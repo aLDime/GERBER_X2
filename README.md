@@ -1,6 +1,9 @@
 # GERBER_X2
 Будущая программа для подготовки Г-кода для фрезеровки плат на ЧПУ.
+Можно использовать как конвертер в ПДФ файл для последующего его использования в КАМ программах.
+
 Future program to prepare for the G-code for milling PCB boards on CNC.
+You can use it as a converter to PDF file for later use in CAM programs.
 
 ![Window](https://github.com/XRay3D/GERBER_X2/blob/master/gerber_x2/Window.PNG)
 
