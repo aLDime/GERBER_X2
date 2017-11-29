@@ -11,8 +11,8 @@
 /// \param item
 ///
 GerberRawItem::GerberRawItem(GERBER_ITEM& item)
-    : aperture(&item.gFile->apertures[item.state.curAperture])
-    , size(item.gFile->apertures[item.state.lstAperture].Size())
+    : aperture(item.gFile->apertures[item.state.curAperture])
+    , size(item.gFile->apertures[item.state.lstAperture]->size())
     , imgPolarity(item.state.imgPolarity)
 {
     //size = item.gFile->apertures.take(item.state.lstAperture).Size();

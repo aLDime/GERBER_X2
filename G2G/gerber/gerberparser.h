@@ -32,8 +32,15 @@ public:
 
 class GERBER_FILE : public QList<GERBER_ITEM> {
 public:
+    ~GERBER_FILE()
+    {
+        for (GerberAperture* var : apertures) {
+            qDebug() << var->type();
+            delete var;
+        }
+    }
     QList<QString> lines;
-    QMap<int, GerberAperture> apertures;
+    QMap<int, GerberAperture*> apertures;
     QString fileName;
 };
 

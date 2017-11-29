@@ -23,7 +23,7 @@ public:
     MyGraphicsView* graphicsView;
     QDialogButtonBox* buttonBox;
     QString fileName;
-    QMap<int, GerberAperture> apertures;
+    QMap<int, GerberAperture*> apertures;
     void setupUi(QDialog* Dialog); // setupUi
     void retranslateUi(QDialog* Dialog); // retranslateUi
 

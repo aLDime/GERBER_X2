@@ -370,9 +370,11 @@ void GerberParser::ClosePath()
 void GerberParser::CreateFlash()
 {
     state.type = APERTURE;
-    Paths paths(gerbFile->apertures[state.curAperture].Draw(state));
-    if (gerbFile->apertures[state.curAperture].HoleDiameter() > 0) {
-        paths.push_back(gerbFile->apertures[state.curAperture].GetHole(state));
+    if (gerbFile->apertures.isEmpty() && gerbFile->apertures[state.curAperture] == nullptr)
+        return;
+    Paths paths(gerbFile->apertures[state.curAperture]->draw(state));
+    if (gerbFile->apertures[state.curAperture]->isDrilled()) {
+        paths.push_back(gerbFile->apertures[state.curAperture]->drawDrill(state));
     }
     gerbFile->append(GERBER_ITEM(state, paths, gerbFile, gerbLines));
     ClearStep();
@@ -482,7 +484,7 @@ Paths GerberParser::CreateLine()
 
     Paths solution;
     if (0) {
-        Path pattern = gerbFile->apertures[state.lstAperture].Draw(state)[0];
+        Path pattern = gerbFile->apertures[state.lstAperture]->draw(state)[0];
         if (Area(pattern) < 0) {
             ReversePath(pattern);
         }
@@ -493,7 +495,7 @@ Paths GerberParser::CreateLine()
         }
     }
     else {
-        double size = gerbFile->apertures[state.lstAperture].Size() * uScale * 0.5;
+        double size = gerbFile->apertures[state.lstAperture]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
             size = 0.01 * uScale;
 
@@ -526,65 +528,54 @@ Paths GerberParser::CreatePolygon()
 bool GerberParser::ParseAperture(const QString& gLine)
 {
     QRegExp match(reAd);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         int apid = match.cap(1).toInt();
         QString apType = match.cap(2);
         QString apParameters = match.cap(3);
-        //         Parse gerber aperture definition into dictionary of apertures.
-        //         The following kinds and their attributes are supported:
-        //         * *Circular (C)*: size (float)
-        //         * *Rectangle (R)*: width (float), height (float)
-        //         * *Obround (O)*: width (float), height (float).
-        //         * *Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
-        //         * *Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
+        // Parse gerber aperture definition into dictionary of apertures.
+        // The following kinds and their attributes are supported:
+        // * Circular (C)*: size (float)
+        // * Rectangle (R)*: width (float), height (float)
+        // * Obround (O)*: width (float), height (float).
+        // * Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
+        // * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
 
         QList<QString> paramList = apParameters.split("X");
-
+        double hole = 0.0, rotation = 0.0;
         switch (slApertureType.indexOf(apType)) {
         case CIRCULAR:
-            gerbFile->apertures[apid].SetType(CIRCULAR);
-            gerbFile->apertures[apid].SetDiameter(Double(paramList[0]));
-            if (paramList.size() > 1) {
-                gerbFile->apertures[apid].SetHoleDiameter(Double(paramList[1]));
-            }
+            if (paramList.size() > 1)
+                hole = Double(paramList[1]);
+            gerbFile->apertures[apid] = new GACircular(Double(paramList[0]), hole);
             break;
         case RECTANGLE:
-            gerbFile->apertures[apid].SetType(RECTANGLE);
-            gerbFile->apertures[apid].SetWidth(Double(paramList[0]));
-            gerbFile->apertures[apid].SetHeight(Double(paramList[1]));
-            if (paramList.size() > 2) {
-                gerbFile->apertures[apid].SetHoleDiameter(Double(paramList[2]));
-            }
+            if (paramList.size() > 2)
+                hole = Double(paramList[2]);
+            gerbFile->apertures[apid] = new GARectangle(Double(paramList[0]), Double(paramList[1]), hole);
+
             break;
         case OBROUND:
-            gerbFile->apertures[apid].SetType(OBROUND);
-            gerbFile->apertures[apid].SetWidth(Double(paramList[0]));
-            gerbFile->apertures[apid].SetHeight(Double(paramList[1]));
-            if (paramList.size() > 2) {
-                gerbFile->apertures[apid].SetHoleDiameter(Double(paramList[2]));
-            }
+            if (paramList.size() > 2)
+                hole = Double(paramList[2]);
+            gerbFile->apertures[apid] = new GAObround(Double(paramList[0]), Double(paramList[1]), hole);
             break;
         case POLYGON:
-            gerbFile->apertures[apid].SetType(POLYGON);
-            gerbFile->apertures[apid].SetDiameter(Double(paramList[0]));
-            gerbFile->apertures[apid].SetNumVertices(paramList[1].toInt());
-            if (paramList.length() > 2) {
-                gerbFile->apertures[apid].SetRotation(Double(paramList[2]));
-            }
-            if (paramList.length() > 3) {
-                gerbFile->apertures[apid].SetHoleDiameter(Double(paramList[3]));
-            }
+            if (paramList.length() > 2)
+                rotation = Double(paramList[2]);
+            if (paramList.length() > 3)
+                hole = Double(paramList[3]);
+            gerbFile->apertures[apid] = new GAPolygon(Double(paramList[0]), paramList[1].toInt(), rotation, hole);
             break;
+        case APERTURE_MACRO:
         default:
-            gerbFile->apertures[apid].SetType(APERTURE_MACRO);
-            gerbFile->apertures[apid].SetMacro(apType);
-            gerbFile->apertures[apid].SetModifiers(apertureMacro[apType].split('*'));
+            QMap<QString, double> macroCoeff;
             for (int i = 0; i < paramList.size(); ++i) {
-                gerbFile->apertures[apid].MacroCoefficients()[QString("$%1").arg(i + 1)] = Double(paramList[i], false, false);
+                macroCoeff[QString("$%1").arg(i + 1)] = Double(paramList[i], false, false);
             }
+            gerbFile->apertures[apid] = new GAMacro(apType, apertureMacro[apType].split('*'), macroCoeff);
             break;
         }
-        //        apertures[apid].Draw();
+        //gerbFile->apertures[apid]->draw();
         return true;
     }
     return false;
@@ -593,7 +584,7 @@ bool GerberParser::ParseAperture(const QString& gLine)
 bool GerberParser::ParseApertureMacros(const QString& gLine)
 {
     QRegExp match(reAmBegin);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) // Start macro if(match, else not an AM, carry on.
+    if (match.exactMatch(gLine)) // Start macro if(match, else not an AM, carry on.
     {
         if (!match.cap(2).isEmpty() && !match.cap(3).isEmpty()) // push_back
         {
@@ -607,36 +598,36 @@ bool GerberParser::ParseApertureMacros(const QString& gLine)
 bool GerberParser::ParseAttributes(const QString& gLine)
 {
     QRegExp match(reAttributes);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
-        //        switch (slAttributeType.indexOf(match.cap(1))) {
-        //        case ATTRIBUTE:
-        //            //FileFunction
-        //            gerberFile.attributesStrings.push_back(match.cap(2));
-        //            break;
-        //        case APERTURE_ATTRIBUTE:
-        //            gerberFile.apertureAttributesStrings.push_back(match.cap(2));
-        //            break;
-        //        case OBJECT_ATTRIBUTE:
-        //            gerberFile.objectAttributesStrings.push_back(match.cap(2));
-        //            break;
-        //        case DELETE_ATTRIBUTE:
-        //            for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
-        //                if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        //                    gerberFile.attributesStrings.removeAt(i);
-        //                }
-        //            }
-        //            for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
-        //                if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        //                    gerberFile.apertureAttributesStrings.removeAt(i);
-        //                }
-        //            }
-        //            for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
-        //                if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
-        //                    gerberFile.objectAttributesStrings.removeAt(i);
-        //                }
-        //            }
-        //            break;
-        //        }
+    if (match.exactMatch(gLine)) {
+        // switch (slAttributeType.indexOf(match.cap(1))) {
+        // case ATTRIBUTE:
+        // //FileFunction
+        // gerberFile.attributesStrings.push_back(match.cap(2));
+        // break;
+        // case APERTURE_ATTRIBUTE:
+        // gerberFile.apertureAttributesStrings.push_back(match.cap(2));
+        // break;
+        // case OBJECT_ATTRIBUTE:
+        // gerberFile.objectAttributesStrings.push_back(match.cap(2));
+        // break;
+        // case DELETE_ATTRIBUTE:
+        // for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
+        // if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        // gerberFile.attributesStrings.removeAt(i);
+        // }
+        // }
+        // for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
+        // if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        // gerberFile.apertureAttributesStrings.removeAt(i);
+        // }
+        // }
+        // for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
+        // if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
+        // gerberFile.objectAttributesStrings.removeAt(i);
+        // }
+        // }
+        // break;
+        // }
         return true;
     }
     return false;
@@ -648,7 +639,7 @@ bool GerberParser::ParseCircularInterpolation(const QString& gLine)
     Path arcPolygon;
     double radius1, radius2, start, stop, angle;
     radius1 = radius2 = start = stop = angle = 0.0;
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         if (match.cap(1).isEmpty()) {
             if (state.curGCode != G02 && state.curGCode != G03) {
                 return false;
@@ -785,14 +776,14 @@ bool GerberParser::ParseCircularInterpolation(const QString& gLine)
 
             curPath.push_back(state.curPos);
             return true;
-            //            break;
+            // break;
         }
         curPath.append(arcPolygon);
-        //        if (arcPolygon.size() > 0) {
-        //            for (Path::size_type i = 0, size = arcPolygon.size(); i < size && size; ++i) {
-        //                curPath.push_back(arcPolygon[i]); //polygon.emplace_back(arcPolygon); //push_back
-        //            }
-        //        }
+        // if (arcPolygon.size() > 0) {
+        // for (Path::size_type i = 0, size = arcPolygon.size(); i < size && size; ++i) {
+        // curPath.push_back(arcPolygon[i]); //polygon.emplace_back(arcPolygon); //push_back
+        // }
+        // }
         state.lstAperture = state.curAperture;
 
         return true;
@@ -803,12 +794,12 @@ bool GerberParser::ParseCircularInterpolation(const QString& gLine)
 bool GerberParser::ParseEndOfFile(const QString& gLine)
 {
     QRegExp match(reEof1);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         ClosePath();
         return true;
     }
     match = QRegExp(reEof2);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         ClosePath();
         return true;
     }
@@ -820,7 +811,7 @@ bool GerberParser::ParseFormat(const QString& gLine)
     const QStringList zeroOmissionModeList = QString("L|T").split("|");
     const QStringList coordinateValuesNotationList = QString("A|I").split("|");
     QRegExp match(reFormat);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         switch (zeroOmissionModeList.indexOf(match.cap(1))) {
         case OMIT_LEADING_ZEROS:
             state.format.zeroOmisMode = OMIT_LEADING_ZEROS;
@@ -867,7 +858,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
 {
 
     QRegExp match(reGCode);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         switch (match.cap(1).toInt()) {
         case G01:
             state.interpolation = LINEAR;
@@ -924,7 +915,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
         }
         return true;
     }
-    if (QRegExp(reComment).indexIn(gLine) > -1) {
+    if (QRegExp(reComment).exactMatch(gLine)) {
         state.curGCode = G04;
         return true;
     }
@@ -934,7 +925,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
 bool GerberParser::ParseImagePolarity(const QString& gLine)
 {
     QRegExp match(rePol);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         switch (slImagePolarity.indexOf(match.cap(1))) {
         case 0:
             state.imgPolarity = POSITIVE;
@@ -951,7 +942,7 @@ bool GerberParser::ParseImagePolarity(const QString& gLine)
 bool GerberParser::ParseLevelPolarity(const QString& gLine)
 {
     QRegExp match(reLpol);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         ClosePath();
         switch (slLevelPolarity.indexOf(match.cap(1))) {
         case 0:
@@ -969,18 +960,17 @@ bool GerberParser::ParseLevelPolarity(const QString& gLine)
 bool GerberParser::ParseLineInterpolation(const QString& gLine)
 {
     QRegExp match(reLin);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         ParsePosition(gLine);
         switch (match.cap(2).isEmpty() ? state.curDCode : match.cap(2).toInt()) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
             state.curDCode = D01;
-
             curPath.push_back(state.curPos);
             state.lstAperture = state.curAperture;
             break;
         case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
             state.curDCode = D02;
-            //             if(curPath.size()&&curPath[curPath.size()-1]!=state.curPos)     curPath.push_back(state.curPos);
+            // if(curPath.size()&&curPath[curPath.size()-1]!=state.curPos)     curPath.push_back(state.curPos);
             ClosePath();
             break;
         case D03: //перемещение в указанную точку x-y с закрытым затвором засветки
@@ -999,7 +989,7 @@ bool GerberParser::ParseLineInterpolation(const QString& gLine)
 bool GerberParser::ParseOperationDCode(const QString& gLine)
 {
     QRegExp match(reDCode);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         switch (match.cap(1).toInt()) {
         case D01:
             state.curDCode = D01;
@@ -1019,8 +1009,8 @@ bool GerberParser::ParseOperationDCode(const QString& gLine)
 
 bool GerberParser::ParseStepAndRepeat(const QString& gLine)
 {
-    QRegExp match2(reStepAndRepeat);
-    if (match2.indexIn(gLine) > -1) {
+    QRegExp match(reStepAndRepeat);
+    if (match.exactMatch(gLine)) {
         return true;
     }
     return false;
@@ -1029,7 +1019,7 @@ bool GerberParser::ParseStepAndRepeat(const QString& gLine)
 bool GerberParser::ParseToolAperture(const QString& gLine)
 {
     QRegExp match(reTool);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         state.lstAperture = state.curAperture;
         state.curAperture = match.cap(1).toInt();
         state.curDCode = D02;
@@ -1043,7 +1033,7 @@ bool GerberParser::ParseToolAperture(const QString& gLine)
 bool GerberParser::ParseUnitMode(const QString& gLine)
 {
     QRegExp match(reUnitMode);
-    if (match.exactMatch(gLine) /*match.indexIn(gLine) > -1*/) {
+    if (match.exactMatch(gLine)) {
         switch (slUnitType.indexOf(match.cap(1))) {
         case INCHES:
             state.format.unitMode = INCHES;

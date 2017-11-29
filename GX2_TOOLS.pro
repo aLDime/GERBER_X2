@@ -3,7 +3,7 @@ TEMPLATE = subdirs
 SUBDIRS += G2G
 #SUBDIRS += G2P
 win32-msvc*{
-    SUBDIRS += GTE_Win
+#    SUBDIRS += GTE_Win
 }
 
 DISTFILES += \

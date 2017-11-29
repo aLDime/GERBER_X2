@@ -16,15 +16,13 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
     , apertures(GerberFileHolder::getFile(fileName)->apertures)
 {
     setupUi(this);
-    QMapIterator<int, GerberAperture> i(apertures);
-    QStandardItemModel* model = new QStandardItemModel(this);
 
-    auto draw = [](GerberAperture aperture) {
+    auto draw = [](GerberAperture* aperture) {
         QPainterPath painterPath;
-        for (QPolygonF &polygon : PathsToQPolygons(aperture.Draw(STATE()))) {
+        for (QPolygonF& polygon : PathsToQPolygons(aperture->draw(STATE()))) {
             painterPath.addPolygon(polygon);
         }
-        painterPath.addEllipse(QPointF(0, 0), aperture.HoleDiameter() * 0.5, aperture.HoleDiameter() * 0.5);
+        painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
 
         QRectF rect = painterPath.boundingRect();
         double width, height;
@@ -32,10 +30,12 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         if (qFuzzyCompare(rect.width(), rect.height())) {
             width = cx;
             height = cx;
-        } else if (rect.width() > rect.height()) {
+        }
+        else if (rect.width() > rect.height()) {
             width = cx;
             height = rect.height() * ((double)cx / rect.width());
-        } else {
+        }
+        else {
             width = rect.width() * ((double)cx / rect.height());
             height = cx;
         }
@@ -56,30 +56,17 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         return icon;
     };
 
+    QMapIterator<int, GerberAperture*> i(apertures);
+    QStandardItemModel* model = new QStandardItemModel(this);
+
     while (i.hasNext()) {
         i.next();
         qDebug() << i.key();
         QList<QStandardItem*> list;
 
         QString name;
-        switch (i.value().Type()) {
-        case CIRCULAR:
-            name = QString("D%1 CIRCULAR(D%2)").arg(i.key()).arg(i.value().Diameter());
-            break;
-        case RECTANGLE:
-            name = QString("D%1 RECTANGLE(W%2, H%3)").arg(i.key()).arg(i.value().Width()).arg(i.value().Height());
-            break;
-        case OBROUND:
-            name = QString("D%1 OBROUND(W%2, H%3)").arg(i.key()).arg(i.value().Width()).arg(i.value().Height());
-            break;
-        case POLYGON:
-            name = QString("D%1 POLYGON(D%2, N%3)").arg(i.key()).arg(i.value().Diameter()).arg(i.value().nVertices());
-            break;
-        case APERTURE_MACRO:
-            name = QString("D%1 MACRO(%2)").arg(i.key()).arg(i.value().Macro());
-            break;
-        }
 
+        name = QString("D%1 %2").arg(i.key()).arg(i.value()->name());
         list << new QStandardItem(draw(i.value()), name);
         list.last()->setFlags(Qt::ItemIsEnabled);
         list.last()->setData(QVariant::fromValue<int>(i.key()));
@@ -99,10 +86,10 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         int d = stdItem->data(Qt::UserRole + 1).toInt();
         graphicsView->scene()->clear();
         QPainterPath painterPath;
-        for (QPolygonF &polygon : PathsToQPolygons(apertures[d].Draw(STATE()))) {
+        for (QPolygonF& polygon : PathsToQPolygons(apertures[d]->draw(STATE()))) {
             painterPath.addPolygon(polygon);
         }
-        painterPath.addEllipse(QPointF(0, 0), apertures[d].HoleDiameter() * 0.5, apertures[d].HoleDiameter() * 0.5);
+        painterPath.addEllipse(QPointF(0, 0), apertures[d]->drillDiameter() * 0.5, apertures[d]->drillDiameter() * 0.5);
 
         QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
         item->setAcceptHoverEvents(true);
