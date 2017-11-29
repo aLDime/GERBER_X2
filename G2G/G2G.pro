@@ -12,7 +12,7 @@ FORMS += \
 RESOURCES += \
     res/resources.qrc \
     qdarkstyle/style.qrc \
-    qtreeviewstylesheet.qrc
+    qtreeviewstylesheet/qtreeviewstylesheet.qrc
 
 
 DISTFILES += \
