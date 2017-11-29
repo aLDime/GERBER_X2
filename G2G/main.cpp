@@ -2,6 +2,8 @@
 #include <QCommandLineParser>
 #ifndef linux
 #include <qt_windows.h>
+
+#include <tooldatabase/tooldatabase.h>
 #endif
 #include "application.h"
 #include "mainwindow.h"
@@ -42,18 +44,18 @@ int main(int argc, char* argv[])
     parser.process(app);
 
 #ifndef linux
-    QStringList list = { QCoreApplication::applicationDirPath() + "/icons/breeze/", QCoreApplication::applicationDirPath() + "/icons/breeze-dark/" };
-    QIcon::setThemeSearchPaths(list);
+    QIcon::setThemeSearchPaths({ "b:/breeze/" });
     QIcon::setThemeName("Breeze");
 #endif
 
-    MainWindow* mainWin = new MainWindow;
+    ToolDatabase b;
+    b.show();
 
-    for (const QString& file : parser.positionalArguments()) {
-        mainWin->openFile(file);
-    }
-
-    mainWin->show();
+//    MainWindow* mainWin = new MainWindow;
+//    for (const QString& file : parser.positionalArguments()) {
+//        mainWin->openFile(file);
+//    }
+//    mainWin->show();
 
     return app.exec();
 }

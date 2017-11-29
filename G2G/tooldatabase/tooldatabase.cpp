@@ -16,7 +16,7 @@
 
 ToolDatabase::ToolDatabase(QWidget* parent)
     : QDialog(parent)
-//,    ui(new Ui::ToolDatabase)
+//, ui(new Ui::ToolDatabase)
 {
     /*ui->*/ setupUi(this);
 
@@ -38,30 +38,41 @@ ToolDatabase::ToolDatabase(QWidget* parent)
     connect(pbNewGroup, &QPushButton::clicked, this, &ToolDatabase::insertChild);
     updateActions();
 
-    //    QStandardItemModel* model = new QStandardItemModel(this);
+    // QStandardItemModel* model = new QStandardItemModel(this);
 
-    //    QFile file("file.txt");
-    //    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    //        return;
+    // QFile file("file.txt");
+    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    // return;
 
-    //    QTextStream in(&file);
-    //    while (!in.atEnd()) {
-    //        qDebug() << in.readLine();
-    //    }
+    // QTextStream in(&file);
+    // while (!in.atEnd()) {
+    // qDebug() << in.readLine();
+    // }
 
     //tree->installEventFilter(this);
 
+    /*----------------------------------------------------------------------------*/
+    /* FOLDER TREE */
+    /*----------------------------------------------------------------------------*/
+
+    // "QTreeView::branch:closed:has-children:!has-siblings, QTreeView::branch:closed:has-children:has-siblings{ image: url(UI:treeview_arrow_right.png); }"
+    // "QTreeView::branch:open:has-children:!has-siblings, QTreeView::branch:open:has-children:has-siblings{ image: url(UI:treeview_arrow_down.png); }"
+
+    QFile f(":/qdarkstyle/QTreeView.qss");
+    f.open(QIODevice::ReadOnly);
+    tree->setStyleSheet(f.readAll());
+    f.close();
     resize(1000, 1);
 }
 
 ToolDatabase::~ToolDatabase()
 {
-    //    QFile file("file.txt");
-    //    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-    //        return;
-    //    QTextStream out(&file);
-    //    out << "The magic number is: " << 49 << "\n";
-    //    delete ui;
+    // QFile file("file.txt");
+    // if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+    // return;
+    // QTextStream out(&file);
+    // out << "The magic number is: " << 49 << "\n";
+    // delete ui;
 }
 
 void ToolDatabase::setupUi(QDialog* ToolDatabase)
@@ -69,12 +80,12 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
     if (ToolDatabase->objectName().isEmpty())
         ToolDatabase->setObjectName(QStringLiteral("ToolDatabase"));
 
-    //    ToolDatabase->resize(533, 360);
-    //    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    //    sizePolicy.setHorizontalStretch(0);
-    //    sizePolicy.setVerticalStretch(0);
-    //    sizePolicy.setHeightForWidth(ToolDatabase->sizePolicy().hasHeightForWidth());
-    //    ToolDatabase->setSizePolicy(sizePolicy);
+    // ToolDatabase->resize(533, 360);
+    // QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    // sizePolicy.setHorizontalStretch(0);
+    // sizePolicy.setVerticalStretch(0);
+    // sizePolicy.setHeightForWidth(ToolDatabase->sizePolicy().hasHeightForWidth());
+    // ToolDatabase->setSizePolicy(sizePolicy);
 
     tree = new QTreeView(ToolDatabase);
     tree->setObjectName(QStringLiteral("tree"));
@@ -225,23 +236,23 @@ void ToolDatabase::updateActions()
 {
     qDebug() << "updateActions";
     bool hasSelection = !tree->selectionModel()->selection().isEmpty();
-    //    removeRowAction->setEnabled(hasSelection);
-    //    removeColumnAction->setEnabled(hasSelection);
+    // removeRowAction->setEnabled(hasSelection);
+    // removeColumnAction->setEnabled(hasSelection);
     pbDelete->setEnabled(hasSelection);
 
     bool hasCurrent = tree->selectionModel()->currentIndex().isValid();
-    //    insertRowAction->setEnabled(hasCurrent);
-    //    insertColumnAction->setEnabled(hasCurrent);
+    // insertRowAction->setEnabled(hasCurrent);
+    // insertColumnAction->setEnabled(hasCurrent);
     pbNew->setEnabled(hasCurrent);
 
     if (hasCurrent) {
         tree->closePersistentEditor(tree->selectionModel()->currentIndex());
 
-        //        int row = tree->selectionModel()->currentIndex().row();
-        //        int column = tree->selectionModel()->currentIndex().column();
-        //        if (tree->selectionModel()->currentIndex().parent().isValid())
-        //            statusBar()->showMessage(tr("Position: (%1,%2)").arg(row).arg(column));
-        //        else
-        //            statusBar()->showMessage(tr("Position: (%1,%2) in top level").arg(row).arg(column));
+        // int row = tree->selectionModel()->currentIndex().row();
+        // int column = tree->selectionModel()->currentIndex().column();
+        // if (tree->selectionModel()->currentIndex().parent().isValid())
+        // statusBar()->showMessage(tr("Position: (%1,%2)").arg(row).arg(column));
+        // else
+        // statusBar()->showMessage(tr("Position: (%1,%2) in top level").arg(row).arg(column));
     }
 }

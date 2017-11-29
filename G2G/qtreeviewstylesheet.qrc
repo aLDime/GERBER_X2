@@ -1,0 +1,10 @@
+<RCC>
+    <qresource prefix="/">
+        <file>qtreeviewstylesheet/stylesheet-branch-closed.png</file>
+        <file>qtreeviewstylesheet/stylesheet-branch-end.png</file>
+        <file>qtreeviewstylesheet/stylesheet-branch-more.png</file>
+        <file>qtreeviewstylesheet/stylesheet-branch-open.png</file>
+        <file>qtreeviewstylesheet/stylesheet-vline.png</file>
+        <file>qtreeviewstylesheet/QTreeView.qss</file>
+    </qresource>
+</RCC>
