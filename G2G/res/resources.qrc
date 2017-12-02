@@ -14,5 +14,11 @@
         <file>tool/endmill.png</file>
         <file>tool/engraving.png</file>
         <file>icons.zip</file>
+        <file>qtreeviewstylesheet/QTreeView.qss</file>
+        <file>qtreeviewstylesheet/branch-closed.png</file>
+        <file>qtreeviewstylesheet/branch-end.png</file>
+        <file>qtreeviewstylesheet/branch-more.png</file>
+        <file>qtreeviewstylesheet/branch-open.png</file>
+        <file>qtreeviewstylesheet/vline.png</file>
     </qresource>
 </RCC>

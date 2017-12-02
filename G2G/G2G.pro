@@ -11,9 +11,6 @@ FORMS += \
 
 RESOURCES += \
     res/resources.qrc \
-    qdarkstyle/style.qrc \
-    qtreeviewstylesheet/qtreeviewstylesheet.qrc
-
 
 DISTFILES += \
     qdarkstyle/style.qss
@@ -36,7 +33,7 @@ HEADERS += \
     application.h \
     clipper/clipper.hpp \
     clipper/myclipper.h \
-    edittool.h \
+    drillforapertureform.h \
     forms/drillingtoolpathform.h \
     forms/pockettoolpathform.h \
     forms/profiletoolpathform.h \
@@ -55,18 +52,19 @@ HEADERS += \
     mainwindow.h \
     mytreewidget.h \
     settingsdialog.h \
+    tooldatabase/edittool.h \
     tooldatabase/tooldatabase.h \
+#    tooldatabase/treeitem.h \
+#    tooldatabase/treemodel.h \
     toolpathcreator.h \
-    tooldatabase/treeitem.h \
-    tooldatabase/treemodel.h \
-    drillforapertureform.h \
-    gerber/gerbergraphicsitem.h
+    gerber/gerbergraphicsitem.h \
+    tooldatabase/mytreeview.h
 
 
 SOURCES += \
     clipper/clipper.cpp \
     clipper/myclipper.cpp \
-    edittool.cpp \
+    drillforapertureform.cpp \
     forms/drillingtoolpathform.cpp \
     forms/pockettoolpathform.cpp \
     forms/profiletoolpathform.cpp \
@@ -85,11 +83,12 @@ SOURCES += \
     mainwindow.cpp \
     mytreewidget.cpp \
     settingsdialog.cpp \
+    tooldatabase/edittool.cpp \
     tooldatabase/tooldatabase.cpp \
+#    tooldatabase/treeitem.cpp \
+#    tooldatabase/treemodel.cpp \
     toolpathcreator.cpp \
-    tooldatabase/treeitem.cpp \
-    tooldatabase/treemodel.cpp \
-    drillforapertureform.cpp \
-    gerber/gerbergraphicsitem.cpp
+    gerber/gerbergraphicsitem.cpp \
+    tooldatabase/mytreeview.cpp
 
 

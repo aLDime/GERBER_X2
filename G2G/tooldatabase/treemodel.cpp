@@ -250,7 +250,7 @@ bool TreeModel::setHeaderData(int section, Qt::Orientation orientation,
     return result;
 }
 
-void TreeModel::setupModelData(const QStringList& lines, TreeItem* parent)
+void TreeModel::setupModelData(const QList<QString>& lines, TreeItem* parent)
 {
     QList<TreeItem*> parents;
     QList<int> indentations;
@@ -279,7 +279,6 @@ void TreeModel::setupModelData(const QStringList& lines, TreeItem* parent)
             if (position > indentations.last()) {
                 // The last child of the current parent is now the new parent
                 // unless the current parent has no children.
-
                 if (parents.last()->childCount() > 0) {
                     parents << parents.last()->child(parents.last()->childCount() - 1);
                     indentations << position;
@@ -298,7 +297,6 @@ void TreeModel::setupModelData(const QStringList& lines, TreeItem* parent)
             for (int column = 0; column < columnData.size(); ++column)
                 parent->child(parent->childCount() - 1)->setData(column, columnData[column]);
         }
-
         ++number;
     }
 }

@@ -38,7 +38,7 @@ EditTool::~EditTool()
 
 void EditTool::on_cbxToolType_activated(int index)
 {
-    for (QDoubleSpinBox* dsb: dsbList) {
+    for (QDoubleSpinBox* dsb : dsbList) {
         dsb->setEnabled(true);
     }
 
@@ -88,49 +88,32 @@ void EditTool::on_cbxToolType_activated(int index)
     updateName();
 }
 
-TOOL EditTool::getTool()
+Tool EditTool::getTool()
 {
-    for (int i = 0; i < dsbList.size(); ++i) {
-        tool.Params[i] = dsbList[i]->value();
-    }
-    //    tool.ClearencePassStepover = dsbList[ClearencePassStepover]->value();
-    //    tool.ClearencePassStepoverPercent = dsbList[ClearencePassStepoverPercent]->value();
-    //    tool.Diameter = dsbList[Diameter]->value();
-    //    tool.FeedRate = dsbList[FeedRate]->value();
-    //    tool.FlatDiameter = dsbList[FlatDiameter]->value();
-    //    tool.PassDepth = dsbList[PassDepth]->value();
-    //    tool.PlungeRate = dsbList[PlungeRate]->value();
-    //    tool.SideAngle = dsbList[SideAngle]->value();
-    //    tool.Stepover = dsbList[Stepover]->value();
-    //    tool.StepoverPercent = dsbList[StepoverPercent]->value();
-    tool.FeedSpeeds = cbxFeedSpeeds->currentIndex();
-    tool.SpindleSpeed = sbSpindleSpeed->value();
-    tool.ToolType = cbxToolType->currentIndex();
+    int i = 0;
+    for (QDoubleSpinBox* dsb : dsbList)
+        tool.data.Params[i++] = dsb->value();
+
+    tool.data.FeedSpeeds = cbxFeedSpeeds->currentIndex();
+    tool.data.SpindleSpeed = sbSpindleSpeed->value();
+    tool.data.ToolType = cbxToolType->currentIndex();
     tool.Name = leName->text();
     tool.Note = pteNote->document()->toRawText();
     return tool;
 }
 
-void EditTool::setTool(const TOOL& value)
+void EditTool::setTool(const Tool& value)
 {
     isNew = false;
     tool = value;
-    for (int i = 0; i < dsbList.size(); ++i) {
-        dsbList[i]->setValue(tool.Params[i]);
-    }
-    //    dsbList[ClearencePassStepover]->setValue(tool.ClearencePassStepover);
-    //    dsbList[ClearencePassStepoverPercent]->setValue(tool.ClearencePassStepoverPercent);
-    //    dsbList[Diameter]->setValue(tool.Diameter);
-    //    dsbList[FeedRate]->setValue(tool.FeedRate);
-    //    dsbList[FlatDiameter]->setValue(tool.FlatDiameter);
-    //    dsbList[PassDepth]->setValue(tool.PassDepth);
-    //    dsbList[PlungeRate]->setValue(tool.PlungeRate);
-    //    dsbList[SideAngle]->setValue(tool.SideAngle);
-    //    dsbList[Stepover]->setValue(tool.Stepover);
-    //    dsbList[StepoverPercent]->setValue(tool.StepoverPercent);
-    cbxFeedSpeeds->setCurrentIndex(tool.FeedSpeeds);
-    sbSpindleSpeed->setValue(tool.SpindleSpeed);
-    cbxToolType->setCurrentIndex(tool.ToolType);
+
+    int i = 0;
+    for (QDoubleSpinBox* dsb : dsbList)
+        dsb->setValue(tool.data.Params[i++]);
+
+    cbxFeedSpeeds->setCurrentIndex(tool.data.FeedSpeeds);
+    sbSpindleSpeed->setValue(tool.data.SpindleSpeed);
+    cbxToolType->setCurrentIndex(tool.data.ToolType);
     leName->setText(tool.Name);
     pteNote->document()->setPlainText(tool.Note);
 }
@@ -436,7 +419,7 @@ void EditTool::retranslateUi(QWidget* EditTool)
     label_9->setText(tr("Side/Included Angle"));
     sbSpindleSpeed->setSuffix(tr(" r.p.m."));
 
-    groupBox->setEnabled(false);
+    //    groupBox->setEnabled(false);
 }
 
 void EditTool::updateName()

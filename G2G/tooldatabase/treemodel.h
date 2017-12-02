@@ -97,7 +97,7 @@ public:
                     const QModelIndex &parent = QModelIndex()) override;
 
 private:
-    void setupModelData(const QStringList &lines, TreeItem *parent);
+    void setupModelData(const QList<QString> &lines, TreeItem *parent);
     TreeItem *getItem(const QModelIndex &index) const;
 
     TreeItem *rootItem;

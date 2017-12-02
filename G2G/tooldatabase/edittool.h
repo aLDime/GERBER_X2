@@ -12,30 +12,51 @@ class QPlainTextEdit;
 class QPushButton;
 class QSpinBox;
 
+enum ToolInfo {
+    ClearencePassStepover,
+    ClearencePassStepoverPercent,
+    Diameter,
+    FeedRate,
+    FlatDiameter,
+    PassDepth,
+    PlungeRate,
+    SideAngle,
+    Stepover,
+    StepoverPercent
+};
+
+enum ToolType {
+    EndMill,
+    Engraving,
+    Drill
+};
+
 namespace Ui {
 class EditTool;
 }
 
 typedef struct {
 public:
-    double Params[10];
-    //    double ClearencePassStepover;
-    //    double ClearencePassStepoverPercent;
-    //    double Diameter;
-    //    double FeedRate;
-    //    double FlatDiameter;
-    //    double PassDepth;
-    //    double PlungeRate;
-    //    double SideAngle;
-    //    double Stepover;
-    //    double StepoverPercent;
-    int FeedSpeeds;
-    int SpindleSpeed;
-    int ToolType;
+    struct {
+        double Params[10];
+        //    double ClearencePassStepover;
+        //    double ClearencePassStepoverPercent;
+        //    double Diameter;
+        //    double FeedRate;
+        //    double FlatDiameter;
+        //    double PassDepth;
+        //    double PlungeRate;
+        //    double SideAngle;
+        //    double Stepover;
+        //    double StepoverPercent;
+        int FeedSpeeds;
+        int SpindleSpeed;
+        int ToolType;
+    }data;
     QString Name;
     QString Note;
     //    TOOL() {}
-} TOOL;
+} Tool;
 
 class EditTool : public QWidget {
     Q_OBJECT
@@ -44,39 +65,20 @@ public:
     explicit EditTool(QWidget* parent = 0);
     ~EditTool();
 
-    TOOL getTool();
-    void setTool(const TOOL& value);
+    Tool getTool();
+    void setTool(const Tool& value);
     void createNew();
 
 private slots:
     void on_cbxToolType_activated(int index);
 
 private:
-    TOOL tool;
-
-    enum ToolType {
-        EndMill,
-        Engraving,
-        Drill
-    };
+    Tool tool;
 
     enum FeedpSpeeds {
         mm_sec,
         mm_min,
         m_min
-    };
-
-    enum {
-        ClearencePassStepover,
-        ClearencePassStepoverPercent,
-        Diameter,
-        FeedRate,
-        FlatDiameter,
-        PassDepth,
-        PlungeRate,
-        SideAngle,
-        Stepover,
-        StepoverPercent
     };
 
     QComboBox* cbxFeedSpeeds;

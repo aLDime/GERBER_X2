@@ -6,7 +6,7 @@
 
 class EditTool;
 class QDialogButtonBox;
-class QTreeView;
+class MyTreeView;
 class QPushButton;
 
 namespace Ui {
@@ -23,7 +23,7 @@ public:
 private:
     //    Ui::ToolDatabase *ui;
 
-    QTreeView* tree;
+    MyTreeView* tree;
     EditTool* widget;
     QPushButton* pbNew;
     QPushButton* bpCopy;
@@ -32,15 +32,7 @@ private:
     QDialogButtonBox* buttonBox;
 
     void setupUi(QDialog* ToolDatabase); // setupUi
-
     void retranslateUi(QDialog* ToolDatabase); // retranslateUi
-
-    void insertChild();
-    bool insertColumn();
-    void insertRow();
-    bool removeColumn();
-    void removeRow();
-    void updateActions();
 };
 
 #endif // TOOLDATABASE_H
