@@ -1,6 +1,9 @@
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
+#include "filesystemmodel.h"
+#include "treemodel.h"
+
 #include <QItemSelection>
 #include <QItemSelectionModel>
 #include <QStandardItemModel>
@@ -33,7 +36,7 @@ private:
     void importTools();
 
     void updateActions();
-    QStandardItemModel* m_model;
+    TreeModel* m_model;
     int ig = 0;
     int id = 0;
     enum {

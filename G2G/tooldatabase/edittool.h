@@ -2,6 +2,9 @@
 #define EDITTOOL_H
 
 #include <QWidget>
+#include <QString>
+#include <QByteArray>
+#include <QByteArray>
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -26,19 +29,21 @@ enum ToolInfo {
 };
 
 enum ToolType {
+    Group = -1,
     EndMill,
     Engraving,
     Drill
 };
+Q_DECLARE_METATYPE(ToolType);
 
 namespace Ui {
 class EditTool;
 }
 
-typedef struct {
+struct Tool {
 public:
-    struct {
-        double Params[10];
+    struct D {
+        double Params[10] = { 0.0 };
         //    double ClearencePassStepover;
         //    double ClearencePassStepoverPercent;
         //    double Diameter;
@@ -49,14 +54,22 @@ public:
         //    double SideAngle;
         //    double Stepover;
         //    double StepoverPercent;
-        int FeedSpeeds;
-        int SpindleSpeed;
-        int ToolType;
-    }data;
-    QString Name;
-    QString Note;
-    //    TOOL() {}
-} Tool;
+        int feedSpeeds = 0;
+        int spindleSpeed = 0;
+        ToolType toolType = Group;
+    } data;
+
+    QString name;
+    QString note;
+
+    Tool();
+    Tool(const QString& name, const QString& note, const QByteArray& Data);
+    Tool(const QList<QString>& Data);
+    ~Tool();
+    void fromHex(const QByteArray& Data);
+    QByteArray toHex() const;
+};
+Q_DECLARE_METATYPE(Tool);
 
 class EditTool : public QWidget {
     Q_OBJECT

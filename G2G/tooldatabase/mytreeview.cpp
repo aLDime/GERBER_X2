@@ -1,4 +1,5 @@
 #include "mytreeview.h"
+#include "treeitem.h"
 
 #include <QDragEnterEvent>
 #include <QDragMoveEvent>
@@ -16,28 +17,22 @@ MyTreeView::MyTreeView(QVector<QPushButton*> buttons, QWidget* parent)
     : QTreeView(parent)
     , m_buttons(buttons)
 {
-    // setLineWidth(4);
-    //    setDragDropOverwriteMode(false);
-    //    setDragDropMode(InternalMove);
-    //    setSelectionMode(SingleSelection);
-
     setDragDropMode(QAbstractItemView::InternalMove);
     setDefaultDropAction(Qt::MoveAction);
     setAlternatingRowColors(true);
     setAnimated(true);
-
-    // connect(this, &MyTreeView::clicked, [&](const QModelIndex& index) {
-    // bool hasData = index.data().toString().contains("No data");
-    // m_buttons[Copy]->setEnabled(hasData);
-    // });
 
     connect(m_buttons[Copy], &QPushButton::clicked, this, &MyTreeView::copyTool);
     connect(m_buttons[Delete], &QPushButton::clicked, this, &MyTreeView::deleteItem);
     connect(m_buttons[New], &QPushButton::clicked, this, &MyTreeView::newTool);
     connect(m_buttons[NewGroup], &QPushButton::clicked, this, &MyTreeView::newGroup);
 
-    m_model = new QStandardItemModel();
-    m_model->setHorizontalHeaderLabels({ "Name", "Note" });
+    QFile file2("default.txt");
+    if (!file2.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(this, tr("Unable to open file"), file2.errorString());
+        return;
+    }
+    m_model = new TreeModel({ "Name", "Note", "", "" }, file2.readAll());
     setModel(m_model);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &MyTreeView::updateActions);
 
@@ -58,23 +53,16 @@ void MyTreeView::newGroup()
 {
     QModelIndex index = selectionModel()->currentIndex();
 
-    if (!(index.flags() & Qt::ItemIsDropEnabled))
+    if (index.data(Qt::UserRole).value<ToolType>() != Group)
         index = index.parent();
-
-    if (m_model->columnCount(index) == 0)
-        if (!m_model->insertColumn(0, index) || !m_model->insertColumn(1, index))
-            return;
 
     if (!m_model->insertRow(0, index))
         return;
 
-    ++ig;
-
-    for (int column = 0; column < m_model->columnCount(index); ++column) {
-        QModelIndex child = m_model->index(0, column, index);
-        m_model->setData(child, QVariant(QString("[New Group %1 %2]").arg(ig).arg(column)));
-        // m_model->setData(child, GroupItem, TypeRole);
-    }
+    Tool t;
+    t.name = "New Group";
+    QModelIndex child = m_model->index(0, 0, index);
+    m_model->setData(child, QVariant::fromValue(t), Qt::DisplayRole);
 
     selectionModel()->setCurrentIndex(m_model->index(0, 0, index), QItemSelectionModel::ClearAndSelect);
     updateActions();
@@ -84,11 +72,9 @@ void MyTreeView::newTool()
 {
     QModelIndex index = selectionModel()->currentIndex();
 
-    if (m_model->columnCount(index) == 0)
-        if (!m_model->insertColumn(0, index) || !m_model->insertColumn(1, index))
-            return;
+    qDebug() << index.data().value<Tool>().data.toolType;
 
-    if (index.flags() & Qt::ItemIsDropEnabled) {
+    if (index.data(Qt::UserRole).value<ToolType>() == Group) {
         if (!m_model->insertRow(0, index))
             return;
     }
@@ -98,14 +84,12 @@ void MyTreeView::newTool()
             return;
     }
 
-    ++id;
+    Tool t;
+    t.data.toolType = EndMill;
+    t.name = "New Tool";
+    QModelIndex child = m_model->index(0, 0, index);
+    m_model->setData(child, QVariant::fromValue(t), Qt::DisplayRole);
 
-    for (int column = 0; column < m_model->columnCount(index); ++column) {
-        QModelIndex child = m_model->index(0, column, index);
-        m_model->setData(child, QVariant(QString("[No data %1 %2]").arg(id).arg(column)));
-        // m_model->setData(child, ToolItem, TypeRole);
-        m_model->itemFromIndex(child)->setFlags(Qt::ItemIsSelectable /*| Qt::ItemIsEditable*/ | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
-    }
     updateActions();
 }
 
@@ -130,8 +114,8 @@ void MyTreeView::copyTool()
     for (int column = 0; column < m_model->columnCount(index.parent()); ++column) {
         QModelIndex child = m_model->index(index.row() + 1, column, index.parent());
         QModelIndex copyIndex = m_model->index(index.row(), column, index.parent());
-        m_model->setData(child, copyIndex.data());
-        m_model->itemFromIndex(child)->setFlags(Qt::ItemIsSelectable /*| Qt::ItemIsEditable*/ | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
+        //m_model->setData(child, copyIndex.data());
+        //  m_model->itemFromIndex(child)->setFlags(Qt::ItemIsSelectable /*| Qt::ItemIsEditable*/ | Qt::ItemIsDragEnabled | Qt::ItemIsEnabled);
     }
 
     updateActions();
@@ -139,32 +123,45 @@ void MyTreeView::copyTool()
 
 void MyTreeView::exportTools()
 {
+    QString lines;
+    TreeItem* item = m_model->getRootItem();
+    QList<TreeItem*> stack;
+    QList<int> row;
 
-    //    QFile file("Tools2.ini");
-    //    if (!file.open(QIODevice::WriteOnly)) {
-    //        QMessageBox::information(this, tr("Unable to open file"), file.errorString());
-    //        return;
-    //    }
-    //    // Need to find a way to clear all present data in file, if the file already exists.
-    //    QDataStream out(&file);
-    //    out.setVersion(QDataStream::Qt_4_3);
+    stack.append(item);
+    row.append(0);
 
-    //    for (int row = 0; row < m_model->rowCount(); ++row) {
-    //        qDebug() << m_model->index(row, 0).data() << m_model->index(row, 1).data();
-    //    }
+    while (stack.size()) {
+        if (stack.last()->childCount() && row.last()) {
+            stack.pop_back();
+            row.pop_back();
+            if (!stack.size())
+                break;
+            ++row.last();
+        }
+        while (stack.last()->childCount() > row.last()) {
+            item = stack.last()->getChildItems()[row.last()];
+            QString str(row.size() - 1, '\t');
+            str += item->getItemData().name + "\t";
+            str += item->getItemData().note + "\t";
+            str += item->getItemData().toHex() + "\r\n";
+            lines += str;
+            if (item->childCount()) {
+                stack.append(item);
+                row.append(0);
+                break;
+            }
+            ++row.last();
+        }
+    }
 
-    //    QSettings settings("Tools.ini", QSettings::IniFormat);
-    //    settings.beginGroup("Tools");
-    //    QModelIndex index = m_model->invisibleRootItem()->index();
-    //    for (int row = 0; row < m_model->rowCount(); ++row) {
-    //        qDebug() << row;
-    //    }
+    QFile file("default.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
 
-    //    settings.setValue("Name", size());
-    //    settings.setValue("Note", pos());
-    //    settings.setValue("Tool", pos());
-
-    //    settings.endGroup();
+    QTextStream out(&file);
+    out.setCodec("UTF-8");
+    out << lines;
 }
 
 void MyTreeView::importTools()
@@ -182,7 +179,7 @@ void MyTreeView::importTools()
         return { new QStandardItem(first), new QStandardItem(second) };
     };
 
-    QStandardItem* item = m_model->invisibleRootItem();
+    //    QStandardItem* item = m_model->invisibleRootItem();
 
     //    QList<QStandardItem*> preparedRow = prepareRow("first", "second");
     //    QStandardItem* item = m_model->invisibleRootItem();
@@ -213,33 +210,35 @@ void MyTreeView::importTools()
     //    };
 
     while (number < lines.count()) {
-        QList<QString> dList = lines[number].split('\t');
-        tabNew = 0;
-        if (dList.size() < 2)
-            break;
 
-        while (dList.size() && dList.first().isEmpty()) {
-            dList.removeFirst();
-            ++tabNew;
-        }
+        //        QList<QString> dList = lines[number].split('\t');
+        //        tabNew = 0;
+        //        if (dList.size() < 2)
+        //            break;
 
-        dList.last() = dList.last() + " : " + QString().setNum(tab);
+        //        while (dList.size() && dList.first().isEmpty()) {
+        //            dList.removeFirst();
+        //            ++tabNew;
+        //        }
 
-        if (tabNew > tabOld) {
-            item = item->child(item->rowCount() - 1, 0);
-            item->appendRow(prepareRow(dList[0], dList[1]));
-        }
-        else if (tabNew == tabOld) {
-            item->appendRow(prepareRow(dList[0], dList[1]));
-        }
-        else if (tabNew < tabOld) {
-            while (tabNew < tabOld--) {
-                item = item->parent();
-            }
-            if (item == nullptr)
-                item = m_model->invisibleRootItem();
-            item->appendRow(prepareRow(dList[0], dList[1]));
-        }
+        //        dList.last() = dList.last() + " : " + QString().setNum(tab);
+
+        //        if (tabNew > tabOld) {
+        //            item = item->child(item->rowCount() - 1, 0);
+        //            item->appendRow(prepareRow(dList[0], dList[1]));
+        //        }
+        //        else if (tabNew == tabOld) {
+        //            item->appendRow(prepareRow(dList[0], dList[1]));
+        //        }
+        //        else if (tabNew < tabOld) {
+        //            while (tabNew < tabOld--) {
+        //                item = item->parent();
+        //            }
+        //            if (item == nullptr)
+        //                item = m_model->invisibleRootItem();
+        //            item->appendRow(prepareRow(dList[0], dList[1]));
+        //        }
+        ///////////////////////
         //        qDebug() << index;
 
         //        qDebug() << (tabNew - tabOld);

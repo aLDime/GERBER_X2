@@ -13,6 +13,9 @@
 #include <QVBoxLayout>
 #include <QApplication>
 #include <QMessageBox>
+#include <QDebug>
+
+int id = qRegisterMetaType<Tool>("Tool");
 
 EditTool::EditTool(QWidget* parent)
     : QWidget(parent)
@@ -94,11 +97,11 @@ Tool EditTool::getTool()
     for (QDoubleSpinBox* dsb : dsbList)
         tool.data.Params[i++] = dsb->value();
 
-    tool.data.FeedSpeeds = cbxFeedSpeeds->currentIndex();
-    tool.data.SpindleSpeed = sbSpindleSpeed->value();
-    tool.data.ToolType = cbxToolType->currentIndex();
-    tool.Name = leName->text();
-    tool.Note = pteNote->document()->toRawText();
+    tool.data.feedSpeeds = cbxFeedSpeeds->currentIndex();
+    tool.data.spindleSpeed = sbSpindleSpeed->value();
+    tool.data.toolType = static_cast<ToolType>(cbxToolType->currentIndex());
+    tool.name = leName->text();
+    tool.note = pteNote->document()->toRawText();
     return tool;
 }
 
@@ -111,11 +114,11 @@ void EditTool::setTool(const Tool& value)
     for (QDoubleSpinBox* dsb : dsbList)
         dsb->setValue(tool.data.Params[i++]);
 
-    cbxFeedSpeeds->setCurrentIndex(tool.data.FeedSpeeds);
-    sbSpindleSpeed->setValue(tool.data.SpindleSpeed);
-    cbxToolType->setCurrentIndex(tool.data.ToolType);
-    leName->setText(tool.Name);
-    pteNote->document()->setPlainText(tool.Note);
+    cbxFeedSpeeds->setCurrentIndex(tool.data.feedSpeeds);
+    sbSpindleSpeed->setValue(tool.data.spindleSpeed);
+    cbxToolType->setCurrentIndex(tool.data.toolType);
+    leName->setText(tool.name);
+    pteNote->document()->setPlainText(tool.note);
 }
 
 void EditTool::setupUi(QWidget* EditTool)
@@ -444,3 +447,31 @@ void EditTool::createNew()
     isNew = true;
     groupBox->setEnabled(true);
 }
+int i = 0;
+Tool::Tool()
+    : name("Name")
+    , note("Note")
+{
+}
+
+Tool::Tool(const QString& name, const QString& note, const QByteArray& Data)
+    : name(name)
+    , note(note)
+    , data(*reinterpret_cast<D*>(QByteArray::fromHex(Data).data()))
+{
+}
+
+Tool::Tool(const QList<QString>& Data)
+    : name(Data[0])
+    , note(Data[1])
+    , data(*reinterpret_cast<D*>(QByteArray::fromHex(Data[2].toLocal8Bit()).data()))
+{
+}
+
+Tool::~Tool()
+{
+}
+
+void Tool::fromHex(const QByteArray& Data) { data = *reinterpret_cast<D*>(QByteArray::fromHex(Data).data()); }
+
+QByteArray Tool::toHex() const { return QByteArray(reinterpret_cast<const char*>(&data), sizeof(D)).toHex(); }
