@@ -52,19 +52,17 @@ HEADERS += \
     mainwindow.h \
     mytreewidget.h \
     settingsdialog.h \
-    tooldatabase/edittool.h \
     tooldatabase/tooldatabase.h \
 #    tooldatabase/treeitem.h \
 #    tooldatabase/treemodel.h \
     toolpathcreator.h \
     gerber/gerbergraphicsitem.h \
-    tooldatabase/mytreeview.h \
-    tooldatabase/treeitem.h \
-    tooldatabase/edittool.h \
-    tooldatabase/mymodel.h \
-    tooldatabase/mytreeview.h \
     tooldatabase/tooldatabase.h \
-    tooldatabase/treeitem.h
+    tooldatabase/tooledit.h \
+    tooldatabase/toolmodel.h \
+    tooldatabase/tooltreeview.h \
+    tooldatabase/toolitem.h \
+    tooldatabase/tool.h
 
 
 SOURCES += \
@@ -89,18 +87,16 @@ SOURCES += \
     mainwindow.cpp \
     mytreewidget.cpp \
     settingsdialog.cpp \
-    tooldatabase/edittool.cpp \
     tooldatabase/tooldatabase.cpp \
 #    tooldatabase/treeitem.cpp \
 #    tooldatabase/treemodel.cpp \
     toolpathcreator.cpp \
     gerber/gerbergraphicsitem.cpp \
-    tooldatabase/mytreeview.cpp \
-    tooldatabase/treeitem.cpp \
-    tooldatabase/edittool.cpp \
-    tooldatabase/mymodel.cpp \
-    tooldatabase/mytreeview.cpp \
     tooldatabase/tooldatabase.cpp \
-    tooldatabase/treeitem.cpp
+    tooldatabase/tooledit.cpp \
+    tooldatabase/toolmodel.cpp \
+    tooldatabase/tooltreeview.cpp \
+    tooldatabase/toolitem.cpp \
+    tooldatabase/tool.cpp
 
 

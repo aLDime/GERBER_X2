@@ -1,4 +1,4 @@
-#include "edittool.h"
+#include "tooledit.h"
 
 #include <QGroupBox>
 #include <QComboBox>
@@ -17,7 +17,7 @@
 
 int id = qRegisterMetaType<Tool>("Tool");
 
-EditTool::EditTool(QWidget* parent)
+ToolEdit::ToolEdit(QWidget* parent)
     : QWidget(parent)
     , dsbList(10)
 {
@@ -31,26 +31,26 @@ EditTool::EditTool(QWidget* parent)
 
     cbxToolType->addItems(QStringLiteral("End Mill|Engraving|Drill").split("|"));
     cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
-    on_cbxToolType_activated(0);
+    on_cbxToolType_currentIndexChanged(0);
+    //    setMaximumSize(QSize(393, 577));
 }
 
-EditTool::~EditTool()
+ToolEdit::~ToolEdit()
 {
-    QApplication::exit(0);
 }
 
-void EditTool::on_cbxToolType_activated(int index)
+void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
 {
     for (QDoubleSpinBox* dsb : dsbList) {
         dsb->setEnabled(true);
     }
 
-    if (index != lastIndex && QMessageBox::question(this, "!!!", "Yes?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
-        cbxToolType->setCurrentIndex(lastIndex);
+    if (index != lastType && QMessageBox::question(this, "!!!", "Yes?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
+        cbxToolType->setCurrentIndex(lastType);
         return;
     }
 
-    lastIndex = cbxToolType->currentIndex();
+    lastType = cbxToolType->currentIndex();
 
     switch (index) {
     case EndMill:
@@ -91,7 +91,7 @@ void EditTool::on_cbxToolType_activated(int index)
     updateName();
 }
 
-Tool EditTool::getTool()
+void ToolEdit::apply()
 {
     int i = 0;
     for (QDoubleSpinBox* dsb : dsbList)
@@ -102,42 +102,54 @@ Tool EditTool::getTool()
     tool.data.toolType = static_cast<ToolType>(cbxToolType->currentIndex());
     tool.name = leName->text();
     tool.note = pteNote->document()->toRawText();
-    return tool;
+    emit toolEdited(tool);
 }
 
-void EditTool::setTool(const Tool& value)
+void ToolEdit::setTool(const Tool& value)
 {
-    isNew = false;
     tool = value;
-
-    int i = 0;
-    for (QDoubleSpinBox* dsb : dsbList)
-        dsb->setValue(tool.data.Params[i++]);
+    for (int i = 0; i < dsbList.size(); ++i) {
+        dsbList[i]->setValue(tool.data.Params[i]);
+    }
 
     cbxFeedSpeeds->setCurrentIndex(tool.data.feedSpeeds);
     sbSpindleSpeed->setValue(tool.data.spindleSpeed);
+    lastType = tool.data.toolType;
     cbxToolType->setCurrentIndex(tool.data.toolType);
     leName->setText(tool.name);
     pteNote->document()->setPlainText(tool.note);
+
+    if (tool.data.toolType == Group) {
+        grBox_2->setVisible(false);
+        grBox_3->setVisible(false);
+        grBox_4->setVisible(false);
+        cbxToolType->setVisible(false);
+        label_6->setVisible(false);
+        lblPixmap->setVisible(false);
+        return;
+    }
+    else {
+        grBox_2->setVisible(true);
+        grBox_3->setVisible(true);
+        grBox_4->setVisible(true);
+        cbxToolType->setVisible(true);
+        label_6->setVisible(true);
+        lblPixmap->setVisible(true);
+    }
 }
 
-void EditTool::setupUi(QWidget* EditTool)
+void ToolEdit::setupUi(QWidget* ToolEdit)
 {
-    if (EditTool->objectName().isEmpty())
-        EditTool->setObjectName(QStringLiteral("EditTool"));
+    if (ToolEdit->objectName().isEmpty())
+        ToolEdit->setObjectName(QStringLiteral("ToolEdit"));
 
-    //    EditTool->resize(100, 100);
     QFont font1;
     font1.setBold(false);
     font1.setWeight(50);
+    ToolEdit->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Preferred));
 
-    groupBox = new QGroupBox(EditTool);
+    groupBox = new QGroupBox(ToolEdit);
     groupBox->setObjectName(QStringLiteral("groupBox"));
-    QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Preferred);
-    sizePolicy.setHorizontalStretch(0);
-    sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(groupBox->sizePolicy().hasHeightForWidth());
-    groupBox->setSizePolicy(sizePolicy);
 
     label_5 = new QLabel(groupBox);
     label_5->setObjectName(QStringLiteral("label_5"));
@@ -145,11 +157,6 @@ void EditTool::setupUi(QWidget* EditTool)
 
     leName = new QLineEdit(groupBox);
     leName->setObjectName(QStringLiteral("leName"));
-    //    QSizePolicy sizePolicy1(QSizePolicy::Minimum, QSizePolicy::Fixed);
-    //    sizePolicy1.setHorizontalStretch(0);
-    //    sizePolicy1.setVerticalStretch(0);
-    //    sizePolicy1.setHeightForWidth(leName->sizePolicy().hasHeightForWidth());
-    //    leName->setSizePolicy(sizePolicy1);
 
     label_6 = new QLabel(groupBox);
     label_6->setObjectName(QStringLiteral("label_6"));
@@ -157,8 +164,6 @@ void EditTool::setupUi(QWidget* EditTool)
 
     cbxToolType = new QComboBox(groupBox);
     cbxToolType->setObjectName(QStringLiteral("cbxToolType"));
-    //    sizePolicy1.setHeightForWidth(cbxToolType->sizePolicy().hasHeightForWidth());
-    //    cbxToolType->setSizePolicy(sizePolicy1);
 
     label_7 = new QLabel(groupBox);
     label_7->setObjectName(QStringLiteral("label_7"));
@@ -166,12 +171,7 @@ void EditTool::setupUi(QWidget* EditTool)
 
     pteNote = new QPlainTextEdit(groupBox);
     pteNote->setObjectName(QStringLiteral("pteNote"));
-    //    QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Expanding);
-    //    sizePolicy2.setHorizontalStretch(0);
-    //    sizePolicy2.setVerticalStretch(0);
-    //    sizePolicy2.setHeightForWidth(pteNote->sizePolicy().hasHeightForWidth());
-    //    pteNote->setSizePolicy(sizePolicy2);
-    pteNote->setMaximumSize(QSize(16777215, 100));
+    pteNote->setSizePolicy(QSizePolicy(QSizePolicy::Maximum, QSizePolicy::Maximum));
 
     label_14 = new QLabel(groupBox);
     label_14->setObjectName(QStringLiteral("label_14"));
@@ -181,20 +181,10 @@ void EditTool::setupUi(QWidget* EditTool)
     cbxUnits = new QComboBox(groupBox);
     cbxUnits->setObjectName(QStringLiteral("cbxUnits"));
     cbxUnits->setEnabled(false);
-    //    sizePolicy1.setHeightForWidth(cbxUnits->sizePolicy().hasHeightForWidth());
-    //    cbxUnits->setSizePolicy(sizePolicy1);
 
     grBox_2 = new QGroupBox(groupBox);
     grBox_2->setObjectName(QStringLiteral("groupBox_2"));
-    //    QSizePolicy sizePolicy3(QSizePolicy::Minimum, QSizePolicy::Preferred);
-    //    sizePolicy3.setHorizontalStretch(0);
-    //    sizePolicy3.setVerticalStretch(0);
-    //    sizePolicy3.setHeightForWidth(groupBox_2->sizePolicy().hasHeightForWidth());
-    //    groupBox_2->setSizePolicy(sizePolicy3);
-    QFont font;
-    //    font.setBold(true);
-    //    font.setWeight(75);
-    grBox_2->setFont(font);
+
     grBox_2->setFlat(false);
     label_8 = new QLabel(grBox_2);
     label_8->setObjectName(QStringLiteral("label_8"));
@@ -237,9 +227,7 @@ void EditTool::setupUi(QWidget* EditTool)
 
     grBox_3 = new QGroupBox(groupBox);
     grBox_3->setObjectName(QStringLiteral("groupBox_3"));
-    //    sizePolicy3.setHeightForWidth(groupBox_3->sizePolicy().hasHeightForWidth());
-    //    groupBox_3->setSizePolicy(sizePolicy3);
-    grBox_3->setFont(font);
+
     label_11 = new QLabel(grBox_3);
     label_11->setObjectName(QStringLiteral("label_11"));
     label_11->setFont(font1);
@@ -292,7 +280,7 @@ void EditTool::setupUi(QWidget* EditTool)
     grBox_4->setObjectName(QStringLiteral("groupBox_4"));
     //    sizePolicy3.setHeightForWidth(groupBox_4->sizePolicy().hasHeightForWidth());
     //    groupBox_4->setSizePolicy(sizePolicy3);
-    grBox_4->setFont(font);
+
     label_2 = new QLabel(grBox_4);
     label_2->setObjectName(QStringLiteral("label_2"));
     label_2->setFont(font1);
@@ -351,22 +339,36 @@ void EditTool::setupUi(QWidget* EditTool)
 
     QGridLayout* gridLayout_4 = new QGridLayout(groupBox);
     gridLayout_4->setObjectName(QStringLiteral("gridLayout_4"));
-    gridLayout_4->addWidget(label_5, 0, 0, 1, 1);
-    gridLayout_4->addWidget(leName, 0, 1, 1, 1);
-    gridLayout_4->addWidget(label_6, 1, 0, 1, 1);
-    gridLayout_4->addWidget(cbxToolType, 1, 1, 1, 1);
-    gridLayout_4->addWidget(label_7, 2, 0, 1, 1);
-    gridLayout_4->addWidget(pteNote, 2, 1, 1, 1);
-    gridLayout_4->addWidget(label_14, 3, 0, 1, 1);
-    gridLayout_4->addWidget(cbxUnits, 3, 1, 1, 1);
-    gridLayout_4->addWidget(grBox_2, 4, 0, 1, 2);
-    gridLayout_4->addWidget(grBox_3, 5, 0, 1, 2);
-    gridLayout_4->addWidget(grBox_4, 6, 0, 1, 2);
-    gridLayout_4->addWidget(bpApply, 6, 2, 1, 1);
-    gridLayout_4->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding), 7, 1, 1, 1);
-    gridLayout_4->addWidget(lblPixmap, 0, 2, 6, 1);
+    gridLayout_4->addWidget(label_5,
+        0, 0, 1, 1);
+    gridLayout_4->addWidget(leName,
+        0, 1, 1, 1);
+    gridLayout_4->addWidget(label_6,
+        1, 0, 1, 1);
+    gridLayout_4->addWidget(cbxToolType,
+        1, 1, 1, 1);
+    gridLayout_4->addWidget(label_7,
+        2, 0, 1, 1);
+    gridLayout_4->addWidget(pteNote,
+        2, 1, 1, 1);
+    gridLayout_4->addWidget(label_14,
+        3, 0, 1, 1);
+    gridLayout_4->addWidget(cbxUnits,
+        3, 1, 1, 1);
+    gridLayout_4->addWidget(grBox_2,
+        4, 0, 1, 2);
+    gridLayout_4->addWidget(grBox_3,
+        5, 0, 1, 2);
+    gridLayout_4->addWidget(grBox_4,
+        6, 0, 1, 2);
+    gridLayout_4->addWidget(bpApply,
+        6, 2, 1, 1);
+    gridLayout_4->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding),
+        7, 1, 1, 1);
+    gridLayout_4->addWidget(lblPixmap,
+        0, 2, 6, 1);
 
-    QVBoxLayout* verticalLayout = new QVBoxLayout(EditTool);
+    QVBoxLayout* verticalLayout = new QVBoxLayout(ToolEdit);
     verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
     verticalLayout->addWidget(groupBox);
     verticalLayout->setMargin(0);
@@ -378,15 +380,16 @@ void EditTool::setupUi(QWidget* EditTool)
     connect(dsbList[Diameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     connect(dsbList[SideAngle], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     connect(dsbList[FlatDiameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
+    connect(bpApply, &QPushButton::clicked, this, &ToolEdit::apply);
 
     ///////////////////////////////////////////////////////////////////////
-    retranslateUi(EditTool);
-    QMetaObject::connectSlotsByName(EditTool);
+    retranslateUi(ToolEdit);
+    QMetaObject::connectSlotsByName(ToolEdit);
 }
 
-void EditTool::retranslateUi(QWidget* EditTool)
+void ToolEdit::retranslateUi(QWidget* ToolEdit)
 {
-    EditTool->setWindowTitle(tr("Dialog"));
+    ToolEdit->setWindowTitle(tr("Dialog"));
     bpApply->setText(tr("Apply"));
     cbxFeedSpeeds->clear();
     cbxFeedSpeeds->insertItems(0, QStringList() << tr("mm/sec") << tr("mm/min") << tr("m/min"));
@@ -421,11 +424,10 @@ void EditTool::retranslateUi(QWidget* EditTool)
     label_8->setText(tr("Diameter"));
     label_9->setText(tr("Side/Included Angle"));
     sbSpindleSpeed->setSuffix(tr(" r.p.m."));
-
     //    groupBox->setEnabled(false);
 }
 
-void EditTool::updateName()
+void ToolEdit::updateName()
 {
     if (!isNew)
         return;
@@ -441,37 +443,3 @@ void EditTool::updateName()
         break;
     }
 }
-
-void EditTool::createNew()
-{
-    isNew = true;
-    groupBox->setEnabled(true);
-}
-int i = 0;
-Tool::Tool()
-    : name("Name")
-    , note("Note")
-{
-}
-
-Tool::Tool(const QString& name, const QString& note, const QByteArray& Data)
-    : name(name)
-    , note(note)
-    , data(*reinterpret_cast<D*>(QByteArray::fromHex(Data).data()))
-{
-}
-
-Tool::Tool(const QList<QString>& Data)
-    : name(Data[0])
-    , note(Data[1])
-    , data(*reinterpret_cast<D*>(QByteArray::fromHex(Data[2].toLocal8Bit()).data()))
-{
-}
-
-Tool::~Tool()
-{
-}
-
-void Tool::fromHex(const QByteArray& Data) { data = *reinterpret_cast<D*>(QByteArray::fromHex(Data).data()); }
-
-QByteArray Tool::toHex() const { return QByteArray(reinterpret_cast<const char*>(&data), sizeof(D)).toHex(); }

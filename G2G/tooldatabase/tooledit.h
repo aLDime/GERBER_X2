@@ -1,6 +1,8 @@
 #ifndef EDITTOOL_H
 #define EDITTOOL_H
 
+#include "tool.h"
+
 #include <QWidget>
 #include <QString>
 #include <QByteArray>
@@ -28,62 +30,25 @@ enum ToolInfo {
     StepoverPercent
 };
 
-enum ToolType {
-    Group = -1,
-    EndMill,
-    Engraving,
-    Drill
-};
-Q_DECLARE_METATYPE(ToolType);
-
 namespace Ui {
 class EditTool;
 }
 
-struct Tool {
-public:
-    struct D {
-        double Params[10] = { 0.0 };
-        //    double ClearencePassStepover;
-        //    double ClearencePassStepoverPercent;
-        //    double Diameter;
-        //    double FeedRate;
-        //    double FlatDiameter;
-        //    double PassDepth;
-        //    double PlungeRate;
-        //    double SideAngle;
-        //    double Stepover;
-        //    double StepoverPercent;
-        int feedSpeeds = 0;
-        int spindleSpeed = 0;
-        ToolType toolType = Group;
-    } data;
-
-    QString name;
-    QString note;
-
-    Tool();
-    Tool(const QString& name, const QString& note, const QByteArray& Data);
-    Tool(const QList<QString>& Data);
-    ~Tool();
-    void fromHex(const QByteArray& Data);
-    QByteArray toHex() const;
-};
-Q_DECLARE_METATYPE(Tool);
-
-class EditTool : public QWidget {
+class ToolEdit : public QWidget {
     Q_OBJECT
 
 public:
-    explicit EditTool(QWidget* parent = 0);
-    ~EditTool();
+    explicit ToolEdit(QWidget* parent = 0);
+    ~ToolEdit();
 
-    Tool getTool();
+    void apply();
     void setTool(const Tool& value);
-    void createNew();
+
+signals:
+    void toolEdited(const Tool& tool);
 
 private slots:
-    void on_cbxToolType_activated(int index);
+    void on_cbxToolType_currentIndexChanged(int index);
 
 private:
     Tool tool;
@@ -121,11 +86,11 @@ private:
     QPushButton* bpApply;
     QSpinBox* sbSpindleSpeed;
 
-    void setupUi(QWidget* EditTool); // setupUi
-    void retranslateUi(QWidget* EditTool); // retranslateUi
+    void setupUi(QWidget* ToolEdit); // setupUi
+    void retranslateUi(QWidget* ToolEdit); // retranslateUi
     void updateName();
 
-    int lastIndex = 0;
+    int lastType = 0;
     bool isNew = true;
 };
 

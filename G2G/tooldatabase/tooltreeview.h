@@ -1,7 +1,7 @@
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
-#include "mymodel.h"
+#include "toolmodel.h"
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
@@ -9,18 +9,15 @@
 #include <QTreeView>
 #include <QPushButton>
 
-enum ItemType {
-    GroupItem,
-    ToolItem,
-    TypeRole = Qt::UserRole + 1,
-};
-
-class MyTreeView : public QTreeView {
+class ToolTreeView : public QTreeView {
     Q_OBJECT
 public:
-    explicit MyTreeView(QVector<QPushButton*> buttons, QWidget* parent = nullptr);
-    ~MyTreeView();
+    explicit ToolTreeView(QVector<QPushButton*> buttons, QWidget* parent = nullptr);
+    ~ToolTreeView();
+    void setTool(const Tool& value);
+
 signals:
+    void toolSelected(const Tool& tool);
 
 public slots:
 

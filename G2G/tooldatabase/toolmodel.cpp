@@ -1,4 +1,4 @@
-#include "mymodel.h"
+#include "toolmodel.h"
 #include <QApplication>
 #include <QDebug>
 #include <QMimeData>
@@ -9,21 +9,11 @@ ToolModel::ToolModel(QObject* parent)
     , rootItem(new ToolItem(Tool()))
 {
     importTools();
-    //    for (int i = 0; i < 10; ++i) {
-    //        ToolItem* item = new ToolItem();
-    //        rootItem->addChild(item);
-    //        for (int j = 0; j < 10; ++j) {
-    //            ToolItem* item2 = new ToolItem();
-    //            item->addChild(item2);
-    //            for (int j = 0; j < 10; ++j) {
-    //                item2->addChild(new ToolItem());
-    //            }
-    //        }
-    //    }
 }
 
 ToolModel::~ToolModel()
 {
+    exportTools();
     delete rootItem;
 }
 
@@ -35,9 +25,9 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
     if (!parentItem)
         parentItem = rootItem;
     if (parentItem->childCount() > row)
-        parentItem->insertChild(row, nullptr);
+        parentItem->insertChild(row, new ToolItem(Tool()));
     else
-        parentItem->addChild(nullptr);
+        parentItem->addChild(new ToolItem(Tool()));
     endInsertRows();
     return true;
 }
@@ -119,7 +109,10 @@ bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int rol
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
     if (!item)
         item = rootItem;
-    return item->setData(index, value, role);
+    if (item->setData(index, value, role)) {
+        return true;
+    }
+    return false;
 }
 
 QVariant ToolModel::data(const QModelIndex& index, int role) const

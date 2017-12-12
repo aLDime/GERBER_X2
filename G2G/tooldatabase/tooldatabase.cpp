@@ -1,5 +1,5 @@
-#include "edittool.h"
-#include "mytreeview.h"
+#include "tooledit.h"
+#include "tooltreeview.h"
 #include "tooldatabase.h"
 //#include "treemodel.h"
 
@@ -17,49 +17,13 @@ ToolDatabase::ToolDatabase(QWidget* parent)
     : QDialog(parent)
 {
     setupUi(this);
-    //    QStringList headers;
-    //    headers << tr("Title") << tr("Note");
-    //    QFile file("default.txt");
-    //    file.open(QIODevice::ReadOnly);
-    //    TreeModel* model = new TreeModel(headers, file.readAll());
-    //    //  QStandardItemModel* model = new QStandardItemModel();
-    //    file.close();
-    //    tree->setModel(model);
-    //    for (int column = 0; column < model->columnCount(); ++column)
-    //        tree->resizeColumnToContents(column);
-    //    connect(tree->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolDatabase::updateActions);
-    //    connect(pbNew, &QPushButton::clicked, this, &ToolDatabase::insertRow);
-    //    connect(bpCopy, &QPushButton::clicked, this, &ToolDatabase::insertRow);
-    //    connect(pbDelete, &QPushButton::clicked, this, &ToolDatabase::removeRow);
-    //    connect(pbNewGroup, &QPushButton::clicked, this, &ToolDatabase::insertChild);
-    //    updateActions();
-    // QStandardItemModel* model = new QStandardItemModel(this);
-    // QFile file("file.txt");
-    // if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-    // return;
-    // QTextStream in(&file);
-    // while (!in.atEnd()) {
-    // qDebug() << in.readLine();
-    // }
-    //tree->installEventFilter(this);
-    /*----------------------------------------------------------------------------*/
-    /* FOLDER TREE */
-    /*----------------------------------------------------------------------------*/
-    //    QFile f(":/qtreeviewstylesheet/QTreeView.qss");
-    //    f.open(QIODevice::ReadOnly);
-    //    tree->setStyleSheet(f.readAll());
-    //    f.close();
-
     resize(1000, 600);
+    connect(tree, &ToolTreeView::toolSelected, tool, &ToolEdit::setTool);
+    connect(tool, &ToolEdit::toolEdited, tree, &ToolTreeView::setTool);
 }
 
 ToolDatabase::~ToolDatabase()
 {
-    QFile file("default2.txt");
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-    QTextStream out(&file);
-    out << "The magic number is: " << 49 << "\n";
 }
 
 void ToolDatabase::setupUi(QDialog* ToolDatabase)
@@ -89,15 +53,15 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
     QHBoxLayout* horizontalLayout_1 = new QHBoxLayout();
     horizontalLayout_1->setObjectName(QStringLiteral("horizontalLayout_2"));
 
-    tree = new MyTreeView({ bpCopy, pbDelete, pbNew, pbNewGroup }, ToolDatabase);
+    tree = new ToolTreeView({ bpCopy, pbDelete, pbNew, pbNewGroup }, ToolDatabase);
     tree->setObjectName(QStringLiteral("tree"));
     tree->setDragDropMode(QAbstractItemView::DragDrop);
 
-    widget = new EditTool(ToolDatabase);
-    widget->setObjectName(QStringLiteral("widget"));
+    tool = new ToolEdit(ToolDatabase);
+    tool->setObjectName(QStringLiteral("widget"));
 
     horizontalLayout_1->addWidget(tree);
-    horizontalLayout_1->addWidget(widget);
+    horizontalLayout_1->addWidget(tool);
 
     buttonBox = new QDialogButtonBox(ToolDatabase);
     buttonBox->setObjectName(QStringLiteral("buttonBox"));

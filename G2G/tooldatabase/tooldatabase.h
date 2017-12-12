@@ -4,9 +4,9 @@
 #include <QAbstractItemModel>
 #include <QDialog>
 
-class EditTool;
+class ToolEdit;
 class QDialogButtonBox;
-class MyTreeView;
+class ToolTreeView;
 class QPushButton;
 
 namespace Ui {
@@ -22,8 +22,8 @@ public:
 
 private:
     //    Ui::ToolDatabase *ui;
-    MyTreeView* tree;
-    EditTool* widget;
+    ToolTreeView* tree;
+    ToolEdit* tool;
     QPushButton* pbNew;
     QPushButton* bpCopy;
     QPushButton* pbDelete;
