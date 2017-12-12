@@ -15,6 +15,7 @@
 #include <QHeaderView>
 #include <QLabel>
 #include <QLineEdit>
+#include <QMessageBox>
 #include <QPushButton>
 #include <QRadioButton>
 #include <QSignalMapper>
@@ -422,5 +423,5 @@ void PocketToolpathForm::calculate()
     group->setAcceptHoverEvents(false);
     group->setAcceptTouchEvents(false);
     group->setAcceptedMouseButtons(Qt::NoButton);
-    mw->treeWidget->addMilling(nameForm->text(), group);
+//    mw->treeWidget->addMilling(nameForm->text(), group);
 }

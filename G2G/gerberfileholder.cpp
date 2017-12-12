@@ -48,7 +48,7 @@ GerberFileHolder::GerberFileHolder(QObject* parent)
                 QColor color(QColor::fromHsv(cc, 255 - cc * 0.2, 255, 150));
 
                 i.value().second->setBrush(color);
-                mainWindow->treeWidget->setGerberFileColor(i.key(), color);
+//                mainWindow->treeWidget->setGerberFileColor(i.key(), color);
             }
             mainWindow->graphicsView->scene()->update();
         });
@@ -74,7 +74,7 @@ void GerberFileHolder::handleResults(GERBER_FILE* gerberFile)
         break;
     }
 
-    mainWindow->treeWidget->addGerberFile(gerberFile->fileName);
+//    mainWindow->treeWidget->addGerberFile(gerberFile->fileName);
     mainWindow->graphicsView->ZoomFit();
 }
 

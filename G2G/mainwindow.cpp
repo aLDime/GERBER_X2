@@ -111,7 +111,7 @@ void MainWindow::open()
 void MainWindow::closeFiles()
 {
     fileHolder->closeAllFiles();
-    treeWidget->closeAllFiles();
+//    treeWidget->closeAllFiles();
     scene->deleteLater();
     scene = new MyGraphicsScene(this);
     graphicsView->SetScene(scene);

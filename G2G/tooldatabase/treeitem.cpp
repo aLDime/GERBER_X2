@@ -1,126 +1,73 @@
 #include "treeitem.h"
-#include <QStringList>
 
-TreeItem::TreeItem(const Tool& data, TreeItem* parent)
+int ToolItem::c = 0;
+
+ToolItem::ToolItem(const ToolItem& item)
 {
-    parentItem = parent;
-    itemData = data;
+    if (this == &item)
+        return;
+    tool = item.tool;
+    for (const ToolItem* i : item.childItems) {
+        addChild(new ToolItem(*i));
+    }
 }
 
-TreeItem::~TreeItem()
+ToolItem::ToolItem(const Tool& tool)
+    : tool(tool)
 {
+    qDebug() << "+TreeItem" << ++c;
+}
+
+ToolItem::~ToolItem()
+{
+    qDebug() << "~TreeItem" << c--;
     qDeleteAll(childItems);
 }
 
-TreeItem* TreeItem::child(int number)
-{
-    return childItems.value(number);
-}
-
-int TreeItem::childCount() const
-{
-    return childItems.count();
-}
-
-int TreeItem::childNumber() const
+int ToolItem::row() const
 {
     if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<TreeItem*>(this));
+        return parentItem->childItems.indexOf(const_cast<ToolItem*>(this));
     return 0;
 }
 
-int TreeItem::columnCount() const
-{
-    return 4; //itemData.count();
-}
+int ToolItem::childCount() const { return childItems.size(); }
 
-QVariant TreeItem::data(int column) const
+ToolItem* ToolItem::child(int row) { return childItems.at(row); }
+
+void ToolItem::setChild(int row, ToolItem* item)
 {
-    switch (column) {
-    case 0:
-        return itemData.name;
-    case 1:
-        return itemData.note;
-    case 2:
-        return itemData.data.toolType;
-    case 3:
-        return itemData.toHex();
-    case Qt::UserRole:
-        return QVariant::fromValue(itemData.data.toolType);
-    default:
-        break;
+    if (item)
+        item->parentItem = this;
+
+    if (row < childItems.size()) {
+        if (childItems[row])
+            delete childItems[row];
+        childItems[row] = item;
     }
-    return QVariant::fromValue(itemData);
 }
 
-bool TreeItem::insertChildren(int position, int count, int columns)
+void ToolItem::addChild(ToolItem* item)
 {
-    if (position < 0 || position > childItems.size())
-        return false;
-
-    for (int row = 0; row < count; ++row) {
-        TreeItem* item = new TreeItem(Tool(), this);
-        childItems.insert(position, item);
-    }
-
-    return true;
+    if (item)
+        item->parentItem = this;
+    childItems.append(item);
 }
 
-bool TreeItem::insertColumns(int position, int columns)
+void ToolItem::insertChild(int row, ToolItem* item)
 {
-    //    if (position < 0 || position > itemData.size())
-    //        return false;
-
-    //    for (int column = 0; column < columns; ++column)
-    //        itemData.insert(position, QVariant());
-
-    //    for (TreeItem* child : childItems)
-    //        child->insertColumns(position, columns);
-
-    return true;
+    if (item)
+        item->parentItem = this;
+    if (row < childItems.size())
+        childItems.insert(row, item);
+    else if (row == childItems.size())
+        childItems.append(item);
 }
 
-TreeItem* TreeItem::parent() const
+void ToolItem::removeChild(int row)
 {
-    return parentItem;
+    delete childItems.at(row);
+    childItems.removeAt(row);
 }
 
-bool TreeItem::removeChildren(int position, int count)
-{
-    if (position < 0 || position + count > childItems.size())
-        return false;
-
-    for (int row = 0; row < count; ++row)
-        delete childItems.takeAt(position);
-
-    return true;
-}
-
-bool TreeItem::removeColumns(int position, int columns)
-{
-    //    if (position < 0 || position + columns > itemData.size())
-    //        return false;
-    //    for (int column = 0; column < columns; ++column)
-    //        itemData.remove(position);
-    //    for (TreeItem* child : childItems)
-    //        child->removeColumns(position, columns);
-    return true;
-}
-
-bool TreeItem::setData(const Tool& value)
-{
-    //    if (column < 0 || column >= itemData.size())
-    //        return false;
-    itemData = value;
-    return true;
-}
-
-Tool& TreeItem::getItemData()
-{
-    return itemData;
-}
-
-QList<TreeItem*> TreeItem::getChildItems() const
-{
-    return childItems;
-}
+ToolItem* ToolItem::parent() { return parentItem; }

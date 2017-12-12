@@ -1,8 +1,7 @@
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
-#include "filesystemmodel.h"
-#include "treemodel.h"
+#include "mymodel.h"
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
@@ -31,12 +30,8 @@ private:
     void deleteItem();
     void copyTool();
 
-    void exportTools();
-
-    void importTools();
-
     void updateActions();
-    TreeModel* m_model;
+    ToolModel* m_model;
     int ig = 0;
     int id = 0;
     enum {

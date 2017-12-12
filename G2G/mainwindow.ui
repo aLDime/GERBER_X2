@@ -75,13 +75,13 @@
       <number>6</number>
      </property>
      <item>
-      <widget class="MyTreeWidget" name="treeWidget">
-       <column>
-        <property name="text">
-         <string>Новый столбец</string>
-        </property>
-       </column>
-      </widget>
+      <widget class="QTableView" name="tableView"/>
+     </item>
+     <item>
+      <widget class="QListView" name="listView"/>
+     </item>
+     <item>
+      <widget class="QTreeView" name="treeView"/>
      </item>
     </layout>
    </widget>
@@ -92,11 +92,6 @@
    <class>MyGraphicsView</class>
    <extends>QGraphicsView</extends>
    <header>graphicsview/mygraphicsview.h</header>
-  </customwidget>
-  <customwidget>
-   <class>MyTreeWidget</class>
-   <extends>QTreeWidget</extends>
-   <header>mytreewidget.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

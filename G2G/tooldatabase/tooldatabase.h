@@ -22,7 +22,6 @@ public:
 
 private:
     //    Ui::ToolDatabase *ui;
-
     MyTreeView* tree;
     EditTool* widget;
     QPushButton* pbNew;

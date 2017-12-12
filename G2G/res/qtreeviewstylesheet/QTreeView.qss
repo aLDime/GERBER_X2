@@ -17,6 +17,7 @@ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
 
 QTreeView::branch:closed:has-children:has-siblings {
     background: pink;
+    border-image: url(:/branch-closed.png);
 }
 
 QTreeView::branch:has-children:!has-siblings:closed {
@@ -25,6 +26,7 @@ QTreeView::branch:has-children:!has-siblings:closed {
 
 QTreeView::branch:open:has-children:has-siblings {
     background: magenta;
+    border-image: url(:/branch-open.png);
 }
 
 QTreeView::branch:open:has-children:!has-siblings {
@@ -36,7 +38,7 @@ QTreeView::branch:has-siblings:!adjoins-item {
     border-image: url(:/qtreeviewstylesheet/vline.png);
 }
 
-QTreeView::branch:has-siblings:adjoins-item {
+QTreeView::branch:!has-children:has-siblings:adjoins-item {
     border-image: url(:/qtreeviewstylesheet/branch-more.png);
 }
 
@@ -45,12 +47,10 @@ QTreeView::branch:!has-children:!has-siblings:adjoins-item {
 }
 /*
 QTreeView::branch:has-children:!has-siblings:closed,QTreeView::branch:closed:has-children:has-siblings {
-    border-image: none;
-    image: url(:/branch-closed.png);
+    border-image: url(:/branch-closed.png);
 }
 
 QTreeView::branch:open:has-children:!has-siblings,QTreeView::branch:open:has-children:has-siblings  {
-    border-image: none;
-    image: url(:/branch-open.png);
+    border-image: url(:/branch-open.png);
 }
 */

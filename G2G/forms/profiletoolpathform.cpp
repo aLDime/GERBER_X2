@@ -419,5 +419,5 @@ void ProfileToolpathForm::calculate()
     group->setAcceptTouchEvents(false);
     group->setAcceptedMouseButtons(Qt::NoButton);
 
-    mw->treeWidget->addMilling(nameForm->text(), group);
+//    mw->treeWidget->addMilling(nameForm->text(), group);
 }

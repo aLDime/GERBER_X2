@@ -59,9 +59,12 @@ HEADERS += \
     toolpathcreator.h \
     gerber/gerbergraphicsitem.h \
     tooldatabase/mytreeview.h \
-    tooldatabase/filesystemmodel.h \
     tooldatabase/treeitem.h \
-    tooldatabase/treemodel.h
+    tooldatabase/edittool.h \
+    tooldatabase/mymodel.h \
+    tooldatabase/mytreeview.h \
+    tooldatabase/tooldatabase.h \
+    tooldatabase/treeitem.h
 
 
 SOURCES += \
@@ -93,8 +96,11 @@ SOURCES += \
     toolpathcreator.cpp \
     gerber/gerbergraphicsitem.cpp \
     tooldatabase/mytreeview.cpp \
-    tooldatabase/filesystemmodel.cpp \
     tooldatabase/treeitem.cpp \
-    tooldatabase/treemodel.cpp
+    tooldatabase/edittool.cpp \
+    tooldatabase/mymodel.cpp \
+    tooldatabase/mytreeview.cpp \
+    tooldatabase/tooldatabase.cpp \
+    tooldatabase/treeitem.cpp
 
 
