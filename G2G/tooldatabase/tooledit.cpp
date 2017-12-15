@@ -32,6 +32,7 @@ ToolEdit::ToolEdit(QWidget* parent)
     cbxToolType->addItems(QStringLiteral("End Mill|Engraving|Drill").split("|"));
     cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
     on_cbxToolType_currentIndexChanged(0);
+
     //    setMaximumSize(QSize(393, 577));
 }
 
@@ -442,4 +443,15 @@ void ToolEdit::updateName()
         leName->setText(QString(tr("Drill (%1 mm)")).arg(dsbList[Diameter]->value()));
         break;
     }
+}
+
+void ToolEdit::showEvent(QShowEvent* /*event*/)
+{
+    setMinimumHeight(height());
+    grBox_2->setVisible(false);
+    grBox_3->setVisible(false);
+    grBox_4->setVisible(false);
+    cbxToolType->setVisible(false);
+    label_6->setVisible(false);
+    lblPixmap->setVisible(false);
 }

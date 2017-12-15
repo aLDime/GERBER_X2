@@ -17,7 +17,6 @@ ToolDatabase::ToolDatabase(QWidget* parent)
     : QDialog(parent)
 {
     setupUi(this);
-    resize(1000, 600);
     connect(tree, &ToolTreeView::toolSelected, tool, &ToolEdit::setTool);
     connect(tool, &ToolEdit::toolEdited, tree, &ToolTreeView::setTool);
 }
@@ -90,7 +89,7 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
 
 void ToolDatabase::retranslateUi(QDialog* ToolDatabase)
 {
-    ToolDatabase->setWindowTitle(tr("Dialog"));
+    ToolDatabase->setWindowTitle(tr("Tool Database"));
     pbNew->setText(tr("New..."));
     bpCopy->setText(tr("Copy..."));
     pbDelete->setText(tr("Delete..."));

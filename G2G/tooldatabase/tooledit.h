@@ -92,6 +92,10 @@ private:
 
     int lastType = 0;
     bool isNew = true;
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent *event) override;
 };
 
 #endif // EDITTOOL_H

@@ -50,12 +50,12 @@ int main(int argc, char* argv[])
 
     ToolDatabase b;
     b.show();
-
-//    MainWindow* mainWin = new MainWindow;
-//    for (const QString& file : parser.positionalArguments()) {
-//        mainWin->openFile(file);
-//    }
-//    mainWin->show();
+    app.exit();
+    //    MainWindow* mainWin = new MainWindow;
+    //    for (const QString& file : parser.positionalArguments()) {
+    //        mainWin->openFile(file);
+    //    }
+    //    mainWin->show();
 
     return app.exec();
 }

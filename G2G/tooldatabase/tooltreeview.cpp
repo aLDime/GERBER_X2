@@ -32,6 +32,7 @@ ToolTreeView::ToolTreeView(QVector<QPushButton*> buttons, QWidget* parent)
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolTreeView::updateActions);
 
     updateActions();
+    setMinimumWidth(500);
 }
 
 ToolTreeView::~ToolTreeView()
@@ -121,8 +122,9 @@ void ToolTreeView::updateActions()
         m_buttons[Copy]->setEnabled(false);
 
     expandAll();
-    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column)
+    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column) {
         resizeColumnToContents(column);
+    }
 }
 
 void ToolTreeView::setTool(const Tool& value)

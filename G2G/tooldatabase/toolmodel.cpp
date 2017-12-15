@@ -19,7 +19,7 @@ ToolModel::~ToolModel()
 
 bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << "insertRows" << row << count << data(parent).toString();
+    //qDebug() << "insertRows" << row << count << data(parent).toString();
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
@@ -34,7 +34,7 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
 
 bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << "removeRows" << row << count << parent << createIndex(row, 0, rootItem);
+    //qDebug() << "removeRows" << row << count << parent << createIndex(row, 0, rootItem);
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
@@ -143,7 +143,7 @@ QVariant ToolModel::data(const QModelIndex& index, int role) const
 QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return QString("column 1|column 2|column 3").split('|')[section];
+        return QString("Name|Note").split('|')[section];
     return QVariant();
 }
 
@@ -282,7 +282,7 @@ void ToolModel::exportTools()
         }
     }
 
-    QFile file("default.txt");
+    QFile file("ToolDatabase.txt");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
 
@@ -296,7 +296,7 @@ void ToolModel::exportTools()
 
 void ToolModel::importTools()
 {
-    QFile file("default.txt");
+    QFile file("ToolDatabase.txt");
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::information(0, tr("Unable to open file"), file.errorString());
         return;
@@ -325,6 +325,11 @@ void ToolModel::importTools()
         // Read the column data from the rest of the line.
         QStringList toolData = lines[number].split("\t", QString::SkipEmptyParts);
         if (!toolData.isEmpty()) {
+            if (toolData.count() < 3) {
+                QMessageBox::information(0, "", tr("Tool Database is corupted!"));
+                return;
+            }
+
             if (nesting > nestingStack.last()) {
                 // The last child of the current parent is now the new parent unless the current parent has no children.
                 if (parentsStack.last()->childCount() > 0) {
@@ -337,10 +342,6 @@ void ToolModel::importTools()
                     parentsStack.pop_back();
                     nestingStack.pop_back();
                 }
-            }
-            if (toolData.count() < 3) {
-                QMessageBox::information(0, "", tr("Tool Database is corupted!"));
-                return;
             }
 
             // Append a new item to the current parent's list of children.
