@@ -38,6 +38,10 @@ private:
         NewGroup,
     };
     QVector<QPushButton*> m_buttons;
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent *event) override;
 };
 
 #endif // MYTREEVIEW_H

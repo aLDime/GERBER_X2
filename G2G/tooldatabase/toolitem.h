@@ -20,6 +20,7 @@ public:
     int row() const;
     int childCount() const;
     ToolItem* child(int row);
+    ToolItem* takeChild(int row);
     ToolItem* parent();
     void addChild(ToolItem* item);
     void insertChild(int row, ToolItem* item);
@@ -33,7 +34,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex& /*index*/) const;
 
     Tool getTool() const;
-    void setTool(const Tool &value);
+    void setTool(const Tool& value);
 
 private:
     ToolItem* parentItem = nullptr;

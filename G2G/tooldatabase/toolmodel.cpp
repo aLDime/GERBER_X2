@@ -44,6 +44,23 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
+bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
+{
+    return false;
+    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+    ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
+    ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
+    if (!srcItem)
+        srcItem = rootItem;
+    if (!dstItem)
+        dstItem = rootItem;
+    for (int r = 0; r < count; ++r) {
+        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+    }
+    endMoveRows();
+    return true;
+}
+
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 2;
@@ -139,6 +156,23 @@ QStringList ToolModel::mimeTypes() const
 
 QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
 {
+    //    QMimeData* mimeData = new QMimeData();
+    //    QByteArray encodedData;
+    //    int noCopy = -1;
+    //    for (const QModelIndex& index : indexes) {
+    //        if (noCopy != index.row()) {
+    //            noCopy = index.row();
+    //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
+    //            if (!item)
+    //                item = rootItem;
+    //            if (index.isValid()) {
+    //                encodedData.append(QString("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+    //                encodedData.append("|");
+    //            }
+    //        }
+    //    }
+    //    mimeData->setData(myModelMimeType(), encodedData);
+    //    return mimeData;
     QMimeData* mimeData = new QMimeData();
     QByteArray encodedData;
     int noCopy = -1;
@@ -157,8 +191,6 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
 
 bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
 {
-    qDebug() << "dropMimeData" << row << column;
-
     if (action == Qt::IgnoreAction)
         return true;
 
@@ -180,6 +212,16 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     QString encodedData = data->data(myModelMimeType());
     QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
 
+    //    for (QString& item : list) {
+    //        QList<QString> d = item.split(',', QString::SkipEmptyParts);
+    //        if (d.size() < 2)
+    //            return false;
+    //        int srcRow = d.at(0).toInt();
+    //        ToolItem* ti = reinterpret_cast<ToolItem*>(d.at(1).toLongLong());
+    //        QModelIndex index = createIndex(srcRow, 0, ti);
+    //        moveRows(index, srcRow, 1, parent, parent.row() > -1 ? parent.row() : 0);
+    //    }
+
     for (QString& item : list) {
         ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
         ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -195,4 +237,117 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
         ++beginRow;
     }
     return true;
+}
+
+Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
+
+Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
+
+QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolItem"); }
+
+void ToolModel::exportTools()
+{
+    QList<QString> lines;
+    ToolItem* item;
+    QList<ToolItem*> stack;
+    QList<int> row;
+
+    stack.push_back(rootItem);
+    row.append(0);
+
+    while (stack.size()) {
+        if (stack.last()->childCount() && row.last()) {
+            stack.pop_back();
+            row.pop_back();
+            if (!stack.size())
+                break;
+            ++row.last();
+        }
+        else if (stack.last() == rootItem && stack.last()->childCount() == 0) {
+            break;
+        }
+        while (stack.last()->childCount() > row.last()) {
+            item = stack.last()->child(row.last());
+            QString str(row.size() - 1, '\t');
+            str += (item->getTool().name.isEmpty() ? " " : item->getTool().name) + "\t";
+            str += (item->getTool().note.isEmpty() ? " " : item->getTool().note) + "\t";
+            str += item->getTool().toHex();
+            lines << str;
+            if (item->childCount()) {
+                stack.push_back(item);
+                row.push_back(0);
+                break;
+            }
+            ++row.last();
+        }
+    }
+
+    QFile file("default.txt");
+    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
+        return;
+
+    QTextStream out(&file);
+    out.setCodec("UTF-8");
+    for (QString line : lines) {
+        out << line << endl;
+    }
+    file.close();
+}
+
+void ToolModel::importTools()
+{
+    QFile file("default.txt");
+    if (!file.open(QIODevice::ReadOnly)) {
+        QMessageBox::information(0, tr("Unable to open file"), file.errorString());
+        return;
+    }
+    QList<QString> lines;
+    QTextStream in(&file);
+    in.setCodec("UTF-8");
+    while (!in.atEnd()) {
+        lines << in.readLine();
+    }
+
+    file.close();
+    QList<ToolItem*> parentsStack;
+    QList<int> nestingStack;
+    parentsStack << rootItem;
+    nestingStack << 0;
+    int number = 0;
+    while (number < lines.count()) {
+        int nesting = 0;
+        while (nesting < lines[number].length()) {
+            if (lines[number].at(nesting) != '\t')
+                break;
+            ++nesting;
+        }
+
+        // Read the column data from the rest of the line.
+        QStringList toolData = lines[number].split("\t", QString::SkipEmptyParts);
+        if (!toolData.isEmpty()) {
+            if (nesting > nestingStack.last()) {
+                // The last child of the current parent is now the new parent unless the current parent has no children.
+                if (parentsStack.last()->childCount() > 0) {
+                    parentsStack.push_back(parentsStack.last()->child(parentsStack.last()->childCount() - 1));
+                    nestingStack.push_back(nesting);
+                }
+            }
+            else {
+                while (nesting < nestingStack.last() && parentsStack.count() > 0) {
+                    parentsStack.pop_back();
+                    nestingStack.pop_back();
+                }
+            }
+            if (toolData.count() < 3) {
+                QMessageBox::information(0, "", tr("Tool Database is corupted!"));
+                return;
+            }
+
+            // Append a new item to the current parent's list of children.
+            ToolItem* parent = parentsStack.last();
+            parent->insertChild(parent->childCount(), new ToolItem(Tool(toolData)));
+        }
+
+        ++number;
+    }
 }

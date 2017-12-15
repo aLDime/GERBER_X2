@@ -1,9 +1,13 @@
 #include "toolitem.h"
 
+#include <QIcon>
+#include <QPixmap>
+
 int ToolItem::c = 0;
 
 ToolItem::ToolItem(const ToolItem& item)
 {
+    qDebug() << "+TreeItem" << ++c;
     tool = item.tool;
     for (const ToolItem* i : item.childItems) {
         addChild(new ToolItem(*i));
@@ -33,6 +37,13 @@ int ToolItem::childCount() const { return childItems.size(); }
 
 ToolItem* ToolItem::child(int row) { return childItems.at(row); }
 
+ToolItem* ToolItem::takeChild(int row)
+{
+    ToolItem* item = childItems.at(row);
+    childItems.removeAt(row);
+    return item;
+}
+
 void ToolItem::setChild(int row, ToolItem* item)
 {
     if (item)
@@ -61,6 +72,7 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
                 return false;
                 break;
             }
+
         default:
             return false;
         }
@@ -70,6 +82,9 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
 
 QVariant ToolItem::data(const QModelIndex& index, int role) const
 {
+    QPixmap p(16, 16);
+    p.fill(Qt::red);
+
     if (index.isValid()) {
         switch (role) {
         case Qt::DisplayRole:
@@ -83,6 +98,20 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
                 return QVariant();
                 break;
             }
+        case Qt::DecorationRole:
+            if (index.column() == 0) {
+                switch (tool.data.toolType) {
+                case Group:
+                    return QIcon::fromTheme("folder-sync");
+                case EndMill:
+                    return QIcon::fromTheme("stroke-cap-round");
+                case Engraving:
+                    return QIcon::fromTheme("stroke-cap-square");
+                case Drill:
+                    return QIcon::fromTheme("stroke-cap-butt");
+                }
+            }
+            break;
         case Qt::UserRole:
             return tool.data.toolType;
         default:
