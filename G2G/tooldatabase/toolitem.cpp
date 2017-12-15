@@ -4,8 +4,6 @@ int ToolItem::c = 0;
 
 ToolItem::ToolItem(const ToolItem& item)
 {
-    if (this == &item)
-        return;
     tool = item.tool;
     for (const ToolItem* i : item.childItems) {
         addChild(new ToolItem(*i));
