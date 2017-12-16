@@ -121,11 +121,13 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags ToolItem::flags(const QModelIndex&) const
+Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const
 {
     Qt::ItemFlags defaultFlags = Qt::ItemIsEditable | Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
     if (tool.data.toolType == ToolType::Group)
         defaultFlags |= Qt::ItemIsDropEnabled;
+    //    if (index.column() == 0)
+    //        defaultFlags | Qt::ItemIsSelectable;
     return defaultFlags;
 }
 

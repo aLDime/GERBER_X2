@@ -68,7 +68,6 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         break;
     case Engraving:
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
-
         break;
     case Drill:
         dsbList[ClearencePassStepover]->setEnabled(false);
@@ -83,8 +82,8 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         dsbList[Stepover]->setValue(0);
         dsbList[StepoverPercent]->setEnabled(false);
         dsbList[StepoverPercent]->setValue(0);
+        dsbList[SideAngle]->setValue(120);
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
-
         break;
     default:
         break;
