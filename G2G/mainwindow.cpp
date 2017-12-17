@@ -23,10 +23,12 @@
 //#include "qt_windows.h"
 //#include "Psapi.h"
 
+MainWindow* MainWindow::pMainWindow;
+
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , gerberParser(new GerberParser)
-    , fileHolder(new GerberFileHolder(this))
+//, fileHolder(new GerberFileHolder(this))
 {
     setupUi(this);
     scene = new MyGraphicsScene(this);
@@ -36,15 +38,12 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(this, &MainWindow::ParseFile, gerberParser, &GerberParser::ParseFile, Qt::QueuedConnection);
-    connect(gerberParser, &GerberParser::resultReady, fileHolder, &GerberFileHolder::handleResults);
+    connect(this, &MainWindow::parseFile, gerberParser, &GerberParser::parseFile, Qt::QueuedConnection);
+    //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
+    connect(gerberParser, &GerberParser::fileReady, treeView, &TreeView::addFile);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
-
-    QCoreApplication::applicationName();
-    QCoreApplication::organizationName();
-    QCoreApplication::applicationVersion();
 
     //    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, QCoreApplication::applicationPid());
     //    static QTimer timer;
@@ -81,6 +80,7 @@ MainWindow::MainWindow(QWidget* parent)
         scene->addItem(pathItem);
     }
     dwCreatePath->hide();
+    pMainWindow = this;
 }
 
 MainWindow::~MainWindow()
@@ -110,8 +110,10 @@ void MainWindow::open()
 
 void MainWindow::closeFiles()
 {
-    fileHolder->closeAllFiles();
-//    treeWidget->closeAllFiles();
+    QModelIndex index = treeView->model()->index(0, 0, QModelIndex());
+    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    treeView->model()->removeRows(0, rowCount, index);
+    //fileHolder->closeAllFiles();
     scene->deleteLater();
     scene = new MyGraphicsScene(this);
     graphicsView->SetScene(scene);
@@ -369,14 +371,16 @@ void MainWindow::openFile(const QString& fileName)
     static QMutex mutex;
     QMutexLocker locker(&mutex);
 
-    //    closeFiles(); ///////////////////////////////
-    if (fileHolder->contains(QFileInfo(fileName).fileName())) {
-        QMessageBox::warning(this, "", tr("The document is open."));
-        return;
+    QModelIndex index = treeView->model()->index(0, 0, QModelIndex());
+    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    for (int row = 0; row < rowCount; ++row) {
+        if (treeView->model()->index(row, 0, index).data().toString() == QFileInfo(fileName).fileName()) {
+            QMessageBox::warning(this, "", tr("The document is open."));
+            return;
+        }
     }
 
     QFile file(fileName);
-
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
@@ -384,11 +388,10 @@ void MainWindow::openFile(const QString& fileName)
     lastPath = QDir(fileName).path();
 
     //QApplication::setOverrideCursor(Qt::WaitCursor);
-    emit ParseFile(fileName);
+    emit parseFile(fileName);
     //QApplication::restoreOverrideCursor();
-
     setCurrentFile(fileName);
-    statusBar()->showMessage(tr("File loaded"), 2000);
+    //    statusBar()->showMessage(tr("File loaded"), 2000);
 }
 
 MyGraphicsScene* MainWindow::getScene() const
@@ -547,3 +550,5 @@ void MainWindow::showSettingsDialog()
         readSettings();
     }
 }
+
+MainWindow* MainWindow::getMainWindow() { return pMainWindow; }

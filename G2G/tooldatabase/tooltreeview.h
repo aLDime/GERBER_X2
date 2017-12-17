@@ -29,8 +29,6 @@ private:
 
     void updateActions();
     ToolModel* m_model;
-    int ig = 0;
-    int id = 0;
     enum {
         Copy,
         Delete,

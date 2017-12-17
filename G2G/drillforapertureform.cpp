@@ -13,7 +13,7 @@
 DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* parent)
     : QDialog(parent)
     , fileName(fileName)
-    , apertures(GerberFileHolder::getFile(fileName)->apertures)
+//    , apertures(GerberFileHolder::getFile(fileName)->apertures)
 {
     setupUi(this);
 

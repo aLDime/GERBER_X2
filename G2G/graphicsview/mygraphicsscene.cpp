@@ -30,10 +30,10 @@ void MyGraphicsScene::drawBackground(QPainter* painter, const QRectF& rect)
 
     painter->save();
 
-    if (GerberFileHolder::getDrawingType() == GerberFileHolder::RAW)
-        painter->setBrush(QColor(128, 128, 0));
-    else
-        painter->setBrush(Qt::NoBrush);
+    //    if (GerberFileHolder::getDrawingType() == GerberFileHolder::RAW)
+    //        painter->setBrush(QColor(128, 128, 0));
+    //    else
+    painter->setBrush(Qt::NoBrush);
 
     painter->setPen(QPen(Qt::white, 0.0));
     painter->drawRect(itemsBoundingRect() /*+ QMarginsF(2, 2, 2, 2)*/);

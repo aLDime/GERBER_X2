@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setApplicationName("G2G");
     QCoreApplication::setOrganizationName("XrSoft");
-    QCoreApplication::setApplicationVersion("0.0.1");
+    QCoreApplication::setApplicationVersion("0.2.3");
 
     //    EditToolForm editTool;
     //    editTool.show();
@@ -43,19 +43,14 @@ int main(int argc, char* argv[])
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
 
-#ifndef linux
-    QIcon::setThemeSearchPaths({ "b:/breeze/" });
+    QIcon::setThemeSearchPaths({ "D:/PRO/QT_PROJECTS/icons/breeze/" });
     QIcon::setThemeName("Breeze");
-#endif
 
-    ToolDatabase b;
-    b.show();
-    app.exit();
-    //    MainWindow* mainWin = new MainWindow;
-    //    for (const QString& file : parser.positionalArguments()) {
-    //        mainWin->openFile(file);
-    //    }
-    //    mainWin->show();
+    MainWindow* mainWin = new MainWindow;
+    for (const QString& file : parser.positionalArguments()) {
+        mainWin->openFile(file);
+    }
+    mainWin->show();
 
     return app.exec();
 }

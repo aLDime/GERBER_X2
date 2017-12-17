@@ -13,7 +13,10 @@ RESOURCES += \
     res/resources.qrc \
 
 DISTFILES += \
-    qdarkstyle/style.qss
+    qdarkstyle/style.qss \
+    mytreewidget.h \
+    mytreewidget.cpp \
+
 
 DEFINES += QT_DEPRECATED_WARNINGS
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
@@ -50,7 +53,6 @@ HEADERS += \
     graphicsview/mygraphicsview.h \
     graphicsview/qdruler.h \
     mainwindow.h \
-    mytreewidget.h \
     settingsdialog.h \
     tooldatabase/tooldatabase.h \
 #    tooldatabase/treeitem.h \
@@ -62,7 +64,12 @@ HEADERS += \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
     tooldatabase/toolitem.h \
-    tooldatabase/tool.h
+    tooldatabase/tool.h \
+    filetree/model.h \
+    filetree/treeview.h \
+    filetree/file.h \
+    filetree/abstractitem.h \
+    filetree/folder.h
 
 
 SOURCES += \
@@ -85,7 +92,6 @@ SOURCES += \
     graphicsview/qdruler.cpp \
     main.cpp \
     mainwindow.cpp \
-    mytreewidget.cpp \
     settingsdialog.cpp \
     tooldatabase/tooldatabase.cpp \
 #    tooldatabase/treeitem.cpp \
@@ -97,6 +103,11 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     tooldatabase/toolitem.cpp \
-    tooldatabase/tool.cpp
+    tooldatabase/tool.cpp \
+    filetree/model.cpp \
+    filetree/treeview.cpp \
+    filetree/file.cpp \
+    filetree/abstractitem.cpp \
+    filetree/folder.cpp
 
 

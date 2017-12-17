@@ -110,6 +110,7 @@ void GerberRawItem::paint(QPainter* painter,
 ///////////////////////////////////////////////
 /// \brief GerberItemGroup::~GerberItemGroup
 ///
+
 GerberItemGroup::~GerberItemGroup()
 {
     qDebug() << "~GerberItemGroup()";
@@ -118,6 +119,16 @@ GerberItemGroup::~GerberItemGroup()
         if (scene != nullptr)
             scene->removeItem(item);
         delete item;
+    }
+}
+
+void GerberItemGroup::setVisible(const bool visible)
+{
+    if (m_visible != visible) {
+        m_visible = visible;
+        for (QGraphicsItem* item : *this) {
+            item->setVisible(m_visible);
+        }
     }
 }
 
@@ -183,6 +194,8 @@ void GerberWorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* op
         c.setAlpha(255);
         brush_.setColor(c);
     }
+    ///////////////////////////////
+    pen_ = QPen(c, 0.0);
     //    if (option->state & QStyle::State_Sunken) {
     //        qDebug() << option->state;
     //        pen_ = QPen(Qt::black, 0.0);

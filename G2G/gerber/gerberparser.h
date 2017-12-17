@@ -6,13 +6,13 @@
 
 #include <QObject>
 
-class GERBER_FILE;
+class GerberFile;
 class GERBER_ITEM {
 public:
     GERBER_ITEM(
         const STATE& state,
         const Paths& paths,
-        GERBER_FILE* gFile,
+        GerberFile* gFile,
         const QStringList& gerberStrings = QStringList(),
         const Path& path = Path())
         : state(state)
@@ -25,14 +25,14 @@ public:
 
     STATE state;
     Paths paths;
-    GERBER_FILE* gFile = nullptr;
+    GerberFile* gFile = nullptr;
     QStringList gerberStrings;
     Path path;
 };
 
-class GERBER_FILE : public QList<GERBER_ITEM> {
+class GerberFile : public QList<GERBER_ITEM> {
 public:
-    ~GERBER_FILE()
+    ~GerberFile()
     {
         for (GerberAperture* var : apertures) {
             qDebug() << var->type();
@@ -48,11 +48,11 @@ class GerberParser : public QObject {
     Q_OBJECT
 public:
     GerberParser(QObject* parent = 0);
-    GERBER_FILE* ParseFile(const QString& fileName);
-    GERBER_FILE* ParseLines(const QString& gerberLines, const QString& fileName = QString());
+    GerberFile* parseFile(const QString& fileName);
+    GerberFile* ParseLines(const QString& gerberLines, const QString& fileName = QString());
 
 signals:
-    void resultReady(GERBER_FILE* gerbFile);
+    void fileReady(GerberFile* gerbFile);
 
 private:
     QList<QString> Format(QString data);
@@ -81,7 +81,7 @@ private:
     Path curPath;
 
     STATE state;
-    GERBER_FILE* gerbFile;
+    GerberFile* gerbFile;
     QList<QString> gerbLines;
 
     bool ParseAperture(const QString& gLine);

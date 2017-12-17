@@ -11,7 +11,7 @@
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<GERBER_FILE*>("GERBER_FILE*");
+int id1 = qRegisterMetaType<GerberFile*>("GERBER_FILE*");
 
 const QList<QString> slApertureType(QString("C|R|O|P|M").split("|"));
 const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
@@ -44,7 +44,7 @@ GerberParser::GerberParser(QObject* parent)
 {
 }
 
-GERBER_FILE* GerberParser::ParseFile(const QString& fileName)
+GerberFile* GerberParser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -54,7 +54,7 @@ GERBER_FILE* GerberParser::ParseFile(const QString& fileName)
     return ParseLines(in.readAll(), fileName);
 }
 
-GERBER_FILE* GerberParser::ParseLines(const QString& gerberLines, const QString& fileName)
+GerberFile* GerberParser::ParseLines(const QString& gerberLines, const QString& fileName)
 {
     mutex.lock();
 
@@ -148,7 +148,7 @@ GERBER_FILE* GerberParser::ParseLines(const QString& gerberLines, const QString&
     if (gerbFile->isEmpty())
         delete gerbFile;
     else
-        emit resultReady(gerbFile);
+        emit fileReady(gerbFile);
 
     gerbLines.clear();
     apertureMacro.clear();
@@ -385,7 +385,7 @@ void GerberParser::Reset(const QString& fileName)
     gerbLines.clear();
     apertureMacro.clear();
     curPath.clear();
-    gerbFile = new GERBER_FILE;
+    gerbFile = new GerberFile;
     gerbFile->fileName = QFileInfo(fileName).fileName();
     state = STATE();
 }

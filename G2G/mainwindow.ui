@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>896</width>
-    <height>711</height>
+    <width>1035</width>
+    <height>798</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -44,7 +44,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>896</width>
+     <width>1035</width>
      <height>21</height>
     </rect>
    </property>
@@ -75,13 +75,7 @@
       <number>6</number>
      </property>
      <item>
-      <widget class="QTableView" name="tableView"/>
-     </item>
-     <item>
-      <widget class="QListView" name="listView"/>
-     </item>
-     <item>
-      <widget class="QTreeView" name="treeView"/>
+      <widget class="TreeView" name="treeView"/>
      </item>
     </layout>
    </widget>
@@ -92,6 +86,11 @@
    <class>MyGraphicsView</class>
    <extends>QGraphicsView</extends>
    <header>graphicsview/mygraphicsview.h</header>
+  </customwidget>
+  <customwidget>
+   <class>TreeView</class>
+   <extends>QTreeView</extends>
+   <header>filetree/treeview.h</header>
   </customwidget>
  </customwidgets>
  <resources/>

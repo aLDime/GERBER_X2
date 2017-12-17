@@ -27,9 +27,10 @@ public:
     //    void ClearScene();
 
     MyGraphicsScene* getScene() const;
+    static MainWindow* getMainWindow();
 
 signals:
-    void ParseFile(const QString& filename);
+    void parseFile(const QString& filename);
 
 private:
     enum { MaxRecentFiles = 20 };
@@ -39,7 +40,7 @@ private:
     QString lastPath;
     GerberParser* gerberParser;
     QThread gerberThread;
-    GerberFileHolder* fileHolder;
+    //    GerberFileHolder* fileHolder;
 
     MyGraphicsScene* scene;
     //////////////////////
@@ -91,6 +92,7 @@ private:
     QToolBar* fileToolBar;
     QToolBar* toolpathToolBar;
     QToolBar* zoomToolBar;
+    static MainWindow* pMainWindow;
 };
 
 #endif // MAINWINDOW_H

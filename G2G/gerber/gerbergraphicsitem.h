@@ -31,16 +31,8 @@ protected:
 
 class GerberItemGroup : public QList<GerberItem*> {
 public:
-    void setVisible(const bool visible)
-    {
-        if (m_visible != visible) {
-            m_visible = visible;
-            for (QGraphicsItem* item : *this) {
-                item->setVisible(m_visible);
-            }
-        }
-    }
     ~GerberItemGroup();
+    void setVisible(const bool visible);
     bool isVisible() { return m_visible; }
     void addToTheScene(QGraphicsScene* scene);
     QBrush brush() const { return m_brush; }

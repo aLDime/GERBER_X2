@@ -1,52 +1,53 @@
-#ifndef GERBERFILEHOLDER_H
-#define GERBERFILEHOLDER_H
+//#ifndef GERBERFILEHOLDER_H
+//#define GERBERFILEHOLDER_H
 
-#include "gerber/gerberparser.h"
+//#include "gerber/gerberparser.h"
 
-#include <QObject>
+//#include <QObject>
 
-class GerberItemGroup;
-class MainWindow;
-class QTimer;
+//class GerberItemGroup;
+//class MainWindow;
+//class QTimer;
 
-class GerberFileHolder : public QObject {
-    Q_OBJECT
-public:
-    explicit GerberFileHolder(QObject* parent = nullptr);
+//class GerberFileHolder : public QObject {
+//    Q_OBJECT
 
-    static void closeFile(const QString& fileName);
-    static void closeAllFiles();
-    static void setVisible(const QString& fileName, bool visible);
-    static GERBER_FILE* getFile(const QString& fileName);
-    static bool contains(const QString& fileName);
+//public:
+//    explicit GerberFileHolder(QObject* parent = nullptr);
 
-    static void drawingRaw();
-    static void drawUnited();
+//    static void closeFile(const QString& fileName);
+//    static void closeAllFiles();
+//    static void setVisible(const QString& fileName, bool visible);
+//    static GerberFile* getFile(const QString& fileName);
+//    static bool contains(const QString& fileName);
 
-    static int getDrawingType();
+//    static void drawingRaw();
+//    static void drawUnited();
 
-    enum DRAWING_TYPE {
-        RAW,
-        UNITED,
-        REDRAW
-    };
+//    static int getDrawingType();
 
-signals:
+//    enum DRAWING_TYPE {
+//        RAW,
+//        UNITED,
+//        REDRAW
+//    };
 
-public slots:
-    void handleResults(GERBER_FILE* gerberFile);
+//signals:
 
-private:
-    static QMap<QString, QPair<GERBER_FILE*, GerberItemGroup*> > files;
+//public slots:
+//    void handleFile(GerberFile* gerberFile);
 
-    QPair<GERBER_FILE*, GerberItemGroup*> pair(GERBER_FILE* file, GerberItemGroup* itemGroup)
-    {
-        return qMakePair<GERBER_FILE*, GerberItemGroup*>(file, itemGroup);
-    }
+//private:
+//    static QMap<QString, QPair<GerberFile*, GerberItemGroup*> > files;
 
-    static MainWindow* mainWindow;
-    static DRAWING_TYPE drawingType;
-    static QTimer* repaint;
-};
+//    QPair<GerberFile*, GerberItemGroup*> pair(GerberFile* file, GerberItemGroup* itemGroup)
+//    {
+//        return qMakePair<GerberFile*, GerberItemGroup*>(file, itemGroup);
+//    }
 
-#endif // GERBERFILEHOLDER_H
+//    static MainWindow* mainWindow;
+//    static DRAWING_TYPE drawingType;
+//    static QTimer* repaint;
+//};
+
+//#endif // GERBERFILEHOLDER_H
