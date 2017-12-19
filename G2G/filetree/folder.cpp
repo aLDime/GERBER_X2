@@ -14,7 +14,7 @@ Folder::~Folder()
 
 QVariant Folder::data(const QModelIndex& index, int role) const
 {
-    if (!index.column())
+    if (!index.column()) {
         switch (role) {
         case Qt::DisplayRole:
             return name;
@@ -24,7 +24,7 @@ QVariant Folder::data(const QModelIndex& index, int role) const
         default:
             break;
         }
-
+    }
     return QVariant();
 }
 

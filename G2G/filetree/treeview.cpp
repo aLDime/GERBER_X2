@@ -69,6 +69,17 @@ void TreeView::removeAllFiles()
 {
 }
 
+QString TreeView::files()
+{
+    QString f;
+    QModelIndex index = m_model->index(0, 0, QModelIndex());
+    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    for (int row = 0; row < rowCount; ++row) {
+        f += m_model->index(row, 0, index).data(Qt::EditRole).toString() + "|";
+    }
+    return f;
+}
+
 //void TreeView::newGroup()
 //{
 //    QModelIndex index = selectionModel()->currentIndex();

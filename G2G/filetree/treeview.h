@@ -16,6 +16,8 @@ public:
     ~TreeView();
     void addFile(GerberFile* gerberFile);
     void removeAllFiles();
+    QString files();
+
 signals:
 
 private:

@@ -81,6 +81,8 @@ MainWindow::MainWindow(QWidget* parent)
     }
     dwCreatePath->hide();
     pMainWindow = this;
+
+    readSettings();
 }
 
 MainWindow::~MainWindow()
@@ -150,8 +152,6 @@ void MainWindow::Init()
     isUntitled = true;
     createActions();
     createStatusBar();
-    readSettings();
-    setUnifiedTitleAndToolBarOnMac(true);
 }
 
 void MainWindow::createActions()
@@ -335,6 +335,10 @@ void MainWindow::readSettings()
     }
     graphicsView->Setup(settings);
     lastPath = settings.value("lastPath").toString();
+    QString files = settings.value("files").toString();
+    for (const QString& file : files.split('|', QString::SkipEmptyParts)) {
+        openFile(file);
+    }
 }
 
 void MainWindow::writeSettings()
@@ -343,6 +347,7 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
+    settings.setValue("files", treeView->files());
 }
 
 bool MainWindow::maybeSave()
@@ -371,13 +376,9 @@ void MainWindow::openFile(const QString& fileName)
     static QMutex mutex;
     QMutexLocker locker(&mutex);
 
-    QModelIndex index = treeView->model()->index(0, 0, QModelIndex());
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
-    for (int row = 0; row < rowCount; ++row) {
-        if (treeView->model()->index(row, 0, index).data().toString() == QFileInfo(fileName).fileName()) {
-            QMessageBox::warning(this, "", tr("The document is open."));
-            return;
-        }
+    if (treeView->files().contains(fileName)) {
+        QMessageBox::warning(this, "", tr("The document is open."));
+        return;
     }
 
     QFile file(fileName);

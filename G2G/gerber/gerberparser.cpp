@@ -386,7 +386,7 @@ void GerberParser::Reset(const QString& fileName)
     apertureMacro.clear();
     curPath.clear();
     gerbFile = new GerberFile;
-    gerbFile->fileName = QFileInfo(fileName).fileName();
+    gerbFile->fileName = fileName;
     state = STATE();
 }
 

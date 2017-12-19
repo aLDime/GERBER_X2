@@ -2,6 +2,7 @@
 
 #include <toolpathcreator.h>
 #include <graphicsview/mygraphicsscene.h>
+#include <QFileInfo>
 #include <mainwindow.h>
 QTimer File::repaintTimer;
 File::File(GerberFile* gerberFile)
@@ -72,6 +73,9 @@ QVariant File::data(const QModelIndex& index, int role) const
     if (!index.column())
         switch (role) {
         case Qt::DisplayRole:
+        case Qt::ToolTipRole:
+            return QFileInfo(gerberFile->fileName).fileName();
+        case Qt::EditRole:
             return gerberFile->fileName;
         case Qt::CheckStateRole:
             return checkState;
@@ -82,8 +86,6 @@ QVariant File::data(const QModelIndex& index, int role) const
             p.fill(c);
             return p;
         }
-        case Qt::ToolTipRole:
-            return gerberFile->fileName;
         default:
             break;
         }
