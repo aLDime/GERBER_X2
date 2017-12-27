@@ -58,12 +58,27 @@ enum D_CODE {
     D03 = 3
 };
 
+enum LAYER {
+    TOP_ASSY,
+    TOP_SILK,
+    TOP_PASTE,
+    TOP_MASK,
+    TOP,
+    BOT,
+    BOT_MASK,
+    BOT_PASTE,
+    BOT_SILK,
+    BOT_ASSY,
+    BOARD,
+};
+
 enum G_CODE {
     // Graphics state operators defining the interpolateparameter defining the interpolate operation (D01).
     G01 = 1, // Sets the interpolation mode tolinear
     G02 = 2, // Sets the interpolation mode to ‘Clockwise circular interpolation’
     G03 = 3, // Sets the interpolation mode to ‘Counterclockwise circularinterpolation’
-    G04 = 4, // Comment
+    // Comment
+    G04 = 4,
     // Region mode
     G36 = 36, // Begin region
     G37 = 37, // End region

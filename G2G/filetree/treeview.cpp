@@ -14,6 +14,7 @@
 #include <QDebug>
 #include <QMenu>
 #include <drillforapertureform.h>
+#include <mainwindow.h>
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
@@ -21,11 +22,12 @@ TreeView::TreeView(QWidget* parent)
     setDragDropMode(QAbstractItemView::InternalMove);
     setDefaultDropAction(Qt::MoveAction);
     setAlternatingRowColors(true);
-    setAnimated(true);
+    // setAnimated(true);
 
     m_model = new Model(this);
     setModel(m_model);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateActions);
+    connect(&iconTimer, &QTimer::timeout, this, &TreeView::updateIcons);
     updateActions();
 }
 
@@ -36,16 +38,8 @@ TreeView::~TreeView()
 void TreeView::addFile(GerberFile* gerberFile)
 {
     m_model->addFile(gerberFile);
+    iconTimer.start(200);
     updateActions();
-    QTimer::singleShot(100, Qt::CoarseTimer, [&] {
-        QModelIndex index = m_model->index(0, 0, QModelIndex());
-        int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
-        for (int r = 0; r < rowCount; ++r) {
-            update(m_model->index(r, 0, index));
-        }
-        //m_model->dataChanged(m_model->index(0, 0, index), m_model->index(rowCount - 1, 0, index) /*, QVector<int>(rowCount, Qt::DecorationRole)*/);
-        qDebug() << "QTimer::singleShot";
-    });
 
     //    //associateFileTypes('.' + gerberFile->fileName.split('.').last());
     //    files[gerberFile->fileName] = pair(gerberFile, nullptr);
@@ -168,6 +162,18 @@ void TreeView::updateActions()
     }
 }
 
+void TreeView::updateIcons()
+{
+    qDebug() << "updateIcons";
+    QModelIndex index = m_model->index(0, 0, QModelIndex());
+    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    for (int r = 0; r < rowCount; ++r) {
+        update(m_model->index(r, 0, index));
+    }
+    //m_model->dataChanged(m_model->index(0, 0, index), m_model->index(rowCount - 1, 0, index) /*, QVector<int>(rowCount, Qt::DecorationRole)*/);
+    iconTimer.stop();
+}
+
 //void TreeView::setTool(const Tool& value)
 //{
 //    QModelIndex index = selectionModel()->currentIndex();
@@ -186,7 +192,7 @@ void TreeView::showEvent(QShowEvent* /*event*/)
     int h = rowHeight(m_model->index(1, 0, QModelIndex()));
 
     QImage i(w, h, QImage::Format_ARGB32);
-    qDebug() << w << h << i;
+
     i.fill(Qt::transparent);
     for (int y = 0; y < h; ++y)
         i.setPixelColor(w / 2, y, QColor(128, 128, 128));
@@ -216,6 +222,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         QMenu menu(this);
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [=] {
             m_model->removeRow(index.row(), index.parent());
+            iconTimer.start(200);
             //            QTimer::singleShot(100, Qt::CoarseTimer, [&] {
             //                QModelIndex index = m_model->index(0, 0, QModelIndex());
             //                int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());

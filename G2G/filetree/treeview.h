@@ -22,7 +22,9 @@ signals:
 
 private:
     void updateActions();
+    void updateIcons();
     Model* m_model;
+    QTimer iconTimer;
 
     // QWidget interface
 protected:

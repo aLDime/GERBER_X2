@@ -22,12 +22,15 @@ File::File(GerberFile* gerberFile)
 
     gig->addToTheScene(scene);
     repaintTimer.connect(&repaintTimer, &QTimer::timeout, this, &File::repaint);
-    repaintTimer.start(1000);
+    repaintTimer.start(100);
+    MainWindow::getMainWindow()->closeAllAct->setEnabled(true);
 }
 
 File::~File()
 {
     qDebug() << "~File()";
+    if (MainWindow::getMainWindow()->isVisible())
+        MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount(QModelIndex()) > 1);
     delete gerberFile;
     delete gig;
     MainWindow::getMainWindow()->getScene()->setSceneRect(0, 0, 0, 0);
@@ -65,7 +68,7 @@ int File::rowCount(const QModelIndex& /*parent*/) const
 
 Qt::ItemFlags File::flags(const QModelIndex& /*index*/) const
 {
-    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable;
+    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
 }
 
 QVariant File::data(const QModelIndex& index, int role) const

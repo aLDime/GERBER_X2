@@ -28,6 +28,7 @@ public:
 
     MyGraphicsScene* getScene() const;
     static MainWindow* getMainWindow();
+    QAction* closeAllAct;
 
 signals:
     void parseFile(const QString& filename);
@@ -77,6 +78,7 @@ private:
     QAction* recentFileActs[MaxRecentFiles];
     QAction* recentFileSeparator;
     QAction* recentFileSubMenuAct;
+
     QString curFile;
     bool isUntitled;
 

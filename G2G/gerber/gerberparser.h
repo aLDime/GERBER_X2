@@ -34,10 +34,7 @@ class GerberFile : public QList<GERBER_ITEM> {
 public:
     ~GerberFile()
     {
-        for (GerberAperture* var : apertures) {
-            qDebug() << var->type();
-            delete var;
-        }
+        qDeleteAll(apertures);
     }
     QList<QString> lines;
     QMap<int, GerberAperture*> apertures;

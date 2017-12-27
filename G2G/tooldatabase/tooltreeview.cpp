@@ -145,7 +145,7 @@ void ToolTreeView::showEvent(QShowEvent* /*event*/)
     int h = rowHeight(m_model->index(1, 0, QModelIndex()));
 
     QImage i(w, h, QImage::Format_ARGB32);
-    qDebug() << w << h << i;
+
     i.fill(Qt::transparent);
     for (int y = 0; y < h; ++y)
         i.setPixelColor(w / 2, y, QColor(128, 128, 128));

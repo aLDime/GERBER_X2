@@ -206,6 +206,8 @@ void MainWindow::createActions()
     fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Close);
     action->setStatusTip(tr("Close all files"));
+    action->setEnabled(false);
+    closeAllAct = action;
 
     action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);

@@ -6,6 +6,7 @@ GerberAperture::GerberAperture()
 
 GerberAperture::~GerberAperture()
 {
+    qDebug() << "~GerberAperture()";
 }
 
 Paths GerberAperture::draw(const STATE& state)
@@ -17,9 +18,11 @@ Paths GerberAperture::draw(const STATE& state)
 
     Paths tmpPpaths;
     for (Path var : m_paths) {
+#ifdef DEPRECATED
         if (state.imgPolarity == NEGATIVE) {
             ReversePath(var);
         }
+#endif
         if (state.format.unitMode == INCHES && type() == APERTURE_MACRO) {
             for (IntPoint& pt : var) {
                 pt.X *= 25.4;

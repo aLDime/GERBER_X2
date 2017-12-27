@@ -335,10 +335,12 @@ bool GerberParser::ParseNumber(QString Str, cInt& val, int integer, int decimal)
                 Str = QString(integer + decimal - Str.length(), '0') + Str;
                 //Str = "0" + Str;
                 break;
+#ifdef DEPRECATED
             case OMIT_TRAILING_ZEROS:
                 Str += QString(integer + decimal - Str.length(), '0');
                 //Str += "0";
                 break;
+#endif
             }
         }
         val = Double(Str, true) * pow(10.0, -decimal) * sign;
@@ -490,9 +492,11 @@ Paths GerberParser::CreateLine()
         }
         //pattern.push_back(pattern[0]);
         MinkowskiSum(pattern, curPath, solution, false);
+#ifdef DEPRECATED
         if (state.imgPolarity == NEGATIVE) {
             ReversePaths(solution);
         }
+#endif
     }
     else {
         double size = gerbFile->apertures[state.lstAperture]->size() * uScale * 0.5;
@@ -502,9 +506,11 @@ Paths GerberParser::CreateLine()
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
         offset.AddPath(curPath, jtRound, etOpenRound);
         offset.Execute(solution, size);
+#ifdef DEPRECATED
         if (state.imgPolarity == NEGATIVE) {
             ReversePaths(solution);
         }
+#endif
     }
     return solution;
 }
@@ -514,8 +520,9 @@ Paths GerberParser::CreatePolygon()
     Paths paths;
     double area = Area(curPath);
     if (area > 0.0) {
-        if (state.imgPolarity == NEGATIVE)
-            ReversePath(curPath);
+#ifdef DEPRECATEDif(state.imgPolarity == NEGATIVE)
+        ReversePath(curPath);
+#endif
     }
     else {
         if (state.imgPolarity == POSITIVE)
@@ -816,17 +823,21 @@ bool GerberParser::ParseFormat(const QString& gLine)
         case OMIT_LEADING_ZEROS:
             state.format.zeroOmisMode = OMIT_LEADING_ZEROS;
             break;
+#ifdef DEPRECATED
         case OMIT_TRAILING_ZEROS:
             state.format.zeroOmisMode = OMIT_TRAILING_ZEROS;
             break;
+#endif
         }
         switch (coordinateValuesNotationList.indexOf(match.cap(2))) {
         case ABSOLUTE_NOTATION:
             state.format.coordValueNotation = ABSOLUTE_NOTATION;
             break;
+#ifdef DEPRECATED
         case INCREMENTAL_NOTATION:
             state.format.coordValueNotation = INCREMENTAL_NOTATION;
             break;
+#endif
         }
         state.format.xInteger = match.cap(3).toInt();
         state.format.xDecimal = match.cap(4).toInt();
@@ -885,6 +896,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
             state.region = OFF;
             state.curGCode = G37;
             break;
+#ifdef DEPRECATED
         case G70:
             state.format.unitMode = INCHES;
             state.curGCode = G70;
@@ -893,6 +905,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
             state.format.unitMode = MILLIMETERS;
             state.curGCode = G71;
             break;
+#endif
         case G74:
             state.quadrant = SINGLE;
             state.curGCode = G74;
@@ -901,6 +914,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
             state.quadrant = MULTI;
             state.curGCode = G75;
             break;
+#ifdef DEPRECATED
         case G90:
             state.format.coordValueNotation = ABSOLUTE_NOTATION;
             state.curGCode = G90;
@@ -908,9 +922,10 @@ bool GerberParser::ParseGCode(const QString& gLine)
         case G91:
             state.format.coordValueNotation = INCREMENTAL_NOTATION;
             state.curGCode = G91;
+#endif
             break;
         default:
-            qDebug() << "Error G-code" << match.capturedTexts();
+            qDebug() << "Erroror or deprecated G-code " << match.capturedTexts();
             break;
         }
         return true;
@@ -930,9 +945,11 @@ bool GerberParser::ParseImagePolarity(const QString& gLine)
         case 0:
             state.imgPolarity = POSITIVE;
             break;
+#ifdef DEPRECATED
         case 1:
             state.imgPolarity = NEGATIVE;
             break;
+#endif
         }
         return true;
     }
@@ -948,9 +965,11 @@ bool GerberParser::ParseLevelPolarity(const QString& gLine)
         case 0:
             state.imgPolarity = POSITIVE;
             break;
+#ifdef DEPRECATED
         case 1:
             state.imgPolarity = NEGATIVE;
             break;
+#endif
         }
         return true;
     }
@@ -1023,7 +1042,9 @@ bool GerberParser::ParseToolAperture(const QString& gLine)
         state.lstAperture = state.curAperture;
         state.curAperture = match.cap(1).toInt();
         state.curDCode = D02;
+#ifdef DEPRECATED
         state.curGCode = G54;
+#endif
         ClosePath();
         return true;
     }

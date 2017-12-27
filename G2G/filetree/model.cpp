@@ -4,13 +4,21 @@
 #include <QDebug>
 #include <QMimeData>
 #include <QStandardItem>
-Folder* f;
+
+enum {
+    FILES,
+    MILLING,
+    DRILL,
+    PATH,
+    PINS,
+};
+
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new Folder("rootItem"))
 {
     importTools();
-    rootItem->add((f = new Folder("Файлы")));
+    rootItem->add(new Folder("Файлы"));
     rootItem->add(new Folder("Фрезеровки"));
     rootItem->add(new Folder("Сверловки"));
     rootItem->add(new Folder("Траектории"));
@@ -150,10 +158,10 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 void Model::addFile(GerberFile* gerberFile)
 {
-    QModelIndex index = createIndex(0, 0, f);
+    QModelIndex index = createIndex(0, 0, rootItem->child(FILES));
     int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
     insertRows(rowCount, 1, index);
-    f->set(rowCount, new File(gerberFile));
+    rootItem->child(FILES)->set(rowCount, new File(gerberFile));
 }
 
 void Model::exportTools()
