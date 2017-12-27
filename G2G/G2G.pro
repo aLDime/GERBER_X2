@@ -69,7 +69,8 @@ HEADERS += \
     filetree/treeview.h \
     filetree/file.h \
     filetree/abstractitem.h \
-    filetree/folder.h
+    filetree/folder.h \
+    filetree/milling.h
 
 
 SOURCES += \
@@ -108,6 +109,7 @@ SOURCES += \
     filetree/treeview.cpp \
     filetree/file.cpp \
     filetree/abstractitem.cpp \
-    filetree/folder.cpp
+    filetree/folder.cpp \
+    filetree/milling.cpp
 
 

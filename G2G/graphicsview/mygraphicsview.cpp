@@ -203,7 +203,7 @@ void MyGraphicsView::dropEvent(QDropEvent* event)
     if (event->mouseButtons() == Qt::LeftButton) {
         emit ClearScene();
     }
-    for (QUrl &var : event->mimeData()->urls()) {
+    for (QUrl& var : event->mimeData()->urls()) {
         emit FileDroped(var.toString().remove("file:///"));
     }
     event->acceptProposedAction();
@@ -219,7 +219,6 @@ void MyGraphicsView::contextMenuEvent(QContextMenuEvent* event)
     QMenu menu(this);
     menu.addAction(QIcon(), tr("&Pointer Mode..."), []() { qDebug() << "&Pointer Mode..."; });
     menu.exec(event->globalPos());
-    setDragMode(RubberBandDrag);
     QGraphicsView::contextMenuEvent(event);
 }
 
@@ -231,40 +230,42 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
 
 void MyGraphicsView::mousePressEvent(QMouseEvent* event)
 {
-    //qDebug() << "mousePressEvent";
-    if (event->buttons() & Qt::MiddleButton) {
-        setInteractive(false);
-        // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, 0, event->modifiers());
-        QGraphicsView::mouseReleaseEvent(&releaseEvent);
-        setDragMode(ScrollHandDrag);
-        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
-        QGraphicsView::mousePressEvent(&fakeEvent);
-    }
-    else if (event->button() == Qt::RightButton) {
-        // это что бы при вызове контекстного меню ничего постороннего не было
-        setDragMode(NoDrag);
-        QGraphicsView::mousePressEvent(event);
-    }
-    else {
-        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
-        QGraphicsView::mousePressEvent(event);
-    }
+    //    qDebug() << "mousePressEvent";
+    //    if (event->buttons() & Qt::MiddleButton) {
+    //        setInteractive(false);
+    //        // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
+    //        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, 0, event->modifiers());
+    //        QGraphicsView::mouseReleaseEvent(&releaseEvent);
+    //        setDragMode(ScrollHandDrag);
+    //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
+    //        QGraphicsView::mousePressEvent(&fakeEvent);
+    //    }
+    //    else if (event->button() == Qt::RightButton) {
+    //        // это что бы при вызове контекстного меню ничего постороннего не было
+    //        setDragMode(NoDrag);
+    //        QGraphicsView::mousePressEvent(event);
+    //    }
+    //    else {
+    //        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
+    //        QGraphicsView::mousePressEvent(event);
+    //    }
+    QGraphicsView::mousePressEvent(event);
 }
 
 void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
 {
-    //qDebug() << "mouseReleaseEvent";
-    if (event->button() == Qt::MiddleButton) {
-        // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-        QGraphicsView::mouseReleaseEvent(&fakeEvent);
-        setDragMode(RubberBandDrag);
-        setInteractive(true);
-    }
-    else {
-        QGraphicsView::mouseReleaseEvent(event);
-    }
+    //    qDebug() << "mouseReleaseEvent";
+    //    if (event->button() == Qt::MiddleButton) {
+    //        // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
+    //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
+    //        QGraphicsView::mouseReleaseEvent(&fakeEvent);
+    //        setDragMode(RubberBandDrag);
+    //        setInteractive(true);
+    //    }
+    //    else {
+    //        QGraphicsView::mouseReleaseEvent(event);
+    //    }
+    QGraphicsView::mouseReleaseEvent(event);
 }
 
 void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)

@@ -5,13 +5,7 @@
 #include <QMimeData>
 #include <QStandardItem>
 
-enum {
-    FILES,
-    MILLING,
-    DRILL,
-    PATH,
-    PINS,
-};
+Model* Model::model = nullptr;
 
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
@@ -21,8 +15,8 @@ Model::Model(QObject* parent)
     rootItem->add(new Folder("Файлы"));
     rootItem->add(new Folder("Фрезеровки"));
     rootItem->add(new Folder("Сверловки"));
-    rootItem->add(new Folder("Траектории"));
     rootItem->add(new Folder("Штифты"));
+    model = this;
 }
 
 Model::~Model()
@@ -38,7 +32,7 @@ bool Model::insertRows(int row, int count, const QModelIndex& parent)
     AbstractItem* parentItem = static_cast<AbstractItem*>(parent.internalPointer());
     if (!parentItem)
         parentItem = rootItem;
-    if (parentItem->rowCount(parent) > row)
+    if (parentItem->rowCount(/*parent*/) > row)
         parentItem->insert(row, new /*AbstractItem*/ Folder(""));
     else
         parentItem->add(new /*AbstractItem*/ Folder(""));
@@ -70,7 +64,7 @@ int Model::columnCount(const QModelIndex& parent) const
         parentItem = rootItem;
     else
         parentItem = static_cast<AbstractItem*>(parent.internalPointer());
-    return parentItem->columnCount(parent);
+    return parentItem->columnCount(/*parent*/);
 }
 
 int Model::rowCount(const QModelIndex& parent) const
@@ -83,7 +77,7 @@ int Model::rowCount(const QModelIndex& parent) const
     else
         parentItem = static_cast<AbstractItem*>(parent.internalPointer());
 
-    return parentItem->rowCount(parent);
+    return parentItem->rowCount(/*parent*/);
 }
 
 QModelIndex Model::index(int row, int column, const QModelIndex& parent) const
@@ -156,12 +150,21 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     return QVariant();
 }
 
-void Model::addFile(GerberFile* gerberFile)
+void Model::addGerberFile(GerberFile* gerberFile)
 {
-    QModelIndex index = createIndex(0, 0, rootItem->child(FILES));
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    QModelIndex index = createIndex(0, 0, rootItem->child(FILES_F));
+    int rowCount = rootItem->child(FILES_F)->rowCount();
     insertRows(rowCount, 1, index);
-    rootItem->child(FILES)->set(rowCount, new File(gerberFile));
+    rootItem->child(FILES_F)->set(rowCount, new File(gerberFile));
+}
+
+void Model::addMilling(const QString name, QGraphicsItemGroup* group)
+{
+    QModelIndex index = createIndex(0, 0, rootItem->child(MILLING_F));
+    int rowCount = rootItem->child(MILLING_F)->rowCount();
+    insertRows(rowCount, 1, index);
+    rootItem->child(MILLING_F)->set(rowCount, new Milling(name, group));
+    emit updateActions();
 }
 
 void Model::exportTools()

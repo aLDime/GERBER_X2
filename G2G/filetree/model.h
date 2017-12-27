@@ -8,11 +8,22 @@
 #include <QFile>
 #include <QMessageBox>
 
+enum {
+    FILES_F,
+    MILLING_F,
+    DRILL_F,
+    PINS_F,
+};
+
 class Model : public QAbstractItemModel {
     Q_OBJECT
     AbstractItem* rootItem;
 
+signals:
+    void updateActions();
+
 public:
+    static Model* model;
     explicit Model(QObject* parent = nullptr);
     ~Model();
 
@@ -33,7 +44,8 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void addFile(GerberFile* gerberFile);
+    void addGerberFile(GerberFile* gerberFile);
+    void addMilling(const QString name, QGraphicsItemGroup* group);
     //    QStringList mimeTypes() const override
     //    {
     //        QStringList types;

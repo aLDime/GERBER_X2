@@ -113,7 +113,7 @@ void MainWindow::open()
 void MainWindow::closeFiles()
 {
     QModelIndex index = treeView->model()->index(0, 0, QModelIndex());
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount(QModelIndex());
+    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount();
     treeView->model()->removeRows(0, rowCount, index);
     //fileHolder->closeAllFiles();
     scene->deleteLater();

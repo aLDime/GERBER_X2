@@ -20,8 +20,8 @@ public:
     int row() const;
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
-    virtual int columnCount(const QModelIndex& parent) const = 0;
-    virtual int rowCount(const QModelIndex& parent) const = 0;
+    virtual int columnCount(/*const QModelIndex& parent*/) const = 0;
+    virtual int rowCount(/*const QModelIndex& parent*/) const = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
 
@@ -37,5 +37,6 @@ protected:
 
 #include "file.h"
 #include "folder.h"
+#include "milling.h"
 
 #endif // TREEITEM_H

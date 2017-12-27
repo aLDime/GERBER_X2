@@ -367,13 +367,16 @@ void ProfileToolpathForm::retranslateUi(QWidget* Form)
 
 void ProfileToolpathForm::calculate()
 {
-    MainWindow* mw = static_cast<MainWindow*>(parentWidget()->parentWidget());
-    QGraphicsScene* csene = mw->graphicsView->scene();
+    QGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
 
-    QList<QGraphicsItem*> wItems(csene->selectedItems());
+    QList<QGraphicsItem*> wItems(scene->selectedItems());
 
-    if (wItems.isEmpty() || qFuzzyIsNull(dsbDepth->value())) {
-        QMessageBox::warning(this, "!!!", tr("No selected gerber file"));
+    if (wItems.isEmpty()) {
+        QMessageBox::warning(this, "!!!", tr("No selected..."));
+        return;
+    }
+    if (qFuzzyIsNull(dsbDepth->value())) {
+        QMessageBox::warning(this, "!!!", tr("No valid tool..."));
         return;
     }
 
@@ -414,10 +417,10 @@ void ProfileToolpathForm::calculate()
     pathItem->setBrush(Qt::NoBrush);
     items.append(pathItem);
 
-    QGraphicsItemGroup* group = csene->createItemGroup(items);
+    QGraphicsItemGroup* group = scene->createItemGroup(items);
     group->setAcceptHoverEvents(false);
     group->setAcceptTouchEvents(false);
     group->setAcceptedMouseButtons(Qt::NoButton);
 
-//    mw->treeWidget->addMilling(nameForm->text(), group);
+    Model::model->addMilling(nameForm->text(), group);
 }

@@ -7,7 +7,7 @@
 QTimer File::repaintTimer;
 File::File(GerberFile* gerberFile)
     : gerberFile(gerberFile)
-    , checkState(Qt::Checked)
+// , checkState(Qt::Checked)
 {
     MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
     gig = new GerberItemGroup;
@@ -30,7 +30,7 @@ File::~File()
 {
     qDebug() << "~File()";
     if (MainWindow::getMainWindow()->isVisible())
-        MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount(QModelIndex()) > 1);
+        MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount() > 1);
     delete gerberFile;
     delete gig;
     MainWindow::getMainWindow()->getScene()->setSceneRect(0, 0, 0, 0);
@@ -56,12 +56,12 @@ bool File::setData(const QModelIndex& index, const QVariant& value, int role)
     return false;
 }
 
-int File::columnCount(const QModelIndex& /*parent*/) const
+int File::columnCount() const
 {
     return 1;
 }
 
-int File::rowCount(const QModelIndex& /*parent*/) const
+int File::rowCount() const
 {
     return 0;
 }
@@ -97,7 +97,7 @@ QVariant File::data(const QModelIndex& index, int role) const
 
 void File::repaint()
 {
-    int count = parentItem->rowCount(QModelIndex());
+    int count = parentItem->rowCount();
     int cc = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(cc, 255 - cc * 0.2, 255, 150));
     gig->setBrush(color);

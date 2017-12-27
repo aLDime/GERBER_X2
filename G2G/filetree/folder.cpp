@@ -9,7 +9,7 @@ Folder::Folder(const QString& name)
 
 Folder::~Folder()
 {
-    qDebug() << "~Folder()";
+    //qDebug() << "~Folder()";
 }
 
 QVariant Folder::data(const QModelIndex& index, int role) const
@@ -20,7 +20,6 @@ QVariant Folder::data(const QModelIndex& index, int role) const
             return name;
         case Qt::DecorationRole:
             return QIcon::fromTheme("folder");
-            break;
         default:
             break;
         }
@@ -33,17 +32,17 @@ Qt::ItemFlags Folder::flags(const QModelIndex& index) const
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
 
-int Folder::rowCount(const QModelIndex& parent) const
+int Folder::rowCount() const
 {
     return childItems.size();
 }
 
-int Folder::columnCount(const QModelIndex& parent) const
+int Folder::columnCount() const
 {
     return 1;
 }
 
 bool Folder::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    return true;
+    return false;
 }

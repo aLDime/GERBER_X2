@@ -6,7 +6,7 @@ GerberAperture::GerberAperture()
 
 GerberAperture::~GerberAperture()
 {
-    qDebug() << "~GerberAperture()";
+    //qDebug() << "~GerberAperture()";
 }
 
 Paths GerberAperture::draw(const STATE& state)
