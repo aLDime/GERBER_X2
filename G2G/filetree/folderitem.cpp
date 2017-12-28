@@ -1,18 +1,18 @@
-#include "folder.h"
+#include "folderitem.h"
 
 #include <QIcon>
 
-Folder::Folder(const QString& name)
+FolderItem::FolderItem(const QString& name)
     : name(name)
 {
 }
 
-Folder::~Folder()
+FolderItem::~FolderItem()
 {
     //qDebug() << "~Folder()";
 }
 
-QVariant Folder::data(const QModelIndex& index, int role) const
+QVariant FolderItem::data(const QModelIndex& index, int role) const
 {
     if (!index.column()) {
         switch (role) {
@@ -27,22 +27,22 @@ QVariant Folder::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags Folder::flags(const QModelIndex& index) const
+Qt::ItemFlags FolderItem::flags(const QModelIndex& index) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
 
-int Folder::rowCount() const
+int FolderItem::rowCount() const
 {
     return childItems.size();
 }
 
-int Folder::columnCount() const
+int FolderItem::columnCount() const
 {
     return 1;
 }
 
-bool Folder::setData(const QModelIndex& index, const QVariant& value, int role)
+bool FolderItem::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     return false;
 }

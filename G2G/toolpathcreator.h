@@ -4,7 +4,7 @@
 #include "clipper/myclipper.h"
 #include "gerber/gerber.h"
 #include <QObject>
-#include "gerber/gerberparser.h"
+#include "gerber/parser.h"
 
 using namespace ClipperLib;
 
@@ -25,7 +25,7 @@ public:
     explicit ToolPathCreator(QObject* parent = 0);
     void Clear();
 
-    Paths& Merge(GerberFile* gerberFile);
+    Paths& Merge(Gerber::File* gerberFile);
     Pathss& ToolPathPocket(MILLING milling, double toolDiameter);
     Paths& ToolPathProfile(MILLING milling, double toolDiameter);
     constexpr Paths& GetMergedPaths();

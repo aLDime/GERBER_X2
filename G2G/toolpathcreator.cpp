@@ -17,7 +17,7 @@ void ToolPathCreator::Clear()
     groupedPaths.clear();
 }
 
-Paths& ToolPathCreator::Merge(GerberFile* gerberFile)
+Paths& ToolPathCreator::Merge(Gerber::File* gerberFile)
 {
     Paths paths;
     Paths tmpPaths;

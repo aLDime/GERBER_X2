@@ -3,7 +3,7 @@
 #include "mainwindow.h"
 #include "tooldatabase/tooldatabase.h"
 
-#include "gerber/gerbergraphicsitem.h"
+#include "gerber/graphicsitem.h"
 #include "graphicsview/mygraphicsscene.h"
 #include "settingsdialog.h"
 #include "toolpathcreator.h"
@@ -18,7 +18,7 @@
 #include "forms/pockettoolpathform.h"
 #include "forms/profiletoolpathform.h"
 #include "gerberfileholder.h"
-#include "gerber/gerberparser.h"
+#include "gerber/parser.h"
 
 //#include "qt_windows.h"
 //#include "Psapi.h"
@@ -27,7 +27,7 @@ MainWindow* MainWindow::pMainWindow;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , gerberParser(new GerberParser)
+    , gerberParser(new Gerber::Parser)
 //, fileHolder(new GerberFileHolder(this))
 {
     setupUi(this);
@@ -38,9 +38,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(this, &MainWindow::parseFile, gerberParser, &GerberParser::parseFile, Qt::QueuedConnection);
+    connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
     //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
-    connect(gerberParser, &GerberParser::fileReady, treeView, &TreeView::addFile);
+    connect(gerberParser, &Gerber::Parser::fileReady, treeView, &TreeView::addFile);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);

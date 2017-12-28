@@ -44,7 +44,7 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void addGerberFile(GerberFile* gerberFile);
+    void addGerberFile(Gerber::File* gerberFile);
     void addMilling(const QString name, QGraphicsItemGroup* group);
     //    QStringList mimeTypes() const override
     //    {

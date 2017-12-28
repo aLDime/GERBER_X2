@@ -1,45 +1,35 @@
-#include "file.h"
+#include "fileitem.h"
 
 #include <toolpathcreator.h>
 #include <graphicsview/mygraphicsscene.h>
 #include <QFileInfo>
 #include <mainwindow.h>
-QTimer File::repaintTimer;
-File::File(GerberFile* gerberFile)
+QTimer FileItem::repaintTimer;
+FileItem::FileItem(Gerber::File* gerberFile)
     : gerberFile(gerberFile)
 // , checkState(Qt::Checked)
 {
     MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
-    gig = new GerberItemGroup;
-    ToolPathCreator tpc;
-    tpc.Merge(gerberFile);
-    int counter = 0;
 
-    for (Paths& vpaths : tpc.GetGroupedPaths(COPPER)) {
-        gig->append(new GerberWorkItem(vpaths));
-        gig->last()->setToolTip(QString("COPPER %1").arg(++counter));
-    }
-
-    gig->addToTheScene(scene);
-    repaintTimer.connect(&repaintTimer, &QTimer::timeout, this, &File::repaint);
+    gerberFile->gig->addToTheScene(scene);
+    repaintTimer.connect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
     repaintTimer.start(100);
     MainWindow::getMainWindow()->closeAllAct->setEnabled(true);
 }
 
-File::~File()
+FileItem::~FileItem()
 {
     qDebug() << "~File()";
     if (MainWindow::getMainWindow()->isVisible())
         MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount() > 1);
     delete gerberFile;
-    delete gig;
     MainWindow::getMainWindow()->getScene()->setSceneRect(0, 0, 0, 0);
     MainWindow::getMainWindow()->getScene()->update();
     //semaphore.tryAcquire();
     repaintTimer.start(100);
 }
 
-bool File::setData(const QModelIndex& index, const QVariant& value, int role)
+bool FileItem::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (!index.column())
         switch (role) {
@@ -48,7 +38,7 @@ bool File::setData(const QModelIndex& index, const QVariant& value, int role)
         //            return true;
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            gig->setVisible(checkState == Qt::Checked);
+            gerberFile->gig->setVisible(checkState == Qt::Checked);
             return true;
         default:
             break;
@@ -56,22 +46,22 @@ bool File::setData(const QModelIndex& index, const QVariant& value, int role)
     return false;
 }
 
-int File::columnCount() const
+int FileItem::columnCount() const
 {
     return 1;
 }
 
-int File::rowCount() const
+int FileItem::rowCount() const
 {
     return 0;
 }
 
-Qt::ItemFlags File::flags(const QModelIndex& /*index*/) const
+Qt::ItemFlags FileItem::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
 }
 
-QVariant File::data(const QModelIndex& index, int role) const
+QVariant FileItem::data(const QModelIndex& index, int role) const
 {
     if (!index.column())
         switch (role) {
@@ -84,7 +74,7 @@ QVariant File::data(const QModelIndex& index, int role) const
             return checkState;
         case Qt::DecorationRole: {
             QPixmap p(16, 16);
-            QColor c = gig->brush().color();
+            QColor c = gerberFile->gig->brush().color();
             c.setAlpha(255);
             p.fill(c);
             return p;
@@ -95,12 +85,12 @@ QVariant File::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-void File::repaint()
+void FileItem::repaint()
 {
     int count = parentItem->rowCount();
     int cc = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(cc, 255 - cc * 0.2, 255, 150));
-    gig->setBrush(color);
+    gerberFile->gig->setBrush(color);
     MainWindow::getMainWindow()->getScene()->update();
     repaintTimer.stop();
 }

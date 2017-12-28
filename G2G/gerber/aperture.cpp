@@ -1,4 +1,4 @@
-#include "gerberaperture.h"
+#include "aperture.h"
 
 GerberAperture::GerberAperture()
 {

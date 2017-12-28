@@ -22,7 +22,7 @@
 
 #include <gerberfileholder.h>
 
-#include <gerber/gerbergraphicsitem.h>
+#include <gerber/graphicsitem.h>
 
 Q_DECLARE_METATYPE(QGraphicsItemGroup*)
 
@@ -382,7 +382,7 @@ void ProfileToolpathForm::calculate()
 
     Paths value;
     for (QGraphicsItem* item : wItems) {
-        value.append(static_cast<GerberWorkItem*>(item)->getPaths());
+        value.append(static_cast<Gerber::WorkItem*>(item)->getPaths());
     }
 
     ToolPathCreator tpc;

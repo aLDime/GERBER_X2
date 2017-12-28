@@ -9,13 +9,13 @@ Model* Model::model = nullptr;
 
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new Folder("rootItem"))
+    , rootItem(new FolderItem("rootItem"))
 {
     importTools();
-    rootItem->add(new Folder("Файлы"));
-    rootItem->add(new Folder("Фрезеровки"));
-    rootItem->add(new Folder("Сверловки"));
-    rootItem->add(new Folder("Штифты"));
+    rootItem->add(new FolderItem("Файлы"));
+    rootItem->add(new FolderItem("Фрезеровки"));
+    rootItem->add(new FolderItem("Сверловки"));
+    rootItem->add(new FolderItem("Штифты"));
     model = this;
 }
 
@@ -33,9 +33,9 @@ bool Model::insertRows(int row, int count, const QModelIndex& parent)
     if (!parentItem)
         parentItem = rootItem;
     if (parentItem->rowCount(/*parent*/) > row)
-        parentItem->insert(row, new /*AbstractItem*/ Folder(""));
+        parentItem->insert(row, new /*AbstractItem*/ FolderItem(""));
     else
-        parentItem->add(new /*AbstractItem*/ Folder(""));
+        parentItem->add(new /*AbstractItem*/ FolderItem(""));
     endInsertRows();
     return true;
 }
@@ -150,12 +150,12 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     return QVariant();
 }
 
-void Model::addGerberFile(GerberFile* gerberFile)
+void Model::addGerberFile(Gerber::File* gerberFile)
 {
     QModelIndex index = createIndex(0, 0, rootItem->child(FILES_F));
     int rowCount = rootItem->child(FILES_F)->rowCount();
     insertRows(rowCount, 1, index);
-    rootItem->child(FILES_F)->set(rowCount, new File(gerberFile));
+    rootItem->child(FILES_F)->set(rowCount, new FileItem(gerberFile));
 }
 
 void Model::addMilling(const QString name, QGraphicsItemGroup* group)

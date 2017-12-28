@@ -3,7 +3,7 @@
 
 #include <QDialog>
 
-#include <gerber/gerberaperture.h>
+#include <gerber/aperture.h>
 
 class QTableView;
 class MyGraphicsView;

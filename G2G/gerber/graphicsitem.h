@@ -4,18 +4,18 @@
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QPen>
-#include "gerberparser.h"
+#include "parser.h"
 
 using namespace ClipperLib;
-
+namespace Gerber {
 enum {
-    GerberRawItemType = QGraphicsItem::UserType + 1,
-    GerberWorkItemType = QGraphicsItem::UserType + 2
+    RawItemType = QGraphicsItem::UserType + 1,
+    WorkItemType = QGraphicsItem::UserType + 2
 };
 
-class GerberItem : public QGraphicsItem {
+class GraphicsItem : public QGraphicsItem {
 public:
-    GerberItem()
+    GraphicsItem()
         : m_pen(Qt::NoPen)
         , m_brush(Qt::red)
     {
@@ -29,9 +29,10 @@ protected:
     QBrush m_brush;
 };
 
-class GerberItemGroup : public QList<GerberItem*> {
+class GraphicsItem;
+class ItemGroup : public QList<GraphicsItem*> {
 public:
-    ~GerberItemGroup();
+    ~ItemGroup();
     void setVisible(const bool visible);
     bool isVisible() { return m_visible; }
     void addToTheScene(QGraphicsScene* scene);
@@ -46,28 +47,28 @@ private:
     QBrush m_brush;
 };
 
-class GerberRawItem : public GerberItem {
-public:
-    GerberRawItem(GERBER_ITEM& item);
-    QRectF boundingRect() const override { return rect; }
-    QPainterPath shape() const override { return m_shape; }
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const { return GerberRawItemType; }
+//class RawItem : public GraphicsItem {
+//public:
+//    RawItem(GraphicObject& item);
+//    QRectF boundingRect() const override { return rect; }
+//    QPainterPath shape() const override { return m_shape; }
+//    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+//    int type() const { return RawItemType; }
 
-private:
-    QColor color;
-    int m_type = 0;
-    QPainterPath path;
-    QPainterPath m_shape;
-    GerberAperture* aperture = nullptr;
-    const double size;
-    IMAGE_POLARITY imgPolarity;
-    QRectF rect;
-};
+//private:
+//    QColor color;
+//    int m_type = 0;
+//    QPainterPath path;
+//    QPainterPath m_shape;
+//    GerberAperture* aperture = nullptr;
+//    const double size;
+//    IMAGE_POLARITY imgPolarity;
+//    QRectF rect;
+//};
 
-class GerberWorkItem : public GerberItem {
+class WorkItem : public GraphicsItem {
 public:
-    GerberWorkItem(const Paths& paths);
+    WorkItem(const Paths& paths);
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
@@ -80,5 +81,6 @@ private:
     Paths paths;
     QRectF rect;
 };
+}
 
 #endif // GERBERITEM_H

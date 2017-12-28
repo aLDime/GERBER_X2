@@ -43,8 +43,6 @@ HEADERS += \
     forms/toolpathforminterface.h \
     forms/toolpathnameform.h \
     gerber/gerber.h \
-    gerber/gerberaperture.h \
-    gerber/gerberparser.h \
     gerber/mathparser.h \
     gerberfileholder.h \
     graphicsview/colorsettings.h \
@@ -58,7 +56,6 @@ HEADERS += \
 #    tooldatabase/treeitem.h \
 #    tooldatabase/treemodel.h \
     toolpathcreator.h \
-    gerber/gerbergraphicsitem.h \
     tooldatabase/tooldatabase.h \
     tooldatabase/tooledit.h \
     tooldatabase/toolmodel.h \
@@ -67,10 +64,13 @@ HEADERS += \
     tooldatabase/tool.h \
     filetree/model.h \
     filetree/treeview.h \
-    filetree/file.h \
     filetree/abstractitem.h \
-    filetree/folder.h \
-    filetree/milling.h
+    filetree/milling.h \
+    filetree/fileitem.h \
+    filetree/folderitem.h \
+    gerber/aperture.h \
+    gerber/graphicsitem.h \
+    gerber/parser.h
 
 
 SOURCES += \
@@ -82,8 +82,6 @@ SOURCES += \
     forms/profiletoolpathform.cpp \
     forms/toolpathforminterface.cpp \
     forms/toolpathnameform.cpp \
-    gerber/gerberaperture.cpp \
-    gerber/gerberparser.cpp \
     gerber/mathparser.cpp \
     gerberfileholder.cpp \
     graphicsview/colorsettings.cpp \
@@ -98,7 +96,6 @@ SOURCES += \
 #    tooldatabase/treeitem.cpp \
 #    tooldatabase/treemodel.cpp \
     toolpathcreator.cpp \
-    gerber/gerbergraphicsitem.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooledit.cpp \
     tooldatabase/toolmodel.cpp \
@@ -107,9 +104,12 @@ SOURCES += \
     tooldatabase/tool.cpp \
     filetree/model.cpp \
     filetree/treeview.cpp \
-    filetree/file.cpp \
     filetree/abstractitem.cpp \
-    filetree/folder.cpp \
-    filetree/milling.cpp
+    filetree/milling.cpp \
+    filetree/fileitem.cpp \
+    filetree/folderitem.cpp \
+    gerber/parser.cpp \
+    gerber/graphicsitem.cpp \
+    gerber/aperture.cpp
 
 

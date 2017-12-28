@@ -36,7 +36,7 @@ TreeView::~TreeView()
 {
 }
 
-void TreeView::addFile(GerberFile* gerberFile)
+void TreeView::addFile(Gerber::File* gerberFile)
 {
     m_model->addGerberFile(gerberFile);
     iconTimer.start(200);

@@ -3,16 +3,16 @@
 
 #include "abstractitem.h"
 
-#include <gerber/gerbergraphicsitem.h>
-#include <gerber/gerberparser.h>
+#include <gerber/graphicsitem.h>
+#include <gerber/parser.h>
 #include <QObject>
 
-class File : public QObject, public AbstractItem {
+class FileItem : public QObject, public AbstractItem {
     Q_OBJECT
 
 public:
-    File(GerberFile* gerberFile);
-    ~File();
+    FileItem(Gerber::File* gerberFile);
+    ~FileItem();
 
     // AbstractItem interface
 public:
@@ -23,8 +23,8 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
 private:
-    GerberFile* gerberFile;
-    GerberItemGroup* gig;
+    Gerber::File* gerberFile;
+
     Qt::CheckState checkState = Qt::Checked;
     static QTimer repaintTimer;
     void repaint();

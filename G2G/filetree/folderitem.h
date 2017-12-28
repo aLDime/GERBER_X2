@@ -3,12 +3,12 @@
 
 #include "abstractitem.h"
 
-class Folder : public AbstractItem {
+class FolderItem : public AbstractItem {
     QString name;
 
 public:
-    Folder(const QString& name);
-    ~Folder();
+    FolderItem(const QString& name);
+    ~FolderItem();
     // AbstractItem interface
 public:
     QVariant data(const QModelIndex& index, int role) const override;

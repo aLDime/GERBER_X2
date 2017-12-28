@@ -1,4 +1,4 @@
-#include "gerberparser.h"
+#include "parser.h"
 
 #include <QDateTime>
 #include <QFile>
@@ -6,12 +6,15 @@
 #include <QMutex>
 #include <QTextStream>
 #include <QThread>
+#include <toolpathcreator.h>
+
+using namespace Gerber;
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<GerberFile*>("GERBER_FILE*");
+int id1 = qRegisterMetaType<File*>("GERBER_FILE*");
 
 const QList<QString> slApertureType(QString("C|R|O|P|M").split("|"));
 const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
@@ -39,12 +42,12 @@ const QRegExp reUnitMode("^%MO(IN|MM)\\*%$");
 
 QMutex mutex;
 
-GerberParser::GerberParser(QObject* parent)
+Parser::Parser(QObject* parent)
     : QObject(parent)
 {
 }
 
-GerberFile* GerberParser::parseFile(const QString& fileName)
+File* Parser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
@@ -54,7 +57,7 @@ GerberFile* GerberParser::parseFile(const QString& fileName)
     return ParseLines(in.readAll(), fileName);
 }
 
-GerberFile* GerberParser::ParseLines(const QString& gerberLines, const QString& fileName)
+File* Parser::ParseLines(const QString& gerberLines, const QString& fileName)
 {
     mutex.lock();
 
@@ -69,9 +72,9 @@ GerberFile* GerberParser::ParseLines(const QString& gerberLines, const QString& 
     else
         Reset(fileName);
 
-    gerbFile->lines = Format(gerberLines);
+    file->lines = Format(gerberLines);
 
-    for (QString& gerberLine : gerbFile->lines) {
+    for (QString& gerberLine : file->lines) {
         try {
             gerbLines.push_back(gerberLine);
             ++state.lineNum;
@@ -145,20 +148,30 @@ GerberFile* GerberParser::ParseLines(const QString& gerberLines, const QString& 
         }
     }
 
-    if (gerbFile->isEmpty())
-        delete gerbFile;
-    else
-        emit fileReady(gerbFile);
+    if (file->isEmpty())
+        delete file;
+    else {
+        file->gig = new Gerber::ItemGroup;
+        ToolPathCreator tpc;
+        tpc.Merge(file);
+        int counter = 0;
+
+        for (Paths& vpaths : tpc.GetGroupedPaths(COPPER)) {
+            file->gig->append(new Gerber::WorkItem(vpaths));
+            file->gig->last()->setToolTip(QString("COPPER %1").arg(++counter));
+        }
+        emit fileReady(file);
+    }
 
     gerbLines.clear();
     apertureMacro.clear();
     curPath.clear();
 
     mutex.unlock();
-    return gerbFile;
+    return file;
 }
 
-QList<QString> GerberParser::Format(QString data)
+QList<QString> Parser::Format(QString data)
 {
     QList<QString> gerberLines;
 
@@ -285,7 +298,7 @@ QList<QString> GerberParser::Format(QString data)
     return gerberLines;
 }
 #include <math.h>
-double GerberParser::ArcAngle(double start, double stop)
+double Parser::ArcAngle(double start, double stop)
 {
     if (state.interpolation == COUNTERCLOCKWISE_CIRCULAR && stop <= start) {
         stop += 2.0 * M_PI;
@@ -296,7 +309,7 @@ double GerberParser::ArcAngle(double start, double stop)
     return qAbs(stop - start);
 }
 
-double GerberParser::Double(const QString& Str, bool scale, bool inchControl)
+double Parser::Double(const QString& Str, bool scale, bool inchControl)
 {
     bool ok;
     double d = Str.toDouble(&ok);
@@ -307,7 +320,7 @@ double GerberParser::Double(const QString& Str, bool scale, bool inchControl)
     return d;
 }
 
-bool GerberParser::ParseNumber(QString Str, cInt& val, int integer, int decimal)
+bool Parser::ParseNumber(QString Str, cInt& val, int integer, int decimal)
 {
     bool flag = false;
     int sign = 1;
@@ -349,7 +362,7 @@ bool GerberParser::ParseNumber(QString Str, cInt& val, int integer, int decimal)
     return flag;
 }
 
-void GerberParser::ClosePath()
+void Parser::ClosePath()
 {
     if (curPath.size() < 2) {
         curPath.clear();
@@ -359,47 +372,47 @@ void GerberParser::ClosePath()
     switch (state.region) {
     case ON:
         state.type = REGION;
-        gerbFile->append(GERBER_ITEM(state, CreatePolygon(), gerbFile, gerbLines, curPath));
+        file->append(GraphicObject(state, CreatePolygon(), file, gerbLines, curPath));
         break;
     case OFF:
         state.type = LINE;
-        gerbFile->append(GERBER_ITEM(state, CreateLine(), gerbFile, gerbLines, curPath));
+        file->append(GraphicObject(state, CreateLine(), file, gerbLines, curPath));
         break;
     }
     ClearStep();
 }
 
-void GerberParser::CreateFlash()
+void Parser::CreateFlash()
 {
     state.type = APERTURE;
-    if (gerbFile->apertures.isEmpty() && gerbFile->apertures[state.curAperture] == nullptr)
+    if (file->apertures.isEmpty() && file->apertures[state.curAperture] == nullptr)
         return;
-    Paths paths(gerbFile->apertures[state.curAperture]->draw(state));
-    if (gerbFile->apertures[state.curAperture]->isDrilled()) {
-        paths.push_back(gerbFile->apertures[state.curAperture]->drawDrill(state));
+    Paths paths(file->apertures[state.curAperture]->draw(state));
+    if (file->apertures[state.curAperture]->isDrilled()) {
+        paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
     }
-    gerbFile->append(GERBER_ITEM(state, paths, gerbFile, gerbLines));
+    file->append(GraphicObject(state, paths, file, gerbLines));
     ClearStep();
 }
 
-void GerberParser::Reset(const QString& fileName)
+void Parser::Reset(const QString& fileName)
 {
     gerbLines.clear();
     apertureMacro.clear();
     curPath.clear();
-    gerbFile = new GerberFile;
-    gerbFile->fileName = fileName;
+    file = new File;
+    file->fileName = fileName;
     state = STATE();
 }
 
-void GerberParser::ClearStep()
+void Parser::ClearStep()
 {
     gerbLines.clear();
     curPath.clear();
     curPath.push_back(state.curPos);
 }
 
-IntPoint GerberParser::ParsePosition(const QString& xyStr)
+IntPoint Parser::ParsePosition(const QString& xyStr)
 {
     QRegExp match("(?:G[01]{1,2})?(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?");
     if (match.indexIn(xyStr) > -1) {
@@ -421,7 +434,7 @@ IntPoint GerberParser::ParsePosition(const QString& xyStr)
     return state.curPos;
 }
 
-Path GerberParser::Arc(const IntPoint& center, double radius, double start, double stop)
+Path Parser::Arc(const IntPoint& center, double radius, double start, double stop)
 {
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
@@ -473,7 +486,7 @@ Path GerberParser::Arc(const IntPoint& center, double radius, double start, doub
     return points;
 }
 
-Path GerberParser::Arc2(IntPoint p1, IntPoint p2, IntPoint center)
+Path Parser::Arc2(IntPoint p1, IntPoint p2, IntPoint center)
 {
     double radius = sqrt(pow((center.X - p1.X), 2) + pow((center.Y - p1.Y), 2));
     double start = atan2(p1.Y - center.Y, p1.X - center.X);
@@ -481,12 +494,12 @@ Path GerberParser::Arc2(IntPoint p1, IntPoint p2, IntPoint center)
     return Arc(center, radius, start, stop);
 }
 
-Paths GerberParser::CreateLine()
+Paths Parser::CreateLine()
 {
 
     Paths solution;
     if (0) {
-        Path pattern = gerbFile->apertures[state.lstAperture]->draw(state)[0];
+        Path pattern = file->apertures[state.lstAperture]->draw(state)[0];
         if (Area(pattern) < 0) {
             ReversePath(pattern);
         }
@@ -499,7 +512,7 @@ Paths GerberParser::CreateLine()
 #endif
     }
     else {
-        double size = gerbFile->apertures[state.lstAperture]->size() * uScale * 0.5;
+        double size = file->apertures[state.lstAperture]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
             size = 0.01 * uScale;
 
@@ -515,7 +528,7 @@ Paths GerberParser::CreateLine()
     return solution;
 }
 
-Paths GerberParser::CreatePolygon()
+Paths Parser::CreatePolygon()
 {
     Paths paths;
     double area = Area(curPath);
@@ -532,7 +545,7 @@ Paths GerberParser::CreatePolygon()
     return paths;
 }
 
-bool GerberParser::ParseAperture(const QString& gLine)
+bool Parser::ParseAperture(const QString& gLine)
 {
     QRegExp match(reAd);
     if (match.exactMatch(gLine)) {
@@ -553,25 +566,25 @@ bool GerberParser::ParseAperture(const QString& gLine)
         case CIRCULAR:
             if (paramList.size() > 1)
                 hole = Double(paramList[1]);
-            gerbFile->apertures[apid] = new GACircular(Double(paramList[0]), hole);
+            file->apertures[apid] = new GACircular(Double(paramList[0]), hole);
             break;
         case RECTANGLE:
             if (paramList.size() > 2)
                 hole = Double(paramList[2]);
-            gerbFile->apertures[apid] = new GARectangle(Double(paramList[0]), Double(paramList[1]), hole);
+            file->apertures[apid] = new GARectangle(Double(paramList[0]), Double(paramList[1]), hole);
 
             break;
         case OBROUND:
             if (paramList.size() > 2)
                 hole = Double(paramList[2]);
-            gerbFile->apertures[apid] = new GAObround(Double(paramList[0]), Double(paramList[1]), hole);
+            file->apertures[apid] = new GAObround(Double(paramList[0]), Double(paramList[1]), hole);
             break;
         case POLYGON:
             if (paramList.length() > 2)
                 rotation = Double(paramList[2]);
             if (paramList.length() > 3)
                 hole = Double(paramList[3]);
-            gerbFile->apertures[apid] = new GAPolygon(Double(paramList[0]), paramList[1].toInt(), rotation, hole);
+            file->apertures[apid] = new GAPolygon(Double(paramList[0]), paramList[1].toInt(), rotation, hole);
             break;
         case APERTURE_MACRO:
         default:
@@ -579,7 +592,7 @@ bool GerberParser::ParseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = Double(paramList[i], false, false);
             }
-            gerbFile->apertures[apid] = new GAMacro(apType, apertureMacro[apType].split('*'), macroCoeff);
+            file->apertures[apid] = new GAMacro(apType, apertureMacro[apType].split('*'), macroCoeff);
             break;
         }
         //gerbFile->apertures[apid]->draw();
@@ -588,7 +601,7 @@ bool GerberParser::ParseAperture(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseApertureMacros(const QString& gLine)
+bool Parser::ParseApertureMacros(const QString& gLine)
 {
     QRegExp match(reAmBegin);
     if (match.exactMatch(gLine)) // Start macro if(match, else not an AM, carry on.
@@ -602,7 +615,7 @@ bool GerberParser::ParseApertureMacros(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseAttributes(const QString& gLine)
+bool Parser::ParseAttributes(const QString& gLine)
 {
     QRegExp match(reAttributes);
     if (match.exactMatch(gLine)) {
@@ -640,7 +653,7 @@ bool GerberParser::ParseAttributes(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseCircularInterpolation(const QString& gLine)
+bool Parser::ParseCircularInterpolation(const QString& gLine)
 {
     QRegExp match(reCirc);
     Path arcPolygon;
@@ -798,7 +811,7 @@ bool GerberParser::ParseCircularInterpolation(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseEndOfFile(const QString& gLine)
+bool Parser::ParseEndOfFile(const QString& gLine)
 {
     QRegExp match(reEof1);
     if (match.exactMatch(gLine)) {
@@ -813,7 +826,7 @@ bool GerberParser::ParseEndOfFile(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseFormat(const QString& gLine)
+bool Parser::ParseFormat(const QString& gLine)
 {
     const QStringList zeroOmissionModeList = QString("L|T").split("|");
     const QStringList coordinateValuesNotationList = QString("A|I").split("|");
@@ -865,7 +878,7 @@ bool GerberParser::ParseFormat(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseGCode(const QString& gLine)
+bool Parser::ParseGCode(const QString& gLine)
 {
 
     QRegExp match(reGCode);
@@ -937,7 +950,7 @@ bool GerberParser::ParseGCode(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseImagePolarity(const QString& gLine)
+bool Parser::ParseImagePolarity(const QString& gLine)
 {
     QRegExp match(rePol);
     if (match.exactMatch(gLine)) {
@@ -956,7 +969,7 @@ bool GerberParser::ParseImagePolarity(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseLevelPolarity(const QString& gLine)
+bool Parser::ParseLevelPolarity(const QString& gLine)
 {
     QRegExp match(reLpol);
     if (match.exactMatch(gLine)) {
@@ -976,7 +989,7 @@ bool GerberParser::ParseLevelPolarity(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseLineInterpolation(const QString& gLine)
+bool Parser::ParseLineInterpolation(const QString& gLine)
 {
     QRegExp match(reLin);
     if (match.exactMatch(gLine)) {
@@ -1005,7 +1018,7 @@ bool GerberParser::ParseLineInterpolation(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseOperationDCode(const QString& gLine)
+bool Parser::ParseOperationDCode(const QString& gLine)
 {
     QRegExp match(reDCode);
     if (match.exactMatch(gLine)) {
@@ -1026,7 +1039,7 @@ bool GerberParser::ParseOperationDCode(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseStepAndRepeat(const QString& gLine)
+bool Parser::ParseStepAndRepeat(const QString& gLine)
 {
     QRegExp match(reStepAndRepeat);
     if (match.exactMatch(gLine)) {
@@ -1035,7 +1048,7 @@ bool GerberParser::ParseStepAndRepeat(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseToolAperture(const QString& gLine)
+bool Parser::ParseToolAperture(const QString& gLine)
 {
     QRegExp match(reTool);
     if (match.exactMatch(gLine)) {
@@ -1051,7 +1064,7 @@ bool GerberParser::ParseToolAperture(const QString& gLine)
     return false;
 }
 
-bool GerberParser::ParseUnitMode(const QString& gLine)
+bool Parser::ParseUnitMode(const QString& gLine)
 {
     QRegExp match(reUnitMode);
     if (match.exactMatch(gLine)) {

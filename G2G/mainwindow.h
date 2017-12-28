@@ -2,14 +2,14 @@
 #define MAINWINDOW_H
 
 #include "gerber/gerber.h"
-#include "gerber/gerberparser.h"
+#include "gerber/parser.h"
 
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
 
 class MyGraphicsScene;
-class GerberParser;
+class Parser;
 class GerberFileHolder;
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -39,7 +39,7 @@ private:
     //    void writeSettings();
     //    void readSettings();
     QString lastPath;
-    GerberParser* gerberParser;
+    Gerber::Parser* gerberParser;
     QThread gerberThread;
     //    GerberFileHolder* fileHolder;
 

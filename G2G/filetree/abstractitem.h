@@ -35,8 +35,8 @@ protected:
     QList<AbstractItem*> childItems;
 };
 
-#include "file.h"
-#include "folder.h"
+#include "fileitem.h"
+#include "folderitem.h"
 #include "milling.h"
 
 #endif // TREEITEM_H

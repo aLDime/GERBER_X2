@@ -26,7 +26,7 @@
 #include <mainwindow.h>
 #include <toolpathcreator.h>
 #include <QtCore/QVariant>
-#include <gerber/gerbergraphicsitem.h>
+#include <gerber/graphicsitem.h>
 
 PocketToolpathForm::PocketToolpathForm(QWidget* parent)
     : QWidget(parent)
@@ -375,7 +375,7 @@ void PocketToolpathForm::calculate()
 
     Paths value;
     for (QGraphicsItem* item : wItems) {
-        value.append(static_cast<GerberWorkItem*>(item)->getPaths());
+        value.append(static_cast<Gerber::WorkItem*>(item)->getPaths());
     }
 
     double toolDiameter = dsbDepth->value();
