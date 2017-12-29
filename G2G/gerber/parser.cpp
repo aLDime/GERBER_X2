@@ -22,6 +22,7 @@ const QList<QString> slLevelPolarity(QString("D|C").split("|"));
 const QList<QString> slUnitType(QString("IN|MM").split("|"));
 
 const QRegExp reAd("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$");
+const QRegExp reABStart("^%AB(.+)*%$");
 const QRegExp reAmBegin("^%AM([^\\*]+)\\*([^%]+)?(%)?$");
 const QRegExp reAttributes("^%(TF|TA|TO|TD)(.*)\\*%$");
 const QRegExp reCirc("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$");
@@ -77,64 +78,67 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             gerbLines.push_back(gerberLine);
             ++state.lineNum;
             //qWarning() << QString("Line Num %1: '%2'").arg(state.lineNum).arg(gLine);
-            if (ParseGCode(gerberLine)) {
+            if (ParseApertureBlock(gerberLine))
                 continue;
-            }
-            if (ParseAttributes(gerberLine)) {
+
+            if (ParseGCode(gerberLine))
                 continue;
-            }
-            if (ParseStepAndRepeat(gerberLine)) {
+
+            if (ParseAttributes(gerberLine))
                 continue;
-            }
-            if (ParseImagePolarity(gerberLine)) {
+
+            if (ParseStepAndRepeat(gerberLine))
                 continue;
-            }
-            if (ParseApertureMacros(gerberLine)) {
+
+            if (ParseImagePolarity(gerberLine))
                 continue;
-            }
-            if (ParseEndOfFile(gerberLine)) {
+
+            if (ParseApertureMacros(gerberLine))
                 continue;
-            }
+
+            if (ParseEndOfFile(gerberLine))
+                continue;
+
             //            if (ParseOperationDCode(gerberLine)) {
             //                continue;
             //            }
             // Aperture definitions %ADD...
-            if (ParseAperture(gerberLine)) {
+            if (ParseAperture(gerberLine))
                 continue;
-            }
+
             // D12*
-            if (ParseToolAperture(gerberLine)) {
+            if (ParseToolAperture(gerberLine))
                 continue;
-            }
+
             // Polarity change
             // Example: %LPD*% or %LPC*%
             // If polarity changes, creates geometry from current
             // buffer, then adds or subtracts accordingly.
-            if (ParseLevelPolarity(gerberLine)) {
+            if (ParseLevelPolarity(gerberLine))
                 continue;
-            }
+
             // Number format
             // Example: %FSLAX24Y24*%
             // TODO: This is ignoring most of the format. Implement the rest.
-            if (ParseFormat(gerberLine)) {
+            if (ParseFormat(gerberLine))
                 continue;
-            }
+
             // Mode (IN/MM)
             // Example: %MOIN*%
-            if (ParseUnitMode(gerberLine)) {
+            if (ParseUnitMode(gerberLine))
                 continue;
-            }
+
             // G01 - Linear interpolation plus flashes
             // Operation code (D0x) missing is deprecated... oh well I will support it.
             // REGEX: r"^(?:G0?(1))?(?:X(-?\d+))?(?:Y(-?\d+))?(?:D0([123]))?\*$"
-            if (ParseLineInterpolation(gerberLine)) {
+            if (ParseLineInterpolation(gerberLine))
                 continue;
-            }
+
             // G02/3 - Circular interpolation
             // 2-clockwise, 3-counterclockwise
-            if (ParseCircularInterpolation(gerberLine)) {
+            if (ParseCircularInterpolation(gerberLine))
                 continue;
-            }
+
             // Line did not match any pattern. Warn user.
             // qWarning() << QString("Line ignored (%1): '%2'").arg(state.lineNum).arg(gerberLine);
         }
@@ -502,7 +506,7 @@ Paths Parser::CreateLine()
         }
         //pattern.push_back(pattern[0]);
         MinkowskiSum(pattern, curPath, solution, false);
-#ifdef DEPRECATED
+#ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE) {
             ReversePaths(solution);
         }
@@ -516,7 +520,7 @@ Paths Parser::CreateLine()
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
         offset.AddPath(curPath, jtRound, etOpenRound);
         offset.Execute(solution, size);
-#ifdef DEPRECATED
+#ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE) {
             ReversePaths(solution);
         }
@@ -594,6 +598,27 @@ bool Parser::ParseAperture(const QString& gLine)
             break;
         }
         //gerbFile->apertures[apid]->draw();
+        return true;
+    }
+    return false;
+}
+
+bool Parser::ParseApertureBlock(const QString& gLine)
+{
+    QRegExp match(reABStart);
+    if (match.exactMatch(gLine)) {
+        ab = true;
+        qDebug() << "Start" << gLine;
+        return true;
+    }
+    if (ab) {
+        qDebug() << gLine;
+        return true;
+    }
+    if (gLine.contains("%AB*%")) {
+        ab = false;
+        qDebug() << "Stop" << gLine;
+
         return true;
     }
     return false;
@@ -978,7 +1003,7 @@ bool Parser::ParseLevelPolarity(const QString& gLine)
         case 0:
             state.imgPolarity = POSITIVE;
             break;
-#ifdef DEPRECATED
+#ifdef DEPRECATED_IMAGE_POLARITY
         case 1:
             state.imgPolarity = NEGATIVE;
             break;

@@ -40,13 +40,15 @@ private:
     QMap<QString, QString> apertureMacro;
     //    QMap<int, GerberAperture> apertures;
 
+    bool ab = false;
     Path curPath;
-
     State state;
     GFile* file;
     QList<QString> gerbLines;
 
     bool ParseAperture(const QString& gLine);
+    bool ParseApertureBlock(const QString& gLine);
+
     bool ParseApertureMacros(const QString& gLine);
     bool ParseAttributes(const QString& gLine);
     bool ParseCircularInterpolation(const QString& gLine);
@@ -56,7 +58,7 @@ private:
     bool ParseImagePolarity(const QString& gLine);
     bool ParseLevelPolarity(const QString& gLine);
     bool ParseLineInterpolation(const QString& gLine);
-//    bool ParseOperationDCode(const QString& gLine);
+    //    bool ParseOperationDCode(const QString& gLine);
     bool ParseStepAndRepeat(const QString& gLine);
     bool ParseToolAperture(const QString& gLine);
     bool ParseUnitMode(const QString& gLine);

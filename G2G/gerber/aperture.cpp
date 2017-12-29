@@ -22,7 +22,7 @@ Paths Aperture::draw(const State& state)
 
     Paths tmpPpaths;
     for (Path var : m_paths) {
-#ifdef DEPRECATED
+#ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE) {
             ReversePath(var);
         }

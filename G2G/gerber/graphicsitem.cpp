@@ -194,11 +194,12 @@ void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         c.setAlpha(200);
         brush.setColor(c);
         c.setAlpha(255);
-        pen = QPen(c, 0.0);
+        pen.setColor(c);
     }
     if (option->state & QStyle::State_Selected) {
         c.setAlpha(255);
         brush.setColor(c);
+        pen.setColor(c);
     }
     ///////////////////////////////
     //    pen_ = QPen(c, 0.0);

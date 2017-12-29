@@ -4,7 +4,7 @@
 #include "../clipper/myclipper.h"
 
 //#define DEPRECATED
-//#define DEPRECATED_IMAGE_POLARITY
+#define DEPRECATED_IMAGE_POLARITY
 
 using namespace ClipperLib;
 namespace G {
