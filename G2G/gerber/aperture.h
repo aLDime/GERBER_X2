@@ -2,11 +2,11 @@
 #define GERBERAPERTURE_H
 
 #include "gerber.h"
-#include "mathparser.h"
+
 #include <QtMath>
 #include <QMap>
-
-enum APERTURE_TYPE {
+namespace G {
+enum ApertureType {
     CIRCULAR,
     RECTANGLE,
     OBROUND,
@@ -14,10 +14,10 @@ enum APERTURE_TYPE {
     APERTURE_MACRO,
 };
 
-class GerberAperture {
+class Aperture {
 public:
-    GerberAperture();
-    virtual ~GerberAperture();
+    Aperture();
+    virtual ~Aperture();
 
     bool isDrilled() const { return m_drillDiam != 0.0; }
     bool isFlashed() const { return m_isFlashed; }
@@ -25,11 +25,11 @@ public:
     double drillDiameter() const { return m_drillDiam; }
     double size();
 
-    Path drawDrill(const STATE& state);
-    Paths draw(const STATE& state);
+    Path drawDrill(const State& state);
+    Paths draw(const State& state);
 
     virtual QString name() = 0;
-    virtual APERTURE_TYPE type() const = 0;
+    virtual ApertureType type() const = 0;
 
 protected:
     bool m_isFlashed = false;
@@ -48,11 +48,11 @@ protected:
 /////////////////////////////////////////////////////
 /// \brief The GACircular class
 ///
-class GACircular : public GerberAperture {
+class ApCircular : public Aperture {
 public:
-    GACircular(double diam, double drillDiam);
+    ApCircular(double diam, double drillDiam);
     QString name() override;
-    APERTURE_TYPE type() const override;
+    ApertureType type() const override;
 
 protected:
     void draw() override;
@@ -64,11 +64,11 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GARectangle class
 ///
-class GARectangle : public GerberAperture {
+class ApRectangle : public Aperture {
 public:
-    GARectangle(double width, double height, double drillDiam);
+    ApRectangle(double width, double height, double drillDiam);
     QString name() override;
-    APERTURE_TYPE type() const override;
+    ApertureType type() const override;
 
 protected:
     void draw() override;
@@ -81,11 +81,11 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAObround class
 ///
-class GAObround : public GerberAperture {
+class ApObround : public Aperture {
 public:
-    GAObround(double width, double height, double drillDiam);
+    ApObround(double width, double height, double drillDiam);
     QString name() override;
-    APERTURE_TYPE type() const override;
+    ApertureType type() const override;
 
 protected:
     void draw() override;
@@ -98,14 +98,14 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAPolygon class
 ///
-class GAPolygon : public GerberAperture {
+class ApPolygon : public Aperture {
 public:
-    GAPolygon(double diam, int nVertices, double rotation, double drillDiam);
+    ApPolygon(double diam, int nVertices, double rotation, double drillDiam);
     double rotation() const;
     int verticesCount() const;
 
     QString name() override;
-    APERTURE_TYPE type() const override;
+    ApertureType type() const override;
 
 protected:
     void draw() override;
@@ -119,11 +119,11 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAMacro class
 ///
-class GAMacro : public GerberAperture {
+class ApMacro : public Aperture {
 public:
-    GAMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients);
+    ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients);
     QString name() override;
-    APERTURE_TYPE type() const override;
+    ApertureType type() const override;
 
 protected:
     void draw() override;
@@ -133,5 +133,5 @@ private:
     QMap<QString, double> m_macroCoefficients;
     QString m_macro;
 };
-
+}
 #endif // GERBERAPERTURE_H

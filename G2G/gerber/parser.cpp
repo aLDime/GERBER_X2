@@ -1,20 +1,19 @@
 #include "parser.h"
-
 #include <QDateTime>
 #include <QFile>
 #include <QFileInfo>
-#include <QMutex>
 #include <QTextStream>
 #include <QThread>
+#include <QDebug>
 #include <toolpathcreator.h>
 
-using namespace Gerber;
+using namespace G;
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<File*>("GERBER_FILE*");
+int id1 = qRegisterMetaType<G::GFile*>("G::GFile*");
 
 const QList<QString> slApertureType(QString("C|R|O|P|M").split("|"));
 const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
@@ -27,7 +26,7 @@ const QRegExp reAmBegin("^%AM([^\\*]+)\\*([^%]+)?(%)?$");
 const QRegExp reAttributes("^%(TF|TA|TO|TD)(.*)\\*%$");
 const QRegExp reCirc("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$");
 const QRegExp reComment("^G0?4(.*)$");
-const QRegExp reDCode("^D0?([123])\\*$");
+//const QRegExp reDCode("^D0?([123])\\*$");
 const QRegExp reEof1("^M[0]?[0123]\\*");
 const QRegExp reEof2("^D0?2M0?[02]\\*");
 const QRegExp reFormat("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$");
@@ -39,7 +38,6 @@ const QRegExp rePol("^%IP(POS|NEG)\\*%$");
 const QRegExp reStepAndRepeat("^%SR(?:X(\\d+))?(?:Y(\\d+))?(?:I(\\d+\\.?\\d*))?(?:J(\\d+\\.?\\d*))?\\*%$");
 const QRegExp reTool("^(?:G54)?D(\\d\\d+)\\*$");
 const QRegExp reUnitMode("^%MO(IN|MM)\\*%$");
-
 QMutex mutex;
 
 Parser::Parser(QObject* parent)
@@ -47,24 +45,24 @@ Parser::Parser(QObject* parent)
 {
 }
 
-File* Parser::parseFile(const QString& fileName)
+void Parser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        return nullptr;
-    }
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+        return;
+
     QTextStream in(&file);
-    return ParseLines(in.readAll(), fileName);
+    ParseLines(in.readAll(), fileName);
 }
 
-File* Parser::ParseLines(const QString& gerberLines, const QString& fileName)
+void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
 {
     mutex.lock();
 
     QRegExp match("FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*");
     if (match.indexIn(gerberLines) == -1) {
         mutex.unlock();
-        return nullptr;
+        return;
     }
 
     if (fileName.isEmpty())
@@ -97,9 +95,9 @@ File* Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             if (ParseEndOfFile(gerberLine)) {
                 continue;
             }
-            if (ParseOperationDCode(gerberLine)) {
-                continue;
-            }
+            //            if (ParseOperationDCode(gerberLine)) {
+            //                continue;
+            //            }
             // Aperture definitions %ADD...
             if (ParseAperture(gerberLine)) {
                 continue;
@@ -151,13 +149,13 @@ File* Parser::ParseLines(const QString& gerberLines, const QString& fileName)
     if (file->isEmpty())
         delete file;
     else {
-        file->gig = new Gerber::ItemGroup;
+        file->gig = new /*Gerber::*/ ItemGroup;
         ToolPathCreator tpc;
         tpc.Merge(file);
         int counter = 0;
 
         for (Paths& vpaths : tpc.GetGroupedPaths(COPPER)) {
-            file->gig->append(new Gerber::WorkItem(vpaths));
+            file->gig->append(new /*Gerber::*/ WorkItem(vpaths));
             file->gig->last()->setToolTip(QString("COPPER %1").arg(++counter));
         }
         emit fileReady(file);
@@ -168,7 +166,6 @@ File* Parser::ParseLines(const QString& gerberLines, const QString& fileName)
     curPath.clear();
 
     mutex.unlock();
-    return file;
 }
 
 QList<QString> Parser::Format(QString data)
@@ -400,9 +397,9 @@ void Parser::Reset(const QString& fileName)
     gerbLines.clear();
     apertureMacro.clear();
     curPath.clear();
-    file = new File;
+    file = new GFile;
     file->fileName = fileName;
-    state = STATE();
+    state.reset();
 }
 
 void Parser::ClearStep()
@@ -533,8 +530,9 @@ Paths Parser::CreatePolygon()
     Paths paths;
     double area = Area(curPath);
     if (area > 0.0) {
-#ifdef DEPRECATEDif(state.imgPolarity == NEGATIVE)
-        ReversePath(curPath);
+#ifdef DEPRECATED_IMAGE_POLARITY
+        if (state.imgPolarity == NEGATIVE)
+            ReversePath(curPath);
 #endif
     }
     else {
@@ -566,25 +564,25 @@ bool Parser::ParseAperture(const QString& gLine)
         case CIRCULAR:
             if (paramList.size() > 1)
                 hole = Double(paramList[1]);
-            file->apertures[apid] = new GACircular(Double(paramList[0]), hole);
+            file->apertures[apid] = new ApCircular(Double(paramList[0]), hole);
             break;
         case RECTANGLE:
             if (paramList.size() > 2)
                 hole = Double(paramList[2]);
-            file->apertures[apid] = new GARectangle(Double(paramList[0]), Double(paramList[1]), hole);
+            file->apertures[apid] = new ApRectangle(Double(paramList[0]), Double(paramList[1]), hole);
 
             break;
         case OBROUND:
             if (paramList.size() > 2)
                 hole = Double(paramList[2]);
-            file->apertures[apid] = new GAObround(Double(paramList[0]), Double(paramList[1]), hole);
+            file->apertures[apid] = new ApObround(Double(paramList[0]), Double(paramList[1]), hole);
             break;
         case POLYGON:
             if (paramList.length() > 2)
                 rotation = Double(paramList[2]);
             if (paramList.length() > 3)
                 hole = Double(paramList[3]);
-            file->apertures[apid] = new GAPolygon(Double(paramList[0]), paramList[1].toInt(), rotation, hole);
+            file->apertures[apid] = new ApPolygon(Double(paramList[0]), paramList[1].toInt(), rotation, hole);
             break;
         case APERTURE_MACRO:
         default:
@@ -592,7 +590,7 @@ bool Parser::ParseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = Double(paramList[i], false, false);
             }
-            file->apertures[apid] = new GAMacro(apType, apertureMacro[apType].split('*'), macroCoeff);
+            file->apertures[apid] = new ApMacro(apType, apertureMacro[apType].split('*'), macroCoeff);
             break;
         }
         //gerbFile->apertures[apid]->draw();
@@ -712,9 +710,10 @@ bool Parser::ParseCircularInterpolation(const QString& gLine)
         }
 
         // Set operation code if provided
-        switch (match.cap(6).isEmpty() ? state.curDCode : match.cap(6).toInt()) {
+        if (!match.cap(6).isEmpty())
+            state.curDCode = static_cast<D_CODE>(match.cap(6).toInt());
+        switch (state.curDCode) {
         case D01:
-            state.curDCode = D01;
             break;
         case D02: // Nothing created! Pen Up.
             state.curDCode = D01;
@@ -722,7 +721,6 @@ bool Parser::ParseCircularInterpolation(const QString& gLine)
             ClosePath();
             return true;
         case D03: // Flash should not happen here
-            state.curDCode = D02;
             state.curPos = IntPoint(x, y);
             qWarning() << QString("Trying to flash within arc. (%1)").arg(state.lineNum);
             return true;
@@ -734,6 +732,7 @@ bool Parser::ParseCircularInterpolation(const QString& gLine)
             IntPoint(state.curPos.X + i, state.curPos.Y - j),
             IntPoint(state.curPos.X - i, state.curPos.Y - j)
         };
+
         bool valid = false;
 
         curPath.push_back(state.curPos);
@@ -903,6 +902,7 @@ bool Parser::ParseGCode(const QString& gLine)
             ClosePath();
             state.region = ON;
             state.curGCode = G36;
+            state.curDCode = D02;
             break;
         case G37:
             ClosePath();
@@ -958,7 +958,7 @@ bool Parser::ParseImagePolarity(const QString& gLine)
         case 0:
             state.imgPolarity = POSITIVE;
             break;
-#ifdef DEPRECATED
+#ifdef DEPRECATED_IMAGE_POLARITY
         case 1:
             state.imgPolarity = NEGATIVE;
             break;
@@ -994,19 +994,18 @@ bool Parser::ParseLineInterpolation(const QString& gLine)
     QRegExp match(reLin);
     if (match.exactMatch(gLine)) {
         ParsePosition(gLine);
-        switch (match.cap(2).isEmpty() ? state.curDCode : match.cap(2).toInt()) {
+        if (!match.cap(2).isEmpty())
+            state.curDCode = static_cast<D_CODE>(match.cap(2).toInt());
+        switch (/*match.cap(2).isEmpty() ? */ state.curDCode /*: match.cap(2).toInt()*/) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
-            state.curDCode = D01;
             curPath.push_back(state.curPos);
             state.lstAperture = state.curAperture;
             break;
         case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
-            state.curDCode = D02;
             // if(curPath.size()&&curPath[curPath.size()-1]!=state.curPos)     curPath.push_back(state.curPos);
             ClosePath();
             break;
-        case D03: //перемещение в указанную точку x-y с закрытым затвором засветки
-            state.curDCode = D03;
+        case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             ClosePath();
             CreateFlash();
             break;
@@ -1018,26 +1017,26 @@ bool Parser::ParseLineInterpolation(const QString& gLine)
     return false;
 }
 
-bool Parser::ParseOperationDCode(const QString& gLine)
-{
-    QRegExp match(reDCode);
-    if (match.exactMatch(gLine)) {
-        switch (match.cap(1).toInt()) {
-        case D01:
-            state.curDCode = D01;
-            break;
-        case D02:
-            state.curDCode = D02;
-            break;
-        case D03:
-            state.curDCode = D03;
-            CreateFlash();
-            break;
-        }
-        return true;
-    }
-    return false;
-}
+//bool Parser::ParseOperationDCode(const QString& gLine)
+//{
+//    QRegExp match(reDCode);
+//    if (match.exactMatch(gLine)) {
+//        switch (match.cap(1).toInt()) {
+//        case D01:
+//            state.curDCode = D01;
+//            break;
+//        case D02:
+//            state.curDCode = D02;
+//            break;
+//        case D03:
+//            state.curDCode = D03;
+//            CreateFlash();
+//            break;
+//        }
+//        return true;
+//    }
+//    return false;
+//}
 
 bool Parser::ParseStepAndRepeat(const QString& gLine)
 {

@@ -2,16 +2,14 @@
 #define FILE_H
 
 #include "abstractitem.h"
-
-#include <gerber/graphicsitem.h>
-#include <gerber/parser.h>
+#include "gerber/file.h"
 #include <QObject>
 
 class FileItem : public QObject, public AbstractItem {
     Q_OBJECT
 
 public:
-    FileItem(Gerber::File* gerberFile);
+    FileItem(G::GFile* gerberFile);
     ~FileItem();
 
     // AbstractItem interface
@@ -23,7 +21,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
 private:
-    Gerber::File* gerberFile;
+   G:: GFile* gFile;
 
     Qt::CheckState checkState = Qt::Checked;
     static QTimer repaintTimer;

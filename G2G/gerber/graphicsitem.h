@@ -1,13 +1,14 @@
 #ifndef GERBERITEM_H
 #define GERBERITEM_H
 
+#include "gerber.h"
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 #include <QPen>
-#include "parser.h"
 
 using namespace ClipperLib;
-namespace Gerber {
+namespace G {
+
 enum {
     RawItemType = QGraphicsItem::UserType + 1,
     WorkItemType = QGraphicsItem::UserType + 2
@@ -82,5 +83,4 @@ private:
     QRectF rect;
 };
 }
-
 #endif // GERBERITEM_H

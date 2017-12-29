@@ -9,7 +9,7 @@
 #include <QThread>
 
 class MyGraphicsScene;
-class Parser;
+class G::Parser;
 class GerberFileHolder;
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -39,7 +39,7 @@ private:
     //    void writeSettings();
     //    void readSettings();
     QString lastPath;
-    Gerber::Parser* gerberParser;
+    G::Parser* gerberParser;
     QThread gerberThread;
     //    GerberFileHolder* fileHolder;
 

@@ -150,7 +150,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     return QVariant();
 }
 
-void Model::addGerberFile(Gerber::File* gerberFile)
+void Model::addGerberFile(G::GFile* gerberFile)
 {
     QModelIndex index = createIndex(0, 0, rootItem->child(FILES_F));
     int rowCount = rootItem->child(FILES_F)->rowCount();

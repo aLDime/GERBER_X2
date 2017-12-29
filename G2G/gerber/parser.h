@@ -1,60 +1,20 @@
 #ifndef GERBERPARSER_H
 #define GERBERPARSER_H
 
+#include "file.h"
 #include "gerber.h"
-#include "aperture.h"
-#include "graphicsitem.h"
-
+#include <QMutex>
 #include <QObject>
-namespace Gerber {
-class File;
-class GraphicObject {
-public:
-    GraphicObject(
-        const STATE& state,
-        const Paths& paths,
-        File* gFile,
-        const QStringList& gerberStrings = QStringList(),
-        const Path& path = Path())
-        : state(state)
-        , paths(paths)
-        , gFile(gFile)
-        , gerberStrings(gerberStrings)
-        , path(path)
-    {
-    }
-
-    STATE state;
-    Paths paths;
-    File* gFile = nullptr;
-    QStringList gerberStrings;
-    Path path;
-};
-
-class ItemGroup;
-class File : public QList<GraphicObject> {
-public:
-    ~File()
-    {
-        qDeleteAll(apertures);
-        if (gig)
-            delete gig;
-    }
-    ItemGroup* gig = nullptr;
-    QList<QString> lines;
-    QMap<int, GerberAperture*> apertures;
-    QString fileName;
-};
-
+namespace G {
 class Parser : public QObject {
     Q_OBJECT
 public:
     Parser(QObject* parent = 0);
-    File* parseFile(const QString& fileName);
-    File* ParseLines(const QString& gerberLines, const QString& fileName = QString());
+    void parseFile(const QString& fileName);
+    void ParseLines(const QString& gerberLines, const QString& fileName = QString());
 
 signals:
-    void fileReady(File* file);
+    void fileReady(GFile* file);
 
 private:
     QList<QString> Format(QString data);
@@ -82,8 +42,8 @@ private:
 
     Path curPath;
 
-    STATE state;
-    File* file;
+    State state;
+    GFile* file;
     QList<QString> gerbLines;
 
     bool ParseAperture(const QString& gLine);
@@ -96,11 +56,10 @@ private:
     bool ParseImagePolarity(const QString& gLine);
     bool ParseLevelPolarity(const QString& gLine);
     bool ParseLineInterpolation(const QString& gLine);
-    bool ParseOperationDCode(const QString& gLine);
+//    bool ParseOperationDCode(const QString& gLine);
     bool ParseStepAndRepeat(const QString& gLine);
     bool ParseToolAperture(const QString& gLine);
     bool ParseUnitMode(const QString& gLine);
 };
 }
-
 #endif // GERBERPARSER_H

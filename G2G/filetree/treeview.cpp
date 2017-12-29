@@ -36,7 +36,7 @@ TreeView::~TreeView()
 {
 }
 
-void TreeView::addFile(Gerber::File* gerberFile)
+void TreeView::addFile(G::GFile* gerberFile)
 {
     m_model->addGerberFile(gerberFile);
     iconTimer.start(200);
@@ -116,7 +116,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
             m_model->removeRow(index.row(), index.parent());
             iconTimer.start(200);
         });
-        menu.addAction(QIcon::fromTheme("crosshairs"), tr("&Drill For Aperture"), [=] {
+        menu.addAction(QIcon::fromTheme("crosshairs"), tr("&Assignment of drills for holes"), [=] {
             DrillForApertureForm dfa(/*item->text(0)*/ "", this);
             dfa.exec();
         });

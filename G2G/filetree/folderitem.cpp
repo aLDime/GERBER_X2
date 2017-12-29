@@ -27,7 +27,7 @@ QVariant FolderItem::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags FolderItem::flags(const QModelIndex& index) const
+Qt::ItemFlags FolderItem::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
@@ -42,7 +42,7 @@ int FolderItem::columnCount() const
     return 1;
 }
 
-bool FolderItem::setData(const QModelIndex& index, const QVariant& value, int role)
+bool FolderItem::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/)
 {
     return false;
 }

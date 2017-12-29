@@ -1,12 +1,15 @@
 #include "graphicsitem.h"
-#include "graphicsitem.h"
+//#include "graphicsitem.h"
+//#include "graphicsitem.h"
 #include "graphicsview/mygraphicsscene.h"
 #include <QApplication>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <QDebug>
 #include <QStyleOptionGraphicsItem>
 
-using namespace Gerber;
+using namespace G;
+
 ///////////////////////////////////////////////
 /// \brief GerberItem::GerberItem
 /// \param item
@@ -182,27 +185,29 @@ QPainterPath WorkItem::shape() const { return m_shape; }
 void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(widget);
-    QPen pen_(Qt::NoPen);
-    QBrush brush_(m_brush);
+
+    QBrush brush(m_brush);
     QColor c(m_brush.color());
+    QPen pen(c, 0.0);
+
     if (option->state & QStyle::State_MouseOver) {
         c.setAlpha(200);
-        brush_.setColor(c);
+        brush.setColor(c);
         c.setAlpha(255);
-        pen_ = QPen(c, 0.0);
+        pen = QPen(c, 0.0);
     }
     if (option->state & QStyle::State_Selected) {
         c.setAlpha(255);
-        brush_.setColor(c);
+        brush.setColor(c);
     }
     ///////////////////////////////
-    pen_ = QPen(c, 0.0);
+    //    pen_ = QPen(c, 0.0);
     //    if (option->state & QStyle::State_Sunken) {
     //        qDebug() << option->state;
     //        pen_ = QPen(Qt::black, 0.0);
     //    }
-    painter->setBrush(brush_);
-    painter->setPen(pen_);
+    painter->setBrush(brush);
+    painter->setPen(pen);
     painter->drawPath(m_shape);
 }
 

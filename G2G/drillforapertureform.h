@@ -23,13 +23,13 @@ public:
     MyGraphicsView* graphicsView;
     QDialogButtonBox* buttonBox;
     QString fileName;
-    QMap<int, GerberAperture*> apertures;
+    QMap<int, G::Aperture*> apertures;
     void setupUi(QDialog* Dialog); // setupUi
     void retranslateUi(QDialog* Dialog); // retranslateUi
 
     // QWidget interface
 protected:
-    virtual void resizeEvent(QResizeEvent *event) override;
+    virtual void resizeEvent(QResizeEvent* event) override;
 };
 
 #endif // DRILLFORAPERTUREFORM_H

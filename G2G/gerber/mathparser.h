@@ -13,10 +13,11 @@ class Result {
 public:
     double acc; // Аккамулятор
     QString rest; // остаток строки, которую мы еще не обработали
-    Result(double v, QString r)
+    Result(double v, const QString& r)
+        : acc(v)
+        , rest(r)
     {
-        acc = v;
-        rest = r;
+
     }
 };
 

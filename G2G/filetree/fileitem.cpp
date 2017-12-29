@@ -5,13 +5,13 @@
 #include <QFileInfo>
 #include <mainwindow.h>
 QTimer FileItem::repaintTimer;
-FileItem::FileItem(Gerber::File* gerberFile)
-    : gerberFile(gerberFile)
+FileItem::FileItem(G::GFile* gerberFile)
+    : gFile(gerberFile)
 // , checkState(Qt::Checked)
 {
     MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
 
-    gerberFile->gig->addToTheScene(scene);
+    gFile->gig->addToTheScene(scene);
     repaintTimer.connect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
     repaintTimer.start(100);
     MainWindow::getMainWindow()->closeAllAct->setEnabled(true);
@@ -19,10 +19,10 @@ FileItem::FileItem(Gerber::File* gerberFile)
 
 FileItem::~FileItem()
 {
-    qDebug() << "~File()";
+    qDebug() << "~FileItem()";
     if (MainWindow::getMainWindow()->isVisible())
         MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount() > 1);
-    delete gerberFile;
+    delete gFile;
     MainWindow::getMainWindow()->getScene()->setSceneRect(0, 0, 0, 0);
     MainWindow::getMainWindow()->getScene()->update();
     //semaphore.tryAcquire();
@@ -38,7 +38,7 @@ bool FileItem::setData(const QModelIndex& index, const QVariant& value, int role
         //            return true;
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            gerberFile->gig->setVisible(checkState == Qt::Checked);
+            gFile->gig->setVisible(checkState == Qt::Checked);
             return true;
         default:
             break;
@@ -67,14 +67,14 @@ QVariant FileItem::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QFileInfo(gerberFile->fileName).fileName();
+            return QFileInfo(gFile->fileName).fileName();
         case Qt::EditRole:
-            return gerberFile->fileName;
+            return gFile->fileName;
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole: {
             QPixmap p(16, 16);
-            QColor c = gerberFile->gig->brush().color();
+            QColor c = gFile->gig->brush().color();
             c.setAlpha(255);
             p.fill(c);
             return p;
@@ -90,7 +90,7 @@ void FileItem::repaint()
     int count = parentItem->rowCount();
     int cc = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(cc, 255 - cc * 0.2, 255, 150));
-    gerberFile->gig->setBrush(color);
+    gFile->gig->setBrush(color);
     MainWindow::getMainWindow()->getScene()->update();
     repaintTimer.stop();
 }

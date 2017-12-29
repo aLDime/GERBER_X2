@@ -1,5 +1,6 @@
 #include "toolpathcreator.h"
 #include <QCoreApplication>
+#include <QDebug>
 
 //GERBER_FILE ToolPathCreator::file;
 
@@ -17,7 +18,7 @@ void ToolPathCreator::Clear()
     groupedPaths.clear();
 }
 
-Paths& ToolPathCreator::Merge(Gerber::File* gerberFile)
+Paths& ToolPathCreator::Merge(G::GFile* gerberFile)
 {
     Paths paths;
     Paths tmpPaths;
@@ -33,7 +34,7 @@ Paths& ToolPathCreator::Merge(Gerber::File* gerberFile)
             SimplifyPolygons(tmpPaths, pftNonZero);
             clipper.AddPaths(tmpPaths, ptClip, true);
         } while (i < gerberFile->size() && exp == gerberFile->at(i).state.imgPolarity);
-        if (gerberFile->at(i - 1).state.imgPolarity == POSITIVE) {
+        if (gerberFile->at(i - 1).state.imgPolarity == G::POSITIVE) {
             clipper.Execute(ctUnion, paths, pftPositive);
         }
         else {

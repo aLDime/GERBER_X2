@@ -382,7 +382,7 @@ void ProfileToolpathForm::calculate()
 
     Paths value;
     for (QGraphicsItem* item : wItems) {
-        value.append(static_cast<Gerber::WorkItem*>(item)->getPaths());
+        value.append(static_cast<G::WorkItem*>(item)->getPaths());
     }
 
     ToolPathCreator tpc;

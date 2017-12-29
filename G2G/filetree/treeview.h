@@ -14,7 +14,7 @@ class TreeView : public QTreeView {
 public:
     explicit TreeView(QWidget* parent = nullptr);
     ~TreeView();
-    void addFile(Gerber::File* gerberFile);
+    void addFile(G::GFile* gerberFile);
     void removeAllFiles();
     QString files();
 

@@ -7,6 +7,7 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QTableView>
+#include <gerber/gerber.h>
 #include <graphicsview/mygraphicsscene.h>
 #include <graphicsview/mygraphicsview.h>
 
@@ -17,9 +18,9 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
 {
     setupUi(this);
 
-    auto draw = [](GerberAperture* aperture) {
+    auto draw = [](G::Aperture* aperture) {
         QPainterPath painterPath;
-        for (QPolygonF& polygon : PathsToQPolygons(aperture->draw(STATE()))) {
+        for (QPolygonF& polygon : PathsToQPolygons(aperture->draw(G::State()))) {
             painterPath.addPolygon(polygon);
         }
         painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
@@ -56,7 +57,7 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         return icon;
     };
 
-    QMapIterator<int, GerberAperture*> i(apertures);
+    QMapIterator<int, G::Aperture*> i(apertures);
     QStandardItemModel* model = new QStandardItemModel(this);
 
     while (i.hasNext()) {
@@ -75,7 +76,7 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         list.last()->setData(QVariant::fromValue<double>(0.0));
         model->appendRow(list);
     }
-    model->setHorizontalHeaderLabels(QString("Aperture|Tool").split('|'));
+    model->setHorizontalHeaderLabels(QString("Gerber::G::Aperture|Tool").split('|'));
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
@@ -86,7 +87,7 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         int d = stdItem->data(Qt::UserRole + 1).toInt();
         graphicsView->scene()->clear();
         QPainterPath painterPath;
-        for (QPolygonF& polygon : PathsToQPolygons(apertures[d]->draw(STATE()))) {
+        for (QPolygonF& polygon : PathsToQPolygons(apertures[d]->draw(G::State()))) {
             painterPath.addPolygon(polygon);
         }
         painterPath.addEllipse(QPointF(0, 0), apertures[d]->drillDiameter() * 0.5, apertures[d]->drillDiameter() * 0.5);
@@ -144,7 +145,7 @@ void DrillForApertureForm::setupUi(QDialog* Dialog)
 
 void DrillForApertureForm::retranslateUi(QDialog* Dialog)
 {
-    Dialog->setWindowTitle(tr("DrillForApertureForm"));
+    Dialog->setWindowTitle(tr("DrillForGerber::ApertureForm"));
 }
 
 void DrillForApertureForm::resizeEvent(QResizeEvent* event)

@@ -27,7 +27,7 @@ MainWindow* MainWindow::pMainWindow;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-    , gerberParser(new Gerber::Parser)
+    , gerberParser(new G::Parser)
 //, fileHolder(new GerberFileHolder(this))
 {
     setupUi(this);
@@ -38,9 +38,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
+    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
-    connect(gerberParser, &Gerber::Parser::fileReady, treeView, &TreeView::addFile);
+    connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);

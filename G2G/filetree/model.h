@@ -2,7 +2,8 @@
 #define MYMODEL_H
 
 #include "abstractitem.h"
-
+#include "gerber/gerber.h"
+#include "gerber/file.h"
 #include <QAbstractItemModel>
 #include <QDebug>
 #include <QFile>
@@ -44,7 +45,7 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void addGerberFile(Gerber::File* gerberFile);
+    void addGerberFile(G::GFile *gerberFile);
     void addMilling(const QString name, QGraphicsItemGroup* group);
     //    QStringList mimeTypes() const override
     //    {

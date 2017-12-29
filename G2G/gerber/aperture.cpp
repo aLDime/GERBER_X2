@@ -1,15 +1,19 @@
 #include "aperture.h"
+#include "mathparser.h"
+#include <QDebug>
 
-GerberAperture::GerberAperture()
+using namespace G;
+
+Aperture::Aperture()
 {
 }
 
-GerberAperture::~GerberAperture()
+Aperture::~Aperture()
 {
     //qDebug() << "~GerberAperture()";
 }
 
-Paths GerberAperture::draw(const STATE& state)
+Paths Aperture::draw(const State& state)
 {
     if (state.curDCode == D03)
         m_isFlashed = true;
@@ -37,14 +41,14 @@ Paths GerberAperture::draw(const STATE& state)
     return tmpPpaths;
 }
 
-double GerberAperture::size()
+double Aperture::size()
 {
     if (m_size == 0)
         draw();
     return m_size;
 }
 
-Path GerberAperture::drawDrill(const STATE& state)
+Path Aperture::drawDrill(const State& state)
 {
     if (qFuzzyIsNull(m_drillDiam))
         return Path();
@@ -58,7 +62,7 @@ Path GerberAperture::drawDrill(const STATE& state)
     return drill;
 }
 
-Path GerberAperture::circle(double diametr, IntPoint center)
+Path Aperture::circle(double diametr, IntPoint center)
 {
     Path poligon(STEPS_PER_CIRCLE);
     double radius = diametr / 2.0;
@@ -73,7 +77,7 @@ Path GerberAperture::circle(double diametr, IntPoint center)
     return poligon;
 }
 
-Path GerberAperture::rect(double width, double height, IntPoint center)
+Path Aperture::rect(double width, double height, IntPoint center)
 {
     Path poligon(4);
     double halfWidth = width * 0.5;
@@ -89,7 +93,7 @@ Path GerberAperture::rect(double width, double height, IntPoint center)
     return poligon;
 }
 
-Path& GerberAperture::rotate(Path& poligon, double angle, IntPoint center)
+Path& Aperture::rotate(Path& poligon, double angle, IntPoint center)
 {
     double tmpAangle;
     double length;
@@ -105,7 +109,7 @@ Path& GerberAperture::rotate(Path& poligon, double angle, IntPoint center)
     return poligon;
 }
 
-void GerberAperture::translate(Path& path, IntPoint pos)
+void Aperture::translate(Path& path, IntPoint pos)
 {
     if (pos.X == 0 && pos.Y == 0)
         return;
@@ -116,43 +120,43 @@ void GerberAperture::translate(Path& path, IntPoint pos)
 }
 /////////////////////////////////////////////////////
 
-GACircular::GACircular(double diam, double drillDiam)
+ApCircular::ApCircular(double diam, double drillDiam)
 {
     m_diam = diam;
     m_drillDiam = drillDiam;
     // GerberAperture interface
 }
 
-QString GACircular::name() { return QString("CIRCULAR(D%1)").arg(m_diam); }
+QString ApCircular::name() { return QString("CIRCULAR(D%1)").arg(m_diam); }
 
-APERTURE_TYPE GACircular::type() const { return CIRCULAR; }
+ApertureType ApCircular::type() const { return CIRCULAR; }
 
-void GACircular::draw()
+void ApCircular::draw()
 {
     m_paths.push_back(circle(m_diam * uScale));
     m_size = m_diam;
 }
 /////////////////////////////////////////////////////
 
-GARectangle::GARectangle(double width, double height, double drillDiam)
+ApRectangle::ApRectangle(double width, double height, double drillDiam)
 {
     m_width = width;
     m_height = height;
     m_drillDiam = drillDiam;
 }
 
-QString GARectangle::name() { return QString("RECTANGLE(W%1, H%2)").arg(m_width).arg(m_height); }
+QString ApRectangle::name() { return QString("RECTANGLE(W%1, H%2)").arg(m_width).arg(m_height); }
 
-APERTURE_TYPE GARectangle::type() const { return RECTANGLE; }
+ApertureType ApRectangle::type() const { return RECTANGLE; }
 
-void GARectangle::draw()
+void ApRectangle::draw()
 {
     m_paths.push_back(rect(m_width * uScale, m_height * uScale));
     m_size = qSqrt(m_width * m_width + m_height * m_height);
 }
 /////////////////////////////////////////////////////
 
-GAObround::GAObround(double width, double height, double drillDiam)
+ApObround::ApObround(double width, double height, double drillDiam)
 {
 
     m_width = width;
@@ -160,11 +164,11 @@ GAObround::GAObround(double width, double height, double drillDiam)
     m_drillDiam = drillDiam;
 }
 
-QString GAObround::name() { return QString("OBROUND(W%1, H%2)").arg(m_width).arg(m_height); }
+QString ApObround::name() { return QString("OBROUND(W%1, H%2)").arg(m_width).arg(m_height); }
 
-APERTURE_TYPE GAObround::type() const { return OBROUND; }
+ApertureType ApObround::type() const { return OBROUND; }
 
-void GAObround::draw()
+void ApObround::draw()
 {
     Clipper clipper;
     cInt height_ = m_height * uScale;
@@ -189,7 +193,7 @@ void GAObround::draw()
 }
 /////////////////////////////////////////////////////
 
-GAPolygon::GAPolygon(double diam, int nVertices, double rotation, double drillDiam)
+ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam)
 {
     m_diam = diam;
     m_verticesCount = nVertices;
@@ -197,15 +201,15 @@ GAPolygon::GAPolygon(double diam, int nVertices, double rotation, double drillDi
     m_drillDiam = drillDiam;
 }
 
-double GAPolygon::rotation() const { return m_rotation; }
+double ApPolygon::rotation() const { return m_rotation; }
 
-int GAPolygon::verticesCount() const { return m_verticesCount; }
+int ApPolygon::verticesCount() const { return m_verticesCount; }
 
-QString GAPolygon::name() { return QString("POLYGON(D%1, N%2)").arg(m_diam).arg(m_verticesCount); }
+QString ApPolygon::name() { return QString("POLYGON(D%1, N%2)").arg(m_diam).arg(m_verticesCount); }
 
-APERTURE_TYPE GAPolygon::type() const { return POLYGON; }
+ApertureType ApPolygon::type() const { return POLYGON; }
 
-void GAPolygon::draw()
+void ApPolygon::draw()
 {
     Path poligon;
     const double step = 360.0 / m_verticesCount;
@@ -221,7 +225,7 @@ void GAPolygon::draw()
 }
 /////////////////////////////////////////////////////
 
-GAMacro::GAMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients)
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients)
 {
     m_macro = macro;
     m_modifiers = modifiers;
@@ -231,11 +235,11 @@ GAMacro::GAMacro(const QString& macro, const QList<QString>& modifiers, const QM
     m_macroCoefficients = macroCoefficients;
 }
 
-QString GAMacro::name() { return QString("MACRO(%1)").arg(m_macro); }
+QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); }
 
-APERTURE_TYPE GAMacro::type() const { return APERTURE_MACRO; }
+ApertureType ApMacro::type() const { return APERTURE_MACRO; }
 
-void GAMacro::draw()
+void ApMacro::draw()
 {
     enum {
         CENTER_LINE = 21,

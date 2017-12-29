@@ -14,8 +14,6 @@ RESOURCES += \
 
 DISTFILES += \
     qdarkstyle/style.qss \
-    mytreewidget.h \
-    mytreewidget.cpp \
 
 
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -33,83 +31,78 @@ win32* {
 }
 
 HEADERS += \
-    application.h \
     clipper/clipper.hpp \
     clipper/myclipper.h \
-    drillforapertureform.h \
+    filetree/abstractitem.h \
+    filetree/fileitem.h \
+    filetree/folderitem.h \
+    filetree/milling.h \
+    filetree/Model.h \
+    filetree/treeview.h \
     forms/drillingtoolpathform.h \
     forms/pockettoolpathform.h \
     forms/profiletoolpathform.h \
     forms/toolpathforminterface.h \
     forms/toolpathnameform.h \
+    gerber/aperture.h \
     gerber/gerber.h \
+    gerber/graphicsitem.h \
     gerber/mathparser.h \
-    gerberfileholder.h \
+    gerber/parser.h \
     graphicsview/colorsettings.h \
     graphicsview/edid.h \
     graphicsview/mygraphicsscene.h \
     graphicsview/mygraphicsview.h \
     graphicsview/qdruler.h \
-    mainwindow.h \
-    settingsdialog.h \
-    tooldatabase/tooldatabase.h \
-#    tooldatabase/treeitem.h \
-#    tooldatabase/treemodel.h \
-    toolpathcreator.h \
+    tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
     tooldatabase/tooledit.h \
+    tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    tooldatabase/toolitem.h \
-    tooldatabase/tool.h \
-    filetree/model.h \
-    filetree/treeview.h \
-    filetree/abstractitem.h \
-    filetree/milling.h \
-    filetree/fileitem.h \
-    filetree/folderitem.h \
-    gerber/aperture.h \
-    gerber/graphicsitem.h \
-    gerber/parser.h
-
+    application.h \
+    drillforapertureform.h \
+    gerberfileholder.h \
+    mainwindow.h \
+    openingdialog.h \
+    settingsdialog.h \
+    toolpathcreator.h \
+    gerber/file.h
 
 SOURCES += \
     clipper/clipper.cpp \
     clipper/myclipper.cpp \
-    drillforapertureform.cpp \
+    filetree/abstractitem.cpp \
+    filetree/fileitem.cpp \
+    filetree/folderitem.cpp \
+    filetree/milling.cpp \
+    filetree/model.cpp \
+    filetree/treeview.cpp \
     forms/drillingtoolpathform.cpp \
     forms/pockettoolpathform.cpp \
     forms/profiletoolpathform.cpp \
     forms/toolpathforminterface.cpp \
     forms/toolpathnameform.cpp \
+    gerber/aperture.cpp \
+    gerber/graphicsitem.cpp \
     gerber/mathparser.cpp \
-    gerberfileholder.cpp \
+    gerber/parser.cpp \
     graphicsview/colorsettings.cpp \
     graphicsview/edid.cpp \
     graphicsview/mygraphicsscene.cpp \
     graphicsview/mygraphicsview.cpp \
     graphicsview/qdruler.cpp \
+    tooldatabase/tool.cpp \
+    tooldatabase/tooldatabase.cpp \
+    tooldatabase/tooledit.cpp \
+    tooldatabase/toolitem.cpp \
+    tooldatabase/toolmodel.cpp \
+    tooldatabase/tooltreeview.cpp \
+    drillforapertureform.cpp \
+    gerberfileholder.cpp \
     main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
-    tooldatabase/tooldatabase.cpp \
-#    tooldatabase/treeitem.cpp \
-#    tooldatabase/treemodel.cpp \
     toolpathcreator.cpp \
-    tooldatabase/tooldatabase.cpp \
-    tooldatabase/tooledit.cpp \
-    tooldatabase/toolmodel.cpp \
-    tooldatabase/tooltreeview.cpp \
-    tooldatabase/toolitem.cpp \
-    tooldatabase/tool.cpp \
-    filetree/model.cpp \
-    filetree/treeview.cpp \
-    filetree/abstractitem.cpp \
-    filetree/milling.cpp \
-    filetree/fileitem.cpp \
-    filetree/folderitem.cpp \
-    gerber/parser.cpp \
-    gerber/graphicsitem.cpp \
-    gerber/aperture.cpp
-
+    gerber/file.cpp
 

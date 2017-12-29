@@ -25,7 +25,7 @@ public:
     explicit ToolPathCreator(QObject* parent = 0);
     void Clear();
 
-    Paths& Merge(Gerber::File* gerberFile);
+    Paths& Merge(G::GFile* gerberFile);
     Pathss& ToolPathPocket(MILLING milling, double toolDiameter);
     Paths& ToolPathProfile(MILLING milling, double toolDiameter);
     constexpr Paths& GetMergedPaths();
