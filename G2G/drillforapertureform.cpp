@@ -11,10 +11,10 @@
 #include <graphicsview/mygraphicsscene.h>
 #include <graphicsview/mygraphicsview.h>
 
-DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* parent)
+DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
     : QDialog(parent)
-    , fileName(fileName)
-//    , apertures(GerberFileHolder::getFile(fileName)->apertures)
+    , fileName(file->fileName)
+    , apertures(file->apertures)
 {
     setupUi(this);
 
@@ -57,16 +57,13 @@ DrillForApertureForm::DrillForApertureForm(const QString& fileName, QWidget* par
         return icon;
     };
 
-    QMapIterator<int, G::Aperture*> i(apertures);
     QStandardItemModel* model = new QStandardItemModel(this);
-
+    QMapIterator<int, G::Aperture*> i(apertures);
     while (i.hasNext()) {
         i.next();
         qDebug() << i.key();
         QList<QStandardItem*> list;
-
         QString name;
-
         name = QString("D%1 %2").arg(i.key()).arg(i.value()->name());
         list << new QStandardItem(draw(i.value()), name);
         list.last()->setFlags(Qt::ItemIsEnabled);

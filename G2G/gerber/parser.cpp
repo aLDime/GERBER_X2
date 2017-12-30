@@ -13,7 +13,7 @@ using namespace G;
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<G::GFile*>("G::GFile*");
+int id1 = qRegisterMetaType<G::File*>("G::GFile*");
 
 const QList<QString> slApertureType(QString("C|R|O|P|M").split("|"));
 const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
@@ -27,7 +27,7 @@ const QRegExp reAmBegin("^%AM([^\\*]+)\\*([^%]+)?(%)?$");
 const QRegExp reAttributes("^%(TF|TA|TO|TD)(.*)\\*%$");
 const QRegExp reCirc("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$");
 const QRegExp reComment("^G0?4(.*)$");
-//const QRegExp reDCode("^D0?([123])\\*$");
+const QRegExp reDCode("^D0?([123])\\*$");
 const QRegExp reEof1("^M[0]?[0123]\\*");
 const QRegExp reEof2("^D0?2M0?[02]\\*");
 const QRegExp reFormat("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$");
@@ -78,8 +78,8 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             gerbLines.push_back(gerberLine);
             ++state.lineNum;
             //qWarning() << QString("Line Num %1: '%2'").arg(state.lineNum).arg(gLine);
-            if (ParseApertureBlock(gerberLine))
-                continue;
+            //            if (ParseApertureBlock(gerberLine))
+            //                continue;
 
             if (ParseGCode(gerberLine))
                 continue;
@@ -99,9 +99,9 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             if (ParseEndOfFile(gerberLine))
                 continue;
 
-            //            if (ParseOperationDCode(gerberLine)) {
-            //                continue;
-            //            }
+            if (ParseOperationDCode(gerberLine))
+                continue;
+
             // Aperture definitions %ADD...
             if (ParseAperture(gerberLine))
                 continue;
@@ -167,7 +167,7 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
 
     gerbLines.clear();
     apertureMacro.clear();
-    curPath.clear();
+    path.clear();
 
     mutex.unlock();
 }
@@ -365,19 +365,19 @@ bool Parser::ParseNumber(QString Str, cInt& val, int integer, int decimal)
 
 void Parser::ClosePath()
 {
-    if (curPath.size() < 2) {
-        curPath.clear();
-        curPath.push_back(state.curPos);
+    if (path.size() < 2) {
+        path.clear();
+        path.push_back(state.curPos);
         return;
     }
     switch (state.region) {
     case ON:
         state.type = REGION;
-        file->append(GraphicObject(state, CreatePolygon(), file, gerbLines, curPath));
+        file->append(GraphicObject(state, CreatePolygon(), file, gerbLines, path));
         break;
     case OFF:
         state.type = LINE;
-        file->append(GraphicObject(state, CreateLine(), file, gerbLines, curPath));
+        file->append(GraphicObject(state, CreateLine(), file, gerbLines, path));
         break;
     }
     ClearStep();
@@ -389,9 +389,9 @@ void Parser::CreateFlash()
     if (file->apertures.isEmpty() && file->apertures[state.curAperture] == nullptr)
         return;
     Paths paths(file->apertures[state.curAperture]->draw(state));
-    if (file->apertures[state.curAperture]->isDrilled()) {
-        paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
-    }
+    //    if (file->apertures[state.curAperture]->isDrilled()) {
+    //        paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
+    //    }
     file->append(GraphicObject(state, paths, file, gerbLines));
     ClearStep();
 }
@@ -400,8 +400,8 @@ void Parser::Reset(const QString& fileName)
 {
     gerbLines.clear();
     apertureMacro.clear();
-    curPath.clear();
-    file = new GFile;
+    path.clear();
+    file = new File;
     file->fileName = fileName;
     state.reset();
 }
@@ -409,8 +409,8 @@ void Parser::Reset(const QString& fileName)
 void Parser::ClearStep()
 {
     gerbLines.clear();
-    curPath.clear();
-    curPath.push_back(state.curPos);
+    path.clear();
+    path.push_back(state.curPos);
 }
 
 IntPoint Parser::ParsePosition(const QString& xyStr)
@@ -500,12 +500,12 @@ Paths Parser::CreateLine()
 
     Paths solution;
     if (0) {
-        Path pattern = file->apertures[state.lstAperture]->draw(state)[0];
+        Path pattern = file->apertures[state.curAperture /*lstAperture*/]->draw(state)[0];
         if (Area(pattern) < 0) {
             ReversePath(pattern);
         }
         //pattern.push_back(pattern[0]);
-        MinkowskiSum(pattern, curPath, solution, false);
+        MinkowskiSum(pattern, path, solution, false);
 #ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE) {
             ReversePaths(solution);
@@ -513,12 +513,12 @@ Paths Parser::CreateLine()
 #endif
     }
     else {
-        double size = file->apertures[state.lstAperture]->size() * uScale * 0.5;
+        double size = file->apertures[state.curAperture /*lstAperture*/]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
             size = 0.01 * uScale;
 
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
-        offset.AddPath(curPath, jtRound, etOpenRound);
+        offset.AddPath(path, jtRound, etOpenRound);
         offset.Execute(solution, size);
 #ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE) {
@@ -532,18 +532,18 @@ Paths Parser::CreateLine()
 Paths Parser::CreatePolygon()
 {
     Paths paths;
-    double area = Area(curPath);
+    double area = Area(path);
     if (area > 0.0) {
 #ifdef DEPRECATED_IMAGE_POLARITY
         if (state.imgPolarity == NEGATIVE)
-            ReversePath(curPath);
+            ReversePath(path);
 #endif
     }
     else {
         if (state.imgPolarity == POSITIVE)
-            ReversePath(curPath);
+            ReversePath(path);
     }
-    paths.push_back(curPath);
+    paths.push_back(path);
     return paths;
 }
 
@@ -760,7 +760,7 @@ bool Parser::ParseCircularInterpolation(const QString& gLine)
 
         bool valid = false;
 
-        curPath.push_back(state.curPos);
+        path.push_back(state.curPos);
 
         switch (state.quadrant) {
         case MULTI: //G75
@@ -818,17 +818,17 @@ bool Parser::ParseCircularInterpolation(const QString& gLine)
         default:
             state.curPos = IntPoint(x, y);
 
-            curPath.push_back(state.curPos);
+            path.push_back(state.curPos);
             return true;
             // break;
         }
-        curPath.append(arcPolygon);
+        path.append(arcPolygon);
         // if (arcPolygon.size() > 0) {
         // for (Path::size_type i = 0, size = arcPolygon.size(); i < size && size; ++i) {
         // curPath.push_back(arcPolygon[i]); //polygon.emplace_back(arcPolygon); //push_back
         // }
         // }
-        state.lstAperture = state.curAperture;
+        state.curAperture /*lstAperture*/ = state.curAperture;
 
         return true;
     }
@@ -980,11 +980,11 @@ bool Parser::ParseImagePolarity(const QString& gLine)
     QRegExp match(rePol);
     if (match.exactMatch(gLine)) {
         switch (slImagePolarity.indexOf(match.cap(1))) {
-        case 0:
+        case POSITIVE:
             state.imgPolarity = POSITIVE;
             break;
 #ifdef DEPRECATED_IMAGE_POLARITY
-        case 1:
+        case NEGATIVE:
             state.imgPolarity = NEGATIVE;
             break;
 #endif
@@ -1000,11 +1000,11 @@ bool Parser::ParseLevelPolarity(const QString& gLine)
     if (match.exactMatch(gLine)) {
         ClosePath();
         switch (slLevelPolarity.indexOf(match.cap(1))) {
-        case 0:
+        case POSITIVE:
             state.imgPolarity = POSITIVE;
             break;
 #ifdef DEPRECATED_IMAGE_POLARITY
-        case 1:
+        case NEGATIVE:
             state.imgPolarity = NEGATIVE;
             break;
 #endif
@@ -1023,11 +1023,10 @@ bool Parser::ParseLineInterpolation(const QString& gLine)
             state.curDCode = static_cast<D_CODE>(match.cap(2).toInt());
         switch (/*match.cap(2).isEmpty() ? */ state.curDCode /*: match.cap(2).toInt()*/) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
-            curPath.push_back(state.curPos);
-            state.lstAperture = state.curAperture;
+            path.push_back(state.curPos);
+            state.curAperture /*lstAperture*/ = state.curAperture;
             break;
         case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
-            // if(curPath.size()&&curPath[curPath.size()-1]!=state.curPos)     curPath.push_back(state.curPos);
             ClosePath();
             break;
         case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
@@ -1042,26 +1041,26 @@ bool Parser::ParseLineInterpolation(const QString& gLine)
     return false;
 }
 
-//bool Parser::ParseOperationDCode(const QString& gLine)
-//{
-//    QRegExp match(reDCode);
-//    if (match.exactMatch(gLine)) {
-//        switch (match.cap(1).toInt()) {
-//        case D01:
-//            state.curDCode = D01;
-//            break;
-//        case D02:
-//            state.curDCode = D02;
-//            break;
-//        case D03:
-//            state.curDCode = D03;
-//            CreateFlash();
-//            break;
-//        }
-//        return true;
-//    }
-//    return false;
-//}
+bool Parser::ParseOperationDCode(const QString& gLine)
+{
+    QRegExp match(reDCode);
+    if (match.exactMatch(gLine)) {
+        switch (match.cap(1).toInt()) {
+        case D01:
+            state.curDCode = D01;
+            break;
+        case D02:
+            state.curDCode = D02;
+            break;
+        case D03:
+            state.curDCode = D03;
+            CreateFlash();
+            break;
+        }
+        return true;
+    }
+    return false;
+}
 
 bool Parser::ParseStepAndRepeat(const QString& gLine)
 {
@@ -1076,7 +1075,8 @@ bool Parser::ParseToolAperture(const QString& gLine)
 {
     QRegExp match(reTool);
     if (match.exactMatch(gLine)) {
-        state.lstAperture = state.curAperture;
+        ClosePath();
+        state.curAperture /*lstAperture*/ = state.curAperture;
         state.curAperture = match.cap(1).toInt();
         state.curDCode = D02;
 #ifdef DEPRECATED

@@ -7,6 +7,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QByteArray>
+#include <QDialog>
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -16,19 +17,6 @@ class QLineEdit;
 class QPlainTextEdit;
 class QPushButton;
 class QSpinBox;
-
-enum ToolInfo {
-    ClearencePassStepover,
-    ClearencePassStepoverPercent,
-    Diameter,
-    FeedRate,
-    FlatDiameter,
-    PassDepth,
-    PlungeRate,
-    SideAngle,
-    Stepover,
-    StepoverPercent
-};
 
 namespace Ui {
 class EditTool;
@@ -43,6 +31,10 @@ public:
 
     void apply();
     void setTool(const Tool& value);
+
+    QPushButton* pbApply;
+    QComboBox* cbxToolType;
+    Tool getTool() const;
 
 signals:
     void toolEdited(const Tool& tool);
@@ -60,7 +52,7 @@ private:
     };
 
     QComboBox* cbxFeedSpeeds;
-    QComboBox* cbxToolType;
+
     QComboBox* cbxUnits;
     QVector<QDoubleSpinBox*> dsbList;
     QGroupBox* groupBox;
@@ -68,7 +60,7 @@ private:
     QGroupBox* grBox_3;
     QGroupBox* grBox_4;
     QLabel* lblPixmap;
-    QLabel* label_10;
+//    QLabel* label_10;
     QLabel* label_11;
     QLabel* label_12;
     QLabel* label_13;
@@ -83,7 +75,7 @@ private:
     QLabel* label_9;
     QLineEdit* leName;
     QPlainTextEdit* pteNote;
-    QPushButton* bpApply;
+
     QSpinBox* sbSpindleSpeed;
 
     void setupUi(QWidget* ToolEdit); // setupUi
@@ -95,7 +87,19 @@ private:
 
     // QWidget interface
 protected:
-    void showEvent(QShowEvent *event) override;
+    void showEvent(QShowEvent* event) override;
+};
+
+class EditToolDialog : public QDialog {
+    Q_OBJECT
+public:
+    EditToolDialog(QWidget* parent, const Tool& tool);
+    virtual ~EditToolDialog();
+
+    ToolEdit* toolEdit;
+    void setupUi(QDialog* Dialog); // setupUi
+    void retranslateUi(QDialog* Dialog); // retranslateUi
+    Tool getTool() const;
 };
 
 #endif // EDITTOOL_H

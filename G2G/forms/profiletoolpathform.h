@@ -5,6 +5,8 @@
 
 #include <QWidget>
 
+#include <tooldatabase/tool.h>
+
 namespace Ui {
 class ProfileToolpathForm;
 }
@@ -60,7 +62,7 @@ private:
     QRadioButton* rbOn;
     QRadioButton* rbOutside;
     ToolpathNameForm* nameForm;
-
+    static Tool tool;
     QList<QRadioButton*> rbList;
 
     int side = 0;

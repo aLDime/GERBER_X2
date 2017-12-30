@@ -19,7 +19,7 @@ int id = qRegisterMetaType<Tool>("Tool");
 
 ToolEdit::ToolEdit(QWidget* parent)
     : QWidget(parent)
-    , dsbList(10)
+    , dsbList({ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr })
 {
     setupUi(this);
     //    setStyleSheet("QGroupBox {"
@@ -33,7 +33,7 @@ ToolEdit::ToolEdit(QWidget* parent)
     cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
     on_cbxToolType_currentIndexChanged(0);
 
-    //    setMaximumSize(QSize(393, 577));
+     //    setMaximumSize(QSize(393, 577));
 }
 
 ToolEdit::~ToolEdit()
@@ -43,7 +43,8 @@ ToolEdit::~ToolEdit()
 void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
 {
     for (QDoubleSpinBox* dsb : dsbList) {
-        dsb->setEnabled(true);
+        if (dsb)
+            dsb->setEnabled(true);
     }
 
     if (index != lastType && QMessageBox::question(this, "!!!", "Yes?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
@@ -59,8 +60,8 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         dsbList[ClearencePassStepover]->setValue(0);
         dsbList[ClearencePassStepoverPercent]->setEnabled(false);
         dsbList[ClearencePassStepoverPercent]->setValue(0);
-        dsbList[FlatDiameter]->setEnabled(false);
-        dsbList[FlatDiameter]->setValue(0);
+        //        dsbList[FlatDiameter]->setEnabled(false);
+        //        dsbList[FlatDiameter]->setValue(0);
         dsbList[SideAngle]->setEnabled(false);
         dsbList[SideAngle]->setValue(0);
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
@@ -76,8 +77,8 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         dsbList[ClearencePassStepoverPercent]->setValue(0);
         dsbList[FeedRate]->setEnabled(false);
         dsbList[FeedRate]->setValue(0);
-        dsbList[FlatDiameter]->setEnabled(false);
-        dsbList[FlatDiameter]->setValue(0);
+        //        dsbList[FlatDiameter]->setEnabled(false);
+        //        dsbList[FlatDiameter]->setValue(0);
         dsbList[Stepover]->setEnabled(false);
         dsbList[Stepover]->setValue(0);
         dsbList[StepoverPercent]->setEnabled(false);
@@ -91,11 +92,19 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
     updateName();
 }
 
+Tool ToolEdit::getTool() const
+{
+    return tool;
+}
+
 void ToolEdit::apply()
 {
     int i = 0;
-    for (QDoubleSpinBox* dsb : dsbList)
-        tool.data.Params[i++] = dsb->value();
+    for (QDoubleSpinBox* dsb : dsbList) {
+        if (dsb)
+            tool.data.Params[i] = dsb->value();
+        ++i;
+    }
 
     tool.data.feedSpeeds = cbxFeedSpeeds->currentIndex();
     tool.data.spindleSpeed = sbSpindleSpeed->value();
@@ -109,7 +118,8 @@ void ToolEdit::setTool(const Tool& value)
 {
     tool = value;
     for (int i = 0; i < dsbList.size(); ++i) {
-        dsbList[i]->setValue(tool.data.Params[i]);
+        if (dsbList[i])
+            dsbList[i]->setValue(tool.data.Params[i]);
     }
 
     cbxFeedSpeeds->setCurrentIndex(tool.data.feedSpeeds);
@@ -119,23 +129,13 @@ void ToolEdit::setTool(const Tool& value)
     leName->setText(tool.name);
     pteNote->document()->setPlainText(tool.note);
 
-    if (tool.data.toolType == Group) {
-        grBox_2->setVisible(false);
-        grBox_3->setVisible(false);
-        grBox_4->setVisible(false);
-        cbxToolType->setVisible(false);
-        label_6->setVisible(false);
-        lblPixmap->setVisible(false);
-        return;
-    }
-    else {
-        grBox_2->setVisible(true);
-        grBox_3->setVisible(true);
-        grBox_4->setVisible(true);
-        cbxToolType->setVisible(true);
-        label_6->setVisible(true);
-        lblPixmap->setVisible(true);
-    }
+    bool fl = tool.data.toolType != Group;
+    grBox_2->setVisible(fl);
+    grBox_3->setVisible(fl);
+    grBox_4->setVisible(fl);
+    cbxToolType->setVisible(fl);
+    label_6->setVisible(fl);
+    lblPixmap->setVisible(fl);
 }
 
 void ToolEdit::setupUi(QWidget* ToolEdit)
@@ -197,10 +197,10 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     label_9->setFont(font1);
     label_9->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
-    label_10 = new QLabel(grBox_2);
-    label_10->setObjectName(QStringLiteral("label_10"));
-    label_10->setFont(font1);
-    label_10->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+    //    label_10 = new QLabel(grBox_2);
+    //    label_10->setObjectName(QStringLiteral("label_10"));
+    //    label_10->setFont(font1);
+    //    label_10->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     dsbList[Diameter] = new QDoubleSpinBox(grBox_2);
     dsbList[Diameter]->setObjectName(QStringLiteral("Diameter"));
@@ -210,10 +210,10 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[SideAngle]->setObjectName(QStringLiteral("SideAngle"));
     dsbList[SideAngle]->setFont(font1);
     dsbList[SideAngle]->setMaximum(180);
-    dsbList[FlatDiameter] = new QDoubleSpinBox(grBox_2);
-    dsbList[FlatDiameter]->setObjectName(QStringLiteral("FlatDiameter"));
-    dsbList[FlatDiameter]->setFont(font1);
-    dsbList[FlatDiameter]->setMaximum(100);
+    //    dsbList[FlatDiameter] = new QDoubleSpinBox(grBox_2);
+    //    dsbList[FlatDiameter]->setObjectName(QStringLiteral("FlatDiameter"));
+    //    dsbList[FlatDiameter]->setFont(font1);
+    //    dsbList[FlatDiameter]->setMaximum(100);
 
     QGridLayout* gridLayout_3 = new QGridLayout(grBox_2);
     gridLayout_3->setObjectName(QStringLiteral("gridLayout_3"));
@@ -222,8 +222,8 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     gridLayout_3->addWidget(dsbList[Diameter], 0, 1, 1, 1);
     gridLayout_3->addWidget(label_9, 1, 0, 1, 1);
     gridLayout_3->addWidget(dsbList[SideAngle], 1, 1, 1, 1);
-    gridLayout_3->addWidget(label_10, 2, 0, 1, 1);
-    gridLayout_3->addWidget(dsbList[FlatDiameter], 2, 1, 1, 1);
+    //    gridLayout_3->addWidget(label_10, 2, 0, 1, 1);
+    //    gridLayout_3->addWidget(dsbList[FlatDiameter], 2, 1, 1, 1);
 
     grBox_3 = new QGroupBox(groupBox);
     grBox_3->setObjectName(QStringLiteral("groupBox_3"));
@@ -324,13 +324,13 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     gridLayout_2->addWidget(dsbList[FeedRate], 1, 1, 1, 1);
     gridLayout_2->addWidget(cbxFeedSpeeds, 1, 2, 2, 1);
 
-    bpApply = new QPushButton(groupBox);
-    bpApply->setObjectName(QStringLiteral("bpApply"));
+    pbApply = new QPushButton(groupBox);
+    pbApply->setObjectName(QStringLiteral("bpApply"));
     QSizePolicy sizePolicy4(QSizePolicy::Minimum, QSizePolicy::Minimum);
     sizePolicy4.setHorizontalStretch(0);
     sizePolicy4.setVerticalStretch(0);
-    sizePolicy4.setHeightForWidth(bpApply->sizePolicy().hasHeightForWidth());
-    bpApply->setSizePolicy(sizePolicy4);
+    sizePolicy4.setHeightForWidth(pbApply->sizePolicy().hasHeightForWidth());
+    pbApply->setSizePolicy(sizePolicy4);
 
     lblPixmap = new QLabel(groupBox);
     lblPixmap->setObjectName(QStringLiteral("label"));
@@ -361,7 +361,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
         5, 0, 1, 2);
     gridLayout_4->addWidget(grBox_4,
         6, 0, 1, 2);
-    gridLayout_4->addWidget(bpApply,
+    gridLayout_4->addWidget(pbApply,
         6, 2, 1, 1);
     gridLayout_4->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding),
         7, 1, 1, 1);
@@ -375,12 +375,12 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     ///////////////////////////////////////////////////////////////////////
 
     dsbList[Diameter]->setSingleStep(0.1);
-    dsbList[FlatDiameter]->setSingleStep(0.1);
+    //    dsbList[FlatDiameter]->setSingleStep(0.1);
 
     connect(dsbList[Diameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     connect(dsbList[SideAngle], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
-    connect(dsbList[FlatDiameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
-    connect(bpApply, &QPushButton::clicked, this, &ToolEdit::apply);
+    //    connect(dsbList[FlatDiameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
+    connect(pbApply, &QPushButton::clicked, this, &ToolEdit::apply);
 
     ///////////////////////////////////////////////////////////////////////
     retranslateUi(ToolEdit);
@@ -390,7 +390,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
 void ToolEdit::retranslateUi(QWidget* ToolEdit)
 {
     ToolEdit->setWindowTitle(tr("Dialog"));
-    bpApply->setText(tr("Apply"));
+    pbApply->setText(tr("Apply"));
     cbxFeedSpeeds->clear();
     cbxFeedSpeeds->insertItems(0, QStringList() << tr("mm/sec") << tr("mm/min") << tr("m/min"));
     cbxUnits->clear();
@@ -399,7 +399,7 @@ void ToolEdit::retranslateUi(QWidget* ToolEdit)
     dsbList[ClearencePassStepover]->setSuffix(tr(" mm"));
     dsbList[ClearencePassStepoverPercent]->setSuffix(tr(" %"));
     dsbList[Diameter]->setSuffix(tr(" mm"));
-    dsbList[FlatDiameter]->setSuffix(tr(" mm"));
+    //    dsbList[FlatDiameter]->setSuffix(tr(" mm"));
     dsbList[PassDepth]->setSuffix(tr(" mm"));
     dsbList[SideAngle]->setSuffix(tr(" \302\260"));
     dsbList[Stepover]->setSuffix(tr(" mm"));
@@ -410,7 +410,7 @@ void ToolEdit::retranslateUi(QWidget* ToolEdit)
     grBox_4->setTitle(tr("Feedp Speeds"));
     groupBox->setTitle(tr("Tool Info"));
     lblPixmap->setText(QString());
-    label_10->setText(tr("Flat Diameter"));
+    //    label_10->setText(tr("Flat Diameter"));
     label_11->setText(tr("Pass Depth"));
     label_12->setText(tr("Stepover"));
     label_13->setText(tr("Clearence Pass\nStepover"));
@@ -436,7 +436,7 @@ void ToolEdit::updateName()
         leName->setText(QString(tr("End Mill (%1 mm)")).arg(dsbList[Diameter]->value()));
         break;
     case Engraving:
-        leName->setText(QString(tr("Engrave (%2\302\260 %1 mm Tip Dia)")).arg(dsbList[FlatDiameter]->value()).arg(dsbList[SideAngle]->value()));
+        leName->setText(QString(tr("Engrave (%2\302\260 %1 mm Tip Dia)")).arg(dsbList[/*FlatDiameter*/ Diameter]->value()).arg(dsbList[SideAngle]->value()));
         break;
     case Drill:
         leName->setText(QString(tr("Drill (%1 mm)")).arg(dsbList[Diameter]->value()));
@@ -446,11 +446,74 @@ void ToolEdit::updateName()
 
 void ToolEdit::showEvent(QShowEvent* /*event*/)
 {
-    setMinimumHeight(height());
-    grBox_2->setVisible(false);
-    grBox_3->setVisible(false);
-    grBox_4->setVisible(false);
-    cbxToolType->setVisible(false);
-    label_6->setVisible(false);
-    lblPixmap->setVisible(false);
+    bool fl = tool.data.toolType != Group;
+    grBox_2->setVisible(fl);
+    grBox_3->setVisible(fl);
+    grBox_4->setVisible(fl);
+    cbxToolType->setVisible(fl);
+    label_6->setVisible(fl);
+    lblPixmap->setVisible(fl);
+    //    setMinimumHeight(height());
+    //    grBox_2->setVisible(false);
+    //    grBox_3->setVisible(false);
+    //    grBox_4->setVisible(false);
+    //    cbxToolType->setVisible(false);
+    //    label_6->setVisible(false);
+    //    lblPixmap->setVisible(false);
+}
+/////////////////////////////////////////////
+/// \brief EditToolDialog::EditToolDialog
+/// \param parent
+///
+EditToolDialog::EditToolDialog(QWidget* parent, const Tool& tool)
+    : QDialog(parent)
+{
+    setupUi(this);
+    toolEdit->setTool(tool);
+    toolEdit->cbxToolType->setEnabled(false);
+}
+
+EditToolDialog::~EditToolDialog() {}
+
+void EditToolDialog::setupUi(QDialog* Dialog)
+{
+    if (Dialog->objectName().isEmpty())
+        Dialog->setObjectName(QStringLiteral("Dialog"));
+    Dialog->resize(298, 340);
+    QVBoxLayout* verticalLayout = new QVBoxLayout(Dialog);
+    verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
+    toolEdit = new ToolEdit(Dialog);
+    toolEdit->setObjectName(QStringLiteral("widget"));
+
+    verticalLayout->addWidget(toolEdit);
+
+    QDialogButtonBox* buttonBox = new QDialogButtonBox(Dialog);
+    buttonBox->setObjectName(QStringLiteral("buttonBox"));
+    buttonBox->setOrientation(Qt::Horizontal);
+    buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+    verticalLayout->addWidget(buttonBox);
+
+    retranslateUi(Dialog);
+    QObject::connect(toolEdit->pbApply, &QPushButton::clicked, [&] {
+        //toolEdit->apply();
+        accept();
+    });
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [&] {
+        toolEdit->apply();
+        accept();
+    });
+    QObject::connect(buttonBox, SIGNAL(rejected()), Dialog, SLOT(reject()));
+
+    QMetaObject::connectSlotsByName(Dialog);
+}
+
+void EditToolDialog::retranslateUi(QDialog* Dialog)
+{
+    Dialog->setWindowTitle(QApplication::translate("Dialog", "Dialog", Q_NULLPTR));
+}
+
+Tool EditToolDialog::getTool() const
+{
+    return toolEdit->getTool();
 }

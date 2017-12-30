@@ -4,6 +4,7 @@
 #include <QDialog>
 
 #include <gerber/aperture.h>
+#include <gerber/file.h>
 
 class QTableView;
 class MyGraphicsView;
@@ -15,7 +16,7 @@ class DrillForApertureForm;
 
 class DrillForApertureForm : public QDialog {
 public:
-    DrillForApertureForm(const QString& fileName, QWidget* parent = 0);
+    DrillForApertureForm(G::File* file, QWidget* parent = 0);
 
     //    QVBoxLayout* verticalLayout;
     //    QHBoxLayout* horizontalLayout;

@@ -72,7 +72,6 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
                 return false;
                 break;
             }
-
         default:
             return false;
         }
@@ -114,6 +113,8 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
             break;
         case Qt::UserRole:
             return tool.data.toolType;
+        case Qt::UserRole + 1:
+            return reinterpret_cast<quint64>(&tool);
         default:
             return QVariant();
         }
@@ -123,7 +124,9 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const
 {
-    Qt::ItemFlags defaultFlags = Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
+    Qt::ItemFlags defaultFlags = Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
+    if (enabled)
+        defaultFlags |= Qt::ItemIsEnabled;
     if (tool.data.toolType == ToolType::Group)
         defaultFlags |= Qt::ItemIsDropEnabled;
     //    if (index.column() == 0)
@@ -139,6 +142,11 @@ Tool ToolItem::getTool() const
 void ToolItem::setTool(const Tool& value)
 {
     tool = value;
+}
+
+void ToolItem::setEnabled(bool value)
+{
+    enabled = value;
 }
 
 void ToolItem::addChild(ToolItem* item)

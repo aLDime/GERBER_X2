@@ -10,12 +10,25 @@ enum ToolType {
     Drill
 };
 
+enum ToolInfo {
+    ClearencePassStepover,
+    ClearencePassStepoverPercent,
+    Diameter,
+    FeedRate,
+    FlatDiameter,
+    PassDepth,
+    PlungeRate,
+    SideAngle,
+    Stepover,
+    StepoverPercent
+};
+
 Q_DECLARE_METATYPE(ToolType)
 
 struct Tool {
 public:
     struct D {
-        double Params[10] = { 0.0 };
+        double Params[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         //    double ClearencePassStepover;
         //    double ClearencePassStepoverPercent;
         //    double Diameter;

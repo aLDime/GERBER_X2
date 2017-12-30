@@ -83,6 +83,7 @@ MainWindow::MainWindow(QWidget* parent)
     pMainWindow = this;
 
     readSettings();
+    dwCreatePath->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -112,10 +113,9 @@ void MainWindow::open()
 
 void MainWindow::closeFiles()
 {
-    QModelIndex index = treeView->model()->index(0, 0, QModelIndex());
+    QModelIndex index = treeView->model()->index(NODE_FILES, 0, QModelIndex());
     int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount();
-    treeView->model()->removeRows(0, rowCount, index);
-    //fileHolder->closeAllFiles();
+    treeView->model()->removeRows(NODE_FILES, rowCount, index);
     scene->deleteLater();
     scene = new MyGraphicsScene(this);
     graphicsView->SetScene(scene);
@@ -240,14 +240,24 @@ void MainWindow::createActions()
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->ZoomOut(); });
     action->setShortcut(QKeySequence::ZoomOut);
 
-    //==================== toolpathToolBar ====================
+    //==================== Selection ====================
+    QToolBar* s = addToolBar(tr("Selection"));
+    s->setObjectName(QStringLiteral("s"));
+    action = s->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), [=]() {
+        for (QGraphicsItem* item : scene->items())
+            if (item->isVisible())
+                item->setSelected(true);
+    });
+    action->setShortcut(QKeySequence::SelectAll);
 
+    //==================== toolpathToolBar ====================
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
 
     dwCreatePath = new QDockWidget(this);
     dwCreatePath->setObjectName(QStringLiteral("dwCreatePath"));
+
     addDockWidget(Qt::RightDockWidgetArea, dwCreatePath);
     enum {
         PROFILE_TOOLPATH_FORM,

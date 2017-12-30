@@ -14,7 +14,7 @@ public:
     void ParseLines(const QString& gerberLines, const QString& fileName = QString());
 
 signals:
-    void fileReady(GFile* file);
+    void fileReady(File* file);
 
 private:
     QList<QString> Format(QString data);
@@ -41,9 +41,9 @@ private:
     //    QMap<int, GerberAperture> apertures;
 
     bool ab = false;
-    Path curPath;
+    Path path;
     State state;
-    GFile* file;
+    File* file;
     QList<QString> gerbLines;
 
     bool ParseAperture(const QString& gLine);
@@ -58,7 +58,7 @@ private:
     bool ParseImagePolarity(const QString& gLine);
     bool ParseLevelPolarity(const QString& gLine);
     bool ParseLineInterpolation(const QString& gLine);
-    //    bool ParseOperationDCode(const QString& gLine);
+    bool ParseOperationDCode(const QString& gLine);
     bool ParseStepAndRepeat(const QString& gLine);
     bool ParseToolAperture(const QString& gLine);
     bool ParseUnitMode(const QString& gLine);

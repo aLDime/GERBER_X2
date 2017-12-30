@@ -36,9 +36,12 @@ public:
     Tool getTool() const;
     void setTool(const Tool& value);
 
+    void setEnabled(bool value);
+
 private:
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
     Tool tool;
+    bool enabled = true;
 };
 #endif // TREEITEM_H

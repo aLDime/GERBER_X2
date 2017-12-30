@@ -9,9 +9,8 @@ class FileItem : public QObject, public AbstractItem {
     Q_OBJECT
 
 public:
-    FileItem(G::GFile* gerberFile);
+    FileItem(G::File* gerberFile);
     ~FileItem();
-
     // AbstractItem interface
 public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
@@ -21,7 +20,7 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
 private:
-   G:: GFile* gFile;
+    G::File* gFile;
 
     Qt::CheckState checkState = Qt::Checked;
     static QTimer repaintTimer;

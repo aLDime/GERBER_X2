@@ -1,3 +1,4 @@
+#include "tooldatabase.h"
 #include "toolmodel.h"
 #include <QApplication>
 #include <QDebug>
@@ -296,6 +297,7 @@ void ToolModel::exportTools()
 
 void ToolModel::importTools()
 {
+    QVector<int> tools(ToolDatabase::getTools());
     QFile file("D:/PRO/QT_PROJECTS/ToolDatabase.txt");
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::information(0, tr("Unable to open file"), file.errorString());
@@ -346,7 +348,11 @@ void ToolModel::importTools()
 
             // Append a new item to the current parent's list of children.
             ToolItem* parent = parentsStack.last();
-            parent->insertChild(parent->childCount(), new ToolItem(Tool(toolData)));
+            ToolItem* item = new ToolItem(Tool(toolData));
+
+            if (tools.size() && item->getTool().data.toolType != Group)
+                item->setEnabled(tools.contains(item->getTool().data.toolType));
+            parent->insertChild(parent->childCount(), item);
         }
 
         ++number;

@@ -14,11 +14,9 @@ class TreeView : public QTreeView {
 public:
     explicit TreeView(QWidget* parent = nullptr);
     ~TreeView();
-    void addFile(G::GFile* gerberFile);
+    void addFile(G::File* gerberFile);
     void removeAllFiles();
     QString files();
-
-signals:
 
 private:
     void updateActions();
@@ -29,9 +27,6 @@ private:
     // QWidget interface
 protected:
     void showEvent(QShowEvent* event) override;
-
-    // QWidget interface
-protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
 };
 

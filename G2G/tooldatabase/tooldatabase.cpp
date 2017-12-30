@@ -13,16 +13,44 @@
 #include <QPushButton>
 #include <QStandardItemModel>
 
-ToolDatabase::ToolDatabase(QWidget* parent)
+QVector<int> ToolDatabase::tools;
+
+ToolDatabase::ToolDatabase(QWidget* parent, const QVector<int> tools)
     : QDialog(parent)
 {
+    this->tools = tools;
+
     setupUi(this);
-    connect(tree, &ToolTreeView::toolSelected, tool, &ToolEdit::setTool);
-    connect(tool, &ToolEdit::toolEdited, tree, &ToolTreeView::setTool);
+
+    connect(tree, &ToolTreeView::toolSelected, toolEdit, &ToolEdit::setTool);
+    connect(toolEdit, &ToolEdit::toolEdited, tree, &ToolTreeView::setTool);
+
+    connect(tree, &ToolTreeView::toolSelected, this, &ToolDatabase::setTool);
+    connect(toolEdit, &ToolEdit::toolEdited, this, &ToolDatabase::setTool);
+    connect(tree, &ToolTreeView::doubleClicked, [&](const QModelIndex& index) {
+        setTool(*reinterpret_cast<Tool*>(index.data(Qt::UserRole + 1).toULongLong()));
+        if (tool.data.toolType != Group && index.flags() & Qt::ItemIsEnabled)
+            accept();
+    });
 }
 
 ToolDatabase::~ToolDatabase()
 {
+}
+
+Tool ToolDatabase::getTool() const
+{
+    return tool;
+}
+
+void ToolDatabase::setTool(const Tool& value)
+{
+    tool = value;
+}
+
+QVector<int> ToolDatabase::getTools()
+{
+    return tools;
 }
 
 void ToolDatabase::setupUi(QDialog* ToolDatabase)
@@ -56,11 +84,11 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
     tree->setObjectName(QStringLiteral("tree"));
     tree->setDragDropMode(QAbstractItemView::DragDrop);
 
-    tool = new ToolEdit(ToolDatabase);
-    tool->setObjectName(QStringLiteral("widget"));
+    toolEdit = new ToolEdit(ToolDatabase);
+    toolEdit->setObjectName(QStringLiteral("widget"));
 
     horizontalLayout_1->addWidget(tree);
-    horizontalLayout_1->addWidget(tool);
+    horizontalLayout_1->addWidget(toolEdit);
 
     buttonBox = new QDialogButtonBox(ToolDatabase);
     buttonBox->setObjectName(QStringLiteral("buttonBox"));
@@ -82,7 +110,10 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
     verticalLayout->addLayout(horizontalLayout_2);
 
     retranslateUi(ToolDatabase);
-    QObject::connect(buttonBox, &QDialogButtonBox::accepted, ToolDatabase, &QDialog::accept);
+    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [&] {
+        if (tool.data.toolType != Group)
+            accept();
+    });
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, ToolDatabase, &QDialog::reject);
     QMetaObject::connectSlotsByName(ToolDatabase);
 }

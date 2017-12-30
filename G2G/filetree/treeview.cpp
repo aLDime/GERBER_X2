@@ -36,7 +36,7 @@ TreeView::~TreeView()
 {
 }
 
-void TreeView::addFile(G::GFile* gerberFile)
+void TreeView::addFile(G::File* gerberFile)
 {
     m_model->addGerberFile(gerberFile);
     iconTimer.start(200);
@@ -106,25 +106,22 @@ void TreeView::showEvent(QShowEvent* /*event*/)
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
-    qDebug() << m_model->data(QModelIndex());
-    qDebug() << static_cast<AbstractItem*>(m_model->index(0, 0, QModelIndex()).internalPointer())->rowCount();
-    qDebug() << event << indexAt(event->pos()).data();
     QModelIndex index = indexAt(event->pos());
-    if (m_model->index(FILES_F, 0, QModelIndex()) == index.parent()) {
+    if (m_model->index(NODE_FILES, 0, QModelIndex()) == index.parent()) {
         QMenu menu(this);
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [=] {
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
             m_model->removeRow(index.row(), index.parent());
             iconTimer.start(200);
         });
-        menu.addAction(QIcon::fromTheme("crosshairs"), tr("&Assignment of drills for holes"), [=] {
-            DrillForApertureForm dfa(/*item->text(0)*/ "", this);
+        menu.addAction(QIcon::fromTheme("crosshairs"), tr("&Assignment of drills for holes"), [&] {
+            DrillForApertureForm dfa(reinterpret_cast<G::File*>(index.data(Qt::UserRole).toULongLong()), this);
             dfa.exec();
         });
         menu.exec(mapToGlobal(event->pos()));
     }
-    if (m_model->index(MILLING_F, 0, QModelIndex()) == index.parent()) {
+    if (m_model->index(NODE_MILLING, 0, QModelIndex()) == index.parent()) {
         QMenu menu(this);
-        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), [=] {
+        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), [&] {
             m_model->removeRow(index.row(), index.parent());
         });
         menu.exec(mapToGlobal(event->pos()));

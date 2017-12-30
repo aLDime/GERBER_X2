@@ -5,14 +5,13 @@
 #include <QFileInfo>
 #include <mainwindow.h>
 QTimer FileItem::repaintTimer;
-FileItem::FileItem(G::GFile* gerberFile)
+FileItem::FileItem(G::File* gerberFile)
     : gFile(gerberFile)
-// , checkState(Qt::Checked)
 {
     MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
 
     gFile->gig->addToTheScene(scene);
-    repaintTimer.connect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
+    connect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
     repaintTimer.start(100);
     MainWindow::getMainWindow()->closeAllAct->setEnabled(true);
 }
@@ -20,6 +19,7 @@ FileItem::FileItem(G::GFile* gerberFile)
 FileItem::~FileItem()
 {
     qDebug() << "~FileItem()";
+    disconnect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
     if (MainWindow::getMainWindow()->isVisible())
         MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount() > 1);
     delete gFile;
@@ -79,6 +79,8 @@ QVariant FileItem::data(const QModelIndex& index, int role) const
             p.fill(c);
             return p;
         }
+        case Qt::UserRole:
+            return QVariant::fromValue(reinterpret_cast<quint64>(gFile));
         default:
             break;
         }

@@ -10,10 +10,10 @@
 #include <QMessageBox>
 
 enum {
-    FILES_F,
-    MILLING_F,
-    DRILL_F,
-    PINS_F,
+    NODE_FILES,
+    NODE_MILLING,
+    NODE_DRILL,
+    NODE_PINS,
 };
 
 class Model : public QAbstractItemModel {
@@ -45,7 +45,7 @@ public:
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    void addGerberFile(G::GFile *gerberFile);
+    void addGerberFile(G::File *gerberFile);
     void addMilling(const QString name, QGraphicsItemGroup* group);
     //    QStringList mimeTypes() const override
     //    {

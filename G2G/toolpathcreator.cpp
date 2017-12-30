@@ -18,7 +18,7 @@ void ToolPathCreator::Clear()
     groupedPaths.clear();
 }
 
-Paths& ToolPathCreator::Merge(G::GFile* gerberFile)
+Paths ToolPathCreator::Merge(G::File* gerberFile)
 {
     Paths paths;
     Paths tmpPaths;
@@ -45,7 +45,7 @@ Paths& ToolPathCreator::Merge(G::GFile* gerberFile)
     return mergedPaths;
 }
 
-Pathss& ToolPathCreator::ToolPathPocket(MILLING milling, double toolDiameter)
+Pathss ToolPathCreator::ToolPathPocket(MILLING milling, double toolDiameter)
 {
     double dOffset = -toolDiameter * uScale / 2.00;
     double stepOver = dOffset * 0.8;
@@ -128,7 +128,7 @@ Pathss& ToolPathCreator::ToolPathPocket(MILLING milling, double toolDiameter)
     return retPaths;
 }
 
-Paths& ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
+Paths ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
 {
     double dOffset;
     switch (milling) {

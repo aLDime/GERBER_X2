@@ -8,13 +8,15 @@ int AbstractItem::c = 0;
 
 AbstractItem::AbstractItem()
 {
-    qDebug() << "~AbstractItem" << ++c;
+    //qDebug() << "AbstractItem" << ++c;
 }
 
 AbstractItem::~AbstractItem()
 {
-    qDebug() << "~AbstractItem" << c--;
-    qDeleteAll(childItems);
+    //qDebug() << "~AbstractItem" << c--;
+    parentItem = nullptr;
+    if (childItems.size())
+        qDeleteAll(childItems);
 }
 
 int AbstractItem::row() const
@@ -62,8 +64,7 @@ void AbstractItem::set(int row, AbstractItem* item)
     if (item)
         item->parentItem = this;
     if (row < childItems.size()) {
-        if (childItems[row])
-            delete childItems[row];
+        delete childItems[row];
         childItems[row] = item;
     }
 }

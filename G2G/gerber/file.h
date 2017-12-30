@@ -5,13 +5,13 @@
 #include "gerber.h"
 #include "graphicsitem.h"
 namespace G {
-class GFile;
+class File;
 class GraphicObject {
 public:
     GraphicObject(
         const State& state,
         const Paths& paths,
-        GFile* gFile,
+        File* gFile,
         const QStringList& gerberStrings = QStringList(),
         const Path& path = Path())
         : state(state)
@@ -24,15 +24,15 @@ public:
 
     State state;
     Paths paths;
-    GFile* gFile = nullptr;
+    File* gFile = nullptr;
     QStringList gerberStrings;
     Path path;
 };
 
-class GFile : public QList<GraphicObject> {
+class File : public QList<GraphicObject> {
 public:
-    GFile() {}
-    ~GFile()
+    File() {}
+    ~File()
     {
         qDeleteAll(apertures);
         if (gig)
@@ -44,4 +44,5 @@ public:
     QString fileName;
 };
 }
+
 #endif // GFILE_H

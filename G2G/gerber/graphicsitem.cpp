@@ -16,10 +16,10 @@ using namespace G;
 ///
 //RawItem::RawItem(GraphicObject& item)
 //    : aperture(item.gFile->apertures[item.state.curAperture])
-//    , size(item.gFile->apertures[item.state.lstAperture]->size())
+//    , size(item.gFile->apertures[item.state.curAperture /*lstAperture*/]->size())
 //    , imgPolarity(item.state.imgPolarity)
 //{
-//    //size = item.gFile->apertures.take(item.state.lstAperture).Size();
+//    //size = item.gFile->apertures.take(item.state.curAperture /*lstAperture*/).Size();
 //    setFlags(ItemIsSelectable);
 //    setAcceptHoverEvents(true);
 //    if (imgPolarity == POSITIVE)
@@ -48,10 +48,10 @@ using namespace G;
 //        for (QPointF& pt : PathToQPolygon(item.path)) {
 //            j++ ? path.lineTo(pt) : path.moveTo(pt);
 //        }
-//        toolTipStr = QString("Aperture: %1").arg(item.state.lstAperture);
+//        toolTipStr = QString("Aperture: %1").arg(item.state.curAperture /*lstAperture*/);
 //        break;
 //    case REGION:
-//        toolTipStr = QString("Aperture: %1").arg(item.state.lstAperture);
+//        toolTipStr = QString("Aperture: %1").arg(item.state.curAperture /*lstAperture*/);
 //        path.addPolygon(PathToQPolygon(item.path));
 //        break;
 //    }

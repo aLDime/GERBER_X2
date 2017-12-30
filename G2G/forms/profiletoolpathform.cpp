@@ -24,7 +24,12 @@
 
 #include <gerber/graphicsitem.h>
 
+#include <tooldatabase/tooldatabase.h>
+#include <tooldatabase/tooledit.h>
+
 Q_DECLARE_METATYPE(QGraphicsItemGroup*)
+
+Tool ProfileToolpathForm::tool;
 
 ProfileToolpathForm::ProfileToolpathForm(QWidget* parent)
     : QWidget(parent)
@@ -64,11 +69,44 @@ ProfileToolpathForm::ProfileToolpathForm(QWidget* parent)
         });
     }
     rbList[0]->clicked();
+
+    connect(pbSelectTool, &QPushButton::clicked, [&] {
+        ToolDatabase tdb(this, { EndMill, Engraving /*, Drill*/ });
+        if (tdb.exec()) {
+            tool = tdb.getTool();
+            lblToolName->setText(tool.name);
+        }
+    });
+
+    connect(pbEditTool, &QPushButton::clicked, [&] {
+        EditToolDialog tdb(this, tool);
+        if (tdb.exec()) {
+            tool = tdb.getTool();
+            lblToolName->setText(tool.name);
+        }
+    });
+
+    QSettings settings;
+    settings.beginGroup("ProfileToolpathForm");
+    QByteArray data(settings.value("tool").toByteArray());
+    if (data.size()) {
+        tool.fromHex(data.split('|')[0]);
+        tool.name = data.split('|')[1];
+        tool.note = data.split('|')[2];
+        lblToolName->setText(tool.name);
+    }
+    dsbDepth->setValue(settings.value("dsbDepth").toDouble());
+    settings.endGroup();
 }
 
 ProfileToolpathForm::~ProfileToolpathForm()
 {
     qDebug() << "~ProfileToolpathForm";
+    QSettings settings;
+    settings.beginGroup("ProfileToolpathForm");
+    settings.setValue("tool", tool.toHex().append('|').append(tool.name).append('|').append(tool.note));
+    settings.setValue("dsbDepth", dsbDepth->value());
+    settings.endGroup();
 }
 
 void ProfileToolpathForm::changeEvent(QEvent* e)
@@ -375,47 +413,46 @@ void ProfileToolpathForm::calculate()
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
     }
-    if (qFuzzyIsNull(dsbDepth->value())) {
+    if (qFuzzyIsNull(tool.data.Params[Diameter])) {
         QMessageBox::warning(this, "!!!", tr("No valid tool..."));
         return;
     }
 
-    Paths value;
-    for (QGraphicsItem* item : wItems) {
-        value.append(static_cast<G::WorkItem*>(item)->getPaths());
-    }
+    Paths wPaths;
+    for (QGraphicsItem* item : wItems)
+        wPaths.append(static_cast<G::WorkItem*>(item)->getPaths());
 
-    ToolPathCreator tpc;
-    Paths paths(tpc.setPaths(value).ToolPathProfile(static_cast<MILLING>(side), dsbDepth->value()));
-
-    QPainterPath painterPath;
     QList<QGraphicsItem*> items;
-    QGraphicsPathItem* pathItem;
+    QGraphicsPolygonItem* polygonItem;
 
-    Paths paths2;
-    ClipperOffset offset;
+    double d = tool.data.Params[Diameter];
+
+    if (dsbDepth->value() > 0.0 && tool.data.Params[SideAngle] > 0.0) {
+        double a = qDegreesToRadians(90 - tool.data.Params[SideAngle] / 2);
+        d = dsbDepth->value() * cos(a) / sin(a);
+        d = d * 2 + tool.data.Params[Diameter];
+    }
+
+    Paths paths(ToolPathCreator().setPaths(wPaths).ToolPathProfile(static_cast<MILLING>(side), /*tool.data.Params[Diameter]*/ d));
+
     for (Path& path : paths) {
-        offset.Clear();
-        offset.AddPath(path, jtRound, etClosedLine);
-        offset.Execute(paths2, dsbDepth->value() * 0.5 * uScale);
-        painterPath = QPainterPath();
-        for (Path& path : paths2) {
-            painterPath.addPolygon(PathToQPolygon(path));
+        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
+        polygonItem->setPen(QPen(QColor(255, 255, 255, 100), tool.data.Params[Diameter], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        polygonItem->setBrush(Qt::NoBrush);
+        items.append(polygonItem);
+
+        if (dsbDepth->value() > 0.0 && tool.data.Params[SideAngle] > 0.0) {
+            polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
+            polygonItem->setPen(QPen(QColor(0, 255, 0, 100), d, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            polygonItem->setBrush(Qt::NoBrush);
+            items.append(polygonItem);
         }
-        pathItem = new QGraphicsPathItem(painterPath);
-        pathItem->setPen(Qt::NoPen);
-        pathItem->setBrush(QColor(255, 255, 255, 50));
-        items.append(pathItem);
-    }
 
-    painterPath = QPainterPath();
-    for (Path& path : paths) {
-        painterPath.addPolygon(PathToQPolygon(path));
+        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
+        polygonItem->setPen(QPen(Qt::white, 0.0));
+        polygonItem->setBrush(Qt::NoBrush);
+        items.append(polygonItem);
     }
-    pathItem = new QGraphicsPathItem(painterPath);
-    pathItem->setPen(QPen(Qt::white, 0.0));
-    pathItem->setBrush(Qt::NoBrush);
-    items.append(pathItem);
 
     QGraphicsItemGroup* group = scene->createItemGroup(items);
     group->setAcceptHoverEvents(false);

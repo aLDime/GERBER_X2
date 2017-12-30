@@ -11,7 +11,7 @@ Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderItem("rootItem"))
 {
-    importTools();
+    //    importTools();
     rootItem->add(new FolderItem("Файлы"));
     rootItem->add(new FolderItem("Фрезеровки"));
     rootItem->add(new FolderItem("Сверловки"));
@@ -21,7 +21,7 @@ Model::Model(QObject* parent)
 
 Model::~Model()
 {
-    exportTools();
+    //    exportTools();
     delete rootItem;
 }
 
@@ -42,7 +42,7 @@ bool Model::insertRows(int row, int count, const QModelIndex& parent)
 
 bool Model::removeRows(int row, int count, const QModelIndex& parent)
 {
-    //qDebug() << "removeRows" << row << count << parent << createIndex(row, 0, rootItem);
+    qDebug() << "removeRows" << row << (row + count - 1) << count << parent;
     beginRemoveRows(parent, row, row + count - 1);
     AbstractItem* parentItem = static_cast<AbstractItem*>(parent.internalPointer());
     if (!parentItem)
@@ -101,16 +101,13 @@ QModelIndex Model::index(int row, int column, const QModelIndex& parent) const
 
 QModelIndex Model::parent(const QModelIndex& child) const
 {
-    if (!child.isValid())
-        return QModelIndex();
-
-    AbstractItem* childItem = static_cast<AbstractItem*>(child.internalPointer());
-    AbstractItem* parentItem = childItem->parent();
-
-    if (parentItem == rootItem)
-        return QModelIndex();
-
-    return createIndex(parentItem->row(), 0, parentItem);
+    if (child.isValid()) {
+        AbstractItem* childItem = static_cast<AbstractItem*>(child.internalPointer());
+        AbstractItem* parentItem = childItem->parent();
+        if (parentItem != rootItem && parentItem != nullptr)
+            return createIndex(parentItem->row(), 0, parentItem);
+    }
+    return QModelIndex();
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const
@@ -150,20 +147,20 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     return QVariant();
 }
 
-void Model::addGerberFile(G::GFile* gerberFile)
+void Model::addGerberFile(G::File* gerberFile)
 {
-    QModelIndex index = createIndex(0, 0, rootItem->child(FILES_F));
-    int rowCount = rootItem->child(FILES_F)->rowCount();
+    QModelIndex index = createIndex(0, 0, rootItem->child(NODE_FILES));
+    int rowCount = rootItem->child(NODE_FILES)->rowCount();
     insertRows(rowCount, 1, index);
-    rootItem->child(FILES_F)->set(rowCount, new FileItem(gerberFile));
+    rootItem->child(NODE_FILES)->set(rowCount, new FileItem(gerberFile));
 }
 
 void Model::addMilling(const QString name, QGraphicsItemGroup* group)
 {
-    QModelIndex index = createIndex(0, 0, rootItem->child(MILLING_F));
-    int rowCount = rootItem->child(MILLING_F)->rowCount();
+    QModelIndex index = createIndex(0, 0, rootItem->child(NODE_MILLING));
+    int rowCount = rootItem->child(NODE_MILLING)->rowCount();
     insertRows(rowCount, 1, index);
-    rootItem->child(MILLING_F)->set(rowCount, new Milling(name, group));
+    rootItem->child(NODE_MILLING)->set(rowCount, new Milling(name, group));
     emit updateActions();
 }
 

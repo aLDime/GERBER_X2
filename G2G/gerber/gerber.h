@@ -3,7 +3,9 @@
 
 #include "../clipper/myclipper.h"
 
-//#define DEPRECATED
+#include <QObject>
+
+#define DEPRECATED
 #define DEPRECATED_IMAGE_POLARITY
 
 using namespace ClipperLib;
@@ -143,14 +145,14 @@ public:
     void reset()
     {
         curDCode = D02;
-        format;
+        format = Format();
         curGCode = G01;
         imgPolarity = POSITIVE;
         curAperture = 0;
         lineNum = 0;
         lstAperture = 0;
         interpolation = LINEAR;
-        curPos;
+        curPos = IntPoint();
         quadrant = UNDEF;
         region = OFF;
         type = APERTURE;
@@ -172,4 +174,5 @@ public:
     IntPoint curPos;
 };
 }
+
 #endif //   GERBER_H
