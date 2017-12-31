@@ -25,6 +25,7 @@ public:
     QPen pen() const { return m_pen; }
     void setBrush(const QBrush& brush) { m_brush = brush; }
     void setPen(const QPen& pen) { m_pen = pen; }
+
 protected:
     QPen m_pen;
     QBrush m_brush;

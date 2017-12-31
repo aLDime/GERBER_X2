@@ -8,7 +8,7 @@ class Milling : public AbstractItem {
     Qt::CheckState checkState = Qt::Checked;
 
 public:
-    Milling(const QString name, QGraphicsItemGroup* group);
+    Milling(const QString name, QGraphicsItem* group);
     ~Milling();
 
     // AbstractItem interface
@@ -20,7 +20,7 @@ public:
 
 private:
     QString name;
-    QGraphicsItemGroup *group;
+    QGraphicsItem *group;
 };
 
 #endif // MILLING_H

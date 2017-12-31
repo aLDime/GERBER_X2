@@ -65,7 +65,6 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         dsbList[SideAngle]->setEnabled(false);
         dsbList[SideAngle]->setValue(0);
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
-
         break;
     case Engraving:
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));

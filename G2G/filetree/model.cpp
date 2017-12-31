@@ -56,7 +56,7 @@ bool Model::removeRows(int row, int count, const QModelIndex& parent)
 
 int Model::columnCount(const QModelIndex& parent) const
 {
-    return 2;
+    return 10;
     AbstractItem* parentItem;
     //    if (parent.column() > 0)
     //        return 0;
@@ -143,7 +143,13 @@ QVariant Model::data(const QModelIndex& index, int role) const
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return QString("Name|Note").split('|')[section];
+        switch (section) {
+        case 0:
+            return QString("Name");
+        default:
+            return QString("");
+        }
+    //    QString("Name|Note").split('|')[section];
     return QVariant();
 }
 
@@ -155,7 +161,7 @@ void Model::addGerberFile(G::File* gerberFile)
     rootItem->child(NODE_FILES)->set(rowCount, new FileItem(gerberFile));
 }
 
-void Model::addMilling(const QString name, QGraphicsItemGroup* group)
+void Model::addMilling(const QString name, QGraphicsItem* group)
 {
     QModelIndex index = createIndex(0, 0, rootItem->child(NODE_MILLING));
     int rowCount = rootItem->child(NODE_MILLING)->rowCount();

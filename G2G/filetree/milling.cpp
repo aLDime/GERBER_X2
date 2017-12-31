@@ -2,7 +2,7 @@
 
 #include <QIcon>
 
-Milling::Milling(const QString name, QGraphicsItemGroup* group)
+Milling::Milling(const QString name, QGraphicsItem *group)
     : name(name)
     , group(group)
 {

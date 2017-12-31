@@ -6,11 +6,17 @@
 class MyGraphicsScene : public QGraphicsScene {
 
 public:
-    MyGraphicsScene(QObject* parent);
+    explicit MyGraphicsScene(QObject* parent);
+    ~MyGraphicsScene();
     void RenderPdf(QPainter* painter);
+
+    QGraphicsPathItem* getItemZero() const;
+    QGraphicsPathItem* getItemHome() const;
 
 private:
     bool drawPdf;
+    QGraphicsPathItem* itemZero;
+    QGraphicsPathItem* itemHome;
 
     // QGraphicsScene interface
 protected:

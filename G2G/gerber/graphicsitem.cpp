@@ -186,6 +186,8 @@ void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 {
     Q_UNUSED(widget);
 
+    //    painter->setCompositionMode(QPainter::CompositionMode_Xor);
+
     QBrush brush(m_brush);
     QColor c(m_brush.color());
     QPen pen(c, 0.0);
@@ -210,6 +212,9 @@ void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->setBrush(brush);
     painter->setPen(pen);
     painter->drawPath(m_shape);
+    //    for (QPolygonF p : m_shape.toSubpathPolygons()) {
+    //        painter->drawPolygon(p);
+    //    }
 }
 
 int WorkItem::type() const { return WorkItemType; }

@@ -11,6 +11,43 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent)
     : QGraphicsScene(parent)
     , drawPdf(false)
 {
+    QPainterPath path;
+    path.addEllipse(QPointF(), 3.0, 3.0);
+    double l = 4;
+    path.moveTo(QPointF(0, -l));
+    path.lineTo(QPointF(0, +l));
+
+    path.moveTo(QPointF(-l, 0));
+    path.lineTo(QPointF(+l, 0));
+
+    itemZero = new QGraphicsPathItem(path);
+    itemZero->setBrush(Qt::NoBrush);
+    itemZero->setPen(QPen(Qt::green, 1.0, Qt::SolidLine, Qt::SquareCap));
+    itemZero->setToolTip("G-Code Zero Point");
+    itemZero->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    addItem(itemZero);
+
+    itemHome = new QGraphicsPathItem(path);
+    itemHome->setBrush(Qt::NoBrush);
+    itemHome->setPen(QPen(Qt::blue, 1.0, Qt::SolidLine, Qt::SquareCap));
+    itemHome->setToolTip("G-Code Home Point");
+    itemHome->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    addItem(itemHome);
+
+    QSettings settings;
+    settings.beginGroup("ToolpathNameForm");
+    itemHome->setPos(settings.value("HomeXY").toPointF());
+    itemZero->setPos(settings.value("ZeroXY").toPointF());
+    settings.endGroup();
+}
+
+MyGraphicsScene::~MyGraphicsScene()
+{
+    QSettings settings;
+    settings.beginGroup("ToolpathNameForm");
+    settings.setValue("HomeXY", itemHome->pos());
+    settings.setValue("ZeroXY", itemZero->pos());
+    settings.endGroup();
 }
 
 void MyGraphicsScene::RenderPdf(QPainter* painter)
@@ -18,6 +55,16 @@ void MyGraphicsScene::RenderPdf(QPainter* painter)
     drawPdf = true;
     render(painter);
     drawPdf = false;
+}
+
+QGraphicsPathItem* MyGraphicsScene::getItemZero() const
+{
+    return itemZero;
+}
+
+QGraphicsPathItem* MyGraphicsScene::getItemHome() const
+{
+    return itemHome;
 }
 
 void MyGraphicsScene::drawBackground(QPainter* painter, const QRectF& rect)

@@ -1,5 +1,5 @@
-#ifndef MYMODEL_H
-#define MYMODEL_H
+#ifndef MODEL_H
+#define MODEL_H
 
 #include "abstractitem.h"
 #include "gerber/gerber.h"
@@ -46,7 +46,7 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
     void addGerberFile(G::File *gerberFile);
-    void addMilling(const QString name, QGraphicsItemGroup* group);
+    void addMilling(const QString name, QGraphicsItem *group);
     //    QStringList mimeTypes() const override
     //    {
     //        QStringList types;
@@ -145,4 +145,4 @@ private:
     void importTools();
 };
 
-#endif // MYMODEL_H
+#endif // MODEL_H

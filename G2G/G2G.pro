@@ -67,7 +67,8 @@ HEADERS += \
     openingdialog.h \
     settingsdialog.h \
     toolpathcreator.h \
-    gerber/file.h
+    gerber/file.h \
+    gcode/gcode.h
 
 SOURCES += \
     clipper/clipper.cpp \
@@ -104,5 +105,6 @@ SOURCES += \
     mainwindow.cpp \
     settingsdialog.cpp \
     toolpathcreator.cpp \
-    gerber/file.cpp
+    gerber/file.cpp \
+    gcode/gcode.cpp
 

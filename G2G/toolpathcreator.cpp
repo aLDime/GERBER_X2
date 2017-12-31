@@ -147,7 +147,7 @@ Paths ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
 
     ClipperOffset offset(uScale, uScale / 1000);
     for (Paths& paths : GetGroupedPaths(COPPER, true)) {
-        offset.AddPaths(paths, jtRound, etClosedPolygon);
+        offset.AddPaths(paths, jtMiter, etClosedPolygon);
     }
     offset.Execute(tmpPaths, dOffset);
     for (Path& path : tmpPaths) {
