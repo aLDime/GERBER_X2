@@ -132,13 +132,3 @@ void ToolpathNameForm::setTool(const Tool& tool, const QString& name)
     settings.setValue("tool", tool.toHex().append('|').append(tool.name).append('|').append(tool.note));
     settings.endGroup();
 }
-
-Tool ToolpathNameForm::getTool() const
-{
-    return tool;
-}
-
-void ToolpathNameForm::setTool(const Tool& value)
-{
-    tool = value;
-}

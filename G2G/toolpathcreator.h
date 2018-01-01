@@ -28,7 +28,7 @@ public:
     Paths Merge(G::File* gerberFile);
     Pathss ToolPathPocket(MILLING milling, double toolDiameter);
     Paths ToolPathProfile(MILLING milling, double toolDiameter);
-    constexpr Paths& GetMergedPaths();
+     Paths GetMergedPaths();
 
     ToolPathCreator& addPaths(const Paths& value);
     ToolPathCreator& setPaths(const Paths& value);

@@ -283,7 +283,7 @@ void ToolModel::exportTools()
         }
     }
 
-    QFile file("D:/PRO/QT_PROJECTS/ToolDatabase.txt");
+    QFile file("ToolDatabase.txt");
     if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
         return;
 
@@ -298,7 +298,7 @@ void ToolModel::exportTools()
 void ToolModel::importTools()
 {
     QVector<int> tools(ToolDatabase::getTools());
-    QFile file("D:/PRO/QT_PROJECTS/ToolDatabase.txt");
+    QFile file("ToolDatabase.txt");
     if (!file.open(QIODevice::ReadOnly)) {
         QMessageBox::information(0, tr("Unable to open file"), file.errorString());
         return;

@@ -156,7 +156,7 @@ Paths ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
     return tmpPaths;
 }
 
-constexpr Paths& ToolPathCreator::GetMergedPaths()
+Paths ToolPathCreator::GetMergedPaths()
 {
     return mergedPaths;
 }

@@ -459,6 +459,10 @@ void ProfileToolpathForm::calculate()
     //    group->setAcceptHoverEvents(false);
     //    group->setAcceptTouchEvents(false);
     //    group->setAcceptedMouseButtons(Qt::NoButton);
+    if (paths.size() == 0 && side == INSIDE_MILLING) {
+        QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
+        return;
+    }
 
     GCodeProfile* group = new GCodeProfile(paths, tool, dsbDepth->value());
     scene->addItem(group);

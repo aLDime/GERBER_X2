@@ -42,8 +42,10 @@ int main(int argc, char* argv[])
     parser.addVersionOption();
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
+    QSettings s;
+    s.setValue("icons", s.value("icons", "icons/breeze/").toString());
+    QIcon::setThemeSearchPaths({ s.value("icons").toString() });
 
-    QIcon::setThemeSearchPaths({ "D:/PRO/QT_PROJECTS/icons/breeze/" });
     QIcon::setThemeName("Breeze");
 
     MainWindow* mainWin = new MainWindow;
