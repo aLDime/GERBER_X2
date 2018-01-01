@@ -7,10 +7,13 @@
 #include <QGraphicsView>
 #include "gerberfileholder.h"
 
-MyGraphicsScene::MyGraphicsScene(QObject* parent)
+MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
     : QGraphicsScene(parent)
     , drawPdf(false)
+    , drawPoints(drawPoints)
 {
+    if (!drawPoints)
+        return;
     QPainterPath path;
     path.addEllipse(QPointF(), 3.0, 3.0);
     double l = 4;
@@ -43,6 +46,8 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent)
 
 MyGraphicsScene::~MyGraphicsScene()
 {
+    if (!drawPoints)
+        return;
     QSettings settings;
     settings.beginGroup("ToolpathNameForm");
     settings.setValue("HomeXY", itemHome->pos());

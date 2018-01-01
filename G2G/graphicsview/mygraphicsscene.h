@@ -6,7 +6,7 @@
 class MyGraphicsScene : public QGraphicsScene {
 
 public:
-    explicit MyGraphicsScene(QObject* parent);
+    explicit MyGraphicsScene(QObject* parent, bool drawPoints = false);
     ~MyGraphicsScene();
     void RenderPdf(QPainter* painter);
 
@@ -15,8 +15,9 @@ public:
 
 private:
     bool drawPdf;
-    QGraphicsPathItem* itemZero;
-    QGraphicsPathItem* itemHome;
+    bool drawPoints;
+    QGraphicsPathItem* itemZero = nullptr;
+    QGraphicsPathItem* itemHome = nullptr;
 
     // QGraphicsScene interface
 protected:

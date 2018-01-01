@@ -58,20 +58,27 @@ DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
     };
 
     QStandardItemModel* model = new QStandardItemModel(this);
+    QList<QStandardItem*> list;
     QMapIterator<int, G::Aperture*> i(apertures);
     while (i.hasNext()) {
         i.next();
         qDebug() << i.key();
-        QList<QStandardItem*> list;
-        QString name;
-        name = QString("D%1 %2").arg(i.key()).arg(i.value()->name());
-        list << new QStandardItem(draw(i.value()), name);
-        list.last()->setFlags(Qt::ItemIsEnabled);
-        list.last()->setData(QVariant::fromValue<int>(i.key()));
-        list << new QStandardItem("Select Drill");
-        list.last()->setFlags(Qt::ItemIsEnabled);
-        list.last()->setData(QVariant::fromValue<double>(0.0));
-        model->appendRow(list);
+        if (i.value()->isFlashed()) {
+            QString name;
+            list.clear();
+            name = QString("D%1 %2").arg(i.key()).arg(i.value()->name());
+            list << new QStandardItem(draw(i.value()), name);
+            list.last()->setFlags(Qt::ItemIsEnabled);
+            list.last()->setData(QVariant::fromValue<int>(i.key()));
+            list << new QStandardItem("Select Drill");
+            list.last()->setFlags(Qt::ItemIsEnabled);
+            list.last()->setData(QVariant::fromValue<double>(0.0));
+            model->appendRow(list);
+        }
+    }
+    if (list.size() == 0) {
+        QMessageBox::information(this, "", "No flashed apertures!");
+        return;
     }
     model->setHorizontalHeaderLabels(QString("Gerber::G::Aperture|Tool").split('|'));
 

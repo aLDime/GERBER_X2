@@ -17,16 +17,12 @@
 #include <QRadioButton>
 #include <QSignalMapper>
 #include <QTabBar>
-
 #include <QMessageBox>
 
 #include <gerberfileholder.h>
-
 #include <gerber/graphicsitem.h>
-
 #include <tooldatabase/tooldatabase.h>
 #include <tooldatabase/tooledit.h>
-
 #include <gcode/gcode.h>
 
 Q_DECLARE_METATYPE(QGraphicsItemGroup*)

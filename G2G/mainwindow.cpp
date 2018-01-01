@@ -31,7 +31,7 @@ MainWindow::MainWindow(QWidget* parent)
 //, fileHolder(new GerberFileHolder(this))
 {
     setupUi(this);
-    scene = new MyGraphicsScene(this);
+    scene = new MyGraphicsScene(this, true);
     graphicsView->SetScene(scene);
     Init();
     setCurrentFile(QString());
@@ -116,9 +116,9 @@ void MainWindow::closeFiles()
     QModelIndex index = treeView->model()->index(NODE_FILES, 0, QModelIndex());
     int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount();
     treeView->model()->removeRows(NODE_FILES, rowCount, index);
-    scene->deleteLater();
-    scene = new MyGraphicsScene(this);
-    graphicsView->SetScene(scene);
+    //    scene->deleteLater();
+    //    scene = new MyGraphicsScene(this, true);
+    //    graphicsView->SetScene(scene);
 }
 
 bool MainWindow::save()
