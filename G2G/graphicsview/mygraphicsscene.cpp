@@ -14,27 +14,25 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
 {
     if (!drawPoints)
         return;
+
     QPainterPath path;
-    path.addEllipse(QPointF(), 3.0, 3.0);
-    double l = 4;
-    path.moveTo(QPointF(0, -l));
-    path.lineTo(QPointF(0, +l));
-
-    path.moveTo(QPointF(-l, 0));
-    path.lineTo(QPointF(+l, 0));
-
+    path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
+    path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
     itemZero = new QGraphicsPathItem(path);
-    itemZero->setBrush(Qt::NoBrush);
-    itemZero->setPen(QPen(Qt::green, 1.0, Qt::SolidLine, Qt::SquareCap));
+    itemZero->setBrush(Qt::green);
+    itemZero->setPen(Qt::NoPen);
     itemZero->setToolTip("G-Code Zero Point");
-    itemZero->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    itemZero->setFlags(QGraphicsItem::ItemIsMovable);
     addItem(itemZero);
 
-    itemHome = new QGraphicsPathItem(path);
-    itemHome->setBrush(Qt::NoBrush);
-    itemHome->setPen(QPen(Qt::blue, 1.0, Qt::SolidLine, Qt::SquareCap));
+    QPainterPath path2;
+    path2.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
+    path2.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+    itemHome = new QGraphicsPathItem(path2);
+    itemHome->setBrush(Qt::blue);
+    itemHome->setPen(Qt::NoPen);
     itemHome->setToolTip("G-Code Home Point");
-    itemHome->setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemIsSelectable);
+    itemHome->setFlags(QGraphicsItem::ItemIsMovable);
     addItem(itemHome);
 
     QSettings settings;

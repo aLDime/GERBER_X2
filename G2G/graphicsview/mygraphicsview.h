@@ -12,7 +12,7 @@ class MyGraphicsView : public QGraphicsView {
 public:
     explicit MyGraphicsView(QWidget* parent = 0);
     void SetScene(QGraphicsScene* Scene);
-    void Setup(QSettings& settings);
+//    void Setup();
     void Zoom100();
     void ZoomFit();
     void ZoomIn();

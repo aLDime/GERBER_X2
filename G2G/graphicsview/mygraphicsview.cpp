@@ -50,6 +50,13 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
 
     scale(1.0, -1.0); //flip vertical
     Zoom100();
+
+    QSettings settings;
+    settings.beginGroup("Viewer");
+    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing").toBool());
+    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+    viewport()->setObjectName("viewport");
+    settings.endGroup();
 }
 
 void MyGraphicsView::SetScene(QGraphicsScene* Scene)
@@ -66,14 +73,15 @@ void MyGraphicsView::ZoomFit()
     UpdateRuler();
 }
 
-void MyGraphicsView::Setup(QSettings& settings)
-{
-    settings.beginGroup("Viewer");
-    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing").toBool());
-    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
-    viewport()->setObjectName("viewport");
-    settings.endGroup();
-}
+//void MyGraphicsView::Setup()
+//{
+//    QSettings settings;
+//    settings.beginGroup("Viewer");
+//    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing").toBool());
+//    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+//    viewport()->setObjectName("viewport");
+//    settings.endGroup();
+//}
 
 void MyGraphicsView::Zoom100()
 {

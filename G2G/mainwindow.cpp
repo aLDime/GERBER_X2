@@ -302,6 +302,7 @@ void MainWindow::createActions()
     action = toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=]() { createDockWidget(new DrillingToolpathForm(), DRILLING_TOOLPATH_FORM); });
     ToolpathActionList.append(action);
     action = toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
+    action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=]() {});
     //    action->setShortcut(QKeySequence::ZoomIn);
     for (QAction* action : ToolpathActionList) {
         action->setCheckable(true);
@@ -345,7 +346,7 @@ void MainWindow::readSettings()
         }
         restoreState(settings.value("state", QByteArray()).toByteArray());
     }
-    graphicsView->Setup(settings);
+    //graphicsView->Setup();
     lastPath = settings.value("lastPath").toString();
     QString files = settings.value("files").toString();
     for (const QString& file : files.split('|', QString::SkipEmptyParts)) {

@@ -39,7 +39,7 @@ public:
         //    double SideAngle;
         //    double Stepover;
         //    double StepoverPercent;
-        int feedSpeeds = 0;
+        int feedSpeeds = 1;
         int spindleRpm = 0;
         ToolType toolType = Group;
     } data;

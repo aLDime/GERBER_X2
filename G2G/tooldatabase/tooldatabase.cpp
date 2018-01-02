@@ -29,7 +29,7 @@ ToolDatabase::ToolDatabase(QWidget* parent, const QVector<int> tools)
     connect(toolEdit, &ToolEdit::toolEdited, this, &ToolDatabase::setTool);
     connect(tree, &ToolTreeView::doubleClicked, [&](const QModelIndex& index) {
         setTool(*reinterpret_cast<Tool*>(index.data(Qt::UserRole + 1).toULongLong()));
-        if (tool.data.toolType != Group && index.flags() & Qt::ItemIsEnabled)
+        if (tool.data.toolType != Group && index.flags() & Qt::ItemIsEnabled && tools.size())
             accept();
     });
 }
@@ -111,7 +111,7 @@ void ToolDatabase::setupUi(QDialog* ToolDatabase)
 
     retranslateUi(ToolDatabase);
     QObject::connect(buttonBox, &QDialogButtonBox::accepted, [&] {
-        if (tool.data.toolType != Group)
+        if (tool.data.toolType != Group || tools.size() == 0)
             accept();
     });
     QObject::connect(buttonBox, &QDialogButtonBox::rejected, ToolDatabase, &QDialog::reject);

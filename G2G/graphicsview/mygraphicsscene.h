@@ -1,7 +1,21 @@
 #ifndef MYGRAPHICSSCENE_H
 #define MYGRAPHICSSCENE_H
 
+#include <QGraphicsItem>
 #include <QGraphicsScene>
+
+class Point : public QObject, public QGraphicsItem {
+    Q_OBJECT
+public:
+    Point() {}
+    virtual ~Point() {}
+
+    // QGraphicsItem interface
+public:
+    QRectF boundingRect() const override;
+    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
+};
+
 
 class MyGraphicsScene : public QGraphicsScene {
 

@@ -33,7 +33,7 @@ ToolEdit::ToolEdit(QWidget* parent)
     cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
     on_cbxToolType_currentIndexChanged(0);
 
-     //    setMaximumSize(QSize(393, 577));
+    //    setMaximumSize(QSize(393, 577));
 }
 
 ToolEdit::~ToolEdit()
@@ -205,6 +205,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[Diameter]->setObjectName(QStringLiteral("Diameter"));
     dsbList[Diameter]->setFont(font1);
     dsbList[Diameter]->setMaximum(100);
+
     dsbList[SideAngle] = new QDoubleSpinBox(grBox_2);
     dsbList[SideAngle]->setObjectName(QStringLiteral("SideAngle"));
     dsbList[SideAngle]->setFont(font1);
@@ -246,18 +247,22 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[PassDepth]->setObjectName(QStringLiteral("PassDepth"));
     dsbList[PassDepth]->setFont(font1);
     dsbList[PassDepth]->setMaximum(100);
+
     dsbList[Stepover] = new QDoubleSpinBox(grBox_3);
     dsbList[Stepover]->setObjectName(QStringLiteral("Stepover"));
     dsbList[Stepover]->setFont(font1);
     dsbList[Stepover]->setMaximum(100);
+
     dsbList[StepoverPercent] = new QDoubleSpinBox(grBox_3);
     dsbList[StepoverPercent]->setObjectName(QStringLiteral("StepoverPercent"));
     dsbList[StepoverPercent]->setFont(font1);
     dsbList[StepoverPercent]->setMaximum(100);
+
     dsbList[ClearencePassStepover] = new QDoubleSpinBox(grBox_3);
     dsbList[ClearencePassStepover]->setObjectName(QStringLiteral("ClearencePassStepover"));
     dsbList[ClearencePassStepover]->setFont(font1);
     dsbList[ClearencePassStepover]->setMaximum(100);
+
     dsbList[ClearencePassStepoverPercent] = new QDoubleSpinBox(grBox_3);
     dsbList[ClearencePassStepoverPercent]->setObjectName(QStringLiteral("ClearencePassStepoverPercent"));
     dsbList[ClearencePassStepoverPercent]->setFont(font1);
@@ -307,6 +312,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[PlungeRate]->setObjectName(QStringLiteral("PlungeRate"));
     dsbList[PlungeRate]->setFont(font1);
     dsbList[PlungeRate]->setMaximum(100);
+
     dsbList[FeedRate] = new QDoubleSpinBox(grBox_4);
     dsbList[FeedRate]->setObjectName(QStringLiteral("FeedRate"));
     dsbList[FeedRate]->setFont(font1);
@@ -377,6 +383,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     //    dsbList[FlatDiameter]->setSingleStep(0.1);
 
     connect(dsbList[Diameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
+    connect(dsbList[Diameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     connect(dsbList[SideAngle], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     //    connect(dsbList[FlatDiameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double) { updateName(); });
     connect(pbApply, &QPushButton::clicked, this, &ToolEdit::apply);
@@ -391,7 +398,7 @@ void ToolEdit::retranslateUi(QWidget* ToolEdit)
     ToolEdit->setWindowTitle(tr("Dialog"));
     pbApply->setText(tr("Apply"));
     cbxFeedSpeeds->clear();
-    cbxFeedSpeeds->insertItems(0, QStringList() << tr("mm/sec") << tr("mm/min") << tr("m/min"));
+    cbxFeedSpeeds->insertItems(0, { tr("mm/sec"), tr("mm/min"), tr("m/min") });
     cbxUnits->clear();
     cbxUnits->insertItems(0, QStringList() << tr("mm") << tr("inches"));
 
