@@ -66,8 +66,8 @@ ToolpathNameForm::ToolpathNameForm(QWidget* parent)
 
     QSettings settings;
     settings.beginGroup("ToolpathNameForm");
-    dsbHomeZ->setValue(settings.value("HomeZ", 10.0).toFloat());
-    dsbSafeZ->setValue(settings.value("SafeZ", 10.0).toFloat());
+    dsbHomeZ->setValue(settings.value("HomeZ", 10.0).toDouble());
+    dsbSafeZ->setValue(settings.value("SafeZ", 10.0).toDouble());
     settings.endGroup();
 }
 

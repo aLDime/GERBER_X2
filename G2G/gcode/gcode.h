@@ -13,7 +13,7 @@ public:
 
 class GCodeProfile : public QGraphicsItemGroup {
 public:
-    GCodeProfile(const Paths& paths, const Tool& tool, double cutDepth);
+    GCodeProfile(const Paths& paths, const Tool& tool, double m_depth);
     //    QRectF boundingRect() const override { return rect; }
     //    QPainterPath shape() const override { return m_shape; }
     //    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override
@@ -39,14 +39,14 @@ public:
     //    }
     //    int type() const { return QGraphicsItem::UserType + 3; }
     Paths getPaths() const;
-
+    void save(const QString& name);
 private:
     QPainterPath m_shape;
     QPainterPath m_drawShape;
     Paths paths;
     QRectF rect;
     Tool tool;
-    double cutDepth;
+    double m_depth;
     double d;
 };
 

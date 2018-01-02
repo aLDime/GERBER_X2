@@ -404,7 +404,7 @@ void ProfileToolpathForm::calculate()
 
     QList<QGraphicsItem*> wItems(scene->selectedItems());
 
-    if (qFuzzyIsNull(tool.data.Params[Diameter])) {
+    if (qFuzzyIsNull(tool.data.params[Diameter])) {
         QMessageBox::warning(this, "!!!", tr("No valid tool..."));
         return;
     }
@@ -419,48 +419,14 @@ void ProfileToolpathForm::calculate()
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
     }
-    //    QList<QGraphicsItem*> items;
-    //    QGraphicsPolygonItem* polygonItem;
 
-    double d = tool.data.Params[Diameter];
+    GCodeProfile* group = ToolPathCreator().setPaths(wPaths).ToolPathProfile(static_cast<MILLING>(side), tool, dsbDepth->value());
 
-    if (dsbDepth->value() > 0.0 && tool.data.Params[SideAngle] > 0.0) {
-        double a = qDegreesToRadians(90 - tool.data.Params[SideAngle] / 2);
-        d = dsbDepth->value() * cos(a) / sin(a);
-        d = d * 2 + tool.data.Params[Diameter];
-    }
-
-    Paths paths(ToolPathCreator().setPaths(wPaths).ToolPathProfile(static_cast<MILLING>(side), /*tool.data.Params[Diameter]*/ d));
-
-    //    for (Path& path : paths) {
-    //        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-    //        polygonItem->setPen(QPen(QColor(255, 255, 255, 100), tool.data.Params[Diameter], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    //        polygonItem->setBrush(Qt::NoBrush);
-    //        items.append(polygonItem);
-
-    //        if (dsbDepth->value() > 0.0 && tool.data.Params[SideAngle] > 0.0) {
-    //            polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-    //            polygonItem->setPen(QPen(QColor(0, 255, 0, 100), d, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-    //            polygonItem->setBrush(Qt::NoBrush);
-    //            items.append(polygonItem);
-    //        }
-
-    //        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-    //        polygonItem->setPen(QPen(Qt::white, 0.0));
-    //        polygonItem->setBrush(Qt::NoBrush);
-    //        items.append(polygonItem);
-    //    }
-
-    //    QGraphicsItemGroup* group = scene->createItemGroup(items);
-    //    group->setAcceptHoverEvents(false);
-    //    group->setAcceptTouchEvents(false);
-    //    group->setAcceptedMouseButtons(Qt::NoButton);
-    if (paths.size() == 0 && side == INSIDE_MILLING) {
+    if (group == nullptr) {
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
         return;
     }
 
-    GCodeProfile* group = new GCodeProfile(paths, tool, dsbDepth->value());
     scene->addItem(group);
     Model::model->addMilling(nameForm->text(), group);
 }

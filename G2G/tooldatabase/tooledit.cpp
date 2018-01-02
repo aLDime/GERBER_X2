@@ -101,12 +101,12 @@ void ToolEdit::apply()
     int i = 0;
     for (QDoubleSpinBox* dsb : dsbList) {
         if (dsb)
-            tool.data.Params[i] = dsb->value();
+            tool.data.params[i] = dsb->value();
         ++i;
     }
 
     tool.data.feedSpeeds = cbxFeedSpeeds->currentIndex();
-    tool.data.spindleSpeed = sbSpindleSpeed->value();
+    tool.data.spindleRpm = sbSpindleSpeed->value();
     tool.data.toolType = static_cast<ToolType>(cbxToolType->currentIndex());
     tool.name = leName->text();
     tool.note = pteNote->document()->toRawText();
@@ -118,11 +118,11 @@ void ToolEdit::setTool(const Tool& value)
     tool = value;
     for (int i = 0; i < dsbList.size(); ++i) {
         if (dsbList[i])
-            dsbList[i]->setValue(tool.data.Params[i]);
+            dsbList[i]->setValue(tool.data.params[i]);
     }
 
     cbxFeedSpeeds->setCurrentIndex(tool.data.feedSpeeds);
-    sbSpindleSpeed->setValue(tool.data.spindleSpeed);
+    sbSpindleSpeed->setValue(tool.data.spindleRpm);
     lastType = tool.data.toolType;
     cbxToolType->setCurrentIndex(tool.data.toolType);
     leName->setText(tool.name);

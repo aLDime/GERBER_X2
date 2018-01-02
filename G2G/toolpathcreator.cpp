@@ -1,6 +1,8 @@
 #include "toolpathcreator.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <QFile>
+#include <QSettings>
 
 //GERBER_FILE ToolPathCreator::file;
 
@@ -45,8 +47,9 @@ Paths ToolPathCreator::Merge(G::File* gerberFile)
     return mergedPaths;
 }
 
-Pathss ToolPathCreator::ToolPathPocket(MILLING milling, double toolDiameter)
+Pathss ToolPathCreator::ToolPathPocket(MILLING milling, const Tool& tool)
 {
+    double toolDiameter = tool.data.params[Diameter];
     double dOffset = -toolDiameter * uScale / 2.00;
     double stepOver = dOffset * 0.8;
 
@@ -128,8 +131,10 @@ Pathss ToolPathCreator::ToolPathPocket(MILLING milling, double toolDiameter)
     return retPaths;
 }
 
-Paths ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
+GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, double depth)
 {
+    double toolDiameter = tool.diameter(depth);
+
     double dOffset;
     switch (milling) {
     case OUTSIDE_MILLING:
@@ -150,10 +155,18 @@ Paths ToolPathCreator::ToolPathProfile(MILLING milling, double toolDiameter)
         offset.AddPaths(paths, jtMiter, etClosedPolygon);
     }
     offset.Execute(tmpPaths, dOffset);
-    for (Path& path : tmpPaths) {
-        path.append(path.first());
-    }
-    return tmpPaths;
+
+    if (tmpPaths.size() == 0)
+        return nullptr;
+
+
+
+
+
+    //    for (Path& path : tmpPaths) {
+    //        path.append(path.first());
+    //    }
+    return new GCodeProfile(tmpPaths, tool, depth);
 }
 
 Paths ToolPathCreator::GetMergedPaths()

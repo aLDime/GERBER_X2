@@ -381,7 +381,7 @@ void PocketToolpathForm::calculate()
     double toolDiameter = dsbDepth->value();
     ToolPathCreator tpc;
     tpc.addPaths(value);
-    Pathss paths = tpc.ToolPathPocket(INSIDE_MILLING, toolDiameter);
+    Pathss paths; //= tpc.ToolPathPocket(INSIDE_MILLING, toolDiameter);
     //tpc.Clear();
 
     QPainterPath painterPath;
@@ -408,9 +408,9 @@ void PocketToolpathForm::calculate()
     //    //}
 
     painterPath = QPainterPath();
-    for (Paths &paths2 : paths) {
-        for (Path &path : paths2) {
-//            path.append(path.first());
+    for (Paths& paths2 : paths) {
+        for (Path& path : paths2) {
+            //            path.append(path.first());
             painterPath.addPolygon(PathToQPolygon(path));
         }
     }
@@ -423,5 +423,5 @@ void PocketToolpathForm::calculate()
     group->setAcceptHoverEvents(false);
     group->setAcceptTouchEvents(false);
     group->setAcceptedMouseButtons(Qt::NoButton);
-//    mw->treeWidget->addMilling(nameForm->text(), group);
+    //    mw->treeWidget->addMilling(nameForm->text(), group);
 }

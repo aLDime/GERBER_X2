@@ -28,7 +28,7 @@ Q_DECLARE_METATYPE(ToolType)
 struct Tool {
 public:
     struct D {
-        double Params[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
+        double params[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
         //    double ClearencePassStepover;
         //    double ClearencePassStepoverPercent;
         //    double Diameter;
@@ -40,7 +40,7 @@ public:
         //    double Stepover;
         //    double StepoverPercent;
         int feedSpeeds = 0;
-        int spindleSpeed = 0;
+        int spindleRpm = 0;
         ToolType toolType = Group;
     } data;
 
@@ -53,6 +53,8 @@ public:
     ~Tool();
     void fromHex(const QByteArray& Data);
     QByteArray toHex() const;
+
+    double diameter(double depth = 0.0) const;
 };
 
 Q_DECLARE_METATYPE(Tool)

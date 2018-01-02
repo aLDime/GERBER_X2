@@ -2,7 +2,7 @@
 
 #include <QIcon>
 
-Milling::Milling(const QString name, QGraphicsItem *group)
+Milling::Milling(const QString name, QGraphicsItem* group)
     : name(name)
     , group(group)
 {
@@ -58,6 +58,8 @@ QVariant Milling::data(const QModelIndex& index, int role) const
             return checkState;
         case Qt::DecorationRole:
             return QIcon::fromTheme("object-to-path");
+        case Qt::UserRole:
+            return QVariant::fromValue(reinterpret_cast<quint64>(group));
         default:
             break;
         }

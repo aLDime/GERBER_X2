@@ -5,6 +5,8 @@
 #include "gerber/gerber.h"
 #include <QObject>
 #include "gerber/parser.h"
+#include <tooldatabase/tool.h>
+#include <gcode/gcode.h>
 
 using namespace ClipperLib;
 
@@ -26,9 +28,9 @@ public:
     void Clear();
 
     Paths Merge(G::File* gerberFile);
-    Pathss ToolPathPocket(MILLING milling, double toolDiameter);
-    Paths ToolPathProfile(MILLING milling, double toolDiameter);
-     Paths GetMergedPaths();
+    Pathss ToolPathPocket(MILLING milling, const Tool& tool);
+    GCodeProfile* ToolPathProfile(MILLING milling, const Tool& tool, double depth = 0.0);
+    Paths GetMergedPaths();
 
     ToolPathCreator& addPaths(const Paths& value);
     ToolPathCreator& setPaths(const Paths& value);

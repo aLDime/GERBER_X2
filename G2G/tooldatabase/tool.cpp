@@ -1,4 +1,5 @@
 #include "tool.h"
+#include <QtMath>
 
 Tool::Tool()
     : name("Name")
@@ -32,4 +33,17 @@ void Tool::fromHex(const QByteArray& Data)
 QByteArray Tool::toHex() const
 {
     return QByteArray(reinterpret_cast<const char*>(&data), sizeof(D)).toHex();
+}
+
+double Tool::diameter(double depth)const
+{
+    double d = data.params[Diameter];
+    if (depth > 0.0 && data.params[SideAngle] > 0.0) {
+        double a = qDegreesToRadians(90 - data.params[SideAngle] / 2);
+        d = depth * cos(a) / sin(a);
+        d = d * 2 + data.params[Diameter];
+    }
+    else
+        d = data.params[Diameter];
+    return d;
 }

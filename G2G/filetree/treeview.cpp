@@ -16,6 +16,8 @@
 #include <drillforapertureform.h>
 #include <mainwindow.h>
 
+#include <gcode/gcode.h>
+
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
 {
@@ -123,6 +125,31 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         QMenu menu(this);
         menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), [&] {
             m_model->removeRow(index.row(), index.parent());
+        });
+        menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), [&] {
+
+            QSettings settings;
+
+            QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
+                QString(settings.value("LastGCodeDir").toString()).append(index.data().toString()),
+                tr("GCode (*.tap)")));
+
+            if (name.isEmpty())
+                return;
+            //            if (name.lastIndexOf(".tap") < (name.length() - 4))
+            //                name.append(".tap");
+
+            qDebug() << name << name.left(name.lastIndexOf('/') + 1);
+
+            settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
+            GCodeProfile* gcp = reinterpret_cast<GCodeProfile*>(index.data(Qt::UserRole).toULongLong());
+            gcp->save(name);
+            //            QFileDialog fileDialog(this, tr("Export PDF"));
+            //            fileDialog.setAcceptMode(QFileDialog::AcceptSave);
+            //            fileDialog.setMimeTypeFilters(QStringList("application/ngc"));
+            //            fileDialog.setDefaultSuffix("pdf");
+            //            if (fileDialog.exec() != QDialog::Accepted)
+            //                return;
         });
         menu.exec(mapToGlobal(event->pos()));
     }
