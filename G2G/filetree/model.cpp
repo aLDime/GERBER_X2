@@ -166,7 +166,7 @@ void Model::addMilling(const QString name, QGraphicsItem* group)
     QModelIndex index = createIndex(0, 0, rootItem->child(NODE_MILLING));
     int rowCount = rootItem->child(NODE_MILLING)->rowCount();
     insertRows(rowCount, 1, index);
-    rootItem->child(NODE_MILLING)->set(rowCount, new Milling(name, group));
+    rootItem->child(NODE_MILLING)->set(rowCount, new Milling(name + ' ' + QString().setNum(rowCount + 1), group));
     emit updateActions();
 }
 

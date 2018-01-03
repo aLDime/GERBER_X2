@@ -24,7 +24,7 @@
 #include <QVBoxLayout>
 #include <QWidget>
 #include <mainwindow.h>
-#include <toolpathcreator.h>
+#include <toolpath/toolpathcreator.h>
 #include <QtCore/QVariant>
 #include <gerber/graphicsitem.h>
 

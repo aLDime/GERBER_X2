@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QtMath>
 #include <QGraphicsView>
-#include "gerberfileholder.h"
+#include "point.h"
 
 MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
     : QGraphicsScene(parent)
@@ -15,42 +15,20 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
     if (!drawPoints)
         return;
 
-    QPainterPath path;
-    path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
-    path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
-    itemZero = new QGraphicsPathItem(path);
-    itemZero->setBrush(Qt::green);
-    itemZero->setPen(Qt::NoPen);
+    itemZero = new Point(0);
+    itemZero->setBrush(Qt::red);
     itemZero->setToolTip("G-Code Zero Point");
-    itemZero->setFlags(QGraphicsItem::ItemIsMovable);
-    addItem(itemZero);
 
-    QPainterPath path2;
-    path2.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
-    path2.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
-    itemHome = new QGraphicsPathItem(path2);
-    itemHome->setBrush(Qt::blue);
-    itemHome->setPen(Qt::NoPen);
+    itemHome = new Point(1);
+    itemHome->setBrush(Qt::green);
     itemHome->setToolTip("G-Code Home Point");
-    itemHome->setFlags(QGraphicsItem::ItemIsMovable);
-    addItem(itemHome);
 
-    QSettings settings;
-    settings.beginGroup("ToolpathNameForm");
-    itemHome->setPos(settings.value("HomeXY").toPointF());
-    itemZero->setPos(settings.value("ZeroXY").toPointF());
-    settings.endGroup();
+    addItem(itemZero);
+    addItem(itemHome);
 }
 
 MyGraphicsScene::~MyGraphicsScene()
 {
-    if (!drawPoints)
-        return;
-    QSettings settings;
-    settings.beginGroup("ToolpathNameForm");
-    settings.setValue("HomeXY", itemHome->pos());
-    settings.setValue("ZeroXY", itemZero->pos());
-    settings.endGroup();
 }
 
 void MyGraphicsScene::RenderPdf(QPainter* painter)
@@ -60,12 +38,12 @@ void MyGraphicsScene::RenderPdf(QPainter* painter)
     drawPdf = false;
 }
 
-QGraphicsPathItem* MyGraphicsScene::getItemZero() const
+Point* MyGraphicsScene::getItemZero() const
 {
     return itemZero;
 }
 
-QGraphicsPathItem* MyGraphicsScene::getItemHome() const
+Point* MyGraphicsScene::getItemHome() const
 {
     return itemHome;
 }

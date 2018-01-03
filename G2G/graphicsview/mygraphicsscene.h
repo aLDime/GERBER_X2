@@ -3,19 +3,7 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
-
-class Point : public QObject, public QGraphicsItem {
-    Q_OBJECT
-public:
-    Point() {}
-    virtual ~Point() {}
-
-    // QGraphicsItem interface
-public:
-    QRectF boundingRect() const override;
-    void paint(QPainter *painter, const QStyleOptionGraphicsItem *option, QWidget *widget) override;
-};
-
+class Point;
 
 class MyGraphicsScene : public QGraphicsScene {
 
@@ -24,14 +12,14 @@ public:
     ~MyGraphicsScene();
     void RenderPdf(QPainter* painter);
 
-    QGraphicsPathItem* getItemZero() const;
-    QGraphicsPathItem* getItemHome() const;
+    Point* getItemZero() const;
+    Point* getItemHome() const;
 
 private:
     bool drawPdf;
     bool drawPoints;
-    QGraphicsPathItem* itemZero = nullptr;
-    QGraphicsPathItem* itemHome = nullptr;
+    Point* itemZero = nullptr;
+    Point* itemHome = nullptr;
 
     // QGraphicsScene interface
 protected:

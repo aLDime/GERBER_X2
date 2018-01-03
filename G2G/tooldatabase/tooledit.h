@@ -8,6 +8,7 @@
 #include <QByteArray>
 #include <QByteArray>
 #include <QDialog>
+#include <qmap.h>
 
 class QComboBox;
 class QDoubleSpinBox;
@@ -54,13 +55,13 @@ private:
     QComboBox* cbxFeedSpeeds;
 
     QComboBox* cbxUnits;
-    QVector<QDoubleSpinBox*> dsbList;
+    QMap<int, QDoubleSpinBox*> dsbList;
     QGroupBox* groupBox;
     QGroupBox* grBox_2;
     QGroupBox* grBox_3;
     QGroupBox* grBox_4;
     QLabel* lblPixmap;
-//    QLabel* label_10;
+    //    QLabel* label_10;
     QLabel* label_11;
     QLabel* label_12;
     QLabel* label_13;

@@ -95,6 +95,7 @@ private:
     QToolBar* toolpathToolBar;
     QToolBar* zoomToolBar;
     static MainWindow* pMainWindow;
+    QVector<QAction*> toolpathActionList;
 };
 
 #endif // MAINWINDOW_H

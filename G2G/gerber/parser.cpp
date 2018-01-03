@@ -5,7 +5,7 @@
 #include <QTextStream>
 #include <QThread>
 #include <QDebug>
-#include <toolpathcreator.h>
+#include <toolpath/toolpathcreator.h>
 
 using namespace G;
 
@@ -159,7 +159,7 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
         int counter = 0;
 
         for (Paths& vpaths : tpc.GetGroupedPaths(COPPER)) {
-            file->gig->append(new /*Gerber::*/ WorkItem(vpaths));
+            file->gig->append(new WorkItem(vpaths));
             file->gig->last()->setToolTip(QString("COPPER %1").arg(++counter));
         }
         emit fileReady(file);
@@ -299,6 +299,8 @@ QList<QString> Parser::Format(QString data)
     return gerberLines;
 }
 #include <math.h>
+
+#include <toolpath/toolpathcreator.h>
 double Parser::ArcAngle(double start, double stop)
 {
     if (state.interpolation == COUNTERCLOCKWISE_CIRCULAR && stop <= start) {
@@ -389,9 +391,9 @@ void Parser::CreateFlash()
     if (file->apertures.isEmpty() && file->apertures[state.curAperture] == nullptr)
         return;
     Paths paths(file->apertures[state.curAperture]->draw(state));
-    //    if (file->apertures[state.curAperture]->isDrilled()) {
-    //        paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
-    //    }
+    if (file->apertures[state.curAperture]->isDrilled()) {
+        paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
+    }
     file->append(GraphicObject(state, paths, file, gerbLines));
     ClearStep();
 }

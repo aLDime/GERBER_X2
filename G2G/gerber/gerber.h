@@ -110,7 +110,7 @@ enum ATTRIBUTE_TYPE {
 };
 
 enum {
-    STEPS_PER_CIRCLE = 90
+    STEPS_PER_CIRCLE = 72
 };
 
 enum PRIMITIVE_TYPE {

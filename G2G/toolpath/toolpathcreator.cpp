@@ -131,17 +131,17 @@ Pathss ToolPathCreator::ToolPathPocket(MILLING milling, const Tool& tool)
     return retPaths;
 }
 
-GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, double depth)
+GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth)
 {
     double toolDiameter = tool.diameter(depth);
 
     double dOffset;
     switch (milling) {
     case OUTSIDE_MILLING:
-        dOffset = toolDiameter * uScale * 0.5;
+        dOffset = +toolDiameter * (uScale / 2);
         break;
     case INSIDE_MILLING:
-        dOffset = -toolDiameter * uScale * 0.5;
+        dOffset = -toolDiameter * (uScale / 2);
         break;
     case ON_MILLING:
         dOffset = 0;
@@ -151,17 +151,16 @@ GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool
     }
 
     ClipperOffset offset(uScale, uScale / 1000);
-    for (Paths& paths : GetGroupedPaths(COPPER, true)) {
-        offset.AddPaths(paths, jtMiter, etClosedPolygon);
-    }
-    offset.Execute(tmpPaths, dOffset);
 
+    for (Paths& paths : GetGroupedPaths(COPPER, true)) {
+        offset.AddPaths(paths, jtRound, etClosedPolygon);
+    }
+
+    offset.Execute(tmpPaths, dOffset);
     if (tmpPaths.size() == 0)
         return nullptr;
-
-
-
-
+    if (!convent)
+        ReversePaths(tmpPaths);
 
     //    for (Path& path : tmpPaths) {
     //        path.append(path.first());

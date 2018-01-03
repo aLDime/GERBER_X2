@@ -117,7 +117,6 @@ using namespace G;
 
 ItemGroup::~ItemGroup()
 {
-    qDebug() << "~GerberItemGroup()";
     for (QGraphicsItem* item : *this) {
         QGraphicsScene* scene = item->scene();
         if (scene != nullptr)

@@ -64,8 +64,8 @@ Path Aperture::drawDrill(const State& state)
 
 Path Aperture::circle(double diametr, IntPoint center)
 {
-    Path poligon(STEPS_PER_CIRCLE);
     double radius = diametr / 2.0;
+    Path poligon(STEPS_PER_CIRCLE);
     for (int i = 0; i < STEPS_PER_CIRCLE; ++i) {
         poligon[i] = IntPoint(
             (qCos(qDegreesToRadians((double)i * 360.0 / STEPS_PER_CIRCLE)) * radius) + center.X,

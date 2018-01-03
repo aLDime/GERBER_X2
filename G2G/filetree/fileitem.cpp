@@ -1,6 +1,6 @@
 #include "fileitem.h"
 
-#include <toolpathcreator.h>
+#include <toolpath/toolpathcreator.h>
 #include <graphicsview/mygraphicsscene.h>
 #include <QFileInfo>
 #include <mainwindow.h>
@@ -18,7 +18,6 @@ FileItem::FileItem(G::File* gerberFile)
 
 FileItem::~FileItem()
 {
-    qDebug() << "~FileItem()";
     disconnect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
     if (MainWindow::getMainWindow()->isVisible())
         MainWindow::getMainWindow()->closeAllAct->setEnabled(AbstractItem::parent()->rowCount() > 1);

@@ -41,7 +41,6 @@ HEADERS += \
     filetree/treeview.h \
     forms/drillingtoolpathform.h \
     forms/pockettoolpathform.h \
-    forms/profiletoolpathform.h \
     forms/toolpathforminterface.h \
     forms/toolpathnameform.h \
     gerber/aperture.h \
@@ -62,13 +61,17 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     application.h \
     drillforapertureform.h \
-    gerberfileholder.h \
     mainwindow.h \
     openingdialog.h \
     settingsdialog.h \
-    toolpathcreator.h \
+    toolpath/toolpathcreator.h \
     gerber/file.h \
-    gcode/gcode.h
+    gcode/gcode.h \
+    toolpath/toolpathwidget.h \
+    toolpath/profilewidget.h \
+    toolpath/widget.h \
+    materialsetup.h \
+    graphicsview/point.h
 
 SOURCES += \
     clipper/clipper.cpp \
@@ -81,7 +84,6 @@ SOURCES += \
     filetree/treeview.cpp \
     forms/drillingtoolpathform.cpp \
     forms/pockettoolpathform.cpp \
-    forms/profiletoolpathform.cpp \
     forms/toolpathforminterface.cpp \
     forms/toolpathnameform.cpp \
     gerber/aperture.cpp \
@@ -100,11 +102,15 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     drillforapertureform.cpp \
-    gerberfileholder.cpp \
     main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
-    toolpathcreator.cpp \
+    toolpath/toolpathcreator.cpp \
     gerber/file.cpp \
-    gcode/gcode.cpp
+    gcode/gcode.cpp \
+    toolpath/toolpathwidget.cpp \
+    toolpath/profilewidget.cpp \
+    toolpath/widget.cpp \
+    materialsetup.cpp \
+    graphicsview/point.cpp
 

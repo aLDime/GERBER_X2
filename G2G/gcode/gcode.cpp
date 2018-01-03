@@ -7,6 +7,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QSettings>
 #include <QFile>
+#include <materialsetup.h>
 
 GCode::GCode()
 {
@@ -166,34 +167,25 @@ GCodeProfile::GCodeProfile(const Paths& paths, const Tool& tool, double m_depth)
 
 Paths GCodeProfile::getPaths() const { return paths; }
 
-void GCodeProfile::save(const QString &name)
+void GCodeProfile::save(const QString& name)
 {
     QList<QString> sl;
     QVector<QPolygonF> paths(PathsToQPolygons(paths));
 
-    QSettings settings;
-    settings.beginGroup("ToolpathNameForm");
-    QPointF homePoint(settings.value("HomeXY").toPointF());
-    QPointF zeroPoint(settings.value("ZeroXY").toPointF());
-    homePoint -= zeroPoint;
-    double homeZ(settings.value("HomeZ").toDouble());
-    double safeZ(settings.value("SafeZ").toDouble());
-    settings.endGroup();
-    qDebug() << homePoint << homeZ << safeZ;
-
     sl.append("G17"); //XY
-    sl.append(QString("G0Z%1").arg(homeZ, 0, 'f', 3)); //HomeZ
-    sl.append(QString("G0X%1Y%2S%3M3").arg(homePoint.x(), 0, 'f', 3).arg(homePoint.y(), 0, 'f', 3).arg(tool.data.spindleRpm)); //HomeXY
+    sl.append(QString("G0Z%1").arg(MaterialSetup::z, 0, 'f', 3)); //HomeZ
+    sl.append(QString("G0X%1Y%2S%3M3").arg(MaterialSetup::homePos.x(), 0, 'f', 3).arg(MaterialSetup::homePos.y(), 0, 'f', 3).arg(tool.data.spindleRpm)); //HomeXY
     QPointF lastPoint;
     for (QPolygonF& path : paths) {
         QPointF point(path.last());
-        point -= zeroPoint;
+        point -= MaterialSetup::zeroPos;
         sl.append(QString("G0X%1Y%2").arg(point.x(), 0, 'f', 3).arg(point.y(), 0, 'f', 3)); //start xy
+        sl.append(QString("G0Z%1").arg(MaterialSetup::plunge, 0, 'f', 3)); //start z
         sl.append(QString("G1Z%1F%2").arg(-m_depth, 0, 'f', 3).arg(tool.data.params[PlungeRate], 0, 'f', 3)); //start z
         bool fl = true;
         for (QPointF& point : path) {
             QString str("G1");
-            point -= zeroPoint;
+            point -= MaterialSetup::zeroPos;
             if (lastPoint.x() != point.x())
                 str.append(QString("X%1").arg(point.x(), 0, 'f', 3));
             if (lastPoint.y() != point.y())
@@ -205,10 +197,10 @@ void GCodeProfile::save(const QString &name)
             sl.append(str);
             lastPoint = point;
         }
-        sl.append(QString("G0Z%1").arg(safeZ, 0, 'f', 3));
+        sl.append(QString("G0Z%1").arg(MaterialSetup::clearence, 0, 'f', 3));
     }
-    sl.append(QString("G0Z%1").arg(homeZ, 0, 'f', 3));
-    sl.append(QString("G0X%1Y%2").arg(homePoint.x(), 0, 'f', 3).arg(homePoint.y(), 0, 'f', 3));
+    sl.append(QString("G0Z%1").arg(MaterialSetup::z, 0, 'f', 3));
+    sl.append(QString("G0X%1Y%2").arg(MaterialSetup::homePos.x(), 0, 'f', 3).arg(MaterialSetup::homePos.y(), 0, 'f', 3));
     sl.append("M30");
 
     QFile file(name);

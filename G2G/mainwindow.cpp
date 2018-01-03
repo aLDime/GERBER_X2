@@ -1,12 +1,13 @@
 #include "drillforapertureform.h"
 #include "mainwindow.h"
 #include "mainwindow.h"
+#include "materialsetup.h"
 #include "tooldatabase/tooldatabase.h"
 
 #include "gerber/graphicsitem.h"
 #include "graphicsview/mygraphicsscene.h"
 #include "settingsdialog.h"
-#include "toolpathcreator.h"
+#include "toolpath/toolpathcreator.h"
 #include <QApplication>
 #include <QCloseEvent>
 #include <QDir>
@@ -16,9 +17,8 @@
 #include <QtWidgets>
 #include "forms/drillingtoolpathform.h"
 #include "forms/pockettoolpathform.h"
-#include "forms/profiletoolpathform.h"
-#include "gerberfileholder.h"
 #include "gerber/parser.h"
+#include <toolpath/toolpathwidget.h>
 
 //#include "qt_windows.h"
 //#include "Psapi.h"
@@ -259,32 +259,28 @@ void MainWindow::createActions()
     dwCreatePath->setObjectName(QStringLiteral("dwCreatePath"));
 
     addDockWidget(Qt::RightDockWidgetArea, dwCreatePath);
-    enum {
-        PROFILE_TOOLPATH_FORM,
-        POCKET_TOOLPATH_FORM,
-        DRILLING_TOOLPATH_FORM
-    };
-    static QVector<QAction*> ToolpathActionList;
-    auto createDockWidget = [=](QWidget* dwContents, int type) {
+
+    auto createDockWidget = [&](QWidget* dwContents, int type) {
         if (dwCreatePath->widget() != nullptr)
-            dwCreatePath->widget()->deleteLater();
+            delete dwCreatePath->widget();
         dwContents->setObjectName(QStringLiteral("dwContents"));
         dwCreatePath->setWidget(dwContents);
         //dwCreatePath->setFloating(false);
         dwCreatePath->setWindowTitle(tr("Create Toolpath"));
-        for (QAction* action : ToolpathActionList) {
+        for (QAction* action : toolpathActionList) {
             action->setChecked(false);
         }
-        ToolpathActionList[type]->setChecked(true);
+        toolpathActionList[type]->setChecked(true);
         dwCreatePath->show();
     };
 
-    connect(dwCreatePath, &QDockWidget::visibilityChanged, [=](bool visible) {
+    connect(dwCreatePath, &QDockWidget::visibilityChanged, [&](bool visible) {
         if (!visible) {
-            QTimer::singleShot(100, [=]() {
+            QTimer::singleShot(100, [=] {
                 if (dwCreatePath->isHidden()) {
-                    for (QAction* action : ToolpathActionList) {
+                    for (QAction* action : toolpathActionList) {
                         action->setChecked(false);
+                        action->setEnabled(true);
                     }
                     if (dwCreatePath->widget() != nullptr)
                         dwCreatePath->widget()->deleteLater();
@@ -293,36 +289,27 @@ void MainWindow::createActions()
         }
     });
 
-    action = toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=]() { createDockWidget(new ProfileToolpathForm(), PROFILE_TOOLPATH_FORM); });
-    ToolpathActionList.append(action);
-    //    action->setShortcut(QKeySequence::FullScreen);
-    action = toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=]() { createDockWidget(new PocketToolpathForm(), POCKET_TOOLPATH_FORM); });
-    ToolpathActionList.append(action);
-    //    action->setShortcuts(tr("Ctrl+0"));
-    action = toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=]() { createDockWidget(new DrillingToolpathForm(), DRILLING_TOOLPATH_FORM); });
-    ToolpathActionList.append(action);
-    action = toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
-    action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=]() {});
-    //    action->setShortcut(QKeySequence::ZoomIn);
-    for (QAction* action : ToolpathActionList) {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=]() {
+        createDockWidget(new ToolPathWidget(PROFILE_TOOLPATH_FORM), PROFILE_TOOLPATH_FORM);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=]() {
+        createDockWidget(new ToolPathWidget(POCKET_TOOLPATH_FORM), POCKET_TOOLPATH_FORM);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=]() {
+        createDockWidget(new ToolPathWidget(DRILLING_TOOLPATH_FORM), DRILLING_TOOLPATH_FORM);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=]() {
+        createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM);
+    }));
+
+    for (QAction* action : toolpathActionList) {
         action->setCheckable(true);
+        action->setEnabled(false);
     }
-    //    if (0) { // for tests
-    //        //==================== selectionToolBar ====================
-    //        selectionToolBar = addToolBar(tr("Selection Mode"));
-    //        selectionToolBar->setIconSize(QSize(24, 24));
-    //        selectionToolBar->setObjectName(QStringLiteral("selectionToolBar"));
-    //        //    action = selectionToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"),
-    //        //        [=]() { createDockWidget(new ProfileToolpathForm(), PROFILE_TOOLPATH_FORM); });
-    //        //    //    action->setShortcut(QKeySequence::FullScreen);
-    //        //    action = selectionToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"),
-    //        //        [=]() { createDockWidget(new PocketToolpathForm(), POCKET_TOOLPATH_FORM); });
-    //        //    //    action->setShortcuts(tr("Ctrl+0"));
-    //        //    action = selectionToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"),
-    //        //        [=]() { createDockWidget(new DrillingToolpathForm(), DRILLING_TOOLPATH_FORM); });
-    //        action = selectionToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"),
-    //            [=]() { DrillForApertureForm dfa("",this); dfa.exec(); });
-    //    }
+
+    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
+
+    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
 }
 
 void MainWindow::createStatusBar()

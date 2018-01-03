@@ -1,5 +1,4 @@
 #include "drillforapertureform.h"
-#include "gerberfileholder.h"
 
 #include <QBoxLayout>
 #include <QDebug>
@@ -7,6 +6,7 @@
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QTableView>
+#include <QTimer>
 #include <gerber/gerber.h>
 #include <graphicsview/mygraphicsscene.h>
 #include <graphicsview/mygraphicsview.h>
@@ -76,11 +76,14 @@ DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
             model->appendRow(list);
         }
     }
+
     if (list.size() == 0) {
         QMessageBox::information(this, "", "No flashed apertures!");
+        QTimer::singleShot(1, Qt::CoarseTimer, this, &QDialog::accept);
         return;
     }
-    model->setHorizontalHeaderLabels(QString("Gerber::G::Aperture|Tool").split('|'));
+
+    model->setHorizontalHeaderLabels(QString("G::Aperture|Tool").split('|'));
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
@@ -149,7 +152,7 @@ void DrillForApertureForm::setupUi(QDialog* Dialog)
 
 void DrillForApertureForm::retranslateUi(QDialog* Dialog)
 {
-    Dialog->setWindowTitle(tr("DrillForGerber::ApertureForm"));
+    Dialog->setWindowTitle(tr("DrillForApertureForm"));
 }
 
 void DrillForApertureForm::resizeEvent(QResizeEvent* event)

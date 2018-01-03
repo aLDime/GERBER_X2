@@ -29,7 +29,7 @@ public:
 
     Paths Merge(G::File* gerberFile);
     Pathss ToolPathPocket(MILLING milling, const Tool& tool);
-    GCodeProfile* ToolPathProfile(MILLING milling, const Tool& tool, double depth = 0.0);
+    GCodeProfile* ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth);
     Paths GetMergedPaths();
 
     ToolPathCreator& addPaths(const Paths& value);

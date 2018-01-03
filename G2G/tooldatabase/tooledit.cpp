@@ -19,7 +19,6 @@ int id = qRegisterMetaType<Tool>("Tool");
 
 ToolEdit::ToolEdit(QWidget* parent)
     : QWidget(parent)
-    , dsbList({ nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr, nullptr })
 {
     setupUi(this);
     //    setStyleSheet("QGroupBox {"
@@ -30,10 +29,69 @@ ToolEdit::ToolEdit(QWidget* parent)
     //                  "}");
 
     cbxToolType->addItems(QStringLiteral("End Mill|Engraving|Drill").split("|"));
-    cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
-    on_cbxToolType_currentIndexChanged(0);
+    //    cbxFeedSpeeds->addItems(QStringLiteral("mm/sec|mm/min|m/min").split("|"));
+    //    on_cbxToolType_currentIndexChanged(0);
 
-    //    setMaximumSize(QSize(393, 577));
+    connect(dsbList[SideAngle], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[SideAngle] = value;
+    });
+
+    connect(dsbList[PassDepth], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[PassDepth] = value;
+    });
+
+    connect(dsbList[Diameter], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[Diameter] = value;
+        double max = value / 100;
+        dsbList[Stepover]->setMaximum(value);
+        dsbList[StepoverPercent]->setValue(dsbList[Stepover]->value() / max);
+        dsbList[OneTurnCut]->setMaximum(value);
+        dsbList[OneTurnCutPercent]->setValue(dsbList[OneTurnCut]->value() / max);
+    });
+
+    connect(dsbList[Stepover], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[Stepover] = value;
+        double max = dsbList[Diameter]->value() / 100;
+        dsbList[StepoverPercent]->setValue(dsbList[Stepover]->value() / max);
+    });
+
+    connect(dsbList[StepoverPercent], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[StepoverPercent] = value;
+        double max = dsbList[Diameter]->value() / 100;
+        dsbList[Stepover]->setValue(dsbList[StepoverPercent]->value() * max);
+    });
+
+    connect(dsbList[OneTurnCut], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[OneTurnCut] = value;
+        double max = dsbList[Diameter]->value() / 100;
+        dsbList[OneTurnCutPercent]->setValue(dsbList[OneTurnCut]->value() / max);
+
+        double k[] = { 60.0, 1.0, 1000.0 };
+        double feed = tool.data.spindleRpm * value;
+        dsbList[FeedRate]->setValue(feed / k[cbxFeedSpeeds->currentIndex()]);
+    });
+
+    connect(dsbList[OneTurnCutPercent], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[OneTurnCutPercent] = value;
+        double max = dsbList[Diameter]->value() / 100;
+        dsbList[OneTurnCut]->setValue(dsbList[OneTurnCutPercent]->value() * max);
+    });
+
+    connect(dsbList[PlungeRate], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[PlungeRate] = value;
+    });
+
+    connect(dsbList[FeedRate], static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+        tool.data.params[FeedRate] = value;
+    });
+
+    connect(sbSpindleSpeed, static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged), [=](int value) {
+        tool.data.spindleRpm = value;
+        double k[] = { 60.0, 1.0, 1000.0 };
+        double feed = value * dsbList[OneTurnCut]->value();
+        dsbList[FeedRate]->setValue(feed / k[cbxFeedSpeeds->currentIndex()]);
+        qDebug() << "sbSpindleSpeed" << value << feed;
+    });
 }
 
 ToolEdit::~ToolEdit()
@@ -42,9 +100,8 @@ ToolEdit::~ToolEdit()
 
 void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
 {
-    for (QDoubleSpinBox* dsb : dsbList) {
-        if (dsb)
-            dsb->setEnabled(true);
+    for (int i = 0; i < dsbList.size(); ++i) {
+        dsbList[i]->setEnabled(true);
     }
 
     if (index != lastType && QMessageBox::question(this, "!!!", "Yes?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::No) {
@@ -56,12 +113,6 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
 
     switch (index) {
     case EndMill:
-        dsbList[ClearencePassStepover]->setEnabled(false);
-        dsbList[ClearencePassStepover]->setValue(0);
-        dsbList[ClearencePassStepoverPercent]->setEnabled(false);
-        dsbList[ClearencePassStepoverPercent]->setValue(0);
-        //        dsbList[FlatDiameter]->setEnabled(false);
-        //        dsbList[FlatDiameter]->setValue(0);
         dsbList[SideAngle]->setEnabled(false);
         dsbList[SideAngle]->setValue(0);
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
@@ -70,10 +121,10 @@ void ToolEdit::on_cbxToolType_currentIndexChanged(int index)
         lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
         break;
     case Drill:
-        dsbList[ClearencePassStepover]->setEnabled(false);
-        dsbList[ClearencePassStepover]->setValue(0);
-        dsbList[ClearencePassStepoverPercent]->setEnabled(false);
-        dsbList[ClearencePassStepoverPercent]->setValue(0);
+        dsbList[OneTurnCut]->setEnabled(false);
+        dsbList[OneTurnCut]->setValue(0);
+        dsbList[OneTurnCutPercent]->setEnabled(false);
+        dsbList[OneTurnCutPercent]->setValue(0);
         dsbList[FeedRate]->setEnabled(false);
         dsbList[FeedRate]->setValue(0);
         //        dsbList[FlatDiameter]->setEnabled(false);
@@ -98,13 +149,9 @@ Tool ToolEdit::getTool() const
 
 void ToolEdit::apply()
 {
-    int i = 0;
-    for (QDoubleSpinBox* dsb : dsbList) {
-        if (dsb)
-            tool.data.params[i] = dsb->value();
-        ++i;
-    }
-
+    //    for (int i = 0; i < dsbList.size(); ++i) {
+    //        tool.data.params[i] = dsbList[i]->value();
+    //    }
     tool.data.feedSpeeds = cbxFeedSpeeds->currentIndex();
     tool.data.spindleRpm = sbSpindleSpeed->value();
     tool.data.toolType = static_cast<ToolType>(cbxToolType->currentIndex());
@@ -117,8 +164,7 @@ void ToolEdit::setTool(const Tool& value)
 {
     tool = value;
     for (int i = 0; i < dsbList.size(); ++i) {
-        if (dsbList[i])
-            dsbList[i]->setValue(tool.data.params[i]);
+        dsbList[i]->setValue(tool.data.params[i]);
     }
 
     cbxFeedSpeeds->setCurrentIndex(tool.data.feedSpeeds);
@@ -204,7 +250,7 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[Diameter] = new QDoubleSpinBox(grBox_2);
     dsbList[Diameter]->setObjectName(QStringLiteral("Diameter"));
     dsbList[Diameter]->setFont(font1);
-    dsbList[Diameter]->setMaximum(100);
+    dsbList[Diameter]->setMaximum(20);
 
     dsbList[SideAngle] = new QDoubleSpinBox(grBox_2);
     dsbList[SideAngle]->setObjectName(QStringLiteral("SideAngle"));
@@ -246,27 +292,27 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[PassDepth] = new QDoubleSpinBox(grBox_3);
     dsbList[PassDepth]->setObjectName(QStringLiteral("PassDepth"));
     dsbList[PassDepth]->setFont(font1);
-    dsbList[PassDepth]->setMaximum(100);
+    dsbList[PassDepth]->setMaximum(10);
 
     dsbList[Stepover] = new QDoubleSpinBox(grBox_3);
     dsbList[Stepover]->setObjectName(QStringLiteral("Stepover"));
     dsbList[Stepover]->setFont(font1);
-    dsbList[Stepover]->setMaximum(100);
+    dsbList[Stepover]->setMaximum(10);
 
     dsbList[StepoverPercent] = new QDoubleSpinBox(grBox_3);
     dsbList[StepoverPercent]->setObjectName(QStringLiteral("StepoverPercent"));
     dsbList[StepoverPercent]->setFont(font1);
     dsbList[StepoverPercent]->setMaximum(100);
 
-    dsbList[ClearencePassStepover] = new QDoubleSpinBox(grBox_3);
-    dsbList[ClearencePassStepover]->setObjectName(QStringLiteral("ClearencePassStepover"));
-    dsbList[ClearencePassStepover]->setFont(font1);
-    dsbList[ClearencePassStepover]->setMaximum(100);
+    dsbList[OneTurnCut] = new QDoubleSpinBox(grBox_3);
+    dsbList[OneTurnCut]->setObjectName(QStringLiteral("ClearencePassStepover"));
+    dsbList[OneTurnCut]->setFont(font1);
+    dsbList[OneTurnCut]->setMaximum(10);
 
-    dsbList[ClearencePassStepoverPercent] = new QDoubleSpinBox(grBox_3);
-    dsbList[ClearencePassStepoverPercent]->setObjectName(QStringLiteral("ClearencePassStepoverPercent"));
-    dsbList[ClearencePassStepoverPercent]->setFont(font1);
-    dsbList[ClearencePassStepoverPercent]->setMaximum(100);
+    dsbList[OneTurnCutPercent] = new QDoubleSpinBox(grBox_3);
+    dsbList[OneTurnCutPercent]->setObjectName(QStringLiteral("CutOneTurnPercent"));
+    dsbList[OneTurnCutPercent]->setFont(font1);
+    dsbList[OneTurnCutPercent]->setMaximum(100);
 
     QGridLayout* gridLayout = new QGridLayout(grBox_3);
     gridLayout->setObjectName(QStringLiteral("gridLayout"));
@@ -277,8 +323,8 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     gridLayout->addWidget(dsbList[Stepover], 1, 1, 1, 1);
     gridLayout->addWidget(dsbList[StepoverPercent], 1, 2, 1, 1);
     gridLayout->addWidget(label_13, 2, 0, 1, 1);
-    gridLayout->addWidget(dsbList[ClearencePassStepover], 2, 1, 1, 1);
-    gridLayout->addWidget(dsbList[ClearencePassStepoverPercent], 2, 2, 1, 1);
+    gridLayout->addWidget(dsbList[OneTurnCut], 2, 1, 1, 1);
+    gridLayout->addWidget(dsbList[OneTurnCutPercent], 2, 2, 1, 1);
 
     grBox_4 = new QGroupBox(groupBox);
     grBox_4->setObjectName(QStringLiteral("groupBox_4"));
@@ -311,12 +357,12 @@ void ToolEdit::setupUi(QWidget* ToolEdit)
     dsbList[PlungeRate] = new QDoubleSpinBox(grBox_4);
     dsbList[PlungeRate]->setObjectName(QStringLiteral("PlungeRate"));
     dsbList[PlungeRate]->setFont(font1);
-    dsbList[PlungeRate]->setMaximum(100);
+    dsbList[PlungeRate]->setMaximum(100000);
 
     dsbList[FeedRate] = new QDoubleSpinBox(grBox_4);
     dsbList[FeedRate]->setObjectName(QStringLiteral("FeedRate"));
     dsbList[FeedRate]->setFont(font1);
-    dsbList[FeedRate]->setMaximum(100);
+    dsbList[FeedRate]->setMaximum(100000);
 
     QGridLayout* gridLayout_2 = new QGridLayout(grBox_4);
     gridLayout_2->setObjectName(QStringLiteral("gridLayout_2"));
@@ -402,8 +448,8 @@ void ToolEdit::retranslateUi(QWidget* ToolEdit)
     cbxUnits->clear();
     cbxUnits->insertItems(0, QStringList() << tr("mm") << tr("inches"));
 
-    dsbList[ClearencePassStepover]->setSuffix(tr(" mm"));
-    dsbList[ClearencePassStepoverPercent]->setSuffix(tr(" %"));
+    dsbList[OneTurnCut]->setSuffix(tr(" mm"));
+    dsbList[OneTurnCutPercent]->setSuffix(tr(" %"));
     dsbList[Diameter]->setSuffix(tr(" mm"));
     //    dsbList[FlatDiameter]->setSuffix(tr(" mm"));
     dsbList[PassDepth]->setSuffix(tr(" mm"));
@@ -419,7 +465,7 @@ void ToolEdit::retranslateUi(QWidget* ToolEdit)
     //    label_10->setText(tr("Flat Diameter"));
     label_11->setText(tr("Pass Depth"));
     label_12->setText(tr("Stepover"));
-    label_13->setText(tr("Clearence Pass\nStepover"));
+    label_13->setText(tr("One-turn Cutting"));
     label_14->setText(tr("Units"));
     label_2->setText(tr("Feed Rate"));
     label_3->setText(tr("Spindle Speed"));
@@ -512,6 +558,20 @@ void EditToolDialog::setupUi(QDialog* Dialog)
     QObject::connect(buttonBox, SIGNAL(rejected()), Dialog, SLOT(reject()));
 
     QMetaObject::connectSlotsByName(Dialog);
+
+    //    QLatin1String styleSheet("QGroupBox {"
+    //                             "background-color: rgb(255,255,255);"
+    //                             "border: 1px solid gray;"
+    //                             "border-radius: 5px;"
+    //                             "margin-top: 1ex; /* leave space at the top for the title */"
+    //                             "}"
+    //                             "QGroupBox::title {"
+    //                             "subcontrol-origin: margin;"
+    //                             "margin-top: -2ex;"
+    //                             "subcontrol-position: top center; /* position at the top center */"
+    //                             "padding: 0 6px;"
+    //                             "}");
+    //    Dialog->setStyleSheet(styleSheet);
 }
 
 void EditToolDialog::retranslateUi(QDialog* Dialog)

@@ -11,16 +11,15 @@ enum ToolType {
 };
 
 enum ToolInfo {
-    ClearencePassStepover,
-    ClearencePassStepoverPercent,
     Diameter,
-    FeedRate,
-    //    FlatDiameter,
-    PassDepth = FeedRate + 2,
-    PlungeRate,
     SideAngle,
+    PassDepth,
     Stepover,
-    StepoverPercent
+    StepoverPercent,
+    OneTurnCut,
+    OneTurnCutPercent,
+    FeedRate,
+    PlungeRate,
 };
 
 Q_DECLARE_METATYPE(ToolType)
