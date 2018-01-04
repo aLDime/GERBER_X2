@@ -6,10 +6,7 @@
 #include <QObject>
 #include <tooldatabase/tool.h>
 
-class GCode {
-public:
-    GCode();
-};
+
 
 class GCodeProfile : public QGraphicsItemGroup {
 public:

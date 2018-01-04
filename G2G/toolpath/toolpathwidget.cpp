@@ -1,3 +1,4 @@
+#include "pocketwidget.h"
 #include "profilewidget.h"
 #include "toolpathwidget.h"
 #include "toolpathwidget.h"
@@ -30,7 +31,6 @@ ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
     , type(type)
 {
     setupUi(this);
-    setVisibleTool2(type);
 
     connect(pbSelectTool1, &QPushButton::clicked, [&] {
         ToolDatabase tdb(this, { EndMill, Engraving /*, Drill*/ });
@@ -60,6 +60,8 @@ ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
     settings.beginGroup(QString("ToolPathWidget%1").arg(type));
     dsbxDepth->setValue(settings.value("Depth").toDouble());
     settings.endGroup();
+
+    setVisibleTool2(type == POCKET_TOOLPATH_FORM);
 }
 
 ToolPathWidget::~ToolPathWidget()
@@ -128,6 +130,11 @@ void ToolPathWidget::setupUi(QWidget* Form)
 
     pbSelectTool1 = new QPushButton(groupBox_2);
     pbSelectTool1->setObjectName(QStringLiteral("pbSelectTool1"));
+    QSizePolicy sizePolicy1(QSizePolicy::Expanding, QSizePolicy::Fixed);
+    sizePolicy1.setHorizontalStretch(0);
+    sizePolicy1.setVerticalStretch(0);
+    sizePolicy1.setHeightForWidth(pbSelectTool1->sizePolicy().hasHeightForWidth());
+    pbSelectTool1->setSizePolicy(sizePolicy1);
 
     pbSelectTool2 = new QPushButton(groupBox_2);
     pbSelectTool2->setObjectName(QStringLiteral("pbSelectTool2"));
@@ -141,6 +148,7 @@ void ToolPathWidget::setupUi(QWidget* Form)
 
     pbEditTool1 = new QPushButton(groupBox_2);
     pbEditTool1->setObjectName(QStringLiteral("pbEditTool1"));
+    pbEditTool1->setSizePolicy(sizePolicy1);
 
     lblToolName1 = new QLabel(groupBox_2);
     lblToolName1->setObjectName(QStringLiteral("lblToolName1"));
@@ -155,16 +163,17 @@ void ToolPathWidget::setupUi(QWidget* Form)
 
     labelT1 = new QLabel(groupBox_2);
     labelT1->setObjectName(QStringLiteral("labelT1"));
-    QSizePolicy sizePolicy2(QSizePolicy::Fixed, QSizePolicy::Preferred);
+    QSizePolicy sizePolicy2(QSizePolicy::Minimum, QSizePolicy::Preferred);
     sizePolicy2.setHorizontalStretch(0);
     sizePolicy2.setVerticalStretch(0);
     sizePolicy2.setHeightForWidth(labelT1->sizePolicy().hasHeightForWidth());
     labelT1->setSizePolicy(sizePolicy2);
+    labelT1->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     labelT2 = new QLabel(groupBox_2);
     labelT2->setObjectName(QStringLiteral("labelT2"));
-    sizePolicy2.setHeightForWidth(labelT2->sizePolicy().hasHeightForWidth());
     labelT2->setSizePolicy(sizePolicy2);
+    labelT2->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     lineT1 = new QFrame(groupBox_2);
     lineT1->setObjectName(QStringLiteral("lineT1"));
@@ -298,6 +307,8 @@ void ToolPathWidget::setupUi(QWidget* Form)
         tpcWidget = new ProfileWidget(groupBox_2);
         break;
     case POCKET_TOOLPATH_FORM:
+        tpcWidget = new PocketWidget(groupBox_2);
+        break;
     case DRILLING_TOOLPATH_FORM:
         tpcWidget = new ProfileWidget(groupBox_2);
         break;

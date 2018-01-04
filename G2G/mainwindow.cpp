@@ -19,6 +19,7 @@
 #include "forms/pockettoolpathform.h"
 #include "gerber/parser.h"
 #include <toolpath/toolpathwidget.h>
+#include <gerber/file.h>
 
 //#include "qt_windows.h"
 //#include "Psapi.h"
@@ -41,6 +42,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
     connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
+    //    connect(gerberParser, &G::Parser::fileReady, [&](G::File*) { graphicsView->ZoomFit(); });
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
@@ -304,10 +306,11 @@ void MainWindow::createActions()
 
     for (QAction* action : toolpathActionList) {
         action->setCheckable(true);
-        action->setEnabled(false);
+        //        action->setEnabled(false);
     }
 
-    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
+    //    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
+    QTimer::singleShot(10, [=] { createDockWidget(new ToolPathWidget(POCKET_TOOLPATH_FORM), POCKET_TOOLPATH_FORM); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
 }

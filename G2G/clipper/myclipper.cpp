@@ -7,6 +7,7 @@ Path QPolygonToPath(const QPolygonF& p)
         path.push_back(IntPoint(pt.x() * uScale, pt.y() * uScale));
     return path;
 }
+
 Paths QPolygonsToPaths(const QVector<QPolygonF>& p)
 {
     Paths paths;
@@ -22,6 +23,7 @@ QPolygonF PathToQPolygon(const Path& p)
         polygon.push_back(QPointF(pt.X * dScale, pt.Y * dScale));
     return polygon;
 }
+
 QVector<QPolygonF> PathsToQPolygons(const Paths& p)
 {
     QVector<QPolygonF> polygons;

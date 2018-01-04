@@ -4,9 +4,15 @@
 #include <QWidget>
 #include <tooldatabase/tool.h>
 
+class QCheckBox;
 class QDoubleSpinBox;
-class QLineEdit;
 class QLabel;
+class QLineEdit;
+
+enum {
+    CLIMB,
+    CONVENTIONAL
+};
 
 class Widget : public QWidget {
     Q_OBJECT
@@ -31,6 +37,7 @@ protected:
     QLineEdit* pathName;
     QLabel* toolName[2];
     QLabel* panelName;
+    QCheckBox* cbxTool2;
 };
 
 #endif // WIDGET_H

@@ -13,6 +13,7 @@ Widget::Widget(QWidget* parent)
     toolName[0] = w->lblToolName1;
     toolName[1] = w->lblToolName2;
     panelName = w->lblPanelName;
+    cbxTool2 = w->cbxTool2;
 }
 
 void Widget::restoreTool(const QVector<Tool*>& tool, const QString& name) const
@@ -41,7 +42,7 @@ void Widget::saveTool(const QVector<Tool*>& tool, const QString& name)
     settings.endGroup();
 }
 
-void Widget::setName(const QString &name)
+void Widget::setName(const QString& name)
 {
     panelName->setText(QString("<html><head/><body><p><span style=\"font-weight:600;\">%1</span></p></body></html>").arg(name));
 }

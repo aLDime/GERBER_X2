@@ -28,7 +28,7 @@ public:
     void Clear();
 
     Paths Merge(G::File* gerberFile);
-    Pathss ToolPathPocket(MILLING milling, const Tool& tool);
+    GCodeProfile* ToolPathPocket(const QVector<Tool>& tool, bool convent, double depth);
     GCodeProfile* ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth);
     Paths GetMergedPaths();
 
@@ -100,7 +100,7 @@ private:
     Paths tmpPaths;
     Pathss groupedPaths;
     //    static GERBER_FILE file;
-    void grouping(PolyNode* n, Pathss* p, GROUP group);
+    void grouping(PolyNode* node, Pathss* pathss, GROUP group);
     //    static Clipper clipper;
     //    static ClipperOffset offset;
 };

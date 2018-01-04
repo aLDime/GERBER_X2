@@ -71,7 +71,8 @@ HEADERS += \
     toolpath/profilewidget.h \
     toolpath/widget.h \
     materialsetup.h \
-    graphicsview/point.h
+    graphicsview/point.h \
+    toolpath/pocketwidget.h
 
 SOURCES += \
     clipper/clipper.cpp \
@@ -112,5 +113,6 @@ SOURCES += \
     toolpath/profilewidget.cpp \
     toolpath/widget.cpp \
     materialsetup.cpp \
-    graphicsview/point.cpp
+    graphicsview/point.cpp \
+    toolpath/pocketwidget.cpp
 

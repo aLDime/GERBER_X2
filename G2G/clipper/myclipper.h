@@ -12,7 +12,7 @@ using namespace ClipperLib;
 
 typedef QVector /*std::vector*/<Paths> Pathss;
 
-const int uScale = 1000000;
+const long long uScale = 1000000;
 const double dScale = 1.0 / uScale;
 
 Path QPolygonToPath(const QPolygonF& p);

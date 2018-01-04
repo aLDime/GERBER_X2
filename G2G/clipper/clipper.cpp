@@ -183,7 +183,7 @@ int PolyTree::Total() const
 //------------------------------------------------------------------------------
 
 PolyNode::PolyNode()
-    : Parent(0)
+    : Parent(nullptr)
     , Index(0)
     , m_IsOpen(false)
 {
@@ -217,7 +217,7 @@ PolyNode* PolyNode::GetNext() const
 PolyNode* PolyNode::GetNextSiblingUp() const
 {
     if (!Parent) //protects against PolyTree.GetNextSiblingUp()
-        return 0;
+        return nullptr;
     else if (Index == Parent->Childs.size() - 1)
         return Parent->GetNextSiblingUp();
     else
@@ -471,11 +471,11 @@ int PointInPolygon(const IntPoint& pt, const Path& path)
 {
     //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
     int result = 0;
-    int/*size_t*/ cnt = path.size();
+    int /*size_t*/ cnt = path.size();
     if (cnt < 3)
         return 0;
     IntPoint ip = path[0];
-    for (int/*size_t*/ i = 1; i <= cnt; ++i) {
+    for (int /*size_t*/ i = 1; i <= cnt; ++i) {
         IntPoint ipNext = (i == cnt ? path[0] : path[i]);
         if (ipNext.Y == pt.Y) {
             if ((ipNext.X == pt.X) || (ip.Y == pt.Y && ((ipNext.X > pt.X) == (ip.X < pt.X))))
@@ -2854,7 +2854,7 @@ bool Clipper::ProcessIntersections(const cInt topY)
         return true;
     try {
         BuildIntersectList(topY);
-        int/*size_t*/ IlSize = m_IntersectList.size();
+        int /*size_t*/ IlSize = m_IntersectList.size();
         if (IlSize == 0)
             return true;
         if (IlSize == 1 || FixupIntersectionOrder())
@@ -2874,7 +2874,7 @@ bool Clipper::ProcessIntersections(const cInt topY)
 
 void Clipper::DisposeIntersectNodes()
 {
-    for (int/*size_t*/ i = 0; i < m_IntersectList.size(); ++i)
+    for (int /*size_t*/ i = 0; i < m_IntersectList.size(); ++i)
         delete m_IntersectList[i];
     m_IntersectList.clear();
 }
@@ -2930,7 +2930,7 @@ void Clipper::BuildIntersectList(const cInt topY)
 
 void Clipper::ProcessIntersectList()
 {
-    for (int/*size_t*/ i = 0; i < m_IntersectList.size(); ++i) {
+    for (int /*size_t*/ i = 0; i < m_IntersectList.size(); ++i) {
         IntersectNode* iNode = m_IntersectList[i];
         {
             IntersectEdges(iNode->Edge1, iNode->Edge2, iNode->Pt);
@@ -2961,10 +2961,10 @@ bool Clipper::FixupIntersectionOrder()
     //so to ensure this the order of intersections may need adjusting ...
     CopyAELToSEL();
     std::sort(m_IntersectList.begin(), m_IntersectList.end(), IntersectListSort);
-    int/*size_t*/ cnt = m_IntersectList.size();
-    for (int/*size_t*/ i = 0; i < cnt; ++i) {
+    int /*size_t*/ cnt = m_IntersectList.size();
+    for (int /*size_t*/ i = 0; i < cnt; ++i) {
         if (!EdgesAdjacent(*m_IntersectList[i])) {
-            int/*size_t*/ j = i + 1;
+            int /*size_t*/ j = i + 1;
             while (j < cnt && !EdgesAdjacent(*m_IntersectList[j]))
                 j++;
             if (j == cnt)
@@ -4359,7 +4359,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     //distance = proximity in units/pixels below which vertices
     //will be stripped. Default ~= sqrt(2).
 
-    int/*size_t*/ size = in_poly.size();
+    int /*size_t*/ size = in_poly.size();
 
     if (size == 0) {
         out_poly.clear();
@@ -4367,7 +4367,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     }
 
     OutPt* outPts = new OutPt[size];
-    for (int/*size_t*/ i = 0; i < size; ++i) {
+    for (int /*size_t*/ i = 0; i < size; ++i) {
         outPts[i].Pt = in_poly[i];
         outPts[i].Next = &outPts[(i + 1) % size];
         outPts[i].Next->Prev = &outPts[i];
@@ -4399,7 +4399,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance)
     if (size < 3)
         size = 0;
     out_poly.resize(size);
-    for (int/*size_t*/ i = 0; i < size; ++i) {
+    for (int /*size_t*/ i = 0; i < size; ++i) {
         out_poly[i] = op->Pt;
         op = op->Next;
     }
@@ -4431,31 +4431,31 @@ void Minkowski(const Path& poly, const Path& path,
     Paths& solution, bool isSum, bool isClosed)
 {
     int delta = (isClosed ? 1 : 0);
-    int/*size_t*/ polyCnt = poly.size();
-    int/*size_t*/ pathCnt = path.size();
+    int /*size_t*/ polyCnt = poly.size();
+    int /*size_t*/ pathCnt = path.size();
     Paths pp;
     pp.reserve(pathCnt);
     if (isSum)
-        for (int/*size_t*/ i = 0; i < pathCnt; ++i) {
+        for (int /*size_t*/ i = 0; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for (int/*size_t*/ j = 0; j < poly.size(); ++j)
+            for (int /*size_t*/ j = 0; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X + poly[j].X, path[i].Y + poly[j].Y));
             pp.push_back(p);
         }
     else
-        for (int/*size_t*/ i = 0; i < pathCnt; ++i) {
+        for (int /*size_t*/ i = 0; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for (int/*size_t*/ j = 0; j < poly.size(); ++j)
+            for (int /*size_t*/ j = 0; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X - poly[j].X, path[i].Y - poly[j].Y));
             pp.push_back(p);
         }
 
     solution.clear();
     solution.reserve((pathCnt + delta) * (polyCnt + 1));
-    for (int/*size_t*/ i = 0; i < pathCnt - 1 + delta; ++i)
-        for (int/*size_t*/ j = 0; j < polyCnt; ++j) {
+    for (int /*size_t*/ i = 0; i < pathCnt - 1 + delta; ++i)
+        for (int /*size_t*/ j = 0; j < polyCnt; ++j) {
             Path quad;
             quad.reserve(4);
             quad.push_back(pp[i % pathCnt][j % polyCnt]);
@@ -4482,7 +4482,7 @@ void TranslatePath(const Path& input, Path& output, const IntPoint delta)
 {
     //precondition: input != output
     output.resize(input.size());
-    for (int/*size_t*/ i = 0; i < input.size(); ++i)
+    for (int /*size_t*/ i = 0; i < input.size(); ++i)
         output[i] = IntPoint(input[i].X + delta.X, input[i].Y + delta.Y);
 }
 //------------------------------------------------------------------------------
@@ -4490,7 +4490,7 @@ void TranslatePath(const Path& input, Path& output, const IntPoint delta)
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed)
 {
     Clipper c;
-    for (int/*size_t*/ i = 0; i < paths.size(); ++i) {
+    for (int /*size_t*/ i = 0; i < paths.size(); ++i) {
         Paths tmp;
         Minkowski(pattern, paths[i], tmp, true, pathIsClosed);
         c.AddPaths(tmp, ptSubject, true);

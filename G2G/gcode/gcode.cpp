@@ -9,10 +9,6 @@
 #include <QFile>
 #include <materialsetup.h>
 
-GCode::GCode()
-{
-}
-
 ///////////////////////////////////////////////
 /// \brief GerberWorkItem::GerberWorkItem
 /// \param paths

@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QFile>
 #include <QSettings>
+#include <QElapsedTimer>
 
 //GERBER_FILE ToolPathCreator::file;
 
@@ -47,88 +48,74 @@ Paths ToolPathCreator::Merge(G::File* gerberFile)
     return mergedPaths;
 }
 
-Pathss ToolPathCreator::ToolPathPocket(MILLING milling, const Tool& tool)
+GCodeProfile* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth)
 {
-    double toolDiameter = tool.data.params[Diameter];
-    double dOffset = -toolDiameter * uScale / 2.00;
-    double stepOver = dOffset * 0.8;
+    double toolDiameter = tool[0].data.params[Diameter];
+    double dOffset = toolDiameter * (uScale / 2);
+    double stepOver = tool[0].data.params[Stepover] * uScale;
 
-    Paths paths;
-    Pathss retPaths;
+    mergedPaths;
+
+    GetGroupedPaths(CUTOFF, true);
 
     ClipperOffset offset(uScale, uScale / 1000);
-
     Clipper clipper;
-    clipper.AddPaths(mergedPaths, ptSubject, true);
-    IntRect r = clipper.GetBounds();
+    Paths paths_1;
+    Pathss paths_2;
 
-    int k = uScale;
-    Path outer(4);
-    outer[0] = IntPoint(r.left - k, r.bottom + k);
-    outer[1] = IntPoint(r.right + k, r.bottom + k);
-    outer[2] = IntPoint(r.right + k, r.top - k);
-    outer[3] = IntPoint(r.left - k, r.top - k);
-
-    //ReversePath(board);
     if (1) {
-        GetGroupedPaths((GROUP)milling);
-        for (Pathss::size_type i = 0; i < groupedPaths.size(); ++i) {
-            paths = groupedPaths[i];
-            qDebug() << "groupedPolygons" << i;
-            for (int p = 0; p < 1000 && paths.size(); ++p) {
-                offset.Clear();
-                offset.AddPaths(paths, p ? jtMiter : jtRound, etClosedPolygon);
-                offset.Execute(paths, p ? stepOver : dOffset);
-                for (Paths::size_type j = 0; j < paths.size(); ++j) {
-                    paths[j].push_back(paths[j][0]);
-                }
-                retPaths.push_back(paths);
-                qDebug() << "paths" << paths.size() << p << "groupedPolygons.size()" << groupedPaths.size() << i;
-                qApp->processEvents(QEventLoop::AllEvents, 1000);
-            }
-        }
-
-        PolyTree polyTree;
-
-        clipper.Clear();
-        for (Paths::size_type i = 0; i < retPaths.size(); ++i) {
-            clipper.AddPaths(retPaths[i], ptSubject, true);
-        }
-        IntRect r = clipper.GetBounds();
-
-        int k = uScale;
-        Path outer(4);
-        outer[0] = IntPoint(r.left - k, r.bottom + k);
-        outer[1] = IntPoint(r.right + k, r.bottom + k);
-        outer[2] = IntPoint(r.right + k, r.top - k);
-        outer[3] = IntPoint(r.left - k, r.top - k);
-
-        clipper.Clear();
-        for (Paths::size_type i = 0; i < retPaths.size(); ++i) {
-            clipper.AddPaths(retPaths[i], ptSubject, true);
-        }
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctXor, polyTree, pftNonZero);
-        retPaths.clear();
-        grouping(polyTree.GetFirst(), &retPaths, (GROUP)!milling);
-    }
-    else {
-        paths = mergedPaths;
-        if (milling) {
-            paths.push_back(outer);
-        }
-        for (int p = 0; p < 1000 && paths.size() > 0; ++p) {
+        tmpPaths.clear();
+        for (Paths paths : groupedPaths) {
             offset.Clear();
             offset.AddPaths(paths, jtRound, etClosedPolygon);
-            offset.Execute(paths, dOffset * uScale);
-            for (Paths::size_type j = 0; j < paths.size(); ++j) {
-                paths[j].push_back(paths[j][0]);
+            offset.Execute(paths, -dOffset);
+            do {
+                paths_1.append(paths);
+                offset.Clear();
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.Execute(paths, -stepOver);
+            } while (paths.size());
+
+            PolyTree polyTree;
+            clipper.Clear();
+            clipper.AddPaths(paths_1, ptSubject, true);
+            IntRect r(clipper.GetBounds());
+            int k = 1;
+            Path outer = {
+                IntPoint(r.left - k, r.bottom + k),
+                IntPoint(r.right + k, r.bottom + k),
+                IntPoint(r.right + k, r.top - k),
+                IntPoint(r.left - k, r.top - k)
+            };
+            clipper.AddPath(outer, ptSubject, true);
+            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+            grouping(polyTree.GetFirst(), &paths_2, COPPER);
+            for (Paths paths : paths_2) {
+                tmpPaths.append(paths);
             }
-            retPaths.push_back(paths);
-            qApp->processEvents(QEventLoop::AllEvents, 1000);
+            paths_1.clear();
+            paths_2.clear();
         }
+        groupedPaths.clear();
     }
-    return retPaths;
+
+    if (tmpPaths.size() == 0)
+        return nullptr;
+
+    std::reverse(tmpPaths.begin(), tmpPaths.end());
+
+    if (convent)
+        for (Path& path : tmpPaths) {
+            if (Orientation(path))
+                ReversePath(path);
+        }
+    else
+        for (Path& path : tmpPaths) {
+            if (!Orientation(path))
+                ReversePath(path);
+        }
+
+    return new GCodeProfile(tmpPaths, tool[0], depth);
 }
 
 GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth)
@@ -179,7 +166,7 @@ Pathss& ToolPathCreator::GetGroupedPaths(GROUP group, bool fl)
     Clipper clipper;
     clipper.AddPaths(mergedPaths, ptSubject, true);
     IntRect r(clipper.GetBounds());
-    int k = uScale;
+    int k = /*uScale*/ 1;
     Path outer = {
         IntPoint(r.left - k, r.bottom + k),
         IntPoint(r.right + k, r.bottom + k),
@@ -206,37 +193,37 @@ ToolPathCreator& ToolPathCreator::setPaths(const Paths& value)
     return *this;
 }
 
-void ToolPathCreator::grouping(PolyNode* n, Pathss* p, GROUP group)
+void ToolPathCreator::grouping(PolyNode* node, Pathss* pathss, GROUP group)
 {
     Path path;
     Paths paths;
     switch (group) {
     case CUTOFF:
-        if (!n->IsHole()) {
-            path = n->Contour;
+        if (!node->IsHole()) {
+            path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < n->ChildCount(); ++var) {
-                path = n->Childs[var]->Contour;
+            for (int var = 0; var < node->ChildCount(); ++var) {
+                path = node->Childs[var]->Contour;
                 paths.push_back(path);
             }
-            p->push_back(paths);
+            pathss->push_back(paths);
         }
-        for (int var = 0; var < n->ChildCount(); ++var) {
-            grouping(n->Childs[var], p, group);
+        for (int var = 0; var < node->ChildCount(); ++var) {
+            grouping(node->Childs[var], pathss, group);
         }
         break;
     case COPPER:
-        if (n->IsHole()) {
-            path = n->Contour;
+        if (node->IsHole()) {
+            path = node->Contour;
             paths.push_back(path);
-            for (int var = 0; var < n->ChildCount(); ++var) {
-                path = n->Childs[var]->Contour;
+            for (int var = 0; var < node->ChildCount(); ++var) {
+                path = node->Childs[var]->Contour;
                 paths.push_back(path);
             }
-            p->push_back(paths);
+            pathss->push_back(paths);
         }
-        for (int var = 0; var < n->ChildCount(); ++var) {
-            grouping(n->Childs[var], p, group);
+        for (int var = 0; var < node->ChildCount(); ++var) {
+            grouping(node->Childs[var], pathss, group);
         }
         break;
     }

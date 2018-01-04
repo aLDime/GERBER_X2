@@ -488,7 +488,7 @@ void ToolEdit::updateName()
         leName->setText(QString(tr("End Mill (%1 mm)")).arg(dsbList[Diameter]->value()));
         break;
     case Engraving:
-        leName->setText(QString(tr("Engrave (%2\302\260 %1 mm Tip Dia)")).arg(dsbList[/*FlatDiameter*/ Diameter]->value()).arg(dsbList[SideAngle]->value()));
+        leName->setText(QString(tr("Engrave (%2\302\260 %1 mm tip)")).arg(dsbList[/*FlatDiameter*/ Diameter]->value()).arg(dsbList[SideAngle]->value()));
         break;
     case Drill:
         leName->setText(QString(tr("Drill (%1 mm)")).arg(dsbList[Diameter]->value()));

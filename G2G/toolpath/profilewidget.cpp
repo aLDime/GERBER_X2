@@ -26,8 +26,6 @@ enum {
     OUTSIDE,
     INSIDE,
     ON,
-    CLIMB = 0,
-    CONVENTIONAL
 };
 
 ProfileWidget::ProfileWidget(QWidget* parent)
@@ -165,15 +163,13 @@ void ProfileWidget::calculate()
 {
     MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
 
-    QList<QGraphicsItem*> wItems(scene->selectedItems());
-
     if (qFuzzyIsNull(tool.data.params[Diameter])) {
         QMessageBox::warning(this, "!!!", tr("No valid tool..."));
         return;
     }
 
     Paths wPaths;
-    for (QGraphicsItem* item : wItems) {
+    for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == G::WorkItemType)
             wPaths.append(static_cast<G::WorkItem*>(item)->getPaths());
     }
