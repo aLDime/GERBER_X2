@@ -101,9 +101,9 @@ Path& Aperture::rotate(Path& poligon, double angle, IntPoint center)
         length = Length(center, poligon[i]);
         poligon[i] = IntPoint(qCos(qDegreesToRadians(tmpAangle + angle)) * length, qSin(qDegreesToRadians(tmpAangle + angle)) * length);
     }
-    if (fl != (Area(poligon) < 0)) {
+    if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
-    }
+
     return poligon;
 }
 
@@ -240,14 +240,14 @@ ApertureType ApMacro::type() const { return APERTURE_MACRO; }
 void ApMacro::draw()
 {
     enum {
-        CENTER_LINE = 21,
-        CIRCLE = 1,
         COMMENT = 0,
-        MOIRE = 6,
+        CIRCLE = 1,
         OUTLINE_CUSTOM_POLYGON = 4, // MAXIMUM 5000 POINTS
         OUTLINE_REGULAR_POLYGON = 5, // 3-12 POINTS
+        MOIRE = 6,
         THERMAL = 7,
         VECTOR_LINE = 20,
+        CENTER_LINE = 21,
     };
 
     QList<double> mod;
@@ -278,6 +278,9 @@ void ApMacro::draw()
                     }
                 }
             }
+
+            qDebug() << m_macroCoefficients;
+
             if (mod.size() < 2)
                 continue;
 
@@ -288,25 +291,25 @@ void ApMacro::draw()
                 qDebug() << "Macro comment:" << var;
                 continue;
             case CIRCLE:
-                polygon = DrawCircle(mod);
+                polygon = drawCircle(mod);
                 break;
             case OUTLINE_CUSTOM_POLYGON:
-                polygon = DrawOutlineCustomPolygon(mod);
+                polygon = drawOutlineCustomPolygon(mod);
                 break;
             case OUTLINE_REGULAR_POLYGON:
-                polygon = DrawOutlineRegularPolygon(mod);
+                polygon = drawOutlineRegularPolygon(mod);
                 break;
             case MOIRE:
-                DrawMoire(mod);
+                drawMoire(mod);
                 return;
             case THERMAL:
-                DrawThermal(mod);
+                drawThermal(mod);
                 return;
             case VECTOR_LINE:
-                polygon = DrawVectorLine(mod);
+                polygon = drawVectorLine(mod);
                 break;
             case CENTER_LINE:
-                polygon = DrawCenterLine(mod);
+                polygon = drawCenterLine(mod);
                 break;
             }
             if (Area(polygon) < 0) {
@@ -352,7 +355,7 @@ void ApMacro::draw()
     m_size = qSqrt(x * x + y * y);
 }
 
-Path ApMacro::DrawCenterLine(const QList<double>& mod)
+Path ApMacro::drawCenterLine(const QList<double>& mod)
 {
     enum {
         Width = 2,
@@ -366,12 +369,12 @@ Path ApMacro::DrawCenterLine(const QList<double>& mod)
     Path polygon = rect(mod[Width] * uScale, mod[Height] * uScale, center);
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0)
-        rotate(polygon, mod[Rotation_angle], center);
+        rotate(polygon, mod[Rotation_angle]);
 
     return polygon;
 }
 
-Path ApMacro::DrawCircle(const QList<double>& mod)
+Path ApMacro::drawCircle(const QList<double>& mod)
 {
     enum {
         Diameter = 2,
@@ -379,16 +382,18 @@ Path ApMacro::DrawCircle(const QList<double>& mod)
         CenterY,
         Rotation_angle
     };
+
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+
     Path polygon = circle(mod[Diameter] * uScale, center);
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0.0)
-        rotate(polygon, mod[Rotation_angle] /*, center*/);
+        rotate(polygon, mod[Rotation_angle]);
 
     return polygon;
 }
 
-void ApMacro::DrawMoire(const QList<double>& mod)
+void ApMacro::drawMoire(const QList<double>& mod)
 {
     enum {
         CenterX = 1,
@@ -425,11 +430,11 @@ void ApMacro::DrawMoire(const QList<double>& mod)
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
         for (Path& path : m_paths)
-            rotate(path, mod[Rotation_angle], center);
+            rotate(path, mod[Rotation_angle]);
     }
 }
 
-Path ApMacro::DrawOutlineCustomPolygon(const QList<double>& mod)
+Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
 {
     enum {
         Number_of_vertices = 2,
@@ -447,10 +452,10 @@ Path ApMacro::DrawOutlineCustomPolygon(const QList<double>& mod)
     return polygon;
 }
 
-Path ApMacro::DrawOutlineRegularPolygon(const QList<double>& mod)
+Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
 {
     enum {
-        Number_of_vertices = 2, //n, 3 ≤ n ≤ 12. A decimal.
+        Number_of_vertices = 2,
         CenterX,
         CenterY,
         Diameter,
@@ -477,7 +482,7 @@ Path ApMacro::DrawOutlineRegularPolygon(const QList<double>& mod)
     return polygon;
 }
 
-void ApMacro::DrawThermal(const QList<double>& mod)
+void ApMacro::drawThermal(const QList<double>& mod)
 {
     enum {
         CenterX = 1,
@@ -505,11 +510,11 @@ void ApMacro::DrawThermal(const QList<double>& mod)
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
         for (Path& path : m_paths)
-            rotate(path, mod[Rotation_angle], center);
+            rotate(path, mod[Rotation_angle] /*, center*/);
     }
 }
 
-Path ApMacro::DrawVectorLine(const QList<double>& mod)
+Path ApMacro::drawVectorLine(const QList<double>& mod)
 {
     enum {
         Width = 2,

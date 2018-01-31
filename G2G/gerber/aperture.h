@@ -133,13 +133,13 @@ private:
     QMap<QString, double> m_macroCoefficients;
     QString m_macro;
 
-    Path DrawCenterLine(const QList<double>& mod);
-    Path DrawCircle(const QList<double>& mod);
-    void DrawMoire(const QList<double>& mod);
-    Path DrawOutlineCustomPolygon(const QList<double>& mod);
-    Path DrawOutlineRegularPolygon(const QList<double>& mod);
-    void DrawThermal(const QList<double>& mod);
-    Path DrawVectorLine(const QList<double>& mod);
+    Path drawCenterLine(const QList<double>& mod);
+    Path drawCircle(const QList<double>& mod);
+    void drawMoire(const QList<double>& mod);
+    Path drawOutlineCustomPolygon(const QList<double>& mod);
+    Path drawOutlineRegularPolygon(const QList<double>& mod);
+    void drawThermal(const QList<double>& mod);
+    Path drawVectorLine(const QList<double>& mod);
 };
 }
 #endif // GERBERAPERTURE_H

@@ -39,20 +39,17 @@ Result MathParser::PlusMinus(QString s) //throws Exception
     double acc = current.acc;
 
     while (current.rest.length() > 0) {
-        if (!(current.rest.at(0) == '+' || current.rest.at(0) == '-')) {
+        if (!(current.rest.at(0) == '+' || current.rest.at(0) == '-'))
             break;
-        }
 
         QChar sign = current.rest.at(0);
         QString next = current.rest.mid(1);
 
         current = MulDiv(next);
-        if (sign == '+') {
+        if (sign == '+')
             acc += current.acc;
-        }
-        else {
+        else
             acc -= current.acc;
-        }
     }
     return Result(acc, current.rest);
 }
@@ -62,12 +59,10 @@ Result MathParser::Bracket(QString s) //throws Exception
     QChar zeroChar = s.at(0);
     if (zeroChar == '(') {
         Result r = PlusMinus(s.mid(1));
-        if (!r.rest.isEmpty() && r.rest.at(0) == ')') {
+        if (!r.rest.isEmpty() && r.rest.at(0) == ')')
             r.rest = r.rest.mid(1);
-        }
-        else {
+        else
             qWarning() << "Error: not close bracket";
-        }
         return r;
     }
     return FunctionVariable(s);
@@ -106,23 +101,20 @@ Result MathParser::MulDiv(QString s) //throws Exception
 
     double acc = current.acc;
     while (true) {
-        if (current.rest.length() == 0) {
+        if (current.rest.length() == 0)
             return current;
-        }
+
         QChar sign = current.rest.at(0);
-        if ((sign != '*' && sign != '/')) {
+        if ((sign != '*' && sign != '/'))
             return current;
-        }
 
         QString next = current.rest.mid(1);
         Result right = Bracket(next);
 
-        if (sign == '*') {
+        if (sign == '*')
             acc *= right.acc;
-        }
-        else {
+        else
             acc /= right.acc;
-        }
 
         current = Result(acc, right.rest);
     }
@@ -146,14 +138,13 @@ Result MathParser::Num(QString s) //throws Exception
         }
         i++;
     }
-    if (i == 0) { // что-либо похожее на число мы не нашли
+    if (i == 0) // что-либо похожее на число мы не нашли
         throw "can't get valid number in '" + s + "'";
-    }
 
     double dPart = s.mid(0, i).toDouble();
-    if (negative) {
+    if (negative)
         dPart = -dPart;
-    }
+
     QString restPart = s.mid(i);
 
     return Result(dPart, restPart);
