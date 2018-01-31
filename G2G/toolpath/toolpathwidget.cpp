@@ -28,7 +28,7 @@
 
 ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
     : QWidget(parent)
-    , type(type)
+    , m_type(type)
 {
     setupUi(this);
 
@@ -67,7 +67,7 @@ ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
 ToolPathWidget::~ToolPathWidget()
 {
     QSettings settings;
-    settings.beginGroup(QString("ToolPathWidget%1").arg(type));
+    settings.beginGroup(QString("ToolPathWidget%1").arg(m_type));
     settings.setValue("Depth", dsbxDepth->value());
     settings.endGroup();
 }
@@ -85,6 +85,11 @@ void ToolPathWidget::setVisibleTool2(bool visible)
     lineT2->setVisible(visible);
     pbEditTool2->setVisible(visible);
     pbSelectTool2->setVisible(visible);
+}
+
+int ToolPathWidget::type() const
+{
+    return m_type;
 }
 
 void ToolPathWidget::setupUi(QWidget* Form)
@@ -302,7 +307,7 @@ void ToolPathWidget::setupUi(QWidget* Form)
     verticalLayout->addItem(new QSpacerItem(10, 10, QSizePolicy::Minimum, QSizePolicy::Expanding));
 
     //////////////////////////////////////////////////////////////
-    switch (type) {
+    switch (m_type) {
     case PROFILE_TOOLPATH_FORM:
         tpcWidget = new ProfileWidget(groupBox_2);
         break;

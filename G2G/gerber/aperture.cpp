@@ -267,14 +267,14 @@ void ApMacro::draw()
                 qDebug() << "Macro comment:" << var;
                 continue;
             }
-            if (var.count('=')) {
+            if (var.contains('=')) {
                 stringList = var.split('=');
                 m_macroCoefficients[stringList.first()] = MathParser(m_macroCoefficients).Parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
             }
             else {
                 for (QString& var2 : var.split(',')) {
-                    if (var2.count('$')) {
+                    if (var2.contains('$')) {
                         mod.push_back(MathParser(m_macroCoefficients).Parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
                     }
                     else {

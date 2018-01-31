@@ -1,7 +1,7 @@
 #include "drillforapertureform.h"
 #include "mainwindow.h"
 #include "mainwindow.h"
-#include "materialsetup.h"
+#include "forms/materialsetup.h"
 #include "tooldatabase/tooldatabase.h"
 
 #include "gerber/graphicsitem.h"
@@ -262,11 +262,11 @@ void MainWindow::createActions()
 
     addDockWidget(Qt::RightDockWidgetArea, dwCreatePath);
 
-    auto createDockWidget = [&](QWidget* dwContents, int type) {
+    auto createDockWidget = [&](QWidget* dwContent, int type) {
         if (dwCreatePath->widget() != nullptr)
             delete dwCreatePath->widget();
-        dwContents->setObjectName(QStringLiteral("dwContents"));
-        dwCreatePath->setWidget(dwContents);
+        dwContent->setObjectName(QStringLiteral("dwContents"));
+        dwCreatePath->setWidget(dwContent);
         //dwCreatePath->setFloating(false);
         dwCreatePath->setWindowTitle(tr("Create Toolpath"));
         for (QAction* action : toolpathActionList) {
@@ -309,8 +309,7 @@ void MainWindow::createActions()
         //        action->setEnabled(false);
     }
 
-    //    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
-    QTimer::singleShot(10, [=] { createDockWidget(new ToolPathWidget(POCKET_TOOLPATH_FORM), POCKET_TOOLPATH_FORM); });
+    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
 }

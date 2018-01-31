@@ -33,8 +33,10 @@ class ToolPathWidget : public QWidget {
     friend class Widget;
 
 public:
-    explicit ToolPathWidget(int type, QWidget* parent = nullptr);
+    explicit ToolPathWidget(int m_type, QWidget* parent = nullptr);
     ~ToolPathWidget();
+
+    int type() const;
 
 private:
     void setVisibleTool2(bool visible);
@@ -44,7 +46,7 @@ signals:
 public slots:
 
 private:
-    int type;
+    int m_type;
 
     QCheckBox* cbxTool2;
     QDoubleSpinBox* dsbxDepth;
