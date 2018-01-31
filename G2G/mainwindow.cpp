@@ -15,8 +15,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
-#include "forms/drillingtoolpathform.h"
-#include "forms/pockettoolpathform.h"
 #include "gerber/parser.h"
 #include <toolpath/toolpathwidget.h>
 #include <gerber/file.h>

@@ -62,7 +62,6 @@ QString TreeView::files()
 
 void TreeView::updateActions()
 {
-
     expandAll();
     for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column) {
         resizeColumnToContents(column);

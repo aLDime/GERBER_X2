@@ -8,12 +8,10 @@ QTimer FileItem::repaintTimer;
 FileItem::FileItem(G::File* gerberFile)
     : gFile(gerberFile)
 {
-    MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
-
-    gFile->gig->addToTheScene(scene);
+    gFile->gig->addToTheScene(MainWindow::getMainWindow()->getScene());
     connect(&repaintTimer, &QTimer::timeout, this, &FileItem::repaint);
-    repaintTimer.start(100);
     MainWindow::getMainWindow()->closeAllAct->setEnabled(true);
+    repaintTimer.start(100);
 }
 
 FileItem::~FileItem()

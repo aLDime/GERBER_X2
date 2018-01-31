@@ -391,9 +391,9 @@ void Parser::CreateFlash()
     if (file->apertures.isEmpty() && file->apertures[state.curAperture] == nullptr)
         return;
     Paths paths(file->apertures[state.curAperture]->draw(state));
-    if (file->apertures[state.curAperture]->isDrilled()) {
+    if (file->apertures[state.curAperture]->isDrilled())
         paths.push_back(file->apertures[state.curAperture]->drawDrill(state));
-    }
+
     file->append(GraphicObject(state, paths, file, gerbLines));
     ClearStep();
 }

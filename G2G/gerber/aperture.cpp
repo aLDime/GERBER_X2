@@ -23,9 +23,8 @@ Paths Aperture::draw(const State& state)
     Paths tmpPpaths;
     for (Path var : m_paths) {
 #ifdef DEPRECATED_IMAGE_POLARITY
-        if (state.imgPolarity == NEGATIVE) {
+        if (state.imgPolarity == NEGATIVE)
             ReversePath(var);
-        }
 #endif
         if (state.format.unitMode == INCHES && type() == APERTURE_MACRO) {
             for (IntPoint& pt : var) {
@@ -33,9 +32,8 @@ Paths Aperture::draw(const State& state)
                 pt.Y *= 25.4;
             }
         }
-        if (state.curPos.X != 0 || state.curPos.Y != 0) {
+        if (state.curPos.X != 0 || state.curPos.Y != 0)
             translate(var, state.curPos);
-        }
         tmpPpaths.push_back(var);
     }
     return tmpPpaths;
@@ -252,13 +250,10 @@ void ApMacro::draw()
         VECTOR_LINE = 20,
     };
 
-    Clipper clipper;
-    int exposure;
     QList<double> mod;
-    QList<QString> stringList;
-    IntPoint center;
     Path polygon;
-    QVector<QPair<int, Paths> > items;
+
+    QVector<QPair<int, Path> > items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
             QString var = m_modifiers[i];
@@ -268,7 +263,7 @@ void ApMacro::draw()
                 continue;
             }
             if (var.contains('=')) {
-                stringList = var.split('=');
+                QList<QString> stringList = var.split('=');
                 m_macroCoefficients[stringList.first()] = MathParser(m_macroCoefficients).Parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
             }
@@ -276,6 +271,7 @@ void ApMacro::draw()
                 for (QString& var2 : var.split(',')) {
                     if (var2.contains('$')) {
                         mod.push_back(MathParser(m_macroCoefficients).Parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
+                        qDebug() << "MathParser" << var2 << "=" << mod.last();
                     }
                     else {
                         mod.push_back(var2.toDouble());
@@ -285,148 +281,43 @@ void ApMacro::draw()
             if (mod.size() < 2)
                 continue;
 
-            m_paths.clear();
-            polygon.clear();
-            clipper.Clear();
+            const int exposure = mod[1];
 
-            exposure = mod[1];
             switch ((int)mod[0]) {
             case COMMENT:
                 qDebug() << "Macro comment:" << var;
                 continue;
             case CIRCLE:
-                exposure = mod[1];
-                mod[2] *= uScale;
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                center = IntPoint(mod[3], mod[4]);
-                polygon = circle(mod[2], center);
-                if (mod.size() > 5) {
-                    rotate(polygon, mod[5], center);
-                }
-                m_paths.push_back(polygon);
+                polygon = DrawCircle(mod);
                 break;
-            case OUTLINE_CUSTOM_POLYGON: //exposure
-                exposure = mod[1];
-                polygon.clear();
-                for (int j = 0; j < int(mod[2]); ++j) {
-                    polygon.push_back(IntPoint(mod[3 + j * 2] * uScale, mod[4 + j * 2] * uScale));
-                }
-                if (mod.size() > (mod[2] * 2 + 3) && mod.last() > 0) {
-                    rotate(polygon, mod.last());
-                }
-                m_paths.push_back(polygon);
+            case OUTLINE_CUSTOM_POLYGON:
+                polygon = DrawOutlineCustomPolygon(mod);
                 break;
-            case OUTLINE_REGULAR_POLYGON: //exposure
-                exposure = mod[1];
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                mod[5] *= uScale;
-                if (3 > mod[2] || mod[2] > 12) {
-                    throw QString("Bad outline (regular polygon) macro!");
-                }
-                center = IntPoint(mod[3], mod[4]);
-                mod[5] /= 2.0;
-                for (int j = 0; j < mod[2]; ++j) {
-                    polygon.push_back(IntPoint(
-                        qCos(qDegreesToRadians(j * 360.0 / mod[2])) * mod[5],
-                        qSin(qDegreesToRadians(j * 360.0 / mod[2])) * mod[5]));
-                }
-                if (mod.size() > 6) {
-                    rotate(polygon, mod[6]);
-                }
-                translate(polygon, center);
-                m_paths.push_back(polygon);
+            case OUTLINE_REGULAR_POLYGON:
+                polygon = DrawOutlineRegularPolygon(mod);
                 break;
             case MOIRE:
-                exposure = 1;
-                mod[1] *= uScale;
-                mod[2] *= uScale;
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                mod[5] *= uScale;
-                mod[7] *= uScale;
-                mod[8] *= uScale;
-                center = IntPoint(mod[1], mod[2]);
-                for (int num = 0; num < mod[6]; ++num) {
-                    clipper.AddPath(circle(mod[3]), ptClip, true);
-                    mod[3] -= mod[4] * 2;
-                    polygon = circle(mod[3]);
-                    ReversePath(polygon);
-                    clipper.AddPath(polygon, ptClip, true);
-                    mod[3] -= mod[5] * 2;
-                }
-                clipper.AddPath(rect(mod[8], mod[7]), ptClip, true);
-                clipper.AddPath(rect(mod[7], mod[8]), ptClip, true);
-                clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
-                if (mod.size() > 9) {
-                    for (Path& path : m_paths) {
-                        rotate(path, mod[9], center);
-                    }
-                }
+                DrawMoire(mod);
                 return;
             case THERMAL:
-                exposure = 1;
-                if (mod[3] <= mod[4] || mod[4] < 0.0 || mod[5] >= (mod[3] / qPow(2.0, 0.5))) {
-                    throw QString("Bad termal macro!");
-                }
-                mod[1] *= uScale;
-                mod[2] *= uScale;
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                mod[5] *= uScale;
-                center = IntPoint(mod[1], mod[2]);
-                clipper.AddPath(circle(mod[3]), ptSubject, true);
-                clipper.AddPath(circle(mod[4]), ptClip, true);
-                clipper.AddPath(rect(mod[5], mod[3]), ptClip, true);
-                clipper.AddPath(rect(mod[3], mod[5]), ptClip, true);
-                clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
-                if (mod.size() > 6) {
-                    for (Path& path : m_paths) {
-                        rotate(path, mod[6], center);
-                    }
-                }
+                DrawThermal(mod);
                 return;
             case VECTOR_LINE:
-                exposure = mod[1];
-                mod[2] *= uScale;
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                mod[5] *= uScale;
-                mod[6] *= uScale;
-                center = IntPoint((mod[3] + mod[5]) / 2, (mod[4] + mod[6]) / 2);
-                polygon = rect(Length(IntPoint(mod[3], mod[4]), IntPoint(mod[5], mod[6])), mod[2], center);
-                rotate(polygon, Angle(IntPoint(mod[3], mod[4]), IntPoint(mod[5], mod[6])), center);
-                if (mod.size() > 7) {
-                    rotate(polygon, mod[7]);
-                }
-                m_paths.push_back(polygon);
+                polygon = DrawVectorLine(mod);
                 break;
             case CENTER_LINE:
-                exposure = mod[1];
-                mod[2] *= uScale;
-                mod[3] *= uScale;
-                mod[4] *= uScale;
-                mod[5] *= uScale;
-                center = IntPoint(mod[4], mod[5]);
-                polygon = rect(mod[2], mod[3], center);
-                if (mod.size() > 6) {
-                    rotate(polygon, mod[6], center);
-                }
-                m_paths.push_back(polygon);
+                polygon = DrawCenterLine(mod);
                 break;
             }
-            if (Area(m_paths[m_paths.size() - 1]) < 0) {
-                if (exposure) {
-                    ReversePath(m_paths[m_paths.size() - 1]);
-                }
+            if (Area(polygon) < 0) {
+                if (exposure)
+                    ReversePath(polygon);
             }
             else {
-                if (!exposure) {
-                    ReversePath(m_paths[m_paths.size() - 1]);
-                }
+                if (!exposure)
+                    ReversePath(polygon);
             }
-            items.push_back(qMakePair(exposure, m_paths));
+            items.push_back(qMakePair(exposure, polygon));
         }
     }
     catch (...) {
@@ -435,21 +326,21 @@ void ApMacro::draw()
     }
 
     if (items.size() > 1) {
-        for (int i = 0, exp = -1; i < items.size();) {
+        Clipper clipper;
+        for (int i = 0, exp; i < items.size();) {
             clipper.Clear();
             clipper.AddPaths(m_paths, ptSubject, true);
             exp = items[i].first;
-            do {
-                clipper.AddPaths((const Paths)items[i++].second, ptClip, true);
-            } while (i < items.size() && exp == items[i].first);
-            if (exp) {
+            while (i < items.size() && exp == items[i].first)
+                clipper.AddPath(items[i++].second, ptClip, true);
+            if (exp)
                 clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
-            }
-            else {
+            else
                 clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
-            }
         }
     }
+    else
+        m_paths.append(polygon);
 
     ClipperBase clipperBase;
     clipperBase.AddPaths(m_paths, ptSubject, true);
@@ -459,4 +350,185 @@ void ApMacro::draw()
     double x = rect.right * dScale;
     double y = rect.top * dScale;
     m_size = qSqrt(x * x + y * y);
+}
+
+Path ApMacro::DrawCenterLine(const QList<double>& mod)
+{
+    enum {
+        Width = 2,
+        Height,
+        CenterX,
+        CenterY,
+        Rotation_angle
+    };
+
+    IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+    Path polygon = rect(mod[Width] * uScale, mod[Height] * uScale, center);
+
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0)
+        rotate(polygon, mod[Rotation_angle], center);
+
+    return polygon;
+}
+
+Path ApMacro::DrawCircle(const QList<double>& mod)
+{
+    enum {
+        Diameter = 2,
+        CenterX,
+        CenterY,
+        Rotation_angle
+    };
+    IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+    Path polygon = circle(mod[Diameter] * uScale, center);
+
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0.0)
+        rotate(polygon, mod[Rotation_angle] /*, center*/);
+
+    return polygon;
+}
+
+void ApMacro::DrawMoire(const QList<double>& mod)
+{
+    enum {
+        CenterX = 1,
+        CenterY,
+        Diameter,
+        Thickness,
+        Gap,
+        Number_of_rings,
+        Cross_thickness,
+        Cross_length,
+        Rotation_angle,
+    };
+
+    cInt diameter = mod[Diameter] * uScale;
+    cInt thickness = mod[Thickness] * uScale;
+    cInt gap = mod[Gap] * uScale;
+    cInt ct = mod[Cross_thickness] * uScale;
+    cInt cl = mod[Cross_length] * uScale;
+
+    Clipper clipper;
+
+    IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+    for (int num = 0; num < mod[Number_of_rings]; ++num) {
+        clipper.AddPath(circle(diameter), ptClip, true);
+        diameter -= thickness * 2;
+        Path polygon = circle(diameter);
+        ReversePath(polygon);
+        clipper.AddPath(polygon, ptClip, true);
+        diameter -= gap * 2;
+    }
+    clipper.AddPath(rect(cl, ct), ptClip, true);
+    clipper.AddPath(rect(ct, cl), ptClip, true);
+    clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
+
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
+        for (Path& path : m_paths)
+            rotate(path, mod[Rotation_angle], center);
+    }
+}
+
+Path ApMacro::DrawOutlineCustomPolygon(const QList<double>& mod)
+{
+    enum {
+        Number_of_vertices = 2,
+        X,
+        Y,
+    };
+
+    Path polygon;
+    for (int j = 0; j < int(mod[Number_of_vertices]); ++j)
+        polygon.push_back(IntPoint(mod[X + j * 2] * uScale, mod[Y + j * 2] * uScale));
+
+    if (mod.size() > (mod[Number_of_vertices] * 2 + 3) && mod.last() > 0)
+        rotate(polygon, mod.last());
+
+    return polygon;
+}
+
+Path ApMacro::DrawOutlineRegularPolygon(const QList<double>& mod)
+{
+    enum {
+        Number_of_vertices = 2, //n, 3 ≤ n ≤ 12. A decimal.
+        CenterX,
+        CenterY,
+        Diameter,
+        Rotation_angle
+    };
+
+    if (3 > mod[Number_of_vertices] || mod[Number_of_vertices] > 12)
+        throw QString("Bad outline (regular polygon) macro!");
+
+    cInt diameter = mod[Diameter] * uScale * 0.5;
+    IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+
+    Path polygon;
+    for (int j = 0; j < mod[Number_of_vertices]; ++j)
+        polygon.push_back(IntPoint(
+            qCos(qDegreesToRadians(j * 360.0 / mod[Number_of_vertices])) * diameter,
+            qSin(qDegreesToRadians(j * 360.0 / mod[Number_of_vertices])) * diameter));
+
+    if (mod.size() > Rotation_angle && mod[6] > 0)
+        rotate(polygon, mod[Rotation_angle]);
+
+    translate(polygon, center);
+
+    return polygon;
+}
+
+void ApMacro::DrawThermal(const QList<double>& mod)
+{
+    enum {
+        CenterX = 1,
+        CenterY,
+        Outer_diameter,
+        Inner_diameter,
+        Gap_thickness,
+        Rotation_angle
+    };
+
+    if (mod[Outer_diameter] <= mod[Inner_diameter] || mod[Inner_diameter] < 0.0 || mod[Gap_thickness] >= (mod[Outer_diameter] / qPow(2.0, 0.5)))
+        throw QString("Bad termal macro!");
+
+    cInt outer = mod[Outer_diameter] * uScale;
+    cInt inner = mod[Inner_diameter] * uScale;
+    cInt gap = mod[Gap_thickness] * uScale;
+
+    IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
+    Clipper clipper;
+    clipper.AddPath(circle(outer), ptSubject, true);
+    clipper.AddPath(circle(inner), ptClip, true);
+    clipper.AddPath(rect(gap, outer), ptClip, true);
+    clipper.AddPath(rect(outer, gap), ptClip, true);
+    clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
+
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
+        for (Path& path : m_paths)
+            rotate(path, mod[Rotation_angle], center);
+    }
+}
+
+Path ApMacro::DrawVectorLine(const QList<double>& mod)
+{
+    enum {
+        Width = 2,
+        StartX,
+        StartY,
+        EndX,
+        EndY,
+        Rotation_angle,
+    };
+
+    IntPoint start(mod[StartX] * uScale, mod[StartY] * uScale);
+    IntPoint end(mod[EndX] * uScale, mod[EndY] * uScale);
+
+    IntPoint center((mod[StartX] + mod[EndX]) * uScale / 2, (mod[StartY] + mod[EndY]) * uScale / 2);
+    Path polygon = rect(Length(start, end), mod[Width] * uScale, center);
+    rotate(polygon, Angle(start, end), center);
+
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0)
+        rotate(polygon, mod[Rotation_angle]);
+
+    return polygon;
 }

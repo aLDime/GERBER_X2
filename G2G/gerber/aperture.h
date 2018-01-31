@@ -132,6 +132,14 @@ private:
     QList<QString> m_modifiers;
     QMap<QString, double> m_macroCoefficients;
     QString m_macro;
+
+    Path DrawCenterLine(const QList<double>& mod);
+    Path DrawCircle(const QList<double>& mod);
+    void DrawMoire(const QList<double>& mod);
+    Path DrawOutlineCustomPolygon(const QList<double>& mod);
+    Path DrawOutlineRegularPolygon(const QList<double>& mod);
+    void DrawThermal(const QList<double>& mod);
+    Path DrawVectorLine(const QList<double>& mod);
 };
 }
 #endif // GERBERAPERTURE_H

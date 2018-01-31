@@ -13,22 +13,20 @@ class Result {
 public:
     double acc; // Аккамулятор
     QString rest; // остаток строки, которую мы еще не обработали
-    Result(double v, const QString& r)
+    Result(double v = 0.0, const QString& r = "")
         : acc(v)
         , rest(r)
     {
-
     }
 };
 
 class MathParser {
 public:
     MathParser(QMap<QString, double>& variables);
-    MathParser();
-    void setVariable(QString variableName, double variableValue);
+    //    void setVariable(QString variableName, double variableValue) { variables->insert(variableName, variableValue) /*= variableValue*/; }
+    //    void setVariables(QMap<QString, double>& value) { variables = &value; }
     double getVariable(QString variableName);
     double Parse(const QString& s = "");
-    void setVariables(QMap<QString, double>& value);
 
 private:
     QMap<QString, double>* variables;

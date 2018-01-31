@@ -7,7 +7,7 @@
 #include <QStyleOptionGraphicsItem>
 #include <QSettings>
 #include <QFile>
-#include <materialsetup.h>
+#include "forms/materialsetup.h"
 
 ///////////////////////////////////////////////
 /// \brief GerberWorkItem::GerberWorkItem

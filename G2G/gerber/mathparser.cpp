@@ -7,19 +7,8 @@ MathParser::MathParser(QMap<QString, double>& variables)
 {
 }
 
-MathParser::MathParser()
-{
-    //*variables = new QMap<QString, double>();
-}
-
-void MathParser::setVariable(QString variableName, double variableValue)
-{
-    variables->insert(variableName, variableValue) /*= variableValue*/;
-}
-
 double MathParser::getVariable(QString variableName)
 {
-
     if (!variables->contains(variableName)) {
         qWarning() << "Error: Try get unexists variable '" + variableName + "'";
         return 0.0;
@@ -29,7 +18,7 @@ double MathParser::getVariable(QString variableName)
 
 double MathParser::Parse(const QString& s)
 {
-    Result result(0.0, "");
+    Result result;
     try {
         result = PlusMinus(s);
         if (!result.rest.isEmpty()) {
@@ -37,15 +26,11 @@ double MathParser::Parse(const QString& s)
                        << "\"" << s << "\"";
             qWarning() << "rest: " + result.rest;
         }
-    } catch (const QString& str) {
+    }
+    catch (const QString& str) {
         qWarning() << str;
     }
     return result.acc;
-}
-
-void MathParser::setVariables(QMap<QString, double>& value)
-{
-    variables = &value;
 }
 
 Result MathParser::PlusMinus(QString s) //throws Exception
@@ -64,7 +49,8 @@ Result MathParser::PlusMinus(QString s) //throws Exception
         current = MulDiv(next);
         if (sign == '+') {
             acc += current.acc;
-        } else {
+        }
+        else {
             acc -= current.acc;
         }
     }
@@ -78,7 +64,8 @@ Result MathParser::Bracket(QString s) //throws Exception
         Result r = PlusMinus(s.mid(1));
         if (!r.rest.isEmpty() && r.rest.at(0) == ')') {
             r.rest = r.rest.mid(1);
-        } else {
+        }
+        else {
             qWarning() << "Error: not close bracket";
         }
         return r;
@@ -88,8 +75,13 @@ Result MathParser::Bracket(QString s) //throws Exception
 
 Result MathParser::FunctionVariable(QString s) //throws Exception
 {
-    QString f = "";
+    QString f;
     int i = 0;
+    int sign = 1;
+    if (s.startsWith('-')) {
+        sign = -1;
+        s.remove(0, 1);
+    }
     // ищем название функции или переменной
     // имя обязательно должна начинаться с буквы
     while (i < s.length() && ((s.at(i).isLetter() || s.at(i) == '$') || (s.at(i).isDigit() && i > 0))) {
@@ -101,9 +93,9 @@ Result MathParser::FunctionVariable(QString s) //throws Exception
         if (s.length() > i && s.at(i) == '(') { // и следующий символ скобка значит - это функция
             Result r = Bracket(s.mid(f.length()));
             return processFunction(f, r);
-        } else { // иначе - это переменная
-            return Result(getVariable(f), s.mid(f.length()));
         }
+        else // иначе - это переменная
+            return Result(getVariable(f) * sign, s.mid(f.length()));
     }
     return Num(s);
 }
@@ -127,7 +119,8 @@ Result MathParser::MulDiv(QString s) //throws Exception
 
         if (sign == '*') {
             acc *= right.acc;
-        } else {
+        }
+        else {
             acc /= right.acc;
         }
 

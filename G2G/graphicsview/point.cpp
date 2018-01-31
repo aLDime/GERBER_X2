@@ -3,7 +3,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QDebug>
-#include <materialsetup.h>
+#include "forms/materialsetup.h"
 
 Point::Point(int type)
     : pen(Qt::NoPen)
@@ -32,11 +32,9 @@ QRectF Point::boundingRect() const
 void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
     Q_UNUSED(widget);
-
     painter->setPen(Qt::NoPen);
     painter->setBrush(brush);
     painter->drawPath(path);
-
     painter->setPen(QPen(brush.color(), 1.0));
     painter->setBrush(Qt::NoBrush);
     painter->drawEllipse(QPoint(0, 0), 2, 2);

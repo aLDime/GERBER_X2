@@ -16,11 +16,11 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
         return;
 
     itemZero = new Point(0);
-    itemZero->setBrush(Qt::red);
+    itemZero->setBrush(QColor(255, 0, 0, 64));
     itemZero->setToolTip("G-Code Zero Point");
 
     itemHome = new Point(1);
-    itemHome->setBrush(Qt::green);
+    itemHome->setBrush(QColor(0, 255, 0, 64));
     itemHome->setToolTip("G-Code Home Point");
 
     addItem(itemZero);
