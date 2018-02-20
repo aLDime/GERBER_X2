@@ -1,6 +1,8 @@
 #ifndef POINT_H
 #define POINT_H
 
+#include "mygraphicsscene.h"
+
 #include <QObject>
 #include <QGraphicsItem>
 #include <QBrush>
@@ -27,7 +29,7 @@ private:
     // QGraphicsItem interface
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent *event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 
 #endif // POINT_H

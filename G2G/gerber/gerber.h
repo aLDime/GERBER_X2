@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-#define DEPRECATED
+//#define DEPRECATED
 #define DEPRECATED_IMAGE_POLARITY
 
 using namespace ClipperLib;
@@ -35,7 +35,6 @@ enum COORDINATE_VALUES_NOTATION {
 #ifdef DEPRECATED
     INCREMENTAL_NOTATION,
 #endif
-
 };
 
 enum INTERPOLATION_MODE {

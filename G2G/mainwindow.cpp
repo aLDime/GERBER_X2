@@ -488,7 +488,7 @@ void MainWindow::exportPdf()
 
     QPdfWriter::Margins margins = { 0, 0, 0, 0 };
     pdfWriter.setMargins(margins);
-    pdfWriter.setResolution(10000000);
+    pdfWriter.setResolution(1000000);
 
     QPainter painter(&pdfWriter);
     painter.setTransform(QTransform().scale(1.0, -1.0));

@@ -255,7 +255,7 @@ void MaterialSetup::setupUi(QWidget* Form)
     formLayout->setWidget(5, QFormLayout::FieldRole, dsbxPlunge);
     formLayout->setWidget(6, QFormLayout::SpanningRole, line_2);
     formLayout->setWidget(7, QFormLayout::SpanningRole, label_7);
-    formLayout->setWidget(8, QFormLayout::LabelRole, new QLabel("Z:", groupBox_2));
+    formLayout->setWidget(8, QFormLayout::LabelRole, new QLabel("X:", groupBox_2));
     formLayout->setWidget(8, QFormLayout::FieldRole, dsbxHomeX);
     formLayout->setWidget(9, QFormLayout::LabelRole, new QLabel("Y:", groupBox_2));
     formLayout->setWidget(9, QFormLayout::FieldRole, dsbxHomeY);

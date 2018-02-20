@@ -6,6 +6,7 @@
 class Point;
 
 class MyGraphicsScene : public QGraphicsScene {
+    friend class Point;
 
 public:
     explicit MyGraphicsScene(QObject* parent, bool drawPoints = false);

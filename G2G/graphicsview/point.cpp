@@ -26,11 +26,17 @@ Point::Point(int type)
 
 QRectF Point::boundingRect() const
 {
+    if (reinterpret_cast<MyGraphicsScene*>(scene())->drawPdf)
+        return QRectF();
+
     return rect;
 }
 
 void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
 {
+    if (reinterpret_cast<MyGraphicsScene*>(scene())->drawPdf)
+        return;
+
     Q_UNUSED(widget);
     painter->setPen(Qt::NoPen);
     painter->setBrush(brush);
@@ -42,6 +48,9 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
 
 QPainterPath Point::shape() const
 {
+    if (reinterpret_cast<MyGraphicsScene*>(scene())->drawPdf)
+        return QPainterPath();
+
     return shape_;
 }
 
