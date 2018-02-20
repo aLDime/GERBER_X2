@@ -17,7 +17,8 @@ public:
     virtual ~AbstractItem();
     AbstractItem* child(int row);
     AbstractItem* parent();
-    int row() const;
+
+    int row() const ;
 
     void add(AbstractItem* item);
     void insert(int row, AbstractItem* item);

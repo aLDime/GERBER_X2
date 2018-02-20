@@ -257,11 +257,14 @@ void ApMacro::draw()
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
             QString var = m_modifiers[i];
+
             mod.clear();
+
             if (var.at(0) == '0') {
                 qDebug() << "Macro comment:" << var;
                 continue;
             }
+
             if (var.contains('=')) {
                 QList<QString> stringList = var.split('=');
                 m_macroCoefficients[stringList.first()] = MathParser(m_macroCoefficients).Parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
@@ -271,7 +274,7 @@ void ApMacro::draw()
                 for (QString& var2 : var.split(',')) {
                     if (var2.contains('$')) {
                         mod.push_back(MathParser(m_macroCoefficients).Parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
-                        qDebug() << "MathParser" << var2 << "=" << mod.last();
+                        //qDebug() << "MathParser" << var2 << "=" << mod.last();
                     }
                     else {
                         mod.push_back(var2.toDouble());
@@ -279,7 +282,7 @@ void ApMacro::draw()
                 }
             }
 
-            qDebug() << m_macroCoefficients;
+            //qDebug() << m_macroCoefficients;
 
             if (mod.size() < 2)
                 continue;
@@ -288,7 +291,7 @@ void ApMacro::draw()
 
             switch ((int)mod[0]) {
             case COMMENT:
-                qDebug() << "Macro comment:" << var;
+                qDebug() << "Macro comment2:" << var;
                 continue;
             case CIRCLE:
                 polygon = drawCircle(mod);
@@ -443,10 +446,11 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
     };
 
     Path polygon;
-    for (int j = 0; j < int(mod[Number_of_vertices]); ++j)
+    int num = mod[Number_of_vertices];
+    for (int j = 0; j < int(num); ++j)
         polygon.push_back(IntPoint(mod[X + j * 2] * uScale, mod[Y + j * 2] * uScale));
 
-    if (mod.size() > (mod[Number_of_vertices] * 2 + 3) && mod.last() > 0)
+    if (mod.size() > (num * 2 + 3) && mod.last() > 0)
         rotate(polygon, mod.last());
 
     return polygon;
@@ -461,18 +465,18 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
         Diameter,
         Rotation_angle
     };
-
-    if (3 > mod[Number_of_vertices] || mod[Number_of_vertices] > 12)
+    int num = mod[Number_of_vertices];
+    if (3 > num || num > 12)
         throw QString("Bad outline (regular polygon) macro!");
 
     cInt diameter = mod[Diameter] * uScale * 0.5;
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
 
     Path polygon;
-    for (int j = 0; j < mod[Number_of_vertices]; ++j)
+    for (int j = 0; j < num; ++j)
         polygon.push_back(IntPoint(
-            qCos(qDegreesToRadians(j * 360.0 / mod[Number_of_vertices])) * diameter,
-            qSin(qDegreesToRadians(j * 360.0 / mod[Number_of_vertices])) * diameter));
+            qCos(qDegreesToRadians(j * 360.0 / num)) * diameter,
+            qSin(qDegreesToRadians(j * 360.0 / num)) * diameter));
 
     if (mod.size() > Rotation_angle && mod[6] > 0)
         rotate(polygon, mod[Rotation_angle]);

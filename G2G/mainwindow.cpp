@@ -121,20 +121,20 @@ void MainWindow::closeFiles()
     //    graphicsView->SetScene(scene);
 }
 
-bool MainWindow::save()
-{
-    return isUntitled ? saveAs() : saveFile(curFile);
-}
+//bool MainWindow::save()
+//{
+//    return isUntitled ? saveAs() : saveFile(curFile);
+//}
 
-bool MainWindow::saveAs()
-{
-    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
-        curFile);
-    if (fileName.isEmpty())
-        return false;
+//bool MainWindow::saveAs()
+//{
+//    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
+//        curFile);
+//    if (fileName.isEmpty())
+//        return false;
 
-    return saveFile(fileName);
-}
+//    return saveFile(fileName);
+//}
 
 void MainWindow::about()
 {
@@ -350,26 +350,26 @@ void MainWindow::writeSettings()
     settings.setValue("files", treeView->files());
 }
 
-bool MainWindow::maybeSave()
-{
-    //if (!textEdit->document()->isModified())
-    return true;
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("SDI"),
-            tr("The document has been modified.\n"
-               "Do you want to save your changes?"),
-            QMessageBox::Save | QMessageBox::Discard
-                | QMessageBox::Cancel);
-    switch (ret) {
-    case QMessageBox::Save:
-        return save();
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        break;
-    }
-    return true;
-}
+//bool MainWindow::maybeSave()
+//{
+//    //if (!textEdit->document()->isModified())
+//    return true;
+//    const QMessageBox::StandardButton ret
+//        = QMessageBox::warning(this, tr("SDI"),
+//            tr("The document has been modified.\n"
+//               "Do you want to save your changes?"),
+//            QMessageBox::Save | QMessageBox::Discard
+//                | QMessageBox::Cancel);
+//    switch (ret) {
+//    case QMessageBox::Save:
+//        return save();
+//    case QMessageBox::Cancel:
+//        return false;
+//    default:
+//        break;
+//    }
+//    return true;
+//}
 
 void MainWindow::openFile(const QString& fileName)
 {
@@ -475,18 +475,17 @@ void MainWindow::openRecentFile()
 
 void MainWindow::exportPdf()
 {
-    QFileDialog fileDialog(this, tr("Export PDF"));
-    fileDialog.setAcceptMode(QFileDialog::AcceptSave);
-    fileDialog.setMimeTypeFilters(QStringList("application/pdf"));
-    fileDialog.setDefaultSuffix("pdf");
-    fileDialog.selectFile(curFile.left(curFile.lastIndexOf('.')));
-    if (fileDialog.exec() != QDialog::Accepted)
+    qDebug() << curFile;
+    curFile = QFileDialog::getSaveFileName(this, tr("Save PDF file"), curFile.left(curFile.lastIndexOf('.')) + ".pdf", tr("File(*.pdf)"));
+    qDebug() << curFile;
+    if (curFile.isEmpty())
         return;
 
-    QSizeF size = scene->itemsBoundingRect().size();
-
     QPdfWriter pdfWriter(curFile.left(curFile.lastIndexOf('.')) + ".pdf");
+
+    QSizeF size = scene->itemsBoundingRect().size();
     pdfWriter.setPageSizeMM(size);
+
     QPdfWriter::Margins margins = { 0, 0, 0, 0 };
     pdfWriter.setMargins(margins);
     pdfWriter.setResolution(10000000);
@@ -498,25 +497,25 @@ void MainWindow::exportPdf()
     scene->RenderPdf(&painter);
 }
 
-bool MainWindow::saveFile(const QString& fileName)
-{
-    QFile file(fileName);
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("SDI"),
-            tr("Cannot write file %1:\n%2.")
-                .arg(QDir::toNativeSeparators(fileName), file.errorString()));
-        return false;
-    }
+//bool MainWindow::saveFile(const QString& fileName)
+//{
+//    QFile file(fileName);
+//    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+//        QMessageBox::warning(this, tr("SDI"),
+//            tr("Cannot write file %1:\n%2.")
+//                .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+//        return false;
+//    }
 
-    QTextStream out(&file);
-    //    QApplication::setOverrideCursor(Qt::WaitCursor);
-    //    out << textEdit->toPlainText();
-    QApplication::restoreOverrideCursor();
+//    QTextStream out(&file);
+//    //    QApplication::setOverrideCursor(Qt::WaitCursor);
+//    //    out << textEdit->toPlainText();
+//    QApplication::restoreOverrideCursor();
 
-    setCurrentFile(fileName);
-    statusBar()->showMessage(tr("File saved"), 2000);
-    return true;
-}
+//    setCurrentFile(fileName);
+//    statusBar()->showMessage(tr("File saved"), 2000);
+//    return true;
+//}
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {

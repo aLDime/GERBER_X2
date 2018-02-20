@@ -27,7 +27,6 @@ Model::~Model()
 
 bool Model::insertRows(int row, int count, const QModelIndex& parent)
 {
-    //qDebug() << "insertRows" << row << count << data(parent).toString();
     beginInsertRows(parent, row, row + count - 1);
     AbstractItem* parentItem = static_cast<AbstractItem*>(parent.internalPointer());
     if (!parentItem)
@@ -42,14 +41,12 @@ bool Model::insertRows(int row, int count, const QModelIndex& parent)
 
 bool Model::removeRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << "removeRows" << row << (row + count - 1) << count << parent;
     beginRemoveRows(parent, row, row + count - 1);
     AbstractItem* parentItem = static_cast<AbstractItem*>(parent.internalPointer());
     if (!parentItem)
         parentItem = rootItem;
-    for (int r = 0; r < count; ++r) {
+    for (int r = 0; r < count; ++r)
         parentItem->remove(row);
-    }
     endRemoveRows();
     return true;
 }
@@ -112,13 +109,11 @@ QModelIndex Model::parent(const QModelIndex& child) const
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const
 {
-
     AbstractItem* item = static_cast<AbstractItem*>(index.internalPointer());
     //    if (dynamic_cast<Folders*>(item))
     //        qDebug() << typeid(dynamic_cast<Folders*>(item)).name();
     //    if (dynamic_cast<AbstractItem*>(item))
     //        qDebug() << typeid(dynamic_cast<AbstractItem*>(item)).name();
-
     if (!item)
         item = rootItem;
     return item->flags(index);

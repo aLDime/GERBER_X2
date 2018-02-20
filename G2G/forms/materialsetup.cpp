@@ -372,7 +372,7 @@ void MaterialSetup::retranslateUi(QWidget* Form)
     pbOk->setText(QApplication::translate("Form", "Ok", Q_NULLPTR));
 }
 
-void MaterialSetup::showEvent(QShowEvent* event)
+void MaterialSetup::showEvent(QShowEvent* /*event*/)
 {
     QDockWidget* w = static_cast<QDockWidget*>(parent());
     dockWidgetFeature = static_cast<int>(w->features());

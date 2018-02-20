@@ -48,8 +48,8 @@ private:
     void open();
     void closeFiles();
 
-    bool save();
-    bool saveAs();
+    //    bool save();
+    //    bool saveAs();
     void about();
     void documentWasModified();
     void Init();
@@ -57,7 +57,7 @@ private:
     void createStatusBar();
     void readSettings();
     void writeSettings();
-    bool maybeSave();
+    //    bool maybeSave();
     void setRecentFilesVisible(bool visible);
     static inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
     static inline QString fileKey() { return QStringLiteral("file"); }
@@ -68,7 +68,7 @@ private:
     void updateRecentFileActions();
     void openRecentFile();
     void exportPdf();
-    bool saveFile(const QString& fileName);
+    //    bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
     QString strippedName(const QString& fullFileName);
     ////////////////////////////////////////////////////
