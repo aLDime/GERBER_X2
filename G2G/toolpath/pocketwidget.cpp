@@ -15,7 +15,7 @@
 #include <mainwindow.h>
 
 #include <gcode/gcode.h>
-#include <graphicsview/mygraphicsscene.h>
+#include <mygraphicsscene.h>
 
 enum {
     OFFSET,

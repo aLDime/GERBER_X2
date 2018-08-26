@@ -1,6 +1,7 @@
 #include "aperture.h"
 #include "mathparser.h"
 #include <QDebug>
+#include <QLineF>
 
 using namespace G;
 
@@ -69,37 +70,39 @@ Path Aperture::circle(double diametr, IntPoint center)
             (qCos(qDegreesToRadians((double)i * 360.0 / STEPS_PER_CIRCLE)) * radius) + center.X,
             (qSin(qDegreesToRadians((double)i * 360.0 / STEPS_PER_CIRCLE)) * radius) + center.Y);
     }
-    if (Area(poligon) < 0) {
+
+    if (Area(poligon) < 0)
         ReversePath(poligon);
-    }
+
     return poligon;
 }
 
 Path Aperture::rect(double width, double height, IntPoint center)
 {
-    Path poligon(4);
-    double halfWidth = width * 0.5;
-    double halfHeight = height * 0.5;
-    poligon[0] = IntPoint(-halfWidth + center.X, +halfHeight + center.Y);
-    poligon[1] = IntPoint(-halfWidth + center.X, -halfHeight + center.Y);
-    poligon[2] = IntPoint(+halfWidth + center.X, -halfHeight + center.Y);
-    poligon[3] = IntPoint(+halfWidth + center.X, +halfHeight + center.Y);
-    //    poligon[4] = IntPoint(-halfWidth + center.X, +halfHeight + center.Y);
-    if ((Area(poligon) < 0.0)) {
+
+    const double halfWidth = width * 0.5;
+    const double halfHeight = height * 0.5;
+    Path poligon{
+        IntPoint(-halfWidth + center.X, +halfHeight + center.Y),
+        IntPoint(-halfWidth + center.X, -halfHeight + center.Y),
+        IntPoint(+halfWidth + center.X, -halfHeight + center.Y),
+        IntPoint(+halfWidth + center.X, +halfHeight + center.Y),
+    };
+    if (Area(poligon) < 0.0)
         ReversePath(poligon);
-    }
+
     return poligon;
 }
 
 Path& Aperture::rotate(Path& poligon, double angle, IntPoint center)
 {
-    double tmpAangle;
-    double length;
     bool fl = Area(poligon) < 0;
-    for (int i = 0; i < poligon.size(); ++i) {
-        tmpAangle = Angle(center, poligon[i]);
-        length = Length(center, poligon[i]);
-        poligon[i] = IntPoint(qCos(qDegreesToRadians(tmpAangle + angle)) * length, qSin(qDegreesToRadians(tmpAangle + angle)) * length);
+    for (IntPoint& pt : poligon) {
+        const double tmpAangle = angle - Angle(center, pt);
+        const double length = Length(center, pt);
+        pt = IntPoint(
+            qCos(qDegreesToRadians(tmpAangle)) * length,
+            qSin(qDegreesToRadians(tmpAangle)) * length);
     }
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
@@ -173,14 +176,12 @@ void ApObround::draw()
     cInt width_ = m_width * uScale;
     if (qFuzzyCompare(width_ + 1.0, height_ + 1.0)) {
         m_paths.push_back(circle(width_));
-    }
-    else {
+    } else {
         if (width_ > height_) {
             clipper.AddPath(circle(height_, IntPoint(-(width_ - height_) / 2, 0)), ptClip, true);
             clipper.AddPath(circle(height_, IntPoint((width_ - height_) / 2, 0)), ptClip, true);
             clipper.AddPath(rect(width_ - height_, height_), ptClip, true);
-        }
-        else if (width_ < height_) {
+        } else if (width_ < height_) {
             clipper.AddPath(circle(width_, IntPoint(0, -(height_ - width_) / 2)), ptClip, true);
             clipper.AddPath(circle(width_, IntPoint(0, (height_ - width_) / 2)), ptClip, true);
             clipper.AddPath(rect(width_, height_ - width_), ptClip, true);
@@ -253,7 +254,9 @@ void ApMacro::draw()
     QList<double> mod;
     Path polygon;
 
-    QVector<QPair<int, Path> > items;
+    QMap<QString, double> macroCoefficients{ m_macroCoefficients };
+
+    QVector<QPair<bool, Path>> items;
     try {
         for (int i = 0; i < m_modifiers.size(); ++i) {
             QString var = m_modifiers[i];
@@ -261,37 +264,36 @@ void ApMacro::draw()
             mod.clear();
 
             if (var.at(0) == '0') {
-                qDebug() << "Macro comment:" << var;
+                //qDebug() << "Macro comment:" << var;
                 continue;
             }
 
             if (var.contains('=')) {
                 QList<QString> stringList = var.split('=');
-                m_macroCoefficients[stringList.first()] = MathParser(m_macroCoefficients).Parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
+                macroCoefficients[stringList.first()]
+                    = MathParser(macroCoefficients).Parse(stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive));
                 continue;
-            }
-            else {
+            } else {
                 for (QString& var2 : var.split(',')) {
                     if (var2.contains('$')) {
-                        mod.push_back(MathParser(m_macroCoefficients).Parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
+                        mod.push_back(MathParser(macroCoefficients).Parse(var2.replace(QChar('x'), '*', Qt::CaseInsensitive)));
                         //qDebug() << "MathParser" << var2 << "=" << mod.last();
-                    }
-                    else {
+                    } else {
                         mod.push_back(var2.toDouble());
                     }
                 }
             }
 
-            //qDebug() << m_macroCoefficients;
+            //qDebug() << macroCoefficients;
 
             if (mod.size() < 2)
                 continue;
 
-            const int exposure = mod[1];
+            const bool exposure = mod[1];
 
             switch ((int)mod[0]) {
             case COMMENT:
-                qDebug() << "Macro comment2:" << var;
+                //qDebug() << "Macro comment2:" << var;
                 continue;
             case CIRCLE:
                 polygon = drawCircle(mod);
@@ -318,25 +320,25 @@ void ApMacro::draw()
             if (Area(polygon) < 0) {
                 if (exposure)
                     ReversePath(polygon);
-            }
-            else {
+            } else {
                 if (!exposure)
                     ReversePath(polygon);
             }
-            items.push_back(qMakePair(exposure, polygon));
+            items.push_back({ exposure, polygon });
         }
-    }
-    catch (...) {
+    } catch (...) {
         qDebug() << "GAMacro draw error";
         throw;
     }
 
+    //items.push_front({ true, circle(1) });
+
     if (items.size() > 1) {
         Clipper clipper;
-        for (int i = 0, exp; i < items.size();) {
+        for (int i = 0; i < items.size();) {
             clipper.Clear();
             clipper.AddPaths(m_paths, ptSubject, true);
-            exp = items[i].first;
+            bool exp = items[i].first;
             while (i < items.size() && exp == items[i].first)
                 clipper.AddPath(items[i++].second, ptClip, true);
             if (exp)
@@ -344,8 +346,7 @@ void ApMacro::draw()
             else
                 clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
         }
-    }
-    else
+    } else
         m_paths.append(polygon);
 
     ClipperBase clipperBase;
@@ -371,7 +372,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
     Path polygon = rect(mod[Width] * uScale, mod[Height] * uScale, center);
 
-    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0)
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0)
         rotate(polygon, mod[Rotation_angle]);
 
     return polygon;
@@ -390,7 +391,7 @@ Path ApMacro::drawCircle(const QList<double>& mod)
 
     Path polygon = circle(mod[Diameter] * uScale, center);
 
-    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0.0)
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0)
         rotate(polygon, mod[Rotation_angle]);
 
     return polygon;
@@ -431,7 +432,7 @@ void ApMacro::drawMoire(const QList<double>& mod)
     clipper.AddPath(rect(ct, cl), ptClip, true);
     clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
 
-    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0) {
         for (Path& path : m_paths)
             rotate(path, mod[Rotation_angle]);
     }
@@ -478,7 +479,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
             qCos(qDegreesToRadians(j * 360.0 / num)) * diameter,
             qSin(qDegreesToRadians(j * 360.0 / num)) * diameter));
 
-    if (mod.size() > Rotation_angle && mod[6] > 0)
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0)
         rotate(polygon, mod[Rotation_angle]);
 
     translate(polygon, center);
@@ -512,9 +513,9 @@ void ApMacro::drawThermal(const QList<double>& mod)
     clipper.AddPath(rect(outer, gap), ptClip, true);
     clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
 
-    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0) {
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0) {
         for (Path& path : m_paths)
-            rotate(path, mod[Rotation_angle] /*, center*/);
+            rotate(path, mod[Rotation_angle]);
     }
 }
 
@@ -529,14 +530,24 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         Rotation_angle,
     };
 
+    QPointF p1(mod[StartX], mod[StartY]);
+
+    QPointF p2(mod[EndX], mod[EndY]);
+
+    QLineF l(p1, p2);
+
+    qDebug() << l << l.center() << l.angle();
+
     IntPoint start(mod[StartX] * uScale, mod[StartY] * uScale);
     IntPoint end(mod[EndX] * uScale, mod[EndY] * uScale);
+    IntPoint center(0.5 * start.X + 0.5 * end.X, 0.5 * start.Y + 0.5 * end.Y);
 
-    IntPoint center((mod[StartX] + mod[EndX]) * uScale / 2, (mod[StartY] + mod[EndY]) * uScale / 2);
-    Path polygon = rect(Length(start, end), mod[Width] * uScale, center);
-    rotate(polygon, Angle(start, end), center);
+    Path polygon = rect(Length(start, end), mod[Width] * uScale);
+    double angle = Angle(start, end);
+    rotate(polygon, angle);
+    translate(polygon, center);
 
-    if (mod.size() > Rotation_angle && mod[Rotation_angle] > 0)
+    if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0)
         rotate(polygon, mod[Rotation_angle]);
 
     return polygon;

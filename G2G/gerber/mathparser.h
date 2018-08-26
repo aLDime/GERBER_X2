@@ -23,8 +23,6 @@ public:
 class MathParser {
 public:
     MathParser(QMap<QString, double>& variables);
-    //    void setVariable(QString variableName, double variableValue) { variables->insert(variableName, variableValue) /*= variableValue*/; }
-    //    void setVariables(QMap<QString, double>& value) { variables = &value; }
     double getVariable(QString variableName);
     double Parse(const QString& s = "");
 

@@ -1,21 +1,21 @@
 #include "materialsetup.h"
 #include "mainwindow.h"
 
-#include <QVBoxLayout>
-#include <QGroupBox>
-#include <QLabel>
-#include <QFormLayout>
-#include <QDoubleSpinBox>
-#include <QFrame>
-#include <QPushButton>
-#include <QSpacerItem>
 #include <QApplication>
 #include <QDockWidget>
-#include <QTimer>
+#include <QDoubleSpinBox>
+#include <QFormLayout>
+#include <QFrame>
+#include <QGroupBox>
+#include <QLabel>
+#include <QPushButton>
 #include <QSettings>
+#include <QSpacerItem>
+#include <QTimer>
+#include <QVBoxLayout>
 
-#include <graphicsview/mygraphicsscene.h>
-#include <graphicsview/point.h>
+#include <mygraphicsscene.h>
+#include <point.h>
 
 bool MaterialSetup::isCreated;
 MaterialSetup* MaterialSetup::t;
@@ -34,7 +34,9 @@ MaterialSetup::MaterialSetup(QWidget* parent)
     setupUi(this);
     isCreated = true;
 
-    connect(dsbxClearence, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+    using dsbx = void (QDoubleSpinBox::*)(double);
+
+    connect(dsbxClearence, static_cast<dsbx>(&QDoubleSpinBox::valueChanged), [=](double value) {
         if (value > dsbxHomeZ->value()) {
             dsbxHomeZ->setValue(value);
             dsbxZeroZ->setValue(value);
@@ -43,7 +45,7 @@ MaterialSetup::MaterialSetup(QWidget* parent)
             dsbxPlunge->setValue(value);
     });
 
-    connect(dsbxPlunge, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
+    connect(dsbxPlunge, static_cast<dsbx>(&QDoubleSpinBox::valueChanged), [=](double value) {
         if (value > dsbxZeroZ->value()) {
             dsbxHomeZ->setValue(value);
             dsbxZeroZ->setValue(value);
@@ -52,18 +54,22 @@ MaterialSetup::MaterialSetup(QWidget* parent)
             dsbxClearence->setValue(value);
     });
 
-    connect(dsbxHomeX, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
-        MainWindow::getMainWindow()->getScene()->getItemHome()->setPos(value, dsbxHomeY->value());
-    });
-    connect(dsbxHomeY, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
-        MainWindow::getMainWindow()->getScene()->getItemHome()->setPos(dsbxHomeX->value(), value);
-    });
-    connect(dsbxZeroX, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
-        MainWindow::getMainWindow()->getScene()->getItemZero()->setPos(value, dsbxZeroY->value());
-    });
-    connect(dsbxZeroY, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), [=](double value) {
-        MainWindow::getMainWindow()->getScene()->getItemZero()->setPos(dsbxZeroX->value(), value);
-    });
+    connect(dsbxHomeX, static_cast<dsbx>(&QDoubleSpinBox::valueChanged),
+        [=](double value) {
+            MainWindow::getMainWindow()->getScene()->getItemHome()->setPos(value, dsbxHomeY->value());
+        });
+    connect(dsbxHomeY, static_cast<dsbx>(&QDoubleSpinBox::valueChanged),
+        [=](double value) {
+            MainWindow::getMainWindow()->getScene()->getItemHome()->setPos(dsbxHomeX->value(), value);
+        });
+    connect(dsbxZeroX, static_cast<dsbx>(&QDoubleSpinBox::valueChanged),
+        [=](double value) {
+            MainWindow::getMainWindow()->getScene()->getItemZero()->setPos(value, dsbxZeroY->value());
+        });
+    connect(dsbxZeroY, static_cast<dsbx>(&QDoubleSpinBox::valueChanged),
+        [=](double value) {
+            MainWindow::getMainWindow()->getScene()->getItemZero()->setPos(dsbxZeroX->value(), value);
+        });
 
     auto setZValue = [=](double value) {
         dsbxHomeZ->setValue(value);
@@ -73,8 +79,8 @@ MaterialSetup::MaterialSetup(QWidget* parent)
         if (value < dsbxPlunge->value())
             dsbxPlunge->setValue(value);
     };
-    connect(dsbxHomeZ, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), setZValue);
-    connect(dsbxZeroZ, static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged), setZValue);
+    connect(dsbxHomeZ, static_cast<dsbx>(&QDoubleSpinBox::valueChanged), setZValue);
+    connect(dsbxZeroZ, static_cast<dsbx>(&QDoubleSpinBox::valueChanged), setZValue);
 
     QSettings settings;
     settings.beginGroup("Material");

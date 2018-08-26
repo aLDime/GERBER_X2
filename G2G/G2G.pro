@@ -3,7 +3,9 @@ QT += core gui opengl widgets
 TARGET = Getber2Gcode
 TEMPLATE = app
 
-CONFIG += c++14 #console
+CONFIG += c++17 #console
+
+QMAKE_CXXFLAGS += /std:c++17
 
 FORMS += \
     mainwindow.ui \
@@ -14,6 +16,8 @@ RESOURCES += \
 
 DISTFILES += \
     qdarkstyle/style.qss \
+
+include(../graphicsview/mygraphicsview.pri)
 
 
 DEFINES += QT_DEPRECATED_WARNINGS
@@ -53,12 +57,12 @@ HEADERS += \
     gerber/graphicsitem.h \
     gerber/mathparser.h \
     gerber/parser.h \
-    graphicsview/colorsettings.h \
-    graphicsview/edid.h \
-    graphicsview/mygraphicsscene.h \
-    graphicsview/mygraphicsview.h \
-    graphicsview/point.h \
-    graphicsview/qdruler.h \
+#    graphicsview/colorsettings.h \
+#    graphicsview/edid.h \
+#    graphicsview/mygraphicsscene.h \
+#    graphicsview/mygraphicsview.h \
+#    graphicsview/point.h \
+#    graphicsview/qdruler.h \
     mainwindow.h \
     openingdialog.h \
     settingsdialog.h \
@@ -95,12 +99,12 @@ SOURCES += \
     gerber/graphicsitem.cpp \
     gerber/mathparser.cpp \
     gerber/parser.cpp \
-    graphicsview/colorsettings.cpp \
-    graphicsview/edid.cpp \
-    graphicsview/mygraphicsscene.cpp \
-    graphicsview/mygraphicsview.cpp \
-    graphicsview/point.cpp \
-    graphicsview/qdruler.cpp \
+#    graphicsview/colorsettings.cpp \
+#    graphicsview/edid.cpp \
+#    graphicsview/mygraphicsscene.cpp \
+#    graphicsview/mygraphicsview.cpp \
+#    graphicsview/point.cpp \
+#    graphicsview/qdruler.cpp \
     main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \

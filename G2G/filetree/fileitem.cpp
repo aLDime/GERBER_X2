@@ -1,7 +1,7 @@
 #include "fileitem.h"
 
 #include <toolpath/toolpathcreator.h>
-#include <graphicsview/mygraphicsscene.h>
+#include <mygraphicsscene.h>
 #include <QFileInfo>
 #include <mainwindow.h>
 QTimer FileItem::repaintTimer;

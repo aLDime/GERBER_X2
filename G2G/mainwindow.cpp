@@ -1,11 +1,11 @@
+#include "mainwindow.h"
 #include "drillforapertureform.h"
-#include "mainwindow.h"
-#include "mainwindow.h"
 #include "forms/materialsetup.h"
+#include "mainwindow.h"
 #include "tooldatabase/tooldatabase.h"
 
 #include "gerber/graphicsitem.h"
-#include "graphicsview/mygraphicsscene.h"
+#include "gerber/parser.h"
 #include "settingsdialog.h"
 #include "toolpath/toolpathcreator.h"
 #include <QApplication>
@@ -15,9 +15,9 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
-#include "gerber/parser.h"
-#include <toolpath/toolpathwidget.h>
 #include <gerber/file.h>
+#include <mygraphicsscene.h>
+#include <toolpath/toolpathwidget.h>
 
 //#include "qt_windows.h"
 //#include "Psapi.h"
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
     connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
-    //    connect(gerberParser, &G::Parser::fileReady, [&](G::File*) { graphicsView->ZoomFit(); });
+    //connect(gerberParser, &G::Parser::fileReady, [=](G::File*) { QTimer::singleShot(200, Qt::CoarseTimer, [=] { graphicsView->ZoomFit(); }); });
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
@@ -327,8 +327,7 @@ void MainWindow::readSettings()
             resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
             move((availableGeometry.width() - width()) / 2,
                 (availableGeometry.height() - height()) / 2);
-        }
-        else {
+        } else {
             restoreGeometry(geometry);
         }
         restoreState(settings.value("state", QByteArray()).toByteArray());
@@ -524,8 +523,7 @@ void MainWindow::setCurrentFile(const QString& fileName)
     isUntitled = fileName.isEmpty();
     if (isUntitled) {
         curFile = tr("document%1.txt").arg(sequenceNumber++);
-    }
-    else {
+    } else {
         curFile = QFileInfo(fileName).canonicalFilePath();
     }
 

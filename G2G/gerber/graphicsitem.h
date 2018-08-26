@@ -71,11 +71,12 @@ private:
 class WorkItem : public GraphicsItem {
 public:
     WorkItem(const Paths& paths);
+    //~WorkItem() override {}
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const;
+    int type() const override;
     Paths getPaths() const;
 
 private:

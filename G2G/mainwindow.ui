@@ -85,7 +85,7 @@
   <customwidget>
    <class>MyGraphicsView</class>
    <extends>QGraphicsView</extends>
-   <header>graphicsview/mygraphicsview.h</header>
+   <header location="global">mygraphicsview.h</header>
   </customwidget>
   <customwidget>
    <class>TreeView</class>

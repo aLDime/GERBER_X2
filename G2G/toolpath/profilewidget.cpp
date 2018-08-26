@@ -18,7 +18,7 @@
 #include <mainwindow.h>
 #include <toolpath/toolpathcreator.h>
 #include <gcode/gcode.h>
-#include <graphicsview/mygraphicsscene.h>
+#include <mygraphicsscene.h>
 
 Tool ProfileWidget::tool;
 

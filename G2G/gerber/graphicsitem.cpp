@@ -1,11 +1,11 @@
 #include "graphicsitem.h"
 //#include "graphicsitem.h"
 //#include "graphicsitem.h"
-#include "graphicsview/mygraphicsscene.h"
+#include <mygraphicsscene.h>
 #include <QApplication>
+#include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <QDebug>
 #include <QStyleOptionGraphicsItem>
 
 using namespace G;
@@ -165,7 +165,8 @@ WorkItem::WorkItem(const Paths& paths)
     : paths(paths)
 {
     for (Path& path : this->paths) {
-        path.append(path.first());
+        if (path.first() != path.last())
+            path.append(path.first());
         m_shape.addPolygon(PathToQPolygon(path));
     }
     rect = m_shape.boundingRect();
@@ -185,15 +186,17 @@ void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     QBrush brush(m_brush);
     QColor c(m_brush.color());
-    QPen pen(c, 0.0);
+    QPen pen(/*Qt::NoPen*/ c, 0.0);
 
     if (option->state & QStyle::State_MouseOver) {
+        //pen = QPen(c, 0.0);
         c.setAlpha(200);
         brush.setColor(c);
         c.setAlpha(255);
         pen.setColor(c);
     }
     if (option->state & QStyle::State_Selected) {
+        //pen = QPen(c, 0.0);
         c.setAlpha(255);
         brush.setColor(c);
         pen.setColor(c);

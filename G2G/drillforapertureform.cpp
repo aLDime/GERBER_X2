@@ -8,8 +8,8 @@
 #include <QTableView>
 #include <QTimer>
 #include <gerber/gerber.h>
-#include <graphicsview/mygraphicsscene.h>
-#include <graphicsview/mygraphicsview.h>
+#include <mygraphicsscene.h>
+#include <mygraphicsview.h>
 
 DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
     : QDialog(parent)
