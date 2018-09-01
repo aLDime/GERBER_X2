@@ -48,6 +48,11 @@ enum REGION_MODE {
     ON
 };
 
+enum STEP_REPEAT {
+    SR_CLOSE,
+    SR_OPEN
+};
+
 enum QUADRANT_MODE {
     UNDEF,
     SINGLE,
@@ -163,7 +168,6 @@ public:
     PRIMITIVE_TYPE type = APERTURE;
     QUADRANT_MODE quadrant = UNDEF;
     REGION_MODE region = OFF;
-
     Format format;
 
     int curAperture = 0;

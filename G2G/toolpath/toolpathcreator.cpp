@@ -1,9 +1,9 @@
 #include "toolpathcreator.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
-#include <QElapsedTimer>
 
 //GERBER_FILE ToolPathCreator::file;
 
@@ -39,8 +39,7 @@ Paths ToolPathCreator::Merge(G::File* gerberFile)
         } while (i < gerberFile->size() && exp == gerberFile->at(i).state.imgPolarity);
         if (gerberFile->at(i - 1).state.imgPolarity == G::POSITIVE) {
             clipper.Execute(ctUnion, paths, pftPositive);
-        }
-        else {
+        } else {
             clipper.Execute(ctDifference, paths, pftNonZero);
         }
     }
@@ -50,9 +49,9 @@ Paths ToolPathCreator::Merge(G::File* gerberFile)
 
 GCodeProfile* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth)
 {
-    double toolDiameter = tool[0].data.params[Diameter];
+    double toolDiameter = tool[0].diameter;
     double dOffset = toolDiameter * (uScale / 2);
-    double stepOver = tool[0].data.params[Stepover] * uScale;
+    double stepOver = tool[0].stepover * uScale;
 
     mergedPaths;
 
@@ -67,7 +66,7 @@ GCodeProfile* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector
         tmpPaths.clear();
         for (Paths paths : groupedPaths) {
             offset.Clear();
-            offset.AddPaths(paths, jtRound, etClosedPolygon);
+            offset.AddPaths(paths, jtMiter /*jtRound*/, etClosedPolygon);
             offset.Execute(paths, -dOffset);
             do {
                 paths_1.append(paths);
@@ -120,7 +119,7 @@ GCodeProfile* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector
 
 GCodeProfile* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth)
 {
-    double toolDiameter = tool.diameter(depth);
+    double toolDiameter = tool.getDiameter(depth);
 
     double dOffset;
     switch (milling) {

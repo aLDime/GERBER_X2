@@ -1,12 +1,11 @@
 #ifndef TOOLPATHCREATOR_H
 #define TOOLPATHCREATOR_H
 
-#include "clipper/myclipper.h"
-#include "gerber/gerber.h"
 #include <QObject>
-#include "gerber/parser.h"
 #include <tooldatabase/tool.h>
 #include <gcode/gcode.h>
+#include <file.h>
+#include <myclipper.h>
 
 using namespace ClipperLib;
 

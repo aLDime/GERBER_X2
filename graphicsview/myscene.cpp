@@ -1,13 +1,16 @@
-#include "mygraphicsscene.h"
+#include "myscene.h"
 #include "mygraphicsview.h"
 #include <QDebug>
 #include <QElapsedTimer>
-#include <QPainter>
-#include <QtMath>
+#include <QFileDialog>
 #include <QGraphicsView>
-#include "point.h"
+#include <QPainter>
+#include <QPdfWriter>
+#include <QtMath>
 
-MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
+MyScene* MyScene::self = nullptr;
+
+MyScene::MyScene(QObject* parent, bool drawPoints)
     : QGraphicsScene(parent)
     , drawPdf(false)
     , drawPoints(drawPoints)
@@ -25,30 +28,48 @@ MyGraphicsScene::MyGraphicsScene(QObject* parent, bool drawPoints)
 
     addItem(itemZero);
     addItem(itemHome);
+    //self = this;
 }
 
-MyGraphicsScene::~MyGraphicsScene()
+MyScene::~MyScene()
 {
+    //self = nullptr;
 }
 
-void MyGraphicsScene::RenderPdf(QPainter* painter)
+void MyScene::RenderPdf()
 {
+    QString curFile = QFileDialog::getSaveFileName(/*this->parent()*/ nullptr, tr("Save PDF file"), /*curFile.left(curFile.lastIndexOf('.')) + ".pdf"*/ "", tr("File(*.pdf)"));
+    if (curFile.isEmpty())
+        return;
+
+    QPdfWriter pdfWriter(curFile.left(curFile.lastIndexOf('.')) + ".pdf");
+
+    QSizeF size = itemsBoundingRect().size();
+    pdfWriter.setPageSizeMM(size);
+
+    QPdfWriter::Margins margins = { 0, 0, 0, 0 };
+    pdfWriter.setMargins(margins);
+    pdfWriter.setResolution(1000000);
+
+    QPainter painter(&pdfWriter);
+    painter.setTransform(QTransform().scale(1.0, -1.0));
+    painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
     drawPdf = true;
-    render(painter);
+    render(&painter);
     drawPdf = false;
 }
 
-Point* MyGraphicsScene::getItemZero() const
+Point* MyScene::getItemZero() const
 {
     return itemZero;
 }
 
-Point* MyGraphicsScene::getItemHome() const
+Point* MyScene::getItemHome() const
 {
     return itemHome;
 }
 
-void MyGraphicsScene::drawBackground(QPainter* painter, const QRectF& rect)
+void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     if (drawPdf)
         return;
@@ -68,7 +89,7 @@ void MyGraphicsScene::drawBackground(QPainter* painter, const QRectF& rect)
     painter->restore();
 }
 
-void MyGraphicsScene::drawForeground(QPainter* painter, const QRectF& rect)
+void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
     if (drawPdf)
         return;
@@ -83,7 +104,11 @@ void MyGraphicsScene::drawForeground(QPainter* painter, const QRectF& rect)
     QMap<long, long> vGrid;
 
     const int с = 100;
-    QVector<QColor> color = { QColor(с, с, с, 85), QColor(с, с, с, 170), QColor(с, с, с) };
+    QVector<QColor> color{
+        QColor(с, с, с, 30),
+        QColor(с, с, с, 80),
+        QColor(с, с, с, 200)
+    };
 
     const long k = 10000;
     const double invK = 1.0 / k;

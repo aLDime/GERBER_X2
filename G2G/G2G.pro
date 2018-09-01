@@ -9,7 +9,10 @@ QMAKE_CXXFLAGS += /std:c++17
 
 FORMS += \
     mainwindow.ui \
-    settingsdialog.ui
+    settingsdialog.ui \
+    tooldatabase/tooledit.ui \
+    tooldatabase/tooleditform.ui \
+    forms/materialsetupform.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -18,9 +21,11 @@ DISTFILES += \
     qdarkstyle/style.qss \
 
 include(../graphicsview/mygraphicsview.pri)
+include(../gerber/gerber.pri)
+include(../clipper/clipper.pri)
 
 
-DEFINES += QT_DEPRECATED_WARNINGS
+DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 ICON = res/toolpath/raster_climb.png
@@ -36,87 +41,60 @@ win32* {
 
 HEADERS += \
     application.h \
-    clipper/clipper.hpp \
-    clipper/myclipper.h \
     drillforapertureform.h \
-    filetree/Model.h \
     filetree/abstractitem.h \
     filetree/fileitem.h \
     filetree/folderitem.h \
     filetree/milling.h \
     filetree/treeview.h \
-#    forms/drillingtoolpathform.h \
-    forms/materialsetup.h \
-#    forms/pockettoolpathform.h \
-#    forms/toolpathforminterface.h \
-#    forms/toolpathnameform.h \
+    forms/materialsetupform.h \
     gcode/gcode.h \
-    gerber/aperture.h \
-    gerber/file.h \
-    gerber/gerber.h \
-    gerber/graphicsitem.h \
-    gerber/mathparser.h \
-    gerber/parser.h \
-#    graphicsview/colorsettings.h \
-#    graphicsview/edid.h \
-#    graphicsview/mygraphicsscene.h \
-#    graphicsview/mygraphicsview.h \
-#    graphicsview/point.h \
-#    graphicsview/qdruler.h \
     mainwindow.h \
     openingdialog.h \
     settingsdialog.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
-    tooldatabase/tooledit.h \
+    tooldatabase/tooleditform.h \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
+    toolpath/pocketwidget.h \
     toolpath/profilewidget.h \
     toolpath/toolpathcreator.h \
     toolpath/toolpathwidget.h \
     toolpath/widget.h \
-    toolpath/pocketwidget.h
+#    forms/drillingtoolpathform.h \
+#    forms/pockettoolpathform.h \
+#    forms/toolpathforminterface.h \
+#    forms/toolpathnameform.h \
+    filetree/filemodel.h
 
 SOURCES += \
-    clipper/clipper.cpp \
-    clipper/myclipper.cpp \
     drillforapertureform.cpp \
     filetree/abstractitem.cpp \
     filetree/fileitem.cpp \
     filetree/folderitem.cpp \
     filetree/milling.cpp \
-    filetree/model.cpp \
     filetree/treeview.cpp \
-#    forms/drillingtoolpathform.cpp \
-    forms/materialsetup.cpp \
-#    forms/pockettoolpathform.cpp \
-#    forms/toolpathforminterface.cpp \
-#    forms/toolpathnameform.cpp \
+    forms/materialsetupform.cpp \
     gcode/gcode.cpp \
-    gerber/aperture.cpp \
-    gerber/file.cpp \
-    gerber/graphicsitem.cpp \
-    gerber/mathparser.cpp \
-    gerber/parser.cpp \
-#    graphicsview/colorsettings.cpp \
-#    graphicsview/edid.cpp \
-#    graphicsview/mygraphicsscene.cpp \
-#    graphicsview/mygraphicsview.cpp \
-#    graphicsview/point.cpp \
-#    graphicsview/qdruler.cpp \
     main.cpp \
     mainwindow.cpp \
     settingsdialog.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
-    tooldatabase/tooledit.cpp \
+    tooldatabase/tooleditform.cpp \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
+    toolpath/pocketwidget.cpp \
     toolpath/profilewidget.cpp \
     toolpath/toolpathcreator.cpp \
     toolpath/toolpathwidget.cpp \
     toolpath/widget.cpp \
-    toolpath/pocketwidget.cpp
+#    forms/drillingtoolpathform.cpp \
+#    forms/pockettoolpathform.cpp \
+#    forms/toolpathforminterface.cpp \
+#    forms/toolpathnameform.cpp \
+    filetree/filemodel.cpp
 

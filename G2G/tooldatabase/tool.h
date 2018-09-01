@@ -1,61 +1,50 @@
 #ifndef TOOL_H
 #define TOOL_H
 
+#include <QJsonObject>
 #include <QObject>
 
-enum ToolType {
-    Group = -1,
-    EndMill,
-    Engraving,
-    Drill
-};
-
-enum ToolInfo {
-    Diameter,
-    SideAngle,
-    PassDepth,
-    Stepover,
-    StepoverPercent,
-    OneTurnCut,
-    OneTurnCutPercent,
-    FeedRate,
-    PlungeRate,
-};
-
-Q_DECLARE_METATYPE(ToolType)
-
-struct Tool {
+class Tool {
 public:
-    struct D {
-        double params[10] = { 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0 };
-        //    double ClearencePassStepover;
-        //    double ClearencePassStepoverPercent;
-        //    double Diameter;
-        //    double FeedRate;
-        //    double FlatDiameter;
-        //    double PassDepth;
-        //    double PlungeRate;
-        //    double SideAngle;
-        //    double Stepover;
-        //    double StepoverPercent;
-        int feedSpeeds = 1;
-        int spindleRpm = 0;
-        ToolType toolType = Group;
-    } data;
+    Tool();
+    ~Tool();
+
+    enum Type {
+        Drill,
+        EndMill,
+        Engraving,
+    };
+
+    enum {
+        Angle,
+        Diameter,
+        FeedRate,
+        OneTurnCut,
+        PassDepth,
+        PlungeRate,
+        SpindleSpeed,
+        Stepover,
+
+        OneTurnCutPercent,
+        StepoverPercent,
+    };
 
     QString name;
     QString note;
+    Type type = Drill;
+    double angle = 0.0;
+    double diameter = 0.0;
+    double feedRate = 0.0;
+    double oneTurnCut = 0.0;
+    double passDepth = 0.0;
+    double plungeRate = 0.0;
+    double spindleSpeed = 0.0;
+    double stepover = 0.0;
 
-    Tool();
-    Tool(const QString& name, const QString& note, const QByteArray& Data);
-    Tool(const QList<QString>& Data);
-    ~Tool();
-    void fromHex(const QByteArray& Data);
-    QByteArray toHex() const;
+    double getDiameter(double depth = 0.0) const;
 
-    double diameter(double depth = 0.0) const;
+    void read(const QJsonObject& json);
+    void write(QJsonObject& json) const;
 };
-
-Q_DECLARE_METATYPE(Tool)
 
 #endif // TOOL_H

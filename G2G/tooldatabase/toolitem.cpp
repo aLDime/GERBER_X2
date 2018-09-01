@@ -1,47 +1,89 @@
 #include "toolitem.h"
+#include "toolmodel.h"
 
 #include <QIcon>
+#include <QJsonArray>
 #include <QPixmap>
 
-int ToolItem::c = 0;
+QMap<int, Tool> ToolItem::tools;
 
 ToolItem::ToolItem(const ToolItem& item)
 {
-    qDebug() << "+TreeItem" << ++c;
-    tool = item.tool;
-    for (const ToolItem* i : item.childItems) {
+    if (item.m_isTool) {
+        m_toolId = item.m_toolId;
+        m_isTool = true;
+        item.m_isTool = false;
+    } else {
+        m_name = item.m_name;
+        m_note = item.m_note;
+    }
+    for (ToolItem* i : item.childItems) {
         addChild(new ToolItem(*i));
     }
 }
 
-ToolItem::ToolItem(const Tool& tool)
-    : tool(tool)
+ToolItem::ToolItem(int toolId)
+    : m_toolId(toolId)
+    , m_isTool(true)
 {
-    qDebug() << "+TreeItem" << ++c;
+}
+
+ToolItem::ToolItem()
+{
 }
 
 ToolItem::~ToolItem()
 {
-    qDebug() << "~TreeItem" << c--;
+    if (m_isTool)
+        tools.remove(m_toolId);
     qDeleteAll(childItems);
+}
+
+void ToolItem::read(const QJsonObject& json)
+{
+    QJsonArray toolArray = json["tools"].toArray();
+    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+        Tool tool;
+        QJsonObject toolObject = toolArray[treeIndex].toObject();
+        tool.read(toolObject);
+        ToolItem::tools[toolObject["id"].toInt()] = tool;
+    }
+}
+
+void ToolItem::write(QJsonObject& json)
+{
+    QJsonArray toolArray;
+    QMap<int, Tool>::iterator i = tools.begin();
+    while (i != tools.constEnd()) {
+        QJsonObject toolObject;
+        i.value().write(toolObject);
+        toolObject["id"] = i.key();
+        toolArray.append(toolObject);
+        ++i;
+    }
+    json["tools"] = toolArray;
 }
 
 int ToolItem::row() const
 {
-    if (parentItem)
+    if (parentItem != nullptr)
         return parentItem->childItems.indexOf(const_cast<ToolItem*>(this));
     return 0;
 }
 
-int ToolItem::childCount() const { return childItems.size(); }
+int ToolItem::childCount() const
+{
+    return childItems.size();
+}
 
-ToolItem* ToolItem::child(int row) { return childItems.at(row); }
+ToolItem* ToolItem::child(int row) const
+{
+    return childItems.at(row);
+}
 
 ToolItem* ToolItem::takeChild(int row)
 {
-    ToolItem* item = childItems.at(row);
-    childItems.removeAt(row);
-    return item;
+    return childItems.takeAt(row);
 }
 
 void ToolItem::setChild(int row, ToolItem* item)
@@ -50,8 +92,7 @@ void ToolItem::setChild(int row, ToolItem* item)
         item->parentItem = this;
 
     if (row < childItems.size()) {
-        if (childItems[row])
-            delete childItems[row];
+        delete childItems[row];
         childItems[row] = item;
     }
 }
@@ -63,14 +104,13 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
         case Qt::EditRole:
             switch (index.column()) {
             case 0:
-                tool.name = value.toString();
+                setName(value.toString());
                 return true;
             case 1:
-                tool.note = value.toString();
+                setNote(value.toString());
                 return true;
             default:
                 return false;
-                break;
             }
         default:
             return false;
@@ -90,31 +130,28 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
         case Qt::EditRole:
             switch (index.column()) {
             case 0:
-                return tool.name;
+                return name();
             case 1:
-                return tool.note;
+                return note();
             default:
                 return QVariant();
-                break;
             }
         case Qt::DecorationRole:
-            if (index.column() == 0) {
-                switch (tool.data.toolType) {
-                case Group:
-                    return QIcon::fromTheme("folder-sync");
-                case EndMill:
-                    return QIcon::fromTheme("stroke-cap-round");
-                case Engraving:
-                    return QIcon::fromTheme("stroke-cap-square");
-                case Drill:
+            if (index.column() == 0 && m_isTool) {
+                switch (tools[m_toolId].type) {
+                case Tool::Drill:
                     return QIcon::fromTheme("stroke-cap-butt");
+                case Tool::EndMill:
+                    return QIcon::fromTheme("stroke-cap-round");
+                case Tool::Engraving:
+                    return QIcon::fromTheme("stroke-cap-square");
                 }
             }
-            break;
+            return QIcon::fromTheme("folder-sync");
         case Qt::UserRole:
-            return tool.data.toolType;
+            return tools[m_toolId].type;
         case Qt::UserRole + 1:
-            return reinterpret_cast<quint64>(&tool);
+            return m_toolId;
         default:
             return QVariant();
         }
@@ -122,31 +159,58 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const
+Qt::ItemFlags ToolItem::flags() const
 {
-    Qt::ItemFlags defaultFlags = Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
-    if (enabled)
-        defaultFlags |= Qt::ItemIsEnabled;
-    if (tool.data.toolType == ToolType::Group)
-        defaultFlags |= Qt::ItemIsDropEnabled;
-    //    if (index.column() == 0)
-    //        defaultFlags | Qt::ItemIsSelectable;
-    return defaultFlags;
+    Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
+    if (!m_isTool)
+        flags |= Qt::ItemIsDropEnabled;
+    return flags;
 }
 
-Tool ToolItem::getTool() const
+int ToolItem::toolId() const
 {
-    return tool;
+    return m_toolId;
 }
 
-void ToolItem::setTool(const Tool& value)
+Tool& ToolItem::tool()
 {
-    tool = value;
+    static Tool tmp;
+    if (m_isTool)
+        return tools[m_toolId];
+    return tmp;
 }
 
-void ToolItem::setEnabled(bool value)
+bool ToolItem::isTool() const
 {
-    enabled = value;
+    return m_isTool;
+}
+
+void ToolItem::setIsTool()
+{
+    m_isTool = true;
+    if (tools.size())
+        m_toolId = tools.lastKey() + 1;
+    tools[m_toolId].diameter = 0.0;
+}
+
+QString ToolItem::note() const
+{
+    return m_isTool ? (tools[m_toolId].note.isEmpty() ? "Tool Id " + QString::number(m_toolId) : tools[m_toolId].note) : m_note;
+}
+
+void ToolItem::setNote(const QString& value)
+{
+    (m_isTool ? tools[m_toolId].note : m_note) = value;
+}
+
+QString ToolItem::name() const
+{
+    return m_isTool ? tools[m_toolId].name : m_name;
+}
+
+void ToolItem::setName(const QString& value)
+{
+    (m_isTool ? tools[m_toolId].name : m_name) = value;
 }
 
 void ToolItem::addChild(ToolItem* item)

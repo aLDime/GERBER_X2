@@ -1,12 +1,12 @@
 #include <QApplication>
 #include <QCommandLineParser>
-#ifndef linux
-#include <qt_windows.h>
 
-#include <tooldatabase/tooldatabase.h>
-#endif
 #include "application.h"
 #include "mainwindow.h"
+
+#ifndef linux
+#include <qt_windows.h>
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -23,18 +23,12 @@ int main(int argc, char* argv[])
     }
 #endif
 
-    Q_INIT_RESOURCE(resources);
+    //Q_INIT_RESOURCE(resources);
     QApplication app(argc, argv);
-
-    //    if (!app.lock())
-    //        return -42;
 
     QCoreApplication::setApplicationName("G2G");
     QCoreApplication::setOrganizationName("XrSoft");
     QCoreApplication::setApplicationVersion("0.2.3");
-
-    //    EditToolForm editTool;
-    //    editTool.show();
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());

@@ -1,13 +1,17 @@
-#include "tooldatabase.h"
 #include "toolmodel.h"
+#include "toolitem.h"
 #include <QApplication>
 #include <QDebug>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
+#include <QMessageBox>
 #include <QMimeData>
 #include <QStandardItem>
 
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new ToolItem(Tool()))
+    , rootItem(new ToolItem())
 {
     importTools();
 }
@@ -25,10 +29,12 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent)
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if (!parentItem)
         parentItem = rootItem;
+
     if (parentItem->childCount() > row)
-        parentItem->insertChild(row, new ToolItem(Tool()));
+        parentItem->insertChild(row, new ToolItem());
     else
-        parentItem->addChild(new ToolItem(Tool()));
+        parentItem->addChild(new ToolItem());
+
     endInsertRows();
     return true;
 }
@@ -119,7 +125,7 @@ Qt::ItemFlags ToolModel::flags(const QModelIndex& index) const
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
     if (!item)
         item = rootItem;
-    return item->flags(index);
+    return item->flags();
 }
 
 bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -127,10 +133,7 @@ bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int rol
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
     if (!item)
         item = rootItem;
-    if (item->setData(index, value, role)) {
-        return true;
-    }
-    return false;
+    return item->setData(index, value, role);
 }
 
 QVariant ToolModel::data(const QModelIndex& index, int role) const
@@ -240,121 +243,125 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     return true;
 }
 
-Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
+Qt::DropActions ToolModel::supportedDragActions() const
+{
+    return Qt::MoveAction | Qt::TargetMoveAction;
+}
 
-Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
+Qt::DropActions ToolModel::supportedDropActions() const
+{
+    return Qt::MoveAction | Qt::TargetMoveAction;
+}
 
 QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolItem"); }
 
 void ToolModel::exportTools()
 {
-    QList<QString> lines;
+    QFile saveFile(QStringLiteral("tools.dat"));
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open tools file.");
+        return;
+    }
+
+    QJsonObject treeObject;
+    rootItem->write(treeObject);
+
     ToolItem* item;
     QList<ToolItem*> stack;
     QList<int> row;
+
+    QJsonArray treeArray;
 
     stack.push_back(rootItem);
     row.append(0);
 
     while (stack.size()) {
+        //qDebug() << "1" << stack.size() << row.last() << row;
         if (stack.last()->childCount() && row.last()) {
             stack.pop_back();
             row.pop_back();
             if (!stack.size())
                 break;
             ++row.last();
-        }
-        else if (stack.last() == rootItem && stack.last()->childCount() == 0) {
+        } else if (stack.last() == rootItem && stack.last()->childCount() == 0) {
             break;
         }
+        //qDebug() << "2" << stack.size() << row.last() << row;
         while (stack.last()->childCount() > row.last()) {
+            //qDebug() << "3" << stack.size() << row.last() << row;
             item = stack.last()->child(row.last());
-            QString str(row.size() - 1, '\t');
-            str += (item->getTool().name.isEmpty() ? " " : item->getTool().name) + "\t";
-            str += (item->getTool().note.isEmpty() ? " " : item->getTool().note) + "\t";
-            str += item->getTool().toHex();
-            lines << str;
+            QJsonObject treeNode;
+            if (item->isTool()) {
+                treeNode["id"] = item->toolId();
+            } else {
+                treeNode["name"] = item->name();
+                treeNode["note"] = item->note();
+            }
+            treeNode["tool"] = item->isTool();
+            treeNode["tab"] = row.size() - 1;
+            treeArray.append(treeNode);
             if (item->childCount()) {
                 stack.push_back(item);
                 row.push_back(0);
                 break;
             }
             ++row.last();
+            //qDebug() << "4" << stack.size() << row.last() << row;
         }
+        //qDebug() << "5" << stack.size() << row.last() << row;
     }
-
-    QFile file("ToolDatabase.txt");
-    if (!file.open(QIODevice::WriteOnly | QIODevice::Text))
-        return;
-
-    QTextStream out(&file);
-    out.setCodec("UTF-8");
-    for (QString line : lines) {
-        out << line << endl;
-    }
-    file.close();
+    treeObject["tree"] = treeArray;
+    QJsonDocument saveDoc(treeObject);
+    saveFile.write(saveDoc.toBinaryData());
 }
 
 void ToolModel::importTools()
 {
-    QVector<int> tools(ToolDatabase::getTools());
-    QFile file("ToolDatabase.txt");
-    if (!file.open(QIODevice::ReadOnly)) {
-        QMessageBox::information(0, tr("Unable to open file"), file.errorString());
+
+    QFile loadFile(QStringLiteral("tools.dat"));
+
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open tools file.");
         return;
     }
-    QList<QString> lines;
-    QTextStream in(&file);
-    in.setCodec("UTF-8");
-    while (!in.atEnd()) {
-        lines << in.readLine();
-    }
 
-    file.close();
+    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
+    rootItem->read(loadDoc.object());
+
     QList<ToolItem*> parentsStack;
     QList<int> nestingStack;
     parentsStack << rootItem;
     nestingStack << 0;
-    int number = 0;
-    while (number < lines.count()) {
-        int nesting = 0;
-        while (nesting < lines[number].length()) {
-            if (lines[number].at(nesting) != '\t')
-                break;
-            ++nesting;
+
+    QJsonArray treeArray = loadDoc.object()["tree"].toArray();
+    for (int treelIndex = 0; treelIndex < treeArray.size(); ++treelIndex) {
+
+        QJsonObject json = treeArray[treelIndex].toObject();
+        int nesting = json["tab"].toInt();
+
+        if (nesting > nestingStack.last()) {
+            // The last child of the current parent is now the new parent unless the current parent has no children.
+            if (parentsStack.last()->childCount() > 0) {
+                parentsStack.push_back(parentsStack.last()->child(parentsStack.last()->childCount() - 1));
+                nestingStack.push_back(nesting);
+            }
+        } else {
+            while (nesting < nestingStack.last() && parentsStack.count() > 0) {
+                parentsStack.pop_back();
+                nestingStack.pop_back();
+            }
         }
 
-        // Read the column data from the rest of the line.
-        QStringList toolData = lines[number].split("\t", QString::SkipEmptyParts);
-        if (!toolData.isEmpty()) {
-            if (toolData.count() < 3) {
-                QMessageBox::information(0, "", tr("Tool Database is corupted!"));
-                return;
-            }
-
-            if (nesting > nestingStack.last()) {
-                // The last child of the current parent is now the new parent unless the current parent has no children.
-                if (parentsStack.last()->childCount() > 0) {
-                    parentsStack.push_back(parentsStack.last()->child(parentsStack.last()->childCount() - 1));
-                    nestingStack.push_back(nesting);
-                }
-            }
-            else {
-                while (nesting < nestingStack.last() && parentsStack.count() > 0) {
-                    parentsStack.pop_back();
-                    nestingStack.pop_back();
-                }
-            }
-
-            // Append a new item to the current parent's list of children.
-            ToolItem* parent = parentsStack.last();
-            ToolItem* item = new ToolItem(Tool(toolData));
-
-            if (tools.size() && item->getTool().data.toolType != Group)
-                item->setEnabled(tools.contains(item->getTool().data.toolType));
-            parent->insertChild(parent->childCount(), item);
+        // Append a new item to the current parent's list of children.
+        ToolItem* parent = parentsStack.last();
+        ToolItem* item;
+        if (json["tool"].toBool())
+            item = new ToolItem(json["id"].toInt());
+        else {
+            item = new ToolItem();
+            item->setName(json["name"].toString());
+            item->setNote(json["note"].toString());
         }
-
-        ++number;
+        parent->insertChild(parent->childCount(), item);
     }
 }

@@ -1,15 +1,15 @@
 #include "drillforapertureform.h"
-
 #include <QBoxLayout>
 #include <QDebug>
 #include <QDialogButtonBox>
+#include <QHeaderView>
 #include <QMessageBox>
 #include <QStandardItemModel>
 #include <QTableView>
 #include <QTimer>
-#include <gerber/gerber.h>
-#include <mygraphicsscene.h>
+#include <gerber.h>
 #include <mygraphicsview.h>
+#include <myscene.h>
 
 DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
     : QDialog(parent)
@@ -27,16 +27,14 @@ DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
 
         QRectF rect = painterPath.boundingRect();
         double width, height;
-        int cx = 32;
+        const int cx = 32;
         if (qFuzzyCompare(rect.width(), rect.height())) {
             width = cx;
             height = cx;
-        }
-        else if (rect.width() > rect.height()) {
+        } else if (rect.width() > rect.height()) {
             width = cx;
             height = rect.height() * ((double)cx / rect.width());
-        }
-        else {
+        } else {
             width = rect.width() * ((double)cx / rect.height());
             height = cx;
         }
@@ -87,6 +85,9 @@ DrillForApertureForm::DrillForApertureForm(G::File* file, QWidget* parent)
 
     tableView->setModel(model);
     tableView->resizeColumnsToContents();
+    tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    tableView->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
 
     connect(tableView->selectionModel(), &QItemSelectionModel::currentChanged, [=](const QModelIndex& current, const QModelIndex& previous) {
         Q_UNUSED(previous)
@@ -131,7 +132,6 @@ void DrillForApertureForm::setupUi(QDialog* Dialog)
 
     graphicsView = new MyGraphicsView(Dialog);
     graphicsView->setObjectName(QStringLiteral("graphicsView"));
-    graphicsView->setScene(new MyGraphicsScene(this));
     horizontalLayout->addWidget(graphicsView);
 
     verticalLayout->addLayout(horizontalLayout);

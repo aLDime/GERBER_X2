@@ -530,14 +530,6 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         Rotation_angle,
     };
 
-    QPointF p1(mod[StartX], mod[StartY]);
-
-    QPointF p2(mod[EndX], mod[EndY]);
-
-    QLineF l(p1, p2);
-
-    qDebug() << l << l.center() << l.angle();
-
     IntPoint start(mod[StartX] * uScale, mod[StartY] * uScale);
     IntPoint end(mod[EndX] * uScale, mod[EndY] * uScale);
     IntPoint center(0.5 * start.X + 0.5 * end.X, 0.5 * start.Y + 0.5 * end.Y);

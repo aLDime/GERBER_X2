@@ -4,8 +4,8 @@
 
 #include <QDialog>
 
-#include <gerber/aperture.h>
-#include <gerber/file.h>
+#include <aperture.h>
+#include <file.h>
 
 class QTableView;
 class MyGraphicsView;

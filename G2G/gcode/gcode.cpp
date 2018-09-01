@@ -1,103 +1,13 @@
 #include "gcode.h"
-#include "gcode.h"
 
-#include <QPainter>
-#include <QtMath>
+#include "forms/materialsetupform.h"
 #include <QDebug>
-#include <QStyleOptionGraphicsItem>
-#include <QSettings>
 #include <QFile>
-#include "forms/materialsetup.h"
+#include <QPainter>
+#include <QSettings>
+#include <QStyleOptionGraphicsItem>
+#include <QtMath>
 
-///////////////////////////////////////////////
-/// \brief GerberWorkItem::GerberWorkItem
-/// \param paths
-///
-class ggg : public QGraphicsItem {
-public:
-    ggg(const Paths& paths, const Tool& tool, double m_depth)
-        : paths(paths)
-        , tool(tool)
-        , m_depth(m_depth)
-        , d(tool.data.params[Diameter])
-    {
-        setAcceptHoverEvents(true);
-        setFlag(ItemIsSelectable, true);
-
-        if (m_depth > 0.0 && tool.data.params[SideAngle] > 0.0) {
-            double a = qDegreesToRadians(90 - tool.data.params[SideAngle] / 2);
-            d = (m_depth * cos(a) / sin(a));
-            d = d * 2 + tool.data.params[Diameter];
-        }
-
-        Paths tmpPaths(paths);
-        ClipperOffset offset(uScale, uScale / 1000);
-
-        offset.AddPaths(paths, jtRound, etClosedLine);
-
-        double td = tool.data.params[Diameter];
-
-        qDebug() << d << td;
-        if (d > td)
-            td = d;
-        offset.Execute(tmpPaths, td * uScale / 2);
-
-        for (Path& path : tmpPaths) {
-            path.append(path.first());
-            m_shape.addPolygon(PathToQPolygon(path));
-        }
-
-        rect = m_shape.boundingRect();
-        qDebug() << rect;
-
-        for (Path& path : this->paths) {
-            path.append(path.first());
-            m_drawShape.addPolygon(PathToQPolygon(path));
-        }
-    }
-
-    QRectF boundingRect() const override { return rect; }
-    QPainterPath shape() const override { return m_shape; }
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override
-    {
-        Q_UNUSED(widget);
-
-        //    painter->setCompositionMode(QPainter::CompositionMode_Xor);
-
-        painter->setBrush(Qt::NoBrush);
-
-        QColor c(255, 255, 255, 100);
-
-        if (option->state & QStyle::State_MouseOver) {
-            c.setAlpha(150);
-        }
-        if (option->state & QStyle::State_Selected) {
-            c.setAlpha(200);
-        }
-
-        painter->setPen(QPen(c, tool.data.params[Diameter], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        painter->drawPath(m_drawShape);
-
-        if (m_depth > 0.0 && tool.data.params[SideAngle] > 0.0) {
-            painter->setPen(QPen(c, d, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            painter->drawPath(m_drawShape);
-        }
-
-        painter->setPen(QPen(Qt::white, 0.0));
-        painter->drawPath(m_drawShape);
-    }
-    int type() const { return QGraphicsItem::UserType + 3; }
-    Paths getPaths() const { return paths; }
-
-private:
-    QPainterPath m_shape;
-    QPainterPath m_drawShape;
-    Paths paths;
-    QRectF rect;
-    Tool tool;
-    double m_depth;
-    double d;
-};
 ///////////////////////////////////////////////
 /// \brief GCodeProfile::GCodeProfile
 /// \param paths
@@ -108,57 +18,31 @@ GCodeProfile::GCodeProfile(const Paths& paths, const Tool& tool, double m_depth)
     : paths(paths)
     , tool(tool)
     , m_depth(m_depth)
-    , d(tool.data.params[Diameter])
+    , d(tool.diameter)
 {
-    //   setAcceptHoverEvents(true);
-    //    setFlag(ItemIsSelectable, true);
 
-    if (m_depth > 0.0 && tool.data.params[SideAngle] > 0.0) {
-        double a = qDegreesToRadians(90 - tool.data.params[SideAngle] / 2);
-        d = (m_depth * cos(a) / sin(a));
-        d = d * 2 + tool.data.params[Diameter];
-    }
-    QGraphicsPolygonItem* polygonItem;
+    //    QGraphicsPolygonItem* polygonItem;
 
+    //    for (const Path& path : paths) {
+    //        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
+    //        polygonItem->setPen(QPen(QColor(150, 150, 150), d, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    //        polygonItem->setBrush(Qt::NoBrush);
+    //        append(polygonItem);
+    //    }
+    //QPainterPath ppath;
+    int i{ 0 };
     for (const Path& path : paths) {
+        //ppath.addPolygon(PathToQPolygon(path));
         //        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-        //        polygonItem->setPen(QPen(QColor(255, 255, 255, 100), tool.data.Params[Diameter], Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        //        polygonItem->setPen(QPen(Qt::white, 0.0));
         //        polygonItem->setBrush(Qt::NoBrush);
-        //        addToGroup(polygonItem);
-        //        if (m_depth > 0.0 && tool.data.Params[SideAngle] > 0.0) {
-        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-        polygonItem->setPen(QPen(QColor(255, 255, 255, 150), d, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        polygonItem->setBrush(Qt::NoBrush);
-        addToGroup(polygonItem);
-        //        }
-        polygonItem = new QGraphicsPolygonItem(PathToQPolygon(path));
-        polygonItem->setPen(QPen(Qt::white, 0.0));
-        polygonItem->setBrush(Qt::NoBrush);
-        addToGroup(polygonItem);
+        GItem* item = new GItem(path);
+        item->setPen(QPen(QColor::fromHsvF((0.83333 / paths.size()) * i++, 1.0, 1.0, 0.5), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        append(item);
     }
-
-    //    QGraphicsItemGroup* group = scene->createItemGroup(items);
-    //    group->setAcceptHoverEvents(false);
-    //    group->setAcceptTouchEvents(false);
-    //    group->setAcceptedMouseButtons(Qt::NoButton);
-    //    Paths tmpPaths(paths);
-    //    ClipperOffset offset(uScale, uScale / 1000);
-    //    offset.AddPaths(paths, jtRound, etClosedLine);
-    //    double td = tool.data.Params[Diameter];
-    //    qDebug() << d << td;
-    //    if (d > td)
-    //        td = d;
-    //    offset.Execute(tmpPaths, td * uScale / 2);
-    //    for (Path& path : tmpPaths) {
-    //        path.append(path.first());
-    //        m_shape.addPolygon(PathToQPolygon(path));
-    //    }
-    //    rect = m_shape.boundingRect();
-    //    qDebug() << rect;
-    //    for (Path& path : this->paths) {
-    //        path.append(path.first());
-    //        m_drawShape.addPolygon(PathToQPolygon(path));
-    //    }
+    //setPath(ppath);
+    //setPen(QPen(Qt::white, tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    setBrush(Qt::NoBrush);
 }
 
 Paths GCodeProfile::getPaths() const { return paths; }
@@ -169,34 +53,34 @@ void GCodeProfile::save(const QString& name)
     QVector<QPolygonF> paths(PathsToQPolygons(paths));
 
     sl.append("G17"); //XY
-    sl.append(QString("G0Z%1").arg(MaterialSetup::z, 0, 'f', 3)); //HomeZ
-    sl.append(QString("G0X%1Y%2S%3M3").arg(MaterialSetup::homePos.x(), 0, 'f', 3).arg(MaterialSetup::homePos.y(), 0, 'f', 3).arg(tool.data.spindleRpm)); //HomeXY
+    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3)); //HomeZ
+    sl.append(QString("G0X%1Y%2S%3M3").arg(MaterialSetupForm::homePos.x(), 0, 'f', 3).arg(MaterialSetupForm::homePos.y(), 0, 'f', 3).arg(tool.spindleSpeed)); //HomeXY
     QPointF lastPoint;
     for (QPolygonF& path : paths) {
         QPointF point(path.last());
-        point -= MaterialSetup::zeroPos;
+        point -= MaterialSetupForm::zeroPos;
         sl.append(QString("G0X%1Y%2").arg(point.x(), 0, 'f', 3).arg(point.y(), 0, 'f', 3)); //start xy
-        sl.append(QString("G0Z%1").arg(MaterialSetup::plunge, 0, 'f', 3)); //start z
-        sl.append(QString("G1Z%1F%2").arg(-m_depth, 0, 'f', 3).arg(tool.data.params[PlungeRate], 0, 'f', 3)); //start z
+        sl.append(QString("G0Z%1").arg(MaterialSetupForm::plunge, 0, 'f', 3)); //start z
+        sl.append(QString("G1Z%1F%2").arg(-m_depth, 0, 'f', 3).arg(tool.plungeRate, 0, 'f', 3)); //start z
         bool fl = true;
         for (QPointF& point : path) {
             QString str("G1");
-            point -= MaterialSetup::zeroPos;
+            point -= MaterialSetupForm::zeroPos;
             if (lastPoint.x() != point.x())
                 str.append(QString("X%1").arg(point.x(), 0, 'f', 3));
             if (lastPoint.y() != point.y())
                 str.append(QString("Y%1").arg(point.y(), 0, 'f', 3));
             if (fl) {
-                str.append(QString("F%1").arg(tool.data.params[FeedRate], 0, 'f', 3));
+                str.append(QString("F%1").arg(tool.feedRate, 0, 'f', 3));
                 fl = false;
             }
             sl.append(str);
             lastPoint = point;
         }
-        sl.append(QString("G0Z%1").arg(MaterialSetup::clearence, 0, 'f', 3));
+        sl.append(QString("G0Z%1").arg(MaterialSetupForm::clearence, 0, 'f', 3));
     }
-    sl.append(QString("G0Z%1").arg(MaterialSetup::z, 0, 'f', 3));
-    sl.append(QString("G0X%1Y%2").arg(MaterialSetup::homePos.x(), 0, 'f', 3).arg(MaterialSetup::homePos.y(), 0, 'f', 3));
+    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3));
+    sl.append(QString("G0X%1Y%2").arg(MaterialSetupForm::homePos.x(), 0, 'f', 3).arg(MaterialSetupForm::homePos.y(), 0, 'f', 3));
     sl.append("M30");
 
     QFile file(name);
@@ -207,3 +91,48 @@ void GCodeProfile::save(const QString& name)
         }
     }
 }
+GItem::GItem(const Path& path)
+    : m_path(path)
+{
+    m_brush = QBrush(Qt::NoBrush);
+    if (m_path.first() != m_path.last())
+        m_path.append(m_path.first());
+    m_shape.addPolygon(PathToQPolygon(m_path));
+
+    rect = m_shape.boundingRect();
+    //setAcceptHoverEvents(true);
+    //setFlag(ItemIsSelectable, true);
+}
+
+QRectF GItem::boundingRect() const
+{
+    double k = m_pen.widthF() / 2;
+    return rect + QMarginsF(k, k, k, k);
+}
+
+//QPainterPath GItem::shape() const { return m_shape; }
+
+void GItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+{
+    //QBrush brush(m_brush);
+    //QColor c(m_brush.color());
+    //if (option->state & QStyle::State_Selected) {
+    //    c.setAlpha(255);
+    ///    brush.setColor(c);
+    //    c.setAlpha(100);
+    //    pen = QPen(c, 0.0);
+    //}
+    //if (option->state & QStyle::State_MouseOver) {
+    //    //        c.setAlpha(200);
+    //    //        brush.setColor(c);
+    //    c.setAlpha(255);
+    //    pen = QPen(c, 0.0);
+    //}
+    painter->setBrush(m_brush);
+    painter->setPen(m_pen);
+    painter->drawPath(m_shape);
+    painter->setPen(QPen(Qt::white, 0.0));
+    painter->drawPath(m_shape);
+}
+
+int GItem::type() const { return QGraphicsItem::UserType + 3; }

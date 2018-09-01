@@ -9,7 +9,6 @@ FolderItem::FolderItem(const QString& name)
 
 FolderItem::~FolderItem()
 {
-    //qDebug() << "~Folder()";
 }
 
 QVariant FolderItem::data(const QModelIndex& index, int role) const
@@ -32,7 +31,7 @@ Qt::ItemFlags FolderItem::flags(const QModelIndex& /*index*/) const
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
 
-int FolderItem::rowCount() const
+int FolderItem::childCount() const
 {
     return childItems.size();
 }

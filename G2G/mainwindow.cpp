@@ -1,12 +1,8 @@
 #include "mainwindow.h"
 #include "drillforapertureform.h"
-#include "forms/materialsetup.h"
 #include "mainwindow.h"
-#include "tooldatabase/tooldatabase.h"
-
-#include "gerber/graphicsitem.h"
-#include "gerber/parser.h"
 #include "settingsdialog.h"
+#include "tooldatabase/tooldatabase.h"
 #include "toolpath/toolpathcreator.h"
 #include <QApplication>
 #include <QCloseEvent>
@@ -15,14 +11,15 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
-#include <gerber/file.h>
-#include <mygraphicsscene.h>
+#include <forms/materialsetupform.h>
+#include <myscene.h>
+#include <parser.h>
 #include <toolpath/toolpathwidget.h>
 
 //#include "qt_windows.h"
 //#include "Psapi.h"
 
-MainWindow* MainWindow::pMainWindow;
+MainWindow* MainWindow::self;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
@@ -30,60 +27,36 @@ MainWindow::MainWindow(QWidget* parent)
 //, fileHolder(new GerberFileHolder(this))
 {
     setupUi(this);
-    scene = new MyGraphicsScene(this, true);
-    graphicsView->SetScene(scene);
-    Init();
-    setCurrentFile(QString());
+    self = this;
+    MyScene::self = reinterpret_cast<MyScene*>(graphicsView->scene());
+
+    init();
 
     gerberParser->moveToThread(&gerberThread);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
-    //    connect(gerberParser, &GerberParser::fileReady, fileHolder, &GerberFileHolder::handleFile);
     connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
-    //connect(gerberParser, &G::Parser::fileReady, [=](G::File*) { QTimer::singleShot(200, Qt::CoarseTimer, [=] { graphicsView->ZoomFit(); }); });
+    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
 
-    //    HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ, FALSE, QCoreApplication::applicationPid());
-    //    static QTimer timer;
-    //    connect(&timer, &QTimer::timeout,
-    //        [=]() {
-    //            PROCESS_MEMORY_COUNTERS pmc;
-    //            if (GetProcessMemoryInfo(hProcess, &pmc, sizeof(pmc))) {
-    //                //                qDebug() << "Ошибок стр.: " << (pmc.PageFaultCount);
-    //                //                qDebug() << "Макс. использ. памяти (Kb): " << (pmc.PeakWorkingSetSize / 1024);
-    //                //                qDebug() << "Выгружаемый пул (макс.): " << (pmc.QuotaPeakPagedPoolUsage);
-    //                //                qDebug() << "Выгружаемый пул : " << (pmc.QuotaPagedPoolUsage);
-    //                //                qDebug() << "Невыгруж. пул (макс.): " << (pmc.QuotaPeakNonPagedPoolUsage);
-    //                //                qDebug() << "Невыгруж. пул : " << (pmc.QuotaNonPagedPoolUsage);
-    //                //                qDebug() << "Вирт. память (Kb): " << (pmc.PagefileUsage / 1024);
-    //                //                qDebug() << "Макс. вирт. память (Kb): " << (pmc.PeakPagefileUsage / 1024);
-    //                qDebug() << "Память (Kb): " << (pmc.WorkingSetSize / 1024.0 / 1024.0);
-    //            }
-    //        });
-    //    timer.start(1000);
-
-    if (0) {
-        QPainterPath painterPath;
-        QFont font;
-        font.setPointSizeF(10);
-        painterPath.addText(QPointF(1, -23), font, "Gerber X2");
-        painterPath.addText(QPointF(1, -12), font, "to");
-        painterPath.addText(QPointF(1, -01), font, "G Code");
-        QGraphicsPathItem* pathItem = new QGraphicsPathItem(painterPath);
-        pathItem->setAcceptHoverEvents(true);
-        pathItem->setBrush(QColor(255, 180, 120));
-        pathItem->setPen(Qt::NoPen);
-        QTransform tr = QTransform::fromScale(2, -2);
-        pathItem->setTransform(tr);
-        scene->addItem(pathItem);
-    }
-    dwCreatePath->hide();
-    pMainWindow = this;
+    //    if (0) {
+    //        QPainterPath painterPath;
+    //        QFont font;
+    //        font.setPointSizeF(10);
+    //        painterPath.addText(QPointF(1, -23), font, "Gerber X2");
+    //        painterPath.addText(QPointF(1, -12), font, "to");
+    //        painterPath.addText(QPointF(1, -01), font, "G Code");
+    //        QGraphicsPathItem* pathItem = new QGraphicsPathItem(painterPath);
+    //        pathItem->setAcceptHoverEvents(true);
+    //        pathItem->setBrush(QColor(255, 180, 120));
+    //        pathItem->setPen(Qt::NoPen);
+    //        QTransform tr = QTransform::fromScale(2, -2);
+    //        pathItem->setTransform(tr);
+    //        scene->addItem(pathItem);
+    //    }
 
     readSettings();
-    dwCreatePath->setVisible(false);
 }
 
 MainWindow::~MainWindow()
@@ -94,13 +67,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    //    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Нет", "Да") == 1) {
+    //    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Нет", "Да") == 1)
     writeSettings();
+    closeFiles();
     event->accept();
-    //    }
-    //    else {
-    //        event->ignore();
-    //    }
 }
 
 void MainWindow::open()
@@ -113,40 +83,15 @@ void MainWindow::open()
 
 void MainWindow::closeFiles()
 {
-    QModelIndex index = treeView->model()->index(NODE_FILES, 0, QModelIndex());
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->rowCount();
-    treeView->model()->removeRows(NODE_FILES, rowCount, index);
-    //    scene->deleteLater();
-    //    scene = new MyGraphicsScene(this, true);
-    //    graphicsView->SetScene(scene);
+    FileModel::self->closeAllFiles();
 }
-
-//bool MainWindow::save()
-//{
-//    return isUntitled ? saveAs() : saveFile(curFile);
-//}
-
-//bool MainWindow::saveAs()
-//{
-//    QString fileName = QFileDialog::getSaveFileName(this, tr("Save As"),
-//        curFile);
-//    if (fileName.isEmpty())
-//        return false;
-
-//    return saveFile(fileName);
-//}
 
 void MainWindow::about()
 {
     QMessageBox::about(this, tr("About G2G"), tr("G2G"));
 }
 
-void MainWindow::documentWasModified()
-{
-    setWindowModified(true);
-}
-
-void MainWindow::Init()
+void MainWindow::init()
 {
     setAttribute(Qt::WA_DeleteOnClose);
     isUntitled = true;
@@ -181,7 +126,7 @@ void MainWindow::createActions()
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), this, &MainWindow::exportPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), MyScene::self, &MyScene::RenderPdf);
     fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Export to PDF file"));
@@ -244,7 +189,7 @@ void MainWindow::createActions()
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
     action = s->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), [=]() {
-        for (QGraphicsItem* item : scene->items())
+        for (QGraphicsItem* item : MyScene::self->items())
             if (item->isVisible())
                 item->setSelected(true);
     });
@@ -255,61 +200,43 @@ void MainWindow::createActions()
     toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
 
-    dwCreatePath = new QDockWidget(this);
-    dwCreatePath->setObjectName(QStringLiteral("dwCreatePath"));
-
-    addDockWidget(Qt::RightDockWidgetArea, dwCreatePath);
-
-    auto createDockWidget = [&](QWidget* dwContent, int type) {
-        if (dwCreatePath->widget() != nullptr)
-            delete dwCreatePath->widget();
-        dwContent->setObjectName(QStringLiteral("dwContents"));
-        dwCreatePath->setWidget(dwContent);
-        //dwCreatePath->setFloating(false);
-        dwCreatePath->setWindowTitle(tr("Create Toolpath"));
-        for (QAction* action : toolpathActionList) {
-            action->setChecked(false);
-        }
-        toolpathActionList[type]->setChecked(true);
-        dwCreatePath->show();
-    };
-
-    connect(dwCreatePath, &QDockWidget::visibilityChanged, [&](bool visible) {
+    dockWidget = new QDockWidget(this);
+    dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+    dockWidget->hide();
+    connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
         if (!visible) {
             QTimer::singleShot(100, [=] {
-                if (dwCreatePath->isHidden()) {
-                    for (QAction* action : toolpathActionList) {
+                if (dockWidget->isHidden()) {
+                    for (QAction* action : toolpathActionList)
                         action->setChecked(false);
-                        action->setEnabled(true);
-                    }
-                    if (dwCreatePath->widget() != nullptr)
-                        dwCreatePath->widget()->deleteLater();
+
+                    if (dockWidget->widget() != nullptr)
+                        dockWidget->widget()->deleteLater();
                 }
             });
         }
     });
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=]() {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=] {
         createDockWidget(new ToolPathWidget(PROFILE_TOOLPATH_FORM), PROFILE_TOOLPATH_FORM);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=]() {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=] {
         createDockWidget(new ToolPathWidget(POCKET_TOOLPATH_FORM), POCKET_TOOLPATH_FORM);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=]() {
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=] {
         createDockWidget(new ToolPathWidget(DRILLING_TOOLPATH_FORM), DRILLING_TOOLPATH_FORM);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=]() {
-        createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM);
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=] {
+        createDockWidget(new MaterialSetupForm(), MATERIAL_SETUP_FORM);
     }));
 
-    for (QAction* action : toolpathActionList) {
+    for (QAction* action : toolpathActionList)
         action->setCheckable(true);
-        //        action->setEnabled(false);
-    }
 
-    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), MATERIAL_SETUP_FORM); });
+    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetupForm(), MATERIAL_SETUP_FORM); });
 
-    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this); tdb.exec(); });
+    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=]() { ToolDatabase tdb(this,{}); tdb.exec(); });
 }
 
 void MainWindow::createStatusBar()
@@ -319,56 +246,26 @@ void MainWindow::createStatusBar()
 
 void MainWindow::readSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     if (isHidden()) {
         const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-        if (geometry.isEmpty()) {
-            const QRect availableGeometry = QApplication::desktop()->availableGeometry(this);
-            resize(availableGeometry.width() / 3, availableGeometry.height() / 2);
-            move((availableGeometry.width() - width()) / 2,
-                (availableGeometry.height() - height()) / 2);
-        } else {
-            restoreGeometry(geometry);
-        }
-        restoreState(settings.value("state", QByteArray()).toByteArray());
+
+        restoreGeometry(geometry);
     }
-    //graphicsView->Setup();
     lastPath = settings.value("lastPath").toString();
     QString files = settings.value("files").toString();
-    for (const QString& file : files.split('|', QString::SkipEmptyParts)) {
-        openFile(file);
-    }
+    for (const QString& file : files.split('|', QString::SkipEmptyParts))
+        openFile(lastPath + "/" + file);
 }
 
 void MainWindow::writeSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("files", treeView->files());
 }
-
-//bool MainWindow::maybeSave()
-//{
-//    //if (!textEdit->document()->isModified())
-//    return true;
-//    const QMessageBox::StandardButton ret
-//        = QMessageBox::warning(this, tr("SDI"),
-//            tr("The document has been modified.\n"
-//               "Do you want to save your changes?"),
-//            QMessageBox::Save | QMessageBox::Discard
-//                | QMessageBox::Cancel);
-//    switch (ret) {
-//    case QMessageBox::Save:
-//        return save();
-//    case QMessageBox::Cancel:
-//        return false;
-//    default:
-//        break;
-//    }
-//    return true;
-//}
 
 void MainWindow::openFile(const QString& fileName)
 {
@@ -385,18 +282,9 @@ void MainWindow::openFile(const QString& fileName)
         QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
-    lastPath = QDir(fileName).path();
-
-    //QApplication::setOverrideCursor(Qt::WaitCursor);
+    lastPath = QFileInfo(fileName).absolutePath();
     emit parseFile(fileName);
-    //QApplication::restoreOverrideCursor();
-    setCurrentFile(fileName);
-    //    statusBar()->showMessage(tr("File loaded"), 2000);
-}
-
-MyGraphicsScene* MainWindow::getScene() const
-{
-    return scene;
+    //    setCurrentFile(fileName);
 }
 
 void MainWindow::setRecentFilesVisible(bool visible)
@@ -472,30 +360,6 @@ void MainWindow::openRecentFile()
         openFile(action->data().toString());
 }
 
-void MainWindow::exportPdf()
-{
-    qDebug() << curFile;
-    curFile = QFileDialog::getSaveFileName(this, tr("Save PDF file"), curFile.left(curFile.lastIndexOf('.')) + ".pdf", tr("File(*.pdf)"));
-    qDebug() << curFile;
-    if (curFile.isEmpty())
-        return;
-
-    QPdfWriter pdfWriter(curFile.left(curFile.lastIndexOf('.')) + ".pdf");
-
-    QSizeF size = scene->itemsBoundingRect().size();
-    pdfWriter.setPageSizeMM(size);
-
-    QPdfWriter::Margins margins = { 0, 0, 0, 0 };
-    pdfWriter.setMargins(margins);
-    pdfWriter.setResolution(1000000);
-
-    QPainter painter(&pdfWriter);
-    painter.setTransform(QTransform().scale(1.0, -1.0));
-    painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
-    qDebug() << size << pdfWriter.resolution();
-    scene->RenderPdf(&painter);
-}
-
 //bool MainWindow::saveFile(const QString& fileName)
 //{
 //    QFile file(fileName);
@@ -505,12 +369,10 @@ void MainWindow::exportPdf()
 //                .arg(QDir::toNativeSeparators(fileName), file.errorString()));
 //        return false;
 //    }
-
 //    QTextStream out(&file);
 //    //    QApplication::setOverrideCursor(Qt::WaitCursor);
 //    //    out << textEdit->toPlainText();
 //    QApplication::restoreOverrideCursor();
-
 //    setCurrentFile(fileName);
 //    statusBar()->showMessage(tr("File saved"), 2000);
 //    return true;
@@ -549,4 +411,16 @@ void MainWindow::showSettingsDialog()
     }
 }
 
-MainWindow* MainWindow::getMainWindow() { return pMainWindow; }
+void MainWindow::createDockWidget(QWidget* dwContent, int type)
+{
+    if (dockWidget->widget() != nullptr)
+        delete dockWidget->widget();
+    dwContent->setObjectName(QStringLiteral("dwContents"));
+    dockWidget->setWidget(dwContent);
+    //dwCreatePath->setFloating(false);
+    dockWidget->setWindowTitle(tr("Create Toolpath"));
+    for (QAction* action : toolpathActionList)
+        action->setChecked(false);
+    toolpathActionList[type]->setChecked(true);
+    dockWidget->show();
+}

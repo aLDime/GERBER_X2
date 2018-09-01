@@ -2,7 +2,7 @@
 
 #include <QIcon>
 
-Milling::Milling(const QString name, QGraphicsItem* group)
+Milling::Milling(const QString name, GCodeProfile *group)
     : name(name)
     , group(group)
 {
@@ -35,7 +35,7 @@ int Milling::columnCount() const
     return 1;
 }
 
-int Milling::rowCount() const
+int Milling::childCount() const
 {
     return 0;
 }

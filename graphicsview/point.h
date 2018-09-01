@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include "mygraphicsscene.h"
+#include "myscene.h"
 
 #include <QObject>
 #include <QGraphicsItem>
@@ -17,15 +17,15 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
 
-    void setBrush(const QBrush& value);
+    void setBrush(const QBrush& brush);
 
 private:
-    QRectF rect;
-    QPainterPath path;
-    QPainterPath shape_;
-    QBrush brush;
-    QPen pen;
-    int type;
+    QRectF m_rect;
+    QPainterPath m_path;
+    QPainterPath m_shape;
+    QBrush m_brush;
+    QPen m_pen;
+    int m_type;
     // QGraphicsItem interface
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;

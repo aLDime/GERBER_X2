@@ -1,45 +1,34 @@
-#ifndef TOOLDATABASE_H
-#define TOOLDATABASE_H
+#ifndef TOOLEDIT_H
+#define TOOLEDIT_H
 
 #include "tool.h"
 
-#include <QAbstractItemModel>
 #include <QDialog>
 
-class ToolEdit;
-class QDialogButtonBox;
-class ToolTreeView;
-class QPushButton;
-
 namespace Ui {
-class ToolDatabase;
+class ToolEdit;
 }
+
+class ToolItem;
 
 class ToolDatabase : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ToolDatabase(QWidget* parent = 0, const QVector<int> tools = QVector<int>({}));
+    explicit ToolDatabase(QWidget* parent = nullptr, QVector<Tool::Type> types = QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving });
     ~ToolDatabase();
 
-    Tool getTool() const;
-    void setTool(const Tool& value);
-    static QVector<int> getTools();
+private:
+    Ui::ToolEdit* ui;
+
+public:
+    Tool tool() const;
+    void setTool(const Tool& tool);
 
 private:
-    //    Ui::ToolDatabase *ui;
-    ToolTreeView* tree;
-    ToolEdit* toolEdit;
-    QPushButton* pbNew;
-    QPushButton* bpCopy;
-    QPushButton* pbDelete;
-    QPushButton* pbNewGroup;
-    QDialogButtonBox* buttonBox;
-    Tool tool;
-    static QVector<int> tools;
-
-    void setupUi(QDialog* ToolDatabase); // setupUi
-    void retranslateUi(QDialog* ToolDatabase); // retranslateUi
+    Tool m_tool;
+    ToolItem* m_item;
+    const QVector<Tool::Type> m_types;
 };
 
-#endif // TOOLDATABASE_H
+#endif // TOOLEDIT_H

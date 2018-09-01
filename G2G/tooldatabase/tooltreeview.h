@@ -5,19 +5,21 @@
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
+#include <QPushButton>
 #include <QStandardItemModel>
 #include <QTreeView>
-#include <QPushButton>
 
 class ToolTreeView : public QTreeView {
     Q_OBJECT
 public:
-    explicit ToolTreeView(QVector<QPushButton*> buttons, QWidget* parent = nullptr);
+    explicit ToolTreeView(/*QVector<QPushButton*> buttons,*/ QWidget* parent = nullptr);
     ~ToolTreeView();
-    void setTool(const Tool& value);
+    void updateItem();
+
+    void setButtons(const QVector<QPushButton*>& buttons);
 
 signals:
-    void toolSelected(const Tool& tool);
+    void itemSelected(ToolItem* item);
 
 public slots:
 
@@ -36,10 +38,6 @@ private:
         NewGroup,
     };
     QVector<QPushButton*> m_buttons;
-
-    // QWidget interface
-protected:
-    void showEvent(QShowEvent *event) override;
 };
 
 #endif // MYTREEVIEW_H

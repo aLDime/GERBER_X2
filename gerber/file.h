@@ -31,17 +31,26 @@ public:
 
 class File : public QList<GraphicObject> {
 public:
-    File() {}
-    ~File()
-    {
-        qDeleteAll(apertures);
-        if (gig)
-            delete gig;
-    }
-    ItemGroup* gig = nullptr;
+    File();
+    ~File();
+
+    enum GROUP {
+        COPPER,
+        CUTOFF,
+    };
+
+    Paths Merge();
+    Pathss& GetGroupedPaths(GROUP group = COPPER, bool fl = false);
+
+    ItemGroup* itemGroup = nullptr;
     QList<QString> lines;
     QMap<int, Aperture*> apertures;
     QString fileName;
+    Paths mergedPaths;
+    Pathss groupedPaths;
+
+private:
+    void grouping(PolyNode* node, Pathss* pathss, GROUP group);
 };
 }
 

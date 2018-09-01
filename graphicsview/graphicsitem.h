@@ -7,7 +7,6 @@
 #include <QPen>
 
 using namespace ClipperLib;
-namespace G {
 
 enum {
     RawItemType = QGraphicsItem::UserType + 1,
@@ -84,5 +83,5 @@ private:
     Paths paths;
     QRectF rect;
 };
-}
+
 #endif // GERBERITEM_H

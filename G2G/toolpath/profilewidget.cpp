@@ -1,10 +1,8 @@
 #include "profilewidget.h"
-
-#include <QtCore/QVariant>
-
 #include <QAction>
 #include <QApplication>
 #include <QButtonGroup>
+#include <QDoubleSpinBox>
 #include <QGridLayout>
 #include <QGroupBox>
 #include <QHeaderView>
@@ -13,12 +11,11 @@
 #include <QRadioButton>
 #include <QSpacerItem>
 #include <QVBoxLayout>
-#include <QDoubleSpinBox>
-
-#include <mainwindow.h>
-#include <toolpath/toolpathcreator.h>
+#include <QtCore/QVariant>
 #include <gcode/gcode.h>
-#include <mygraphicsscene.h>
+#include <mainwindow.h>
+#include <myscene.h>
+#include <toolpath/toolpathcreator.h>
 
 Tool ProfileWidget::tool;
 
@@ -32,7 +29,7 @@ ProfileWidget::ProfileWidget(QWidget* parent)
     : Widget(parent)
 {
     setupUi(this);
-    restoreTool({ &tool }, "ProfileWidget");
+    restoreTools({ &tool }, "ProfileWidget");
     setName("Profile Toolpath");
 
     auto rb_clicked = [&] {
@@ -75,7 +72,7 @@ ProfileWidget::ProfileWidget(QWidget* parent)
 
 ProfileWidget::~ProfileWidget()
 {
-    saveTool({ &tool }, "ProfileWidget");
+    saveTools({ &tool }, "ProfileWidget");
 }
 
 void ProfileWidget::setupUi(QWidget* Form)
@@ -161,17 +158,17 @@ void ProfileWidget::retranslateUi(QWidget* Form)
 
 void ProfileWidget::calculate()
 {
-    MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
+    MyScene* scene = MyScene::self;
 
-    if (qFuzzyIsNull(tool.data.params[Diameter])) {
+    if (qFuzzyIsNull(tool.diameter)) {
         QMessageBox::warning(this, "!!!", tr("No valid tool..."));
         return;
     }
 
     Paths wPaths;
     for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == G::WorkItemType)
-            wPaths.append(static_cast<G::WorkItem*>(item)->getPaths());
+        if (item->type() == WorkItemType)
+            wPaths.append(static_cast<WorkItem*>(item)->getPaths());
     }
 
     if (wPaths.isEmpty()) {
@@ -186,8 +183,8 @@ void ProfileWidget::calculate()
         return;
     }
 
-    scene->addItem(group);
-    Model::model->addMilling(pathName->text(), group);
+    group->addToTheScene(scene);
+    FileModel::self->addMilling(pathName->text(), group);
 }
 
 Tool ProfileWidget::getTool(int n) const

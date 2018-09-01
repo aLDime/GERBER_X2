@@ -3,18 +3,19 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
-class Point;
+#include "point.h"
 
-class MyGraphicsScene : public QGraphicsScene {
+class MyScene : public QGraphicsScene {
     friend class Point;
 
 public:
-    explicit MyGraphicsScene(QObject* parent, bool drawPoints = false);
-    ~MyGraphicsScene();
-    void RenderPdf(QPainter* painter);
+    explicit MyScene(QObject* parent, bool drawPoints = false);
+    ~MyScene();
+    void RenderPdf();
 
     Point* getItemZero() const;
     Point* getItemHome() const;
+    static MyScene* self;
 
 private:
     bool drawPdf;

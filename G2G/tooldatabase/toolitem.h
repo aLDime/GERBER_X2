@@ -3,23 +3,26 @@
 
 #include "tool.h"
 
+#include <QAbstractItemModel>
+#include <QDebug>
 #include <QObject>
 #include <QVariant>
-#include <QDebug>
-#include <QAbstractItemModel>
 
 class ToolItem {
-    //TreeItem(const TreeItem&) Q_DECL_EQ_DELETE;
     ToolItem& operator=(const ToolItem&) Q_DECL_EQ_DELETE;
-    static int c;
 
 public:
-    ToolItem(const Tool& tool);
+    ToolItem();
+    ToolItem(int toolId);
     ToolItem(const ToolItem& item);
     ~ToolItem();
+
+    void read(const QJsonObject& json);
+    void write(QJsonObject& json);
+
     int row() const;
     int childCount() const;
-    ToolItem* child(int row);
+    ToolItem* child(int row) const;
     ToolItem* takeChild(int row);
     ToolItem* parent();
     void addChild(ToolItem* item);
@@ -31,17 +34,29 @@ public:
 
     QVariant data(const QModelIndex& index, int role) const;
 
-    Qt::ItemFlags flags(const QModelIndex& /*index*/) const;
+    Qt::ItemFlags flags() const;
 
-    Tool getTool() const;
-    void setTool(const Tool& value);
+    int toolId() const;
 
-    void setEnabled(bool value);
+    Tool& tool();
+
+    bool isTool() const;
+    void setIsTool();
+
+    QString name() const;
+    void setName(const QString& value);
+
+    QString note() const;
+    void setNote(const QString& value);
 
 private:
+    static QMap<int, Tool> tools;
+
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
-    Tool tool;
-    bool enabled = true;
+    int m_toolId = 0;
+    mutable bool m_isTool = false;
+    QString m_name;
+    QString m_note;
 };
 #endif // TREEITEM_H

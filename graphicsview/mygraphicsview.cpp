@@ -1,6 +1,8 @@
 #include "mygraphicsview.h"
 #include "edid.h"
+#include "myscene.h"
 #include "qdruler.h"
+#include "mygraphicsview.h"
 #include <QDebug>
 #include <QGLWidget>
 #include <QSettings>
@@ -11,6 +13,7 @@
 MyGraphicsView::MyGraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
+
     setRenderHint(QPainter::Antialiasing, true);
     //    setOptimizationFlags(DontSavePainterState);
     //    setViewportUpdateMode(SmartViewportUpdate);
@@ -53,10 +56,12 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
 
     QSettings settings;
     settings.beginGroup("Viewer");
-    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing").toBool());
+    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", true).toBool());
     setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
     viewport()->setObjectName("viewport");
     settings.endGroup();
+
+    SetScene(new MyScene(this, true));
 }
 
 void MyGraphicsView::SetScene(QGraphicsScene* Scene)
@@ -73,24 +78,13 @@ void MyGraphicsView::ZoomFit()
     UpdateRuler();
 }
 
-//void MyGraphicsView::Setup()
-//{
-//    QSettings settings;
-//    settings.beginGroup("Viewer");
-//    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing").toBool());
-//    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
-//    viewport()->setObjectName("viewport");
-//    settings.endGroup();
-//}
-
 void MyGraphicsView::Zoom100()
 {
     double x = 1.0, y = 1.0;
     if (0) {
         x = qAbs(1.0 / transform().m11() / (25.4 / physicalDpiX()));
         y = qAbs(1.0 / transform().m22() / (25.4 / physicalDpiY()));
-    }
-    else {
+    } else {
         QSizeF size(GetEdid()); // size in mm
         QRect scrGeometry = QGuiApplication::primaryScreen()->geometry(); // size in pix
         x = qAbs(1.0 / transform().m11() / (size.height() / scrGeometry.height()));
@@ -100,14 +94,16 @@ void MyGraphicsView::Zoom100()
     UpdateRuler();
 }
 
-enum { DURATION = 300 };
-enum { INTERVAL = 30 };
+enum {
+    DURATION = 300,
+    INTERVAL = 30
+};
 
 void MyGraphicsView::ZoomIn()
 {
-    if (transform().m11() > 10000.0) {
+    if (transform().m11() > 10000.0)
         return;
-    }
+
     //    numScheduledScalings += 1;
     //    QTimeLine* anim = new QTimeLine(DURATION, this);
     //    anim->setUpdateInterval(INTERVAL);
@@ -120,9 +116,9 @@ void MyGraphicsView::ZoomIn()
 
 void MyGraphicsView::ZoomOut()
 {
-    if (transform().m11() < 1.0) {
+    if (transform().m11() < 1.0)
         return;
-    }
+
     //    numScheduledScalings -= 1;
     //    QTimeLine* anim = new QTimeLine(DURATION, this);
     //    anim->setUpdateInterval(INTERVAL);
@@ -139,8 +135,7 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::ControlModifier:
         if (event->delta() > 0) {
             ZoomIn();
-        }
-        else {
+        } else {
             ZoomOut();
         }
         break;
@@ -150,8 +145,7 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
     case Qt::NoModifier:
         if (event->angleDelta().x() != 0) {
             QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        }
-        else {
+        } else {
             QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
         }
         break;
@@ -168,24 +162,9 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
 //    selectModeButton = !selectModeButton;
 //}
 
-void MyGraphicsView::ScalingTime(qreal x)
-{
-    qreal factor = 1.0 + qreal(numScheduledScalings) / 100 * x;
-    qDebug() << numScheduledScalings << x << transform().m11();
-    scale(factor, factor);
-}
 
-void MyGraphicsView::AnimFinished()
-{
-    if (numScheduledScalings > 0) {
-        numScheduledScalings--;
-    }
-    else {
-        numScheduledScalings++;
-    }
-    sender()->~QObject();
-    UpdateRuler();
-}
+
+
 
 void MyGraphicsView::UpdateRuler()
 {
@@ -236,48 +215,8 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
     UpdateRuler();
 }
 
-void MyGraphicsView::mousePressEvent(QMouseEvent* event)
-{
-    //    qDebug() << "mousePressEvent";
-    //    if (event->buttons() & Qt::MiddleButton) {
-    //        setInteractive(false);
-    //        // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-    //        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, 0, event->modifiers());
-    //        QGraphicsView::mouseReleaseEvent(&releaseEvent);
-    //        setDragMode(ScrollHandDrag);
-    //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
-    //        QGraphicsView::mousePressEvent(&fakeEvent);
-    //    }
-    //    else if (event->button() == Qt::RightButton) {
-    //        // это что бы при вызове контекстного меню ничего постороннего не было
-    //        setDragMode(NoDrag);
-    //        QGraphicsView::mousePressEvent(event);
-    //    }
-    //    else {
-    //        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
-    //        QGraphicsView::mousePressEvent(event);
-    //    }
-    QGraphicsView::mousePressEvent(event);
-}
 
-void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
-{
-    //    qDebug() << "mouseReleaseEvent";
-    //    if (event->button() == Qt::MiddleButton) {
-    //        // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-    //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-    //        QGraphicsView::mouseReleaseEvent(&fakeEvent);
-    //        setDragMode(RubberBandDrag);
-    //        setInteractive(true);
-    //    }
-    //    else {
-    //        QGraphicsView::mouseReleaseEvent(event);
-    //    }
-    QGraphicsView::mouseReleaseEvent(event);
-}
 
-void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)
-{
-    //qDebug() << "mouseMoveEvent";
-    QGraphicsView::mouseMoveEvent(event);
-}
+
+
+

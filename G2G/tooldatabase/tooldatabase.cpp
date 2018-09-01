@@ -1,128 +1,54 @@
-#include "tooledit.h"
-#include "tooltreeview.h"
 #include "tooldatabase.h"
-//#include "treemodel.h"
+#include "toolitem.h"
+#include "ui_tooledit.h"
 
-#include <QBoxLayout>
-#include <QDebug>
-#include <QDialogButtonBox>
-#include <QEvent>
-#include <QFile>
-#include <QListWidget>
-#include <QMessageBox>
-#include <QPushButton>
-#include <QStandardItemModel>
-
-QVector<int> ToolDatabase::tools;
-
-ToolDatabase::ToolDatabase(QWidget* parent, const QVector<int> tools)
+ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)
+    , ui(new Ui::ToolEdit)
+    , m_types(types)
 {
-    this->tools = tools;
 
-    setupUi(this);
+    ui->setupUi(this);
+    ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
 
-    connect(tree, &ToolTreeView::toolSelected, toolEdit, &ToolEdit::setTool);
-    connect(toolEdit, &ToolEdit::toolEdited, tree, &ToolTreeView::setTool);
+    ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled(m_types.isEmpty());
 
-    connect(tree, &ToolTreeView::toolSelected, this, &ToolDatabase::setTool);
-    connect(toolEdit, &ToolEdit::toolEdited, this, &ToolDatabase::setTool);
-    connect(tree, &ToolTreeView::doubleClicked, [&](const QModelIndex& index) {
-        setTool(*reinterpret_cast<Tool*>(index.data(Qt::UserRole + 1).toULongLong()));
-        if (tool.data.toolType != Group && index.flags() & Qt::ItemIsEnabled && tools.size())
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ToolDatabase::accept);
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ToolDatabase::reject);
+
+    connect(ui->toolEdit, &ToolEditForm::itemChanged, [=](ToolItem* item) {
+        if (item->isTool())
+            setTool(item->tool());
+        ui->treeView->updateItem();
+    });
+
+    connect(ui->treeView, &ToolTreeView::itemSelected, [=](ToolItem* item) {
+        if (item->isTool())
+            setTool(item->tool());
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && m_types.contains(item->tool().type)) || m_types.isEmpty());
+        ui->toolEdit->setItem(item);
+    });
+
+    connect(ui->treeView, &ToolTreeView::doubleClicked, [=](const QModelIndex& index) {
+        ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+        if ((item->isTool() && m_types.contains(item->tool().type))) {
+            setTool(item->tool());
             accept();
+        }
     });
 }
 
 ToolDatabase::~ToolDatabase()
 {
+    delete ui;
 }
 
-Tool ToolDatabase::getTool() const
+Tool ToolDatabase::tool() const
 {
-    return tool;
+    return m_tool;
 }
 
-void ToolDatabase::setTool(const Tool& value)
+void ToolDatabase::setTool(const Tool& tool)
 {
-    tool = value;
-}
-
-QVector<int> ToolDatabase::getTools()
-{
-    return tools;
-}
-
-void ToolDatabase::setupUi(QDialog* ToolDatabase)
-{
-    if (ToolDatabase->objectName().isEmpty())
-        ToolDatabase->setObjectName(QStringLiteral("ToolDatabase"));
-
-    ToolDatabase->resize(533, 360);
-    QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
-    sizePolicy.setHorizontalStretch(0);
-    sizePolicy.setVerticalStretch(0);
-    sizePolicy.setHeightForWidth(ToolDatabase->sizePolicy().hasHeightForWidth());
-    ToolDatabase->setSizePolicy(sizePolicy);
-
-    bpCopy = new QPushButton(ToolDatabase);
-    bpCopy->setObjectName(QStringLiteral("bpCopy"));
-
-    pbDelete = new QPushButton(ToolDatabase);
-    pbDelete->setObjectName(QStringLiteral("pbDelete"));
-
-    pbNew = new QPushButton(ToolDatabase);
-    pbNew->setObjectName(QStringLiteral("pbNew"));
-
-    pbNewGroup = new QPushButton(ToolDatabase);
-    pbNewGroup->setObjectName(QStringLiteral("pbNewGroup"));
-
-    QHBoxLayout* horizontalLayout_1 = new QHBoxLayout();
-    horizontalLayout_1->setObjectName(QStringLiteral("horizontalLayout_2"));
-
-    tree = new ToolTreeView({ bpCopy, pbDelete, pbNew, pbNewGroup }, ToolDatabase);
-    tree->setObjectName(QStringLiteral("tree"));
-    tree->setDragDropMode(QAbstractItemView::DragDrop);
-
-    toolEdit = new ToolEdit(ToolDatabase);
-    toolEdit->setObjectName(QStringLiteral("widget"));
-
-    horizontalLayout_1->addWidget(tree);
-    horizontalLayout_1->addWidget(toolEdit);
-
-    buttonBox = new QDialogButtonBox(ToolDatabase);
-    buttonBox->setObjectName(QStringLiteral("buttonBox"));
-    buttonBox->setOrientation(Qt::Horizontal);
-    buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
-
-    QHBoxLayout* horizontalLayout_2 = new QHBoxLayout();
-    horizontalLayout_2->setObjectName(QStringLiteral("horizontalLayout"));
-    horizontalLayout_2->addWidget(pbNew);
-    horizontalLayout_2->addWidget(bpCopy);
-    horizontalLayout_2->addWidget(pbDelete);
-    horizontalLayout_2->addWidget(pbNewGroup);
-    horizontalLayout_2->addItem(new QSpacerItem(40, 20, QSizePolicy::Expanding, QSizePolicy::Minimum));
-    horizontalLayout_2->addWidget(buttonBox);
-
-    QVBoxLayout* verticalLayout = new QVBoxLayout(ToolDatabase);
-    verticalLayout->setObjectName(QStringLiteral("verticalLayout"));
-    verticalLayout->addLayout(horizontalLayout_1);
-    verticalLayout->addLayout(horizontalLayout_2);
-
-    retranslateUi(ToolDatabase);
-    QObject::connect(buttonBox, &QDialogButtonBox::accepted, [&] {
-        if (tool.data.toolType != Group || tools.size() == 0)
-            accept();
-    });
-    QObject::connect(buttonBox, &QDialogButtonBox::rejected, ToolDatabase, &QDialog::reject);
-    QMetaObject::connectSlotsByName(ToolDatabase);
-}
-
-void ToolDatabase::retranslateUi(QDialog* ToolDatabase)
-{
-    ToolDatabase->setWindowTitle(tr("Tool Database"));
-    pbNew->setText(tr("New..."));
-    bpCopy->setText(tr("Copy..."));
-    pbDelete->setText(tr("Delete..."));
-    pbNewGroup->setText(tr("New Group"));
+    m_tool = tool;
 }

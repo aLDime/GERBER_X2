@@ -1,13 +1,14 @@
 #ifndef MYTREEVIEW_H
 #define MYTREEVIEW_H
 
-#include "Model.h"
+#include "filemodel.h"
 
 #include <QItemSelection>
 #include <QItemSelectionModel>
-#include <QStandardItemModel>
-#include <QTreeView>
 #include <QPushButton>
+#include <QStandardItemModel>
+#include <QTimer>
+#include <QTreeView>
 
 class TreeView : public QTreeView {
     Q_OBJECT
@@ -15,16 +16,13 @@ public:
     explicit TreeView(QWidget* parent = nullptr);
     ~TreeView();
     void addFile(G::File* gerberFile);
-    void removeAllFiles();
     QString files();
 
 private:
-    void updateActions();
+    void updateTree();
     void updateIcons();
-    Model* m_model;
-    QTimer iconTimer;
+    FileModel* m_model;
 
-    // QWidget interface
 protected:
     void showEvent(QShowEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;

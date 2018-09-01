@@ -1,15 +1,16 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#include "gerber/gerber.h"
-#include "gerber/parser.h"
-
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
 
-class MyGraphicsScene;
-class G::Parser;
+namespace G {
+class Parser;
+}
+
+class MyScene;
+
 class GerberFileHolder;
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -22,58 +23,44 @@ public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
     void openFile(const QString& fileName);
-    //    void OpenFile(QString file);
-    //    void OpenFile();
-    //    void ClearScene();
 
-    MyGraphicsScene* getScene() const;
-    static MainWindow* getMainWindow();
     QAction* closeAllAct;
+    static MainWindow* self;
 
 signals:
     void parseFile(const QString& filename);
 
 private:
     enum { MaxRecentFiles = 20 };
+    bool hasRecentFiles();
+    inline QString fileKey() { return QStringLiteral("file"); }
+    inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
+    void updateRecentFileActions();
+    void prependToRecentFiles(const QString& fileName);
+    void openRecentFile();
+    void setRecentFilesVisible(bool visible);
+    void writeRecentFiles(const QStringList& files, QSettings& settings);
 
-    //    void writeSettings();
-    //    void readSettings();
     QString lastPath;
     G::Parser* gerberParser;
     QThread gerberThread;
-    //    GerberFileHolder* fileHolder;
 
-    MyGraphicsScene* scene;
     //////////////////////
-    void open();
-    void closeFiles();
 
-    //    bool save();
-    //    bool saveAs();
+    QString strippedName(const QString& fullFileName);
+    QStringList readRecentFiles(QSettings& settings);
+
+    void init();
     void about();
-    void documentWasModified();
-    void Init();
+    void closeFiles();
     void createActions();
+    void createDockWidget(QWidget* dwContent, int type);
     void createStatusBar();
+    void open();
+    void setCurrentFile(const QString& fileName);
+    void showSettingsDialog();
     void readSettings();
     void writeSettings();
-    //    bool maybeSave();
-    void setRecentFilesVisible(bool visible);
-    static inline QString recentFilesKey() { return QStringLiteral("recentFileList"); }
-    static inline QString fileKey() { return QStringLiteral("file"); }
-    static QStringList readRecentFiles(QSettings& settings);
-    static void writeRecentFiles(const QStringList& files, QSettings& settings);
-    bool hasRecentFiles();
-    void prependToRecentFiles(const QString& fileName);
-    void updateRecentFileActions();
-    void openRecentFile();
-    void exportPdf();
-    //    bool saveFile(const QString& fileName);
-    void setCurrentFile(const QString& fileName);
-    QString strippedName(const QString& fullFileName);
-    ////////////////////////////////////////////////////
-    void showSettingsDialog();
-    //QTextEdit* textEdit;
 
     QAction* recentFileActs[MaxRecentFiles];
     QAction* recentFileSeparator;
@@ -86,7 +73,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    QDockWidget* dwCreatePath;
+    QDockWidget* dockWidget;
     QMenu* fileMenu;
     QMenu* helpMenu;
     QMenu* recentMenu;
@@ -94,7 +81,6 @@ private:
     QToolBar* fileToolBar;
     QToolBar* toolpathToolBar;
     QToolBar* zoomToolBar;
-    static MainWindow* pMainWindow;
     QVector<QAction*> toolpathActionList;
 };
 

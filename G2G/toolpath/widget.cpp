@@ -1,8 +1,11 @@
-#include "toolpathwidget.h"
 #include "widget.h"
+#include "toolpathwidget.h"
 #include <QDebug>
-#include <QSettings>
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <QLabel>
+#include <QSettings>
 
 Widget::Widget(QWidget* parent)
     : QWidget(parent)
@@ -16,30 +19,42 @@ Widget::Widget(QWidget* parent)
     cbxTool2 = w->cbxTool2;
 }
 
-void Widget::restoreTool(const QVector<Tool*>& tool, const QString& name) const
+void Widget::restoreTools(const QVector<Tool*>& tool, const QString& name) const
 {
-    QSettings settings;
-    settings.beginGroup("tools");
-    for (int i = 0; i < tool.size(); ++i) {
-        QByteArray data(settings.value(name + QString().setNum(i)).toByteArray());
-        if (data.size()) {
-            tool[i]->fromHex(data.split('|')[0]);
-            tool[i]->name = data.split('|')[1];
-            tool[i]->note = data.split('|')[2];
-            toolName[i]->setText(tool[i]->name);
-        }
+    QFile loadFile(name + ".json");
+
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open tools file.");
+        return;
     }
-    settings.endGroup();
+
+    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+    QJsonObject json = loadDoc.object();
+    QJsonArray toolArray = json["tools"].toArray();
+    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+        QJsonObject toolObject = toolArray[treeIndex].toObject();
+        tool[treeIndex]->read(toolObject);
+        toolName[treeIndex]->setText(tool[treeIndex]->name);
+    }
 }
 
-void Widget::saveTool(const QVector<Tool*>& tool, const QString& name)
+void Widget::saveTools(const QVector<Tool*>& tool, const QString& name)
 {
-    QSettings settings;
-    settings.beginGroup("tools");
-    for (int i = 0; i < tool.size(); ++i) {
-        settings.setValue(name + QString().setNum(i), tool[i]->toHex().append('|').append(tool[i]->name).append('|').append(tool[i]->note));
+    QFile saveFile(name + ".json");
+    if (!saveFile.open(QIODevice::WriteOnly)) {
+        qWarning("Couldn't open tools file.");
+        return;
     }
-    settings.endGroup();
+    QJsonObject json;
+    QJsonArray toolArray;
+    for (int treeIndex = 0; treeIndex < tool.size(); ++treeIndex) {
+        QJsonObject toolObject;
+        tool[treeIndex]->write(toolObject);
+        toolArray.append(toolObject);
+    }
+    json["tools"] = toolArray;
+    QJsonDocument saveDoc(json);
+    saveFile.write(saveDoc.toJson());
 }
 
 void Widget::setName(const QString& name)

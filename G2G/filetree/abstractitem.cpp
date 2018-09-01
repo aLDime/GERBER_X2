@@ -1,52 +1,46 @@
 #include "abstractitem.h"
-#include "abstractitem.h"
 
-#include <QIcon>
-#include <QPixmap>
+#include <QDebug>
 
 int AbstractItem::c = 0;
 
 AbstractItem::AbstractItem()
 {
-    qDebug() << "AbstractItem" << ++c << this << parentItem;
+    qDebug() << "AbstractItem" << ++c << this << m_parentItem;
 }
 
 AbstractItem::~AbstractItem()
 {
-    qDebug() << "~AbstractItem" << c-- << this << parentItem;
-    parentItem = nullptr;
-    if (childItems.size())
-        qDeleteAll(childItems);
+    qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
+    qDeleteAll(childItems);
 }
 
 int AbstractItem::row() const
 {
-    if (parentItem)
-        return parentItem->childItems.indexOf(const_cast<AbstractItem*>(this));
+    if (m_parentItem)
+        return m_parentItem->childItems.indexOf(const_cast<AbstractItem*>(this));
     return 0;
 }
 
 AbstractItem* AbstractItem::child(int row)
 {
-    return childItems.at(row);
+    return childItems.value(row);
 }
 
-AbstractItem* AbstractItem::parent()
+AbstractItem* AbstractItem::parentItem()
 {
-    return parentItem;
+    return m_parentItem;
 }
 
 void AbstractItem::add(AbstractItem* item)
 {
-    if (item)
-        item->parentItem = this;
+    item->m_parentItem = this;
     childItems.append(item);
 }
 
 void AbstractItem::insert(int row, AbstractItem* item)
 {
-    if (item)
-        item->parentItem = this;
+    item->m_parentItem = this;
     if (row < childItems.size())
         childItems.insert(row, item);
     else if (row == childItems.size())
@@ -55,17 +49,11 @@ void AbstractItem::insert(int row, AbstractItem* item)
 
 void AbstractItem::remove(int row)
 {
-    AbstractItem* item = childItems.at(row);
-    childItems.removeAt(row);
-    delete item;
+    delete childItems.takeAt(row);
 }
 
-void AbstractItem::set(int row, AbstractItem* item)
+int AbstractItem::childCount() const
 {
-    if (item)
-        item->parentItem = this;
-    if (row < childItems.size()) {
-        delete childItems[row];
-        childItems[row] = item;
-    }
+    return childItems.count();
 }
+

@@ -1,15 +1,13 @@
 #ifndef MYMODEL_H
 #define MYMODEL_H
 
-#include "toolitem.h"
-
 #include <QAbstractItemModel>
-#include <QDebug>
-#include <QFile>
-#include <QMessageBox>
+
+class ToolItem;
 
 class ToolModel : public QAbstractItemModel {
     Q_OBJECT
+    //friend class ToolItem;
     ToolItem* rootItem;
 
 public:

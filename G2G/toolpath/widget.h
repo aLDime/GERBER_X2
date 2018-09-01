@@ -25,8 +25,8 @@ public:
     virtual Tool getTool(int n) const = 0;
     virtual void setTool(int n, const Tool& value) = 0;
 
-    void restoreTool(const QVector<Tool*>& tool, const QString& pathName) const;
-    void saveTool(const QVector<Tool*>& tool, const QString& pathName);
+    void restoreTools(const QVector<Tool*>& tool, const QString& pathName) const;
+    void saveTools(const QVector<Tool*>& tool, const QString& pathName);
     void setName(const QString& pathName);
 signals:
 

@@ -1,14 +1,10 @@
 #include "graphicsitem.h"
-//#include "graphicsitem.h"
-//#include "graphicsitem.h"
-#include <mygraphicsscene.h>
 #include <QApplication>
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-
-using namespace G;
+#include <myscene.h>
 
 ///////////////////////////////////////////////
 /// \brief GerberItem::GerberItem
@@ -144,8 +140,9 @@ void ItemGroup::setBrush(const QBrush& brush)
 {
     if (m_brush != brush) {
         m_brush = brush;
-        for (GraphicsItem* item : *this)
+        for (GraphicsItem* item : *this) {
             item->setBrush(m_brush);
+        }
     }
 }
 
@@ -153,10 +150,12 @@ void ItemGroup::setPen(const QPen& pen)
 {
     if (m_pen != pen) {
         m_pen = pen;
-        for (GraphicsItem* item : *this)
+        for (GraphicsItem* item : *this) {
             item->setPen(m_pen);
+        }
     }
 }
+
 ///////////////////////////////////////////////
 /// \brief GerberWorkItem::GerberWorkItem
 /// \param paths
@@ -178,41 +177,27 @@ QRectF WorkItem::boundingRect() const { return rect; }
 
 QPainterPath WorkItem::shape() const { return m_shape; }
 
-void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget)
+void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    Q_UNUSED(widget);
-
-    //    painter->setCompositionMode(QPainter::CompositionMode_Xor);
-
     QBrush brush(m_brush);
     QColor c(m_brush.color());
-    QPen pen(/*Qt::NoPen*/ c, 0.0);
+    QPen pen(Qt::NoPen);
 
-    if (option->state & QStyle::State_MouseOver) {
-        //pen = QPen(c, 0.0);
-        c.setAlpha(200);
-        brush.setColor(c);
-        c.setAlpha(255);
-        pen.setColor(c);
-    }
     if (option->state & QStyle::State_Selected) {
-        //pen = QPen(c, 0.0);
         c.setAlpha(255);
         brush.setColor(c);
-        pen.setColor(c);
+        c.setAlpha(100);
+        pen = QPen(c, 0.0);
     }
-    ///////////////////////////////
-    //    pen_ = QPen(c, 0.0);
-    //    if (option->state & QStyle::State_Sunken) {
-    //        qDebug() << option->state;
-    //        pen_ = QPen(Qt::black, 0.0);
-    //    }
+    if (option->state & QStyle::State_MouseOver) {
+        //        c.setAlpha(200);
+        //        brush.setColor(c);
+        c.setAlpha(255);
+        pen = QPen(c, 0.0);
+    }
     painter->setBrush(brush);
     painter->setPen(pen);
     painter->drawPath(m_shape);
-    //    for (QPolygonF p : m_shape.toSubpathPolygons()) {
-    //        painter->drawPolygon(p);
-    //    }
 }
 
 int WorkItem::type() const { return WorkItemType; }

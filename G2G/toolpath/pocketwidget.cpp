@@ -1,8 +1,7 @@
 #include "pocketwidget.h"
 #include "toolpathcreator.h"
-
-#include <QComboBox>
 #include <QCheckBox>
+#include <QComboBox>
 #include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QGridLayout>
@@ -11,11 +10,9 @@
 #include <QLineEdit>
 #include <QRadioButton>
 #include <QVBoxLayout>
-
-#include <mainwindow.h>
-
 #include <gcode/gcode.h>
-#include <mygraphicsscene.h>
+#include <mainwindow.h>
+#include <myscene.h>
 
 enum {
     OFFSET,
@@ -26,7 +23,7 @@ PocketWidget::PocketWidget(QWidget* parent)
     : Widget(parent)
 {
     setupUi(this);
-    restoreTool({ &tool1, &tool2 }, "PocketWidget");
+    restoreTools({ &tool1, &tool2 }, "PocketWidget");
     setName("Pocket Toolpath");
 
     rbOffset->setChecked(true);
@@ -71,7 +68,7 @@ PocketWidget::PocketWidget(QWidget* parent)
 
 PocketWidget::~PocketWidget()
 {
-    saveTool({ &tool1, &tool2 }, "PocketWidget");
+    saveTools({ &tool1, &tool2 }, "PocketWidget");
 }
 
 void PocketWidget::setupUi(QWidget* Form)
@@ -173,22 +170,22 @@ void PocketWidget::retranslateUi(QWidget* Form)
 
 void PocketWidget::calculate()
 {
-    MyGraphicsScene* scene = MainWindow::getMainWindow()->getScene();
+    MyScene* scene = MyScene::self;
 
-    if (qFuzzyIsNull(tool1.data.params[Diameter])) {
+    if (qFuzzyIsNull(tool1.diameter)) {
         QMessageBox::warning(this, "!!!", tr("No valid tool 1..."));
         return;
     }
 
-    if (cbxTool2->isChecked() && qFuzzyIsNull(tool2.data.params[Diameter])) {
+    if (cbxTool2->isChecked() && qFuzzyIsNull(tool2.diameter)) {
         QMessageBox::warning(this, "!!!", tr("No valid tool 2..."));
         return;
     }
 
     Paths wPaths;
     for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == G::WorkItemType)
-            wPaths.append(static_cast<G::WorkItem*>(item)->getPaths());
+        if (item->type() == WorkItemType)
+            wPaths.append(static_cast<WorkItem*>(item)->getPaths());
     }
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
@@ -201,9 +198,8 @@ void PocketWidget::calculate()
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
         return;
     }
-
-    scene->addItem(group);
-    Model::model->addMilling(pathName->text(), group);
+    group->addToTheScene(scene);
+    FileModel::self->addMilling(pathName->text(), group);
 }
 
 Tool PocketWidget::getTool(int n) const

@@ -1,15 +1,16 @@
+#include "toolpathwidget.h"
 #include "pocketwidget.h"
 #include "profilewidget.h"
 #include "toolpathwidget.h"
-#include "toolpathwidget.h"
 
-#include <QVariant>
 #include <QAction>
 #include <QApplication>
 #include <QDebug>
+#include <QVariant>
 
 #include <QButtonGroup>
 #include <QCheckBox>
+#include <QDockWidget>
 #include <QDoubleSpinBox>
 #include <QFormLayout>
 #include <QFrame>
@@ -19,12 +20,10 @@
 #include <QLabel>
 #include <QLineEdit>
 #include <QPushButton>
-#include <QVBoxLayout>
-#include <QDockWidget>
 #include <QSettings>
+#include <QVBoxLayout>
 
 #include <tooldatabase/tooldatabase.h>
-#include <tooldatabase/tooledit.h>
 
 ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
     : QWidget(parent)
@@ -33,27 +32,27 @@ ToolPathWidget::ToolPathWidget(int type, QWidget* parent)
     setupUi(this);
 
     connect(pbSelectTool1, &QPushButton::clicked, [&] {
-        ToolDatabase tdb(this, { EndMill, Engraving /*, Drill*/ });
+        ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving /*, Drill*/ });
         if (tdb.exec())
-            tpcWidget->setTool(0, tdb.getTool());
+            tpcWidget->setTool(0, tdb.tool());
     });
 
     connect(pbEditTool1, &QPushButton::clicked, [&] {
-        EditToolDialog tdb(this, tpcWidget->getTool(0));
-        if (tdb.exec())
-            tpcWidget->setTool(0, tdb.getTool());
+//        EditToolDialog tdb(this, tpcWidget->getTool(0));
+//        if (tdb.exec())
+//            tpcWidget->setTool(0, tdb.getTool());
     });
 
     connect(pbSelectTool2, &QPushButton::clicked, [&] {
-        ToolDatabase tdb(this, { EndMill, Engraving /*, Drill*/ });
-        if (tdb.exec())
-            tpcWidget->setTool(1, tdb.getTool());
+//        ToolDatabase tdb(this, { EndMill, Engraving /*, Drill*/ });
+//        if (tdb.exec())
+//            tpcWidget->setTool(1, tdb.getTool());
     });
 
     connect(pbEditTool2, &QPushButton::clicked, [&] {
-        EditToolDialog tdb(this, tpcWidget->getTool(1));
-        if (tdb.exec())
-            tpcWidget->setTool(1, tdb.getTool());
+//        EditToolDialog tdb(this, tpcWidget->getTool(1));
+//        if (tdb.exec())
+//            tpcWidget->setTool(1, tdb.getTool());
     });
 
     QSettings settings;

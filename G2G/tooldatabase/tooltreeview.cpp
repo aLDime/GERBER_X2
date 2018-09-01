@@ -1,38 +1,57 @@
 #include "tooltreeview.h"
 #include "toolitem.h"
 
-#include <QDragEnterEvent>
-#include <QDragMoveEvent>
-#include <QDragLeaveEvent>
-#include <QDropEvent>
 #include <QAbstractItemView>
 #include <QApplication>
-#include <QMessageBox>
-#include <QSettings>
+#include <QDebug>
+#include <QDragEnterEvent>
+#include <QDragLeaveEvent>
+#include <QDragMoveEvent>
+#include <QDropEvent>
 #include <QFileDialog>
 #include <QHeaderView>
-#include <QDebug>
+#include <QMessageBox>
+#include <QPainter>
+#include <QSettings>
 
-ToolTreeView::ToolTreeView(QVector<QPushButton*> buttons, QWidget* parent)
+ToolTreeView::ToolTreeView(QWidget* parent)
     : QTreeView(parent)
-    , m_buttons(buttons)
 {
     setDragDropMode(QAbstractItemView::InternalMove);
     setDefaultDropAction(Qt::MoveAction);
     setAlternatingRowColors(true);
     setAnimated(true);
 
-    connect(m_buttons[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
-    connect(m_buttons[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
-    connect(m_buttons[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
-    connect(m_buttons[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
-
     m_model = new ToolModel(this);
     setModel(m_model);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolTreeView::updateActions);
+    header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    header()->setSectionResizeMode(1, QHeaderView::Stretch);
+    setMinimumWidth(400);
 
-    updateActions();
-    setMinimumWidth(500);
+    QFile file(":/QTreeView.qss");
+    file.open(QFile::ReadOnly);
+    setStyleSheet(file.readAll());
+
+    int w = indentation();
+    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
+
+    QImage i(w, h, QImage::Format_ARGB32);
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    i.save("vline.png", "PNG");
+
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-more.png", "PNG");
+
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h / 2; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-end.png", "PNG");
 }
 
 ToolTreeView::~ToolTreeView()
@@ -42,14 +61,15 @@ ToolTreeView::~ToolTreeView()
 void ToolTreeView::newGroup()
 {
     QModelIndex index = selectionModel()->currentIndex();
-
-    if (index.data(Qt::UserRole).value<ToolType>() != Group)
+    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+    if (item == nullptr || item->isTool())
         index = index.parent();
 
     if (!m_model->insertRows(0, 1, index))
         return;
 
     QModelIndex child = m_model->index(0, 0, index);
+
     m_model->setData(child, "New Group", Qt::EditRole);
 
     selectionModel()->setCurrentIndex(m_model->index(0, 0, index), QItemSelectionModel::ClearAndSelect);
@@ -59,24 +79,24 @@ void ToolTreeView::newGroup()
 void ToolTreeView::newTool()
 {
     QModelIndex index = selectionModel()->currentIndex();
-
-    qDebug() << index.data().value<Tool>().data.toolType;
-
-    if (index.data(Qt::UserRole).value<ToolType>() == Group) {
-        if (!m_model->insertRows(0, 1, index))
-            return;
-    }
-    else {
+    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+    if (item && item->isTool()) {
         index = index.parent();
-        if (!m_model->insertRows(0, 1, index))
+        item = static_cast<ToolItem*>(index.internalPointer());
+        if (!m_model->insertRows(item->childCount(), 1, index))
+            return;
+    } else {
+        if (!m_model->insertRows(item->childCount(), 1, index))
             return;
     }
 
-    Tool tool;
-    tool.data.toolType = EndMill;
-    QModelIndex child = m_model->index(0, 0, index);
-    static_cast<ToolItem*>(child.internalPointer())->setTool(tool);
-    m_model->setData(child, "New Tool", Qt::EditRole);
+    item = static_cast<ToolItem*>(index.internalPointer());
+    item = item->child(item->childCount() - 1);
+    if (item) {
+        item->setIsTool();
+        item->tool().type = Tool::EndMill;
+        item->tool().name = "New Tool " + QString::number(item->toolId());
+    }
     updateActions();
 }
 
@@ -94,15 +114,15 @@ void ToolTreeView::deleteItem()
 void ToolTreeView::copyTool()
 {
     QModelIndex index = selectionModel()->currentIndex();
-
+    ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
     if (!m_model->insertRows(index.row() + 1, 1, index.parent()))
         return;
 
-    ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
-    ToolItem* itemDst = static_cast<ToolItem*>(indexBelow(index).internalPointer());
+    index = index.sibling(index.row() + 1, 0);
 
-    if (selectionModel()->currentIndex().isValid() && itemSrc && itemDst)
-        itemDst->setTool(itemSrc->getTool());
+    ToolItem* itemDst = static_cast<ToolItem*>(index.internalPointer());
+    itemDst->setIsTool();
+    itemDst->tool() = itemSrc->tool();
 
     updateActions();
 }
@@ -115,52 +135,28 @@ void ToolTreeView::updateActions()
     m_buttons[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
     m_buttons[New]->setEnabled(index.isValid());
     if (item) {
-        m_buttons[Copy]->setEnabled(item->getTool().data.toolType != Group);
-        emit toolSelected(item->getTool());
-    }
-    else
+        m_buttons[Copy]->setEnabled(item->isTool());
+        emit itemSelected(item);
+    } else
         m_buttons[Copy]->setEnabled(false);
 
     expandAll();
-    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column) {
-        resizeColumnToContents(column);
-    }
 }
 
-void ToolTreeView::setTool(const Tool& value)
+void ToolTreeView::setButtons(const QVector<QPushButton*>& buttons)
 {
-    QModelIndex index = selectionModel()->currentIndex();
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (selectionModel()->currentIndex().isValid() && item)
-        item->setTool(value);
+    m_buttons = buttons;
+    connect(m_buttons[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
+    connect(m_buttons[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
+    connect(m_buttons[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
+    connect(m_buttons[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
+    updateActions();
+}
+
+void ToolTreeView::updateItem()
+{
+    resizeColumnToContents(0);
     for (QModelIndex index : selectionModel()->selection().indexes()) {
         update(index);
     }
-}
-
-void ToolTreeView::showEvent(QShowEvent* /*event*/)
-{
-    //setIconSize(QSize(20, 20));
-    int w = indentation();
-    int h = rowHeight(m_model->index(1, 0, QModelIndex()));
-
-    QImage i(w, h, QImage::Format_ARGB32);
-
-    i.fill(Qt::transparent);
-    for (int y = 0; y < h; ++y)
-        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    i.save("vline.png", "PNG");
-    for (int x = w / 2; x < w; ++x)
-        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    i.save("branch-more.png", "PNG");
-    i.fill(Qt::transparent);
-    for (int y = 0; y < h / 2; ++y)
-        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    for (int x = w / 2; x < w; ++x)
-        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    i.save("branch-end.png", "PNG");
-
-    QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-    file.open(QFile::ReadOnly);
-    setStyleSheet(file.readAll());
 }

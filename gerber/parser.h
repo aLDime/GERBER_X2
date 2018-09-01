@@ -3,7 +3,6 @@
 
 #include "file.h"
 #include "gerber.h"
-#include <QMutex>
 #include <QObject>
 namespace G {
 class Parser : public QObject {
@@ -46,8 +45,21 @@ private:
     File* file;
     QList<QString> gerbLines;
 
+    struct
+    {
+        int x = 0;
+        int y = 0;
+        double i = 0.0;
+        double j = 0.0;
+        STEP_REPEAT state = SR_CLOSE;
+        QList<GraphicObject> acc;
+    } sr;
+
     bool ParseAperture(const QString& gLine);
     bool ParseApertureBlock(const QString& gLine);
+
+    bool ParseStepRepeat(const QString& gLine);
+    void CloseStepRepeat();
 
     bool ParseApertureMacros(const QString& gLine);
     bool ParseAttributes(const QString& gLine);
@@ -59,7 +71,6 @@ private:
     bool ParseLevelPolarity(const QString& gLine);
     bool ParseLineInterpolation(const QString& gLine);
     bool ParseOperationDCode(const QString& gLine);
-    bool ParseStepAndRepeat(const QString& gLine);
     bool ParseToolAperture(const QString& gLine);
     bool ParseUnitMode(const QString& gLine);
 };
