@@ -40,10 +40,10 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, dsbxValueChanged, [=](double value) { MainWindow::self->home()->setPos(value, ui->dsbxHomeY->value()); });
-    connect(ui->dsbxHomeY, dsbxValueChanged, [=](double value) { MainWindow::self->home()->setPos(ui->dsbxHomeX->value(), value); });
-    connect(ui->dsbxZeroX, dsbxValueChanged, [=](double value) { MainWindow::self->zero()->setPos(value, ui->dsbxZeroY->value()); });
-    connect(ui->dsbxZeroY, dsbxValueChanged, [=](double value) { MainWindow::self->zero()->setPos(ui->dsbxZeroX->value(), value); });
+    connect(ui->dsbxHomeX, dsbxValueChanged, MainWindow::self->home(), &Point::setPosX);
+    connect(ui->dsbxHomeY, dsbxValueChanged, MainWindow::self->home(), &Point::setPosY);
+    connect(ui->dsbxZeroX, dsbxValueChanged, MainWindow::self->zero(), &Point::setPosX);
+    connect(ui->dsbxZeroY, dsbxValueChanged, MainWindow::self->zero(), &Point::setPosY);
 
     connect(ui->dsbxSafeZ, dsbxValueChanged, [=](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -79,21 +79,6 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();
 
-    QLatin1String styleSheet("QGroupBox {"
-                             "background-color: rgb(255,255,255);"
-                             "border: 1px solid gray;"
-                             "border-radius: 5px;"
-                             "margin-top: 1ex; /* leave space at the top for the title */"
-                             "}"
-                             "QGroupBox::title {"
-                             "subcontrol-origin: margin;"
-                             "margin-top: -2ex;"
-                             "subcontrol-position: top center; /* position at the top center */"
-                             "padding: 0 6px;"
-                             "}");
-    //ui->groupBox->setStyleSheet(styleSheet);
-    //ui->groupBox_2->setStyleSheet(styleSheet);
-
     connect(ui->pbOk, &QPushButton::clicked, [=] {
         if (this->parent()
             && ui->dsbxThickness->value() > 0.0
@@ -122,9 +107,6 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
             QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
         }
     });
-
-    //    connect(MainWindow::self->home(), &Point::posChanged, this, &MaterialSetupForm::setHomePos);
-    //    connect(MainWindow::self->zero(), &Point::posChanged, this, &MaterialSetupForm::setZeroPos);
 }
 
 MaterialSetupForm::~MaterialSetupForm()

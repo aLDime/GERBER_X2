@@ -37,51 +37,85 @@ GerberItem::~GerberItem()
 
 bool GerberItem::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (index.column())
-        return false;
-    switch (role) {
-    case Qt::CheckStateRole:
-        checkState = value.value<Qt::CheckState>();
-        gFiles[m_id]->itemGroup->setVisible(checkState == Qt::Checked);
-        return true;
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::CheckStateRole:
+            checkState = value.value<Qt::CheckState>();
+            gFiles[m_id]->itemGroup->setVisible(checkState == Qt::Checked);
+            return true;
+        default:
+            return false;
+        }
+    case 1:
+        switch (role) {
+        case Qt::EditRole:
+            gFiles[m_id]->side = static_cast<G::Side>(value.toBool());
+            return true;
+        default:
+            return false;
+        }
     default:
         return false;
     }
+    return false;
 }
 
-int GerberItem::columnCount() const { return 1; }
+int GerberItem::columnCount() const { return 3; }
 
 int GerberItem::childCount() const { return 0; }
 
-Qt::ItemFlags GerberItem::flags(const QModelIndex& /*index*/) const
+Qt::ItemFlags GerberItem::flags(const QModelIndex& index) const
 {
-    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+    switch (index.column()) {
+    case 0:
+        return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+    case 1:
+        return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+    default:
+        return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+    }
 }
 
 QVariant GerberItem::data(const QModelIndex& index, int role) const
 {
-    if (index.column())
-        return QVariant();
-    switch (role) {
-    case Qt::DisplayRole:
-    case Qt::ToolTipRole:
-        return QFileInfo(gFiles[m_id]->fileName).fileName();
-    case Qt::EditRole:
-        return gFiles[m_id]->fileName;
-    case Qt::CheckStateRole:
-        return checkState;
-    case Qt::DecorationRole: {
-        QPixmap pixmap(16, 16);
-        QColor color = gFiles[m_id]->itemGroup->brush().color();
-        color.setAlpha(255);
-        pixmap.fill(color);
-        return pixmap;
-    }
-    case Qt::UserRole:
-        return QVariant::fromValue(static_cast<void*>(gFiles[m_id]));
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::DisplayRole:
+        case Qt::ToolTipRole:
+            return QFileInfo(gFiles[m_id]->fileName).fileName();
+        case Qt::EditRole:
+            return gFiles[m_id]->fileName;
+        case Qt::CheckStateRole:
+            return checkState;
+        case Qt::DecorationRole: {
+            QPixmap pixmap(16, 16);
+            QColor color = gFiles[m_id]->itemGroup->brush().color();
+            color.setAlpha(255);
+            pixmap.fill(color);
+            return pixmap;
+        }
+        case Qt::UserRole:
+            return QVariant::fromValue(static_cast<void*>(gFiles[m_id]));
+        default:
+            return QVariant();
+        }
+    case 1:
+        switch (role) {
+        case Qt::DisplayRole:
+        case Qt::ToolTipRole:
+            return QString("Top|Bottom").split('|')[gFiles[m_id]->side];
+        case Qt::EditRole:
+            return static_cast<bool>(gFiles[m_id]->side);
+        default:
+            return QVariant();
+        }
     default:
-        return QVariant();
+        break;
     }
+
+    return QVariant();
 }
 
 QTimer* GerberItem::repaintTimer()

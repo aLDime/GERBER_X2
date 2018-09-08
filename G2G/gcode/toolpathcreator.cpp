@@ -5,7 +5,7 @@
 #include <QFile>
 #include <QSettings>
 #include <algorithm>
-#include <forms/materialsetupform.h>
+#include "forms/materialsetupform.h"
 //GERBER_FILE ToolPathCreator::file;
 
 //Paths ToolPathCreator::mergedPolygons;
@@ -13,8 +13,6 @@
 
 void fixBegin(Path& path)
 {
-    QElapsedTimer t;
-    t.start();
     cInt x = path.first().X, y = path.first().Y;
     int s = 1;
     int i = 1;
@@ -29,7 +27,6 @@ void fixBegin(Path& path)
         }
     }
     std::rotate(path.begin(), path.begin() + s, path.end());
-    qDebug() << t.nsecsElapsed() << s << path.size();
 }
 
 Paths sortByStratDistance(Paths src)
@@ -59,10 +56,6 @@ ToolPathCreator::ToolPathCreator(const Paths& value)
 {
     mergedPaths = value;
 }
-
-
-
-
 
 GCode* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth)
 {

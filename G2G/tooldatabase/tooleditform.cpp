@@ -82,7 +82,6 @@ void ToolEditForm::setVisibleWidgets(bool visible)
 
 void ToolEditForm::on_cbxFeedSpeeds_currentIndexChanged(int index)
 {
-    qDebug("on_cbxFeedSpeeds_currentIndexChanged");
     double feed = m_feed;
     switch (index) {
     case 0: //mm/sec
@@ -154,7 +153,6 @@ void ToolEditForm::on_teNote_textChanged()
 
 void ToolEditForm::calculate(int index, double value)
 {
-    qDebug() << index << value;
 
     switch (index) {
     case Tool::Angle:

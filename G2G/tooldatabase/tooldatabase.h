@@ -1,6 +1,7 @@
 #ifndef TOOLEDIT_H
 #define TOOLEDIT_H
 
+//#include "toolitem.h"
 #include "tool.h"
 
 #include <QDialog>
@@ -8,7 +9,6 @@
 namespace Ui {
 class ToolEdit;
 }
-
 class ToolItem;
 
 class ToolDatabase : public QDialog {

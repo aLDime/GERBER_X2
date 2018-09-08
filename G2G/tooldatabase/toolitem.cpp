@@ -46,7 +46,8 @@ void ToolItem::read(const QJsonObject& json)
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
-        ToolItem::tools[toolObject["id"].toInt()] = tool;
+        tool.id = toolObject["id"].toInt();
+        ToolItem::tools[tool.id] = tool;
     }
 }
 

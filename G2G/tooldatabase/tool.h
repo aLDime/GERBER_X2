@@ -41,6 +41,8 @@ public:
     double spindleSpeed = 0.0;
     double stepover = 0.0;
 
+    int id = -1;
+
     double getDiameter(double depth = 0.0) const;
 
     void read(const QJsonObject& json);

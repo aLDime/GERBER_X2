@@ -33,12 +33,16 @@ Point::Point(int type)
     , m_type(type)
 {
     setFlags(QGraphicsItem::ItemIsMovable);
-    if (m_type) {
+    if (m_type == HOME) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
+        m_brush = QBrush(QColor(0, 255, 0, 64));
+        setToolTip("G-Code Home Point");
     } else {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+        m_brush = QBrush(QColor(255, 0, 0, 64));
+        setToolTip("G-Code Zero Point");
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
@@ -71,45 +75,55 @@ QPainterPath Point::shape() const
     return m_shape;
 }
 
-void Point::setBrush(const QBrush& brush)
-{
-    m_brush = brush;
-}
-
-void Point::setPosition(const QPointF& position)
-{
-    if (pos() != position) {
-        setPos(position);
-        emit posChanged(position);
-    }
-}
-
-void Point::resetPosition()
+void Point::resetPos()
 {
     updateRect();
-    if (m_type)
-        setPosition(boardRect.bottomRight());
-
+    if (m_type == HOME)
+        setPos(boardRect.bottomRight());
     else
-        setPosition(boardRect.topLeft());
+        setPos(boardRect.topLeft());
+}
+
+void Point::setPos(const QPointF& pos)
+{
+    QGraphicsItem::setPos(pos);
+    updateMaterialSetupForm();
+}
+
+void Point::setPosX(double x)
+{
+    QPointF pos_(pos());
+    pos_.setX(x);
+    QGraphicsItem::setPos(pos_);
+    updateMaterialSetupForm();
+}
+
+void Point::setPosY(double y)
+{
+    QPointF pos_(pos());
+    pos_.setY(y);
+    QGraphicsItem::setPos(pos_);
+    updateMaterialSetupForm();
+}
+
+void Point::updateMaterialSetupForm()
+{
+    if (m_type == HOME)
+        MaterialSetupForm::self->setHomePos(pos());
+    else
+        MaterialSetupForm::self->setZeroPos(pos());
 }
 
 void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
-    if (m_type)
-        MaterialSetupForm::self->setHomePos(pos());
-    else
-        MaterialSetupForm::self->setZeroPos(pos());
+    updateMaterialSetupForm();
     QGraphicsItem::mouseMoveEvent(event);
 }
 
 void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
-    resetPosition();
-    if (m_type)
-        MaterialSetupForm::self->setHomePos(pos());
-    else
-        MaterialSetupForm::self->setZeroPos(pos());
+    resetPos();
+    updateMaterialSetupForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
@@ -118,7 +132,7 @@ void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 /// \param type
 /// \param num
 ///
-Shtift::Shtift( int num)
+Shtift::Shtift(int num)
     : m_pen(Qt::NoPen)
 {
     setFlags(QGraphicsItem::ItemIsMovable);
@@ -173,14 +187,6 @@ QPainterPath Shtift::shape() const
 void Shtift::setBrush(const QBrush& brush)
 {
     m_brush = brush;
-}
-
-void Shtift::setPosition(const QPointF& position)
-{
-    if (pos() != position) {
-        setPos(position);
-        emit posChanged(position);
-    }
 }
 
 void Shtift::setShtifts(const QVector<Shtift*>& shtifts)

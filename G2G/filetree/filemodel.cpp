@@ -1,7 +1,7 @@
 #include "filemodel.h"
-#include "gerberitem.h"
 #include "folderitem.h"
 #include "gcodeitem.h"
+#include "gerberitem.h"
 #include <QApplication>
 #include <QDebug>
 #include <QMimeData>
@@ -36,13 +36,13 @@ void FileModel::addGerberFile(G::File* gerberFile)
     endInsertRows();
 }
 
-void FileModel::addGcode( GCode* group)
+void FileModel::addGcode(GCode* group)
 {
     AbstractItem* item{ rootItem->child(NODE_MILLING) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new GcodeItem( group));
+    item->add(new GcodeItem(group));
     endInsertRows();
 }
 
@@ -179,10 +179,12 @@ bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 
 int FileModel::columnCount(const QModelIndex& parent) const
 {
-    if (parent.isValid())
-        return static_cast<AbstractItem*>(parent.internalPointer())->columnCount();
-    else
-        return rootItem->columnCount();
+    //    if (parent.isValid())
+    //        return static_cast<AbstractItem*>(parent.internalPointer())->columnCount();
+    //    else
+    //        return rootItem->columnCount();
+
+    return 3;
 }
 
 int FileModel::rowCount(const QModelIndex& parent) const

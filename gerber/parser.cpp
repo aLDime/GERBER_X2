@@ -158,15 +158,14 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
         }
     }
 
-
     if (file->isEmpty())
         delete file;
     else {
         file->itemGroup = new /*Gerber::*/ ItemGroup;
         file->Merge();
         int counter = 0;
-        for (Paths& vpaths : file->GetGroupedPaths()) {
-            file->itemGroup->append(new WorkItem(vpaths));
+        for (Paths& paths : file->GetGroupedPaths()) {
+            file->itemGroup->append(new WorkItem(paths, file));
             file->itemGroup->last()->setToolTip(QString("COPPER %1").arg(++counter));
         }
         emit fileReady(file);

@@ -19,15 +19,15 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
 
-    void setBrush(const QBrush& brush);
-    void setPosition(const QPointF& position);
-    void resetPosition();
+    void resetPos();
+    void setPos(const QPointF& pos);
+    void setPosX(double x);
+    void setPosY(double y);
 
-    bool bounding() const;
-    void setBounding(bool bounding);
-
-signals:
-    void posChanged(const QPointF& pos);
+    enum {
+        ZERO,
+        HOME
+    };
 
 private:
     QRectF m_rect;
@@ -36,6 +36,7 @@ private:
     QBrush m_brush;
     QPen m_pen;
     int m_type;
+    void updateMaterialSetupForm();
     // QGraphicsItem interface
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -43,7 +44,6 @@ protected:
 };
 
 class Shtift : public QObject, public QGraphicsItem {
-    Q_OBJECT
 
 public:
     Shtift(int num);
@@ -54,15 +54,9 @@ public:
     QPainterPath shape() const override;
 
     void setBrush(const QBrush& brush);
-    void setPosition(const QPointF& position);
-
     bool bounding() const;
     void setBounding(bool bounding);
-
     void setShtifts(const QVector<Shtift*>& shtifts);
-
-signals:
-    void posChanged(const QPointF& pos);
 
 private:
     QRectF m_rect;

@@ -19,7 +19,7 @@
 
 #include <gcode/gcode.h>
 
-#include <forms/drillform.h>
+#include "forms/drillform.h"
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
@@ -158,10 +158,6 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), [&] {
             hideOther(index);
         });
-        //        menu.addAction(QIcon::fromTheme("crosshairs"), tr("&Assignment of drills for holes"), [&] {
-        //            //            DrillForApertureForm dfa(reinterpret_cast<G::File*>(index.data(Qt::UserRole).toULongLong()), this);
-        //            //            dfa.exec();
-        //        });
 
         menu.exec(mapToGlobal(event->pos()));
     }

@@ -3,7 +3,7 @@
 
 #include "tool.h"
 
-#include <QAbstractItemModel>
+#include <QModelIndex>
 #include <QDebug>
 #include <QObject>
 #include <QVariant>
@@ -48,10 +48,9 @@ public:
 
     QString note() const;
     void setNote(const QString& value);
-
-private:
     static QMap<int, Tool> tools;
 
+private:
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
     int m_toolId = 0;

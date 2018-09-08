@@ -10,19 +10,13 @@ namespace G {
 class Parser;
 }
 
-class MyScene;
-
-class GerberFileHolder;
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
 
 public:
-    friend class ProfileToolpathForm;
-    friend class GerberFileHolder;
-    friend class PocketToolpathForm;
-
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
+
     void openFile(const QString& fileName);
 
     QAction* closeAllAct;
@@ -30,6 +24,7 @@ public:
 
     Point* zero() const;
     Point* home() const;
+
 signals:
     void parseFile(const QString& filename);
 

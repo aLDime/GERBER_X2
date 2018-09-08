@@ -1,5 +1,9 @@
 #include "mainwindow.h"
 #include "drillforapertureform.h"
+#include "forms/drillform.h"
+#include "forms/materialsetupform.h"
+#include "forms/pocketform.h"
+#include "forms/profileform.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "tooldatabase/tooldatabase.h"
@@ -12,10 +16,6 @@
 #include <QtWidgets>
 #include <filetree/gcodeitem.h>
 #include <filetree/gerberitem.h>
-#include <forms/drillform.h>
-#include <forms/materialsetupform.h>
-#include <forms/pocketform.h>
-#include <forms/profileform.h>
 #include <limits>
 #include <myscene.h>
 #include <parser.h>
@@ -49,13 +49,8 @@ MainWindow::MainWindow(QWidget* parent)
         MyScene::self->addItem(shtifts[i]);
     }
 
-    m_zeroPoint = new Point(0);
-    m_zeroPoint->setBrush(QColor(255, 0, 0, 64));
-    m_zeroPoint->setToolTip("G-Code Zero Point");
-
-    m_homePoint = new Point(1);
-    m_homePoint->setBrush(QColor(0, 255, 0, 64));
-    m_homePoint->setToolTip("G-Code Home Point");
+    m_zeroPoint = new Point(Point::ZERO);
+    m_homePoint = new Point(Point::HOME);
 
     MyScene::self->addItem(m_zeroPoint);
     MyScene::self->addItem(m_homePoint);
@@ -116,12 +111,16 @@ MainWindow::~MainWindow()
 
 Point* MainWindow::zero() const
 {
-    return m_zeroPoint;
+    if (self)
+        return m_zeroPoint;
+    return nullptr;
 }
 
 Point* MainWindow::home() const
 {
-    return m_homePoint;
+    if (self)
+        return m_homePoint;
+    return nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)
@@ -479,11 +478,11 @@ void MainWindow::setCurrentFile(const QString& fileName)
     static int sequenceNumber = 1;
 
     isUntitled = fileName.isEmpty();
-    if (isUntitled) {
+
+    if (isUntitled)
         curFile = tr("document%1.txt").arg(sequenceNumber++);
-    } else {
+    else
         curFile = QFileInfo(fileName).canonicalFilePath();
-    }
 
     //    textEdit->document()->setModified(false);
     setWindowModified(false);

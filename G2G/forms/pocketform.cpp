@@ -122,7 +122,6 @@ void PocketForm::on_pbCreate_clicked()
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
         return;
     }
-    gcode->addToTheScene(scene);
     gcode->setName(ui->leName->text());
     FileModel::self->addGcode(gcode);
 }

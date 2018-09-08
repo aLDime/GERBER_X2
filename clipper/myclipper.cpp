@@ -32,6 +32,11 @@ QVector<QPolygonF> PathsToQPolygons(const Paths& p)
     return polygons;
 }
 
+QPointF ToQPointF(const IntPoint& p)
+{
+    return QPointF(p.X * dScale, p.Y * dScale);
+}
+
 double Angle(const IntPoint& pt1, const IntPoint& pt2)
 {
     const double dx = pt2.X - pt1.X;

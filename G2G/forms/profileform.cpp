@@ -115,7 +115,6 @@ void ProfileForm::on_pbCreate_clicked()
         return;
     }
 
-    gcode->addToTheScene(scene);
     gcode->setName(ui->leName->text());
     FileModel::self->addGcode(gcode);
 }

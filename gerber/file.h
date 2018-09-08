@@ -6,6 +6,23 @@
 #include "graphicsitem.h"
 namespace G {
 
+enum Layer {
+    Copper,
+    Mask,
+    Silk,
+    Board,
+};
+
+enum Miror {
+    Vertical,
+    Horizontal
+};
+
+enum Side {
+    Top,
+    Bottom
+};
+
 class File;
 
 class GraphicObject {
@@ -51,12 +68,15 @@ public:
     Paths mergedPaths;
     Pathss groupedPaths;
 
+    Layer layer = Copper;
+    Miror miror = Vertical;
+    Side side = Top;
+
 private:
     void grouping(PolyNode* node, Pathss* pathss, GROUP group);
 };
 
 Q_DECLARE_METATYPE(File)
-
 }
 
 #endif // GFILE_H

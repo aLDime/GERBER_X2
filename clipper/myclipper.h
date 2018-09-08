@@ -21,6 +21,8 @@ Paths QPolygonsToPaths(const QVector<QPolygonF>& p);
 QPolygonF PathToQPolygon(const Path& p);
 QVector<QPolygonF> PathsToQPolygons(const Paths& p);
 
+QPointF ToQPointF(const IntPoint& p);
+
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);
 

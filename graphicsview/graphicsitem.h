@@ -67,10 +67,13 @@ private:
 //    IMAGE_POLARITY imgPolarity;
 //    QRectF rect;
 //};
+namespace G {
+class File;
+}
 
 class WorkItem : public GraphicsItem {
 public:
-    WorkItem(const Paths& paths);
+    WorkItem(const Paths& paths, G::File* file);
     //~WorkItem() override {}
 
     QRectF boundingRect() const override;
@@ -78,6 +81,7 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths getPaths() const;
+    const G::File* file;
 
 private:
     QPainterPath m_shape;

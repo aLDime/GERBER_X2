@@ -5,6 +5,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <file.h>
 #include <mainwindow.h>
 #include <myscene.h>
 
@@ -131,8 +132,8 @@ void ItemGroup::addToTheScene(QGraphicsScene* scene)
 {
     for (QGraphicsItem* item : *this)
         scene->addItem(item);
-    MainWindow::self->zero()->resetPosition();
-    MainWindow::self->home()->resetPosition();
+    MainWindow::self->zero()->resetPos();
+    MainWindow::self->home()->resetPos();
 }
 
 void ItemGroup::setBrush(const QBrush& brush)
@@ -163,7 +164,7 @@ void ItemGroup::setZValue(qreal z)
 /// \brief GerberWorkItem::GerberWorkItem
 /// \param paths
 ///
-WorkItem::WorkItem(const Paths& paths)
+WorkItem::WorkItem(const Paths& paths, G::File* file)
     : paths(paths)
 {
     for (Path& path : this->paths) {
