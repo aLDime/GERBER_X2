@@ -12,7 +12,10 @@ FORMS += \
     settingsdialog.ui \
     tooldatabase/tooledit.ui \
     tooldatabase/tooleditform.ui \
-    forms/materialsetupform.ui
+    forms/materialsetupform.ui \
+    forms/drillform.ui \
+    forms/profileform.ui \
+    forms/pocketform.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -43,14 +46,19 @@ HEADERS += \
     application.h \
     drillforapertureform.h \
     filetree/abstractitem.h \
-    filetree/fileitem.h \
+    filetree/filemodel.h \
     filetree/folderitem.h \
-    filetree/milling.h \
+    filetree/gcodeitem.h \
+    filetree/gerberitem.h \
     filetree/treeview.h \
+    forms/drillform.h \
     forms/materialsetupform.h \
+    forms/profileform.h \
     gcode/gcode.h \
+    gcode/toolpathcreator.h \
     mainwindow.h \
     openingdialog.h \
+    point.h \
     settingsdialog.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
@@ -58,28 +66,26 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    toolpath/pocketwidget.h \
-    toolpath/profilewidget.h \
-    toolpath/toolpathcreator.h \
-    toolpath/toolpathwidget.h \
-    toolpath/widget.h \
-#    forms/drillingtoolpathform.h \
-#    forms/pockettoolpathform.h \
-#    forms/toolpathforminterface.h \
-#    forms/toolpathnameform.h \
-    filetree/filemodel.h
+    forms/pocketform.h \
+    forms/toolpathutil.h
+
 
 SOURCES += \
     drillforapertureform.cpp \
     filetree/abstractitem.cpp \
-    filetree/fileitem.cpp \
+    filetree/filemodel.cpp \
     filetree/folderitem.cpp \
-    filetree/milling.cpp \
+    filetree/gcodeitem.cpp \
+    filetree/gerberitem.cpp \
     filetree/treeview.cpp \
+    forms/drillform.cpp \
     forms/materialsetupform.cpp \
+    forms/profileform.cpp \
     gcode/gcode.cpp \
+    gcode/toolpathcreator.cpp \
     main.cpp \
     mainwindow.cpp \
+    point.cpp \
     settingsdialog.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
@@ -87,14 +93,8 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    toolpath/pocketwidget.cpp \
-    toolpath/profilewidget.cpp \
-    toolpath/toolpathcreator.cpp \
-    toolpath/toolpathwidget.cpp \
-    toolpath/widget.cpp \
-#    forms/drillingtoolpathform.cpp \
-#    forms/pockettoolpathform.cpp \
-#    forms/toolpathforminterface.cpp \
-#    forms/toolpathnameform.cpp \
-    filetree/filemodel.cpp
+    forms/pocketform.cpp \
+    forms/toolpathutil.cpp
+
+
 

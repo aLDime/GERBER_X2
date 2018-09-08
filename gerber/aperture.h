@@ -6,6 +6,7 @@
 #include <QtMath>
 #include <QMap>
 namespace G {
+
 enum ApertureType {
     CIRCULAR,
     RECTANGLE,
@@ -40,8 +41,8 @@ protected:
     virtual void draw() = 0;
 
     Path circle(double diametr, IntPoint center = IntPoint());
-    Path rect(double m_width, double m_height, IntPoint center = IntPoint());
-    Path& rotate(Path& poligon, double angle, IntPoint center = IntPoint());
+    Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
+    void rotate(Path& poligon, double angle, IntPoint center = IntPoint());
     void translate(Path& path, IntPoint pos);
 };
 
@@ -135,11 +136,11 @@ private:
 
     Path drawCenterLine(const QList<double>& mod);
     Path drawCircle(const QList<double>& mod);
-    void drawMoire(const QList<double>& mod);
     Path drawOutlineCustomPolygon(const QList<double>& mod);
     Path drawOutlineRegularPolygon(const QList<double>& mod);
-    void drawThermal(const QList<double>& mod);
     Path drawVectorLine(const QList<double>& mod);
+    void drawMoire(const QList<double>& mod);
+    void drawThermal(const QList<double>& mod);
 };
 }
 #endif // GERBERAPERTURE_H

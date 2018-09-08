@@ -17,7 +17,6 @@ HEADERS += \
     $$PWD/graphicsitem.h \
     $$PWD/mygraphicsview.h \
     $$PWD/myscene.h \
-    $$PWD/point.h \
     $$PWD/qdruler.h \
 
 SOURCES += \
@@ -26,6 +25,4 @@ SOURCES += \
     $$PWD/graphicsitem.cpp \
     $$PWD/mygraphicsview.cpp \
     $$PWD/myscene.cpp \
-    $$PWD/point.cpp \
     $$PWD/qdruler.cpp \
-

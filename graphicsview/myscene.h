@@ -3,25 +3,20 @@
 
 #include <QGraphicsItem>
 #include <QGraphicsScene>
-#include "point.h"
 
 class MyScene : public QGraphicsScene {
     friend class Point;
+    friend class Shtift;
 
 public:
-    explicit MyScene(QObject* parent, bool drawPoints = false);
+    explicit MyScene(QObject* parent);
     ~MyScene();
     void RenderPdf();
 
-    Point* getItemZero() const;
-    Point* getItemHome() const;
     static MyScene* self;
 
 private:
     bool drawPdf;
-    bool drawPoints;
-    Point* itemZero = nullptr;
-    Point* itemHome = nullptr;
 
     // QGraphicsScene interface
 protected:

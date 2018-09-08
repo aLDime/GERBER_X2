@@ -47,4 +47,6 @@ public:
     void write(QJsonObject& json) const;
 };
 
+Q_DECLARE_METATYPE(Tool)
+
 #endif // TOOL_H

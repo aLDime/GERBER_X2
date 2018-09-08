@@ -1,14 +1,16 @@
 #include "mygraphicsview.h"
 #include "edid.h"
+#include "mygraphicsview.h"
 #include "myscene.h"
 #include "qdruler.h"
-#include "mygraphicsview.h"
 #include <QDebug>
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
+
+MyGraphicsView* MyGraphicsView::self = nullptr;
 
 MyGraphicsView::MyGraphicsView(QWidget* parent)
     : QGraphicsView(parent)
@@ -61,7 +63,13 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     viewport()->setObjectName("viewport");
     settings.endGroup();
 
-    SetScene(new MyScene(this, true));
+    SetScene(new MyScene(this));
+    self = this;
+}
+
+MyGraphicsView::~MyGraphicsView()
+{
+    self = nullptr;
 }
 
 void MyGraphicsView::SetScene(QGraphicsScene* Scene)
@@ -162,10 +170,6 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
 //    selectModeButton = !selectModeButton;
 //}
 
-
-
-
-
 void MyGraphicsView::UpdateRuler()
 {
     updateSceneRect(QRectF()); //actualize mapFromScene
@@ -214,9 +218,3 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
     QGraphicsView::resizeEvent(event);
     UpdateRuler();
 }
-
-
-
-
-
-

@@ -14,6 +14,8 @@ public:
 
 signals:
     void fileReady(File* file);
+    void fileProgress(const QString& fileName, int max, int value);
+    void fileError(const QString& fileName, const QString& error);
 
 private:
     QList<QString> Format(QString data);

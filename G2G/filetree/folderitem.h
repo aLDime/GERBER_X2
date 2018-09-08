@@ -16,5 +16,8 @@ public:
     int childCount(/*const QModelIndex& parent*/) const override;
     int columnCount(/*const QModelIndex& parent*/) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+
+private:
+    Qt::CheckState checkState = Qt::Checked;
 };
 #endif // FOLDER_H

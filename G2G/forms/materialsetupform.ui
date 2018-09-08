@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>185</width>
-    <height>484</height>
+    <height>462</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -41,17 +41,20 @@
     <number>6</number>
    </property>
    <item>
-    <widget class="QGroupBox" name="groupBox">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
      </property>
-     <property name="title">
-      <string/>
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
      </property>
-     <layout class="QVBoxLayout" name="verticalLayout_2">
+     <property name="lineWidth">
+      <number>1</number>
+     </property>
+     <property name="midLineWidth">
+      <number>0</number>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout_3">
       <property name="leftMargin">
        <number>6</number>
       </property>
@@ -75,11 +78,14 @@
     </widget>
    </item>
    <item>
-    <widget class="QGroupBox" name="groupBox_2">
-     <property name="title">
-      <string/>
+    <widget class="QFrame" name="frame_2">
+     <property name="frameShape">
+      <enum>QFrame::Panel</enum>
      </property>
-     <layout class="QFormLayout" name="formLayout">
+     <property name="frameShadow">
+      <enum>QFrame::Plain</enum>
+     </property>
+     <layout class="QFormLayout" name="formLayout_2">
       <property name="labelAlignment">
        <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
       </property>
@@ -125,33 +131,10 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="Line" name="line">
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="lineWidth">
-         <number>1</number>
-        </property>
-        <property name="midLineWidth">
-         <number>0</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
       <item row="3" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
         <property name="text">
          <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Rapid z gaps above Material&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
-      <item row="4" column="0">
-       <widget class="QLabel" name="clearenceLabel">
-        <property name="text">
-         <string>Clearence</string>
         </property>
        </widget>
       </item>
@@ -165,6 +148,13 @@
         </property>
         <property name="maximum">
          <double>100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="4" column="0">
+       <widget class="QLabel" name="clearenceLabel">
+        <property name="text">
+         <string>Clearence</string>
         </property>
        </widget>
       </item>
@@ -191,49 +181,10 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0" colspan="2">
-       <widget class="Line" name="line_2">
-        <property name="frameShadow">
-         <enum>QFrame::Plain</enum>
-        </property>
-        <property name="lineWidth">
-         <number>1</number>
-        </property>
-        <property name="midLineWidth">
-         <number>0</number>
-        </property>
-        <property name="orientation">
-         <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="7" column="0" colspan="2">
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
-        </property>
-       </widget>
-      </item>
       <item row="8" column="0">
        <widget class="QLabel" name="homeXLabel">
         <property name="text">
          <string>X</string>
-        </property>
-       </widget>
-      </item>
-      <item row="8" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxHomeX">
-        <property name="suffix">
-         <string> mm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>-1000.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>1000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -257,6 +208,29 @@
         </property>
         <property name="maximum">
          <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="8" column="1">
+       <widget class="QDoubleSpinBox" name="dsbxHomeX">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>-1000.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="7" column="0" colspan="2">
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -306,13 +280,6 @@
         </property>
        </widget>
       </item>
-      <item row="13" column="0">
-       <widget class="QLabel" name="zeroYLabel">
-        <property name="text">
-         <string>Y</string>
-        </property>
-       </widget>
-      </item>
       <item row="13" column="1">
        <widget class="QDoubleSpinBox" name="dsbxZeroY">
         <property name="suffix">
@@ -329,6 +296,13 @@
         </property>
        </widget>
       </item>
+      <item row="13" column="0">
+       <widget class="QLabel" name="zeroYLabel">
+        <property name="text">
+         <string>Y</string>
+        </property>
+       </widget>
+      </item>
       <item row="14" column="0" colspan="2">
        <widget class="Line" name="line_4">
         <property name="frameShadow">
@@ -336,13 +310,6 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Safe Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
         </property>
        </widget>
       </item>
@@ -359,6 +326,45 @@
         </property>
         <property name="maximum">
          <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="0">
+       <widget class="QLabel" name="label_6">
+        <property name="text">
+         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Safe Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+        </property>
+       </widget>
+      </item>
+      <item row="6" column="0" colspan="2">
+       <widget class="Line" name="line_2">
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="midLineWidth">
+         <number>0</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0" colspan="2">
+       <widget class="Line" name="line">
+        <property name="frameShadow">
+         <enum>QFrame::Plain</enum>
+        </property>
+        <property name="lineWidth">
+         <number>1</number>
+        </property>
+        <property name="midLineWidth">
+         <number>0</number>
+        </property>
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
        </widget>
       </item>

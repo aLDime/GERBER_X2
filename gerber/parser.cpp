@@ -63,6 +63,7 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
 
     QRegExp match("FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*");
     if (match.indexIn(gerberLines) == -1) {
+        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!");
         mutex.unlock();
         return;
     }
@@ -73,14 +74,23 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
         Reset(fileName);
 
     file->lines = Format(gerberLines);
+    if (file->lines.isEmpty())
+        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!");
+
+    emit fileProgress(QFileInfo(fileName).fileName(), file->lines.size() - 1, 0);
 
     for (QString& gerberLine : file->lines) {
+        if (!(state.lineNum % 1000))
+            emit fileProgress(QFileInfo(fileName).fileName(), file->lines.size() - 1, state.lineNum);
+        gerbLines.push_back(gerberLine);
+        ++state.lineNum;
         try {
-            gerbLines.push_back(gerberLine);
-            ++state.lineNum;
+
             //qWarning() << QString("Line Num %1: '%2'").arg(state.lineNum).arg(gLine);
             //            if (ParseApertureBlock(gerberLine))
             //                continue;
+            if (ParseEndOfFile(gerberLine))
+                continue;
 
             if (ParseGCode(gerberLine))
                 continue;
@@ -95,9 +105,6 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
                 continue;
 
             if (ParseApertureMacros(gerberLine))
-                continue;
-
-            if (ParseEndOfFile(gerberLine))
                 continue;
 
             if (ParseOperationDCode(gerberLine))
@@ -144,10 +151,13 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             // qWarning() << QString("Line ignored (%1): '%2'").arg(state.lineNum).arg(gerberLine);
         } catch (const QString& errStr) {
             qWarning() << "exeption:" << errStr;
+            emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
         } catch (...) {
             qWarning() << "exeption:" << errno;
+            emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
         }
     }
+
 
     if (file->isEmpty())
         delete file;
@@ -155,13 +165,13 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
         file->itemGroup = new /*Gerber::*/ ItemGroup;
         file->Merge();
         int counter = 0;
-
         for (Paths& vpaths : file->GetGroupedPaths()) {
             file->itemGroup->append(new WorkItem(vpaths));
             file->itemGroup->last()->setToolTip(QString("COPPER %1").arg(++counter));
         }
         emit fileReady(file);
     }
+    fileProgress("", 1, 1);
 
     gerbLines.clear();
     apertureMacro.clear();

@@ -29,7 +29,7 @@ public:
     ~FileModel();
 
     void addGerberFile(G::File* gerberFile);
-    void addMilling(const QString name, GCodeProfile* group);
+    void addGcode(GCode* group);
     void closeAllFiles();
 
 public:

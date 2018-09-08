@@ -1,4 +1,5 @@
 #include "folderitem.h"
+#include "gerberitem.h"
 
 #include <QIcon>
 
@@ -13,17 +14,19 @@ FolderItem::~FolderItem()
 
 QVariant FolderItem::data(const QModelIndex& index, int role) const
 {
-    if (!index.column()) {
-        switch (role) {
-        case Qt::DisplayRole:
-            return name;
-        case Qt::DecorationRole:
-            return QIcon::fromTheme("folder");
-        default:
-            break;
-        }
+    if (index.column())
+        return QVariant();
+
+    switch (role) {
+    case Qt::DisplayRole:
+        return name;
+    case Qt::DecorationRole:
+        return QIcon::fromTheme("folder");
+    case Qt::CheckStateRole:
+        //        return checkState;
+    default:
+        return QVariant();
     }
-    return QVariant();
 }
 
 Qt::ItemFlags FolderItem::flags(const QModelIndex& /*index*/) const
@@ -41,7 +44,18 @@ int FolderItem::columnCount() const
     return 1;
 }
 
-bool FolderItem::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/)
+bool FolderItem::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    return false;
+    if (index.column())
+        return false;
+    switch (role) {
+    case Qt::CheckStateRole:
+        checkState = value.value<Qt::CheckState>();
+        //        for (G::File* f : GerberItem::gFiles) {
+        //            if()
+        //        }
+        return true;
+    default:
+        return false;
+    }
 }

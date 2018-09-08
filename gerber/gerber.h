@@ -5,7 +5,7 @@
 
 #include <QObject>
 
-//#define DEPRECATED
+#define DEPRECATED
 #define DEPRECATED_IMAGE_POLARITY
 
 using namespace ClipperLib;

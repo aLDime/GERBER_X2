@@ -77,7 +77,7 @@ Path Aperture::circle(double diametr, IntPoint center)
     return poligon;
 }
 
-Path Aperture::rect(double width, double height, IntPoint center)
+Path Aperture::rectangle(double width, double height, IntPoint center)
 {
 
     const double halfWidth = width * 0.5;
@@ -94,7 +94,7 @@ Path Aperture::rect(double width, double height, IntPoint center)
     return poligon;
 }
 
-Path& Aperture::rotate(Path& poligon, double angle, IntPoint center)
+void Aperture::rotate(Path& poligon, double angle, IntPoint center)
 {
     bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
@@ -106,8 +106,6 @@ Path& Aperture::rotate(Path& poligon, double angle, IntPoint center)
     }
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
-
-    return poligon;
 }
 
 void Aperture::translate(Path& path, IntPoint pos)
@@ -152,7 +150,7 @@ ApertureType ApRectangle::type() const { return RECTANGLE; }
 
 void ApRectangle::draw()
 {
-    m_paths.push_back(rect(m_width * uScale, m_height * uScale));
+    m_paths.push_back(rectangle(m_width * uScale, m_height * uScale));
     m_size = qSqrt(m_width * m_width + m_height * m_height);
 }
 /////////////////////////////////////////////////////
@@ -180,11 +178,11 @@ void ApObround::draw()
         if (width_ > height_) {
             clipper.AddPath(circle(height_, IntPoint(-(width_ - height_) / 2, 0)), ptClip, true);
             clipper.AddPath(circle(height_, IntPoint((width_ - height_) / 2, 0)), ptClip, true);
-            clipper.AddPath(rect(width_ - height_, height_), ptClip, true);
+            clipper.AddPath(rectangle(width_ - height_, height_), ptClip, true);
         } else if (width_ < height_) {
             clipper.AddPath(circle(width_, IntPoint(0, -(height_ - width_) / 2)), ptClip, true);
             clipper.AddPath(circle(width_, IntPoint(0, (height_ - width_) / 2)), ptClip, true);
-            clipper.AddPath(rect(width_, height_ - width_), ptClip, true);
+            clipper.AddPath(rectangle(width_, height_ - width_), ptClip, true);
         }
         clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
     }
@@ -217,7 +215,7 @@ void ApPolygon::draw()
         poligon.push_back(IntPoint(qCos(qDegreesToRadians(step * i)) * diam / 2, qSin(qDegreesToRadians(step * i)) * diam / 2));
     }
     if (m_rotation > 0.1) {
-        poligon = rotate(poligon, m_rotation);
+        rotate(poligon, m_rotation);
     }
     m_paths.push_back(poligon);
     m_size = diam;
@@ -370,7 +368,7 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
     };
 
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
-    Path polygon = rect(mod[Width] * uScale, mod[Height] * uScale, center);
+    Path polygon = rectangle(mod[Width] * uScale, mod[Height] * uScale, center);
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0)
         rotate(polygon, mod[Rotation_angle]);
@@ -428,8 +426,8 @@ void ApMacro::drawMoire(const QList<double>& mod)
         clipper.AddPath(polygon, ptClip, true);
         diameter -= gap * 2;
     }
-    clipper.AddPath(rect(cl, ct), ptClip, true);
-    clipper.AddPath(rect(ct, cl), ptClip, true);
+    clipper.AddPath(rectangle(cl, ct), ptClip, true);
+    clipper.AddPath(rectangle(ct, cl), ptClip, true);
     clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0) {
@@ -509,8 +507,8 @@ void ApMacro::drawThermal(const QList<double>& mod)
     Clipper clipper;
     clipper.AddPath(circle(outer), ptSubject, true);
     clipper.AddPath(circle(inner), ptClip, true);
-    clipper.AddPath(rect(gap, outer), ptClip, true);
-    clipper.AddPath(rect(outer, gap), ptClip, true);
+    clipper.AddPath(rectangle(gap, outer), ptClip, true);
+    clipper.AddPath(rectangle(outer, gap), ptClip, true);
     clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
 
     if (mod.size() > Rotation_angle && mod[Rotation_angle] != 0.0) {
@@ -534,7 +532,7 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
     IntPoint end(mod[EndX] * uScale, mod[EndY] * uScale);
     IntPoint center(0.5 * start.X + 0.5 * end.X, 0.5 * start.Y + 0.5 * end.Y);
 
-    Path polygon = rect(Length(start, end), mod[Width] * uScale);
+    Path polygon = rectangle(Length(start, end), mod[Width] * uScale);
     double angle = Angle(start, end);
     rotate(polygon, angle);
     translate(polygon, center);

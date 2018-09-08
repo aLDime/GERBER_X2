@@ -11,11 +11,13 @@ class MyGraphicsView : public QGraphicsView {
     Q_OBJECT
 public:
     explicit MyGraphicsView(QWidget* parent = 0);
+    ~MyGraphicsView();
     void SetScene(QGraphicsScene* Scene);
     void Zoom100();
     void ZoomFit();
     void ZoomIn();
     void ZoomOut();
+    static MyGraphicsView* self;
 
 signals:
     void FileDroped(const QString& file);

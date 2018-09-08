@@ -1,7 +1,7 @@
 #include "filemodel.h"
-#include "fileitem.h"
+#include "gerberitem.h"
 #include "folderitem.h"
-#include "milling.h"
+#include "gcodeitem.h"
 #include <QApplication>
 #include <QDebug>
 #include <QMimeData>
@@ -32,17 +32,17 @@ void FileModel::addGerberFile(G::File* gerberFile)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new FileItem(gerberFile));
+    item->add(new GerberItem(gerberFile));
     endInsertRows();
 }
 
-void FileModel::addMilling(const QString name, GCodeProfile* group)
+void FileModel::addGcode( GCode* group)
 {
     AbstractItem* item{ rootItem->child(NODE_MILLING) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new Milling(name + ' ' + QString().setNum(rowCount + 1), group));
+    item->add(new GcodeItem( group));
     endInsertRows();
 }
 

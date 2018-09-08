@@ -41,6 +41,7 @@ public:
     QPen pen() const { return m_pen; }
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
+    void setZValue(qreal z);
 
 private:
     bool m_visible = true;

@@ -10,30 +10,17 @@
 
 MyScene* MyScene::self = nullptr;
 
-MyScene::MyScene(QObject* parent, bool drawPoints)
+MyScene::MyScene(QObject* parent)
     : QGraphicsScene(parent)
     , drawPdf(false)
-    , drawPoints(drawPoints)
 {
-    if (!drawPoints)
-        return;
-
-    itemZero = new Point(0);
-    itemZero->setBrush(QColor(255, 0, 0, 64));
-    itemZero->setToolTip("G-Code Zero Point");
-
-    itemHome = new Point(1);
-    itemHome->setBrush(QColor(0, 255, 0, 64));
-    itemHome->setToolTip("G-Code Home Point");
-
-    addItem(itemZero);
-    addItem(itemHome);
-    //self = this;
+    self = this;
 }
 
 MyScene::~MyScene()
 {
-    //self = nullptr;
+    clear();
+    self = nullptr;
 }
 
 void MyScene::RenderPdf()
@@ -42,31 +29,24 @@ void MyScene::RenderPdf()
     if (curFile.isEmpty())
         return;
 
+    drawPdf = true;
+
     QPdfWriter pdfWriter(curFile.left(curFile.lastIndexOf('.')) + ".pdf");
 
-    QSizeF size = itemsBoundingRect().size();
+    QRectF rect(itemsBoundingRect());
+    QSizeF size(rect.size());
+
     pdfWriter.setPageSizeMM(size);
 
-    QPdfWriter::Margins margins = { 0, 0, 0, 0 };
-    pdfWriter.setMargins(margins);
+    pdfWriter.setMargins({ 0, 0, 0, 0 });
     pdfWriter.setResolution(1000000);
 
     QPainter painter(&pdfWriter);
     painter.setTransform(QTransform().scale(1.0, -1.0));
     painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
-    drawPdf = true;
+
     render(&painter);
     drawPdf = false;
-}
-
-Point* MyScene::getItemZero() const
-{
-    return itemZero;
-}
-
-Point* MyScene::getItemHome() const
-{
-    return itemHome;
 }
 
 void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
@@ -74,6 +54,8 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
     if (drawPdf)
         return;
     painter->fillRect(rect, Qt::black);
+    return;
+
     if (itemsBoundingRect().width() == 0 || itemsBoundingRect().height() == 0)
         return;
 

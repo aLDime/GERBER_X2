@@ -5,13 +5,19 @@
 
 #ifndef linux
 #include <windows.h>
+
 #include <initguid.h>
+
 #include <Setupapi.h>
+
 #define NAME_SIZE 128
 #endif
 QSizeF GetEdid()
+
 {
-    QSizeF size;
+    static QSizeF size;
+    if (!size.isEmpty())
+        return size;
 
 #ifndef linux
     GUID GUID_CLASS_MONITOR = { 0x4d36e96e, 0xe325, 0x11ce, 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 };
@@ -19,13 +25,13 @@ QSizeF GetEdid()
     SP_DEVINFO_DATA devInfoData;
     do {
         devInfo = ::SetupDiGetClassDevsExA(
-                    &GUID_CLASS_MONITOR, // class GUID
-                    NULL, //                enumerator
-                    NULL, //                HWND
-                    DIGCF_PRESENT, //       Flags //DIGCF_ALLCLASSES|
-                    NULL, //                device info, create a new one.
-                    NULL, //                machine name, local machine
-                    NULL); //               reserved
+            &GUID_CLASS_MONITOR, // class GUID
+            NULL, //                enumerator
+            NULL, //                HWND
+            DIGCF_PRESENT, //       Flags //DIGCF_ALLCLASSES|
+            NULL, //                device info, create a new one.
+            NULL, //                machine name, local machine
+            NULL); //               reserved
 
         if (NULL == devInfo) {
             qDebug("SetupDiGetClassDevsEx");
@@ -42,8 +48,7 @@ QSizeF GetEdid()
 
                 if (::SetupDiGetDeviceRegistryProperty(devInfo, &devInfoData, SPDRP_DEVICEDESC /*SPDRP_UI_NUMBER*/, NULL, (PBYTE)(&uniID), sizeof(uniID), NULL)) {
                     qDebug() << "UID:" << QString::fromWCharArray(uniID);
-                }
-                else {
+                } else {
                     qDebug() << "ERROR:" << ::GetLastError();
                     break;
                 }
@@ -64,21 +69,13 @@ QSizeF GetEdid()
 
                         if (retValue == ERROR_SUCCESS) {
                             if (!strcmp(valueName, "EDID")) {
-                                qDebug("Found value EDID");
-                                {
-                                    size = QSizeF(((EDIDdata[68] & 0xF0) << 4) | EDIDdata[66], ((EDIDdata[68] & 0x0F) << 8) | EDIDdata[67]);
-                                    //qDebug() << (((EDIDdata[68] & 0xF0) << 4) | EDIDdata[66]);
-                                    //qDebug() << (((EDIDdata[68] & 0x0F) << 8) | EDIDdata[67]);
-                                    //qDebug() << (EDIDdata[21]);
-                                    //qDebug() << (EDIDdata[22]);
-                                }
+                                size = QSizeF(((EDIDdata[68] & 0xF0) << 4) | EDIDdata[66], ((EDIDdata[68] & 0x0F) << 8) | EDIDdata[67]);
                                 break;
                             }
                         }
                     }
                     RegCloseKey(hDevRegKey);
-                }
-                else {
+                } else {
                     qDebug() << "ERROR:" << GetLastError();
                 }
             } // SetupDiEnumDeviceInfo

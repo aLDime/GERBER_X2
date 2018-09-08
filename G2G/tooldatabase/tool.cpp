@@ -1,6 +1,8 @@
 #include "tool.h"
 #include <qmath.h>
 
+int toolId = qRegisterMetaType<Tool>("Tool");
+
 Tool::Tool()
     : name("Name")
 {

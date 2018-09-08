@@ -5,7 +5,9 @@
 #include "gerber.h"
 #include "graphicsitem.h"
 namespace G {
+
 class File;
+
 class GraphicObject {
 public:
     GraphicObject(
@@ -52,6 +54,9 @@ public:
 private:
     void grouping(PolyNode* node, Pathss* pathss, GROUP group);
 };
+
+Q_DECLARE_METATYPE(File)
+
 }
 
 #endif // GFILE_H

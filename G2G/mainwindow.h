@@ -1,6 +1,7 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "point.h"
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
@@ -27,6 +28,8 @@ public:
     QAction* closeAllAct;
     static MainWindow* self;
 
+    Point* zero() const;
+    Point* home() const;
 signals:
     void parseFile(const QString& filename);
 
@@ -68,6 +71,12 @@ private:
 
     QString curFile;
     bool isUntitled;
+
+    void fileProgress(const QString& fileName, int max, int value);
+    void fileError(const QString& fileName, const QString& error);
+
+    Point* m_zeroPoint = nullptr;
+    Point* m_homePoint = nullptr;
 
 protected:
     void closeEvent(QCloseEvent* event) override;

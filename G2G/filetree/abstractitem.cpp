@@ -6,12 +6,12 @@ int AbstractItem::c = 0;
 
 AbstractItem::AbstractItem()
 {
-    qDebug() << "AbstractItem" << ++c << this << m_parentItem;
+    //qDebug() << "AbstractItem" << ++c << this << m_parentItem;
 }
 
 AbstractItem::~AbstractItem()
 {
-    qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
+    //qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
     qDeleteAll(childItems);
 }
 

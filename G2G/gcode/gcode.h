@@ -7,9 +7,16 @@
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
 
-class GCodeProfile : public ItemGroup {
+enum GCodeType {
+    PROFILE,
+    POCKET,
+    DRILLING,
+    MATERIAL_SETUP_FORM
+};
+
+class GCode : public ItemGroup {
 public:
-    GCodeProfile(const Paths& paths, const Tool& tool, double m_depth);
+    GCode(const Paths& paths, const Tool& tool, double m_depth, GCodeType type);
     //    QRectF boundingRect() const override { return rect; }
     //    QPainterPath shape() const override { return m_shape; }
     //    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override
@@ -35,7 +42,11 @@ public:
     //    }
     //    int type() const { return QGraphicsItem::UserType + 3; }
     Paths getPaths() const;
-    void save(const QString& name);
+    void save(const QString& name = QString());
+
+    QString name() const;
+    void setName(const QString& name);
+    const GCodeType type;
 
 private:
     QPainterPath m_shape;
@@ -43,19 +54,23 @@ private:
     Paths paths;
     QRectF rect;
     Tool tool;
+    QString m_name;
     double m_depth;
     double d;
 };
-
+////////////////////////////////////////////////////
+/// \brief The GItem class
+///
 class GItem : public GraphicsItem {
 public:
     GItem(const Path& m_path);
     //~WorkItem() override {}
 
     QRectF boundingRect() const override;
-    //QPainterPath shape() const override;
+    QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
+    double w = 0.0;
 
 private:
     QPainterPath m_shape;

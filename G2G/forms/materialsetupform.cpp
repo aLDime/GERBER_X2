@@ -4,6 +4,7 @@
 #include <QDockWidget>
 #include <QSettings>
 #include <QTimer>
+#include <mainwindow.h>
 #include <myscene.h>
 
 MaterialSetupForm* MaterialSetupForm::self = nullptr;
@@ -39,10 +40,10 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, dsbxValueChanged, [=](double value) { MyScene::self->getItemHome()->setPos(value, ui->dsbxHomeY->value()); });
-    connect(ui->dsbxHomeY, dsbxValueChanged, [=](double value) { MyScene::self->getItemHome()->setPos(ui->dsbxHomeX->value(), value); });
-    connect(ui->dsbxZeroX, dsbxValueChanged, [=](double value) { MyScene::self->getItemZero()->setPos(value, ui->dsbxZeroY->value()); });
-    connect(ui->dsbxZeroY, dsbxValueChanged, [=](double value) { MyScene::self->getItemZero()->setPos(ui->dsbxZeroX->value(), value); });
+    connect(ui->dsbxHomeX, dsbxValueChanged, [=](double value) { MainWindow::self->home()->setPos(value, ui->dsbxHomeY->value()); });
+    connect(ui->dsbxHomeY, dsbxValueChanged, [=](double value) { MainWindow::self->home()->setPos(ui->dsbxHomeX->value(), value); });
+    connect(ui->dsbxZeroX, dsbxValueChanged, [=](double value) { MainWindow::self->zero()->setPos(value, ui->dsbxZeroY->value()); });
+    connect(ui->dsbxZeroY, dsbxValueChanged, [=](double value) { MainWindow::self->zero()->setPos(ui->dsbxZeroX->value(), value); });
 
     connect(ui->dsbxSafeZ, dsbxValueChanged, [=](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -121,6 +122,9 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
             QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
         }
     });
+
+    //    connect(MainWindow::self->home(), &Point::posChanged, this, &MaterialSetupForm::setHomePos);
+    //    connect(MainWindow::self->zero(), &Point::posChanged, this, &MaterialSetupForm::setZeroPos);
 }
 
 MaterialSetupForm::~MaterialSetupForm()

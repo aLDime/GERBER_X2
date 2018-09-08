@@ -1,30 +1,27 @@
-#ifndef FILE_H
-#define FILE_H
+#ifndef MILLING_H
+#define MILLING_H
 
 #include "abstractitem.h"
-#include <QObject>
-#include <file.h>
+#include <QGraphicsItemGroup>
+#include <gcode/gcode.h>
 
-class FileItem : public QObject, public AbstractItem {
-    Q_OBJECT
+class GcodeItem : public AbstractItem {
+    Qt::CheckState checkState = Qt::Checked;
 
 public:
-    FileItem(G::File* gerberFile);
-    ~FileItem();
+    GcodeItem(GCode* group);
+    ~GcodeItem();
+
     // AbstractItem interface
-public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     int columnCount(/*const QModelIndex& parent*/) const override;
     int childCount(/*const QModelIndex& parent*/) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    static QTimer repaintTimer;
+    static QMap<int, GCode*> gCode;
 
 private:
-    G::File* gFile;
-
-    Qt::CheckState checkState = Qt::Checked;
-    void repaint();
+    const int m_id;
 };
 
-#endif // FILE_H
+#endif // MILLING_H
