@@ -35,6 +35,30 @@ TreeView::TreeView(QWidget* parent)
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::on_selectionChanged);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
+
+    int w = indentation();
+    int h = rowHeight(m_model->index(1, 0, QModelIndex()));
+
+    QImage image(w, h, QImage::Format_ARGB32);
+
+    QPainter painter(&image);
+    painter.setPen(QColor(128, 128, 128));
+
+    image.fill(Qt::transparent);
+    painter.drawLine(h / 2, 0, h / 2, w);
+    image.save("vline.png", "PNG");
+
+    painter.drawLine(h / 2, w / 2, h, w / 2);
+    image.save("branch-more.png", "PNG");
+
+    image.fill(Qt::transparent);
+    painter.drawLine(h / 2, 0, h / 2, w / 2);
+    painter.drawLine(h / 2, w / 2, h, w / 2);
+    image.save("branch-end.png", "PNG");
+
+    QFile file(":/qtreeviewstylesheet/QTreeView.qss");
+    file.open(QFile::ReadOnly);
+    setStyleSheet(file.readAll());
 }
 
 TreeView::~TreeView()
@@ -77,7 +101,7 @@ void TreeView::updateIcons()
 
 void TreeView::on_doubleClicked(const QModelIndex& index)
 {
-    if (index.parent() == m_model->index(NODE_FILES, 0, QModelIndex())) {
+    if (index.column() == 0 && index.parent() == m_model->index(NODE_GERBER_FILES, 0, QModelIndex())) {
         hideOther(index);
     }
 }
@@ -85,19 +109,19 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 void TreeView::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
 
-    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_FILES) {
+    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_GERBER_FILES) {
         QModelIndex& index = selected.indexes().first();
         if (index.isValid()) {
             G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-            int id = GerberItem::gFiles.key(file);
+            int id = GerberItem::files.key(file);
             file->itemGroup->setZValue(id);
         }
     }
-    if (!deselected.indexes().isEmpty() && deselected.indexes().first().parent().row() == NODE_FILES) {
+    if (!deselected.indexes().isEmpty() && deselected.indexes().first().parent().row() == NODE_GERBER_FILES) {
         QModelIndex& index = deselected.indexes().first();
         if (index.isValid()) {
             G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-            int id = GerberItem::gFiles.key(file);
+            int id = GerberItem::files.key(file);
             file->itemGroup->setZValue(-id);
         }
     }
@@ -119,36 +143,10 @@ void TreeView::hideOther(const QModelIndex& index)
     m_model->dataChanged(index.sibling(0, 0), index.sibling(rowCount, 0));
 }
 
-void TreeView::showEvent(QShowEvent* /*event*/)
-{
-    int w = indentation();
-    int h = rowHeight(m_model->index(1, 0, QModelIndex()));
-
-    QImage i(w, h, QImage::Format_ARGB32);
-
-    i.fill(Qt::transparent);
-    for (int y = 0; y < h; ++y)
-        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    i.save("vline.png", "PNG");
-    for (int x = w / 2; x < w; ++x)
-        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    i.save("branch-more.png", "PNG");
-    i.fill(Qt::transparent);
-    for (int y = 0; y < h / 2; ++y)
-        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    for (int x = w / 2; x < w; ++x)
-        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    i.save("branch-end.png", "PNG");
-
-    QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-    file.open(QFile::ReadOnly);
-    setStyleSheet(file.readAll());
-}
-
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QModelIndex index = indexAt(event->pos());
-    if (index.parent().row() == NODE_FILES) {
+    if (index.parent().row() == NODE_GERBER_FILES) {
         QMenu menu(this);
 
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {

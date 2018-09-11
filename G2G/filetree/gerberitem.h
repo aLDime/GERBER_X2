@@ -18,7 +18,7 @@ public:
     int childCount() const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    static QMap<int, G::File*> gFiles;
+    static QMap<int, G::File*> files;
     static QTimer* repaintTimer();
 
 private:

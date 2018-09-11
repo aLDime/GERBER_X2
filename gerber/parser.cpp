@@ -1,6 +1,7 @@
 #include "parser.h"
 #include <QDateTime>
 #include <QDebug>
+#include <QElapsedTimer>
 #include <QFile>
 #include <QFileInfo>
 #include <QMutex>
@@ -78,7 +79,8 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
         emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!");
 
     emit fileProgress(QFileInfo(fileName).fileName(), file->lines.size() - 1, 0);
-
+    QElapsedTimer t;
+    t.start();
     for (QString& gerberLine : file->lines) {
         if (!(state.lineNum % 1000))
             emit fileProgress(QFileInfo(fileName).fileName(), file->lines.size() - 1, state.lineNum);
@@ -157,6 +159,8 @@ void Parser::ParseLines(const QString& gerberLines, const QString& fileName)
             emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
         }
     }
+
+    qDebug() << "elapsed" << t.elapsed();
 
     if (file->isEmpty())
         delete file;

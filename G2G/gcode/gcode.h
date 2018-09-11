@@ -20,8 +20,8 @@ public:
 
     Paths getPaths() const;
     void save(const QString& name = QString());
-    void save1(const QString& name = QString());
-    void save2(const QString& name = QString());
+    void saveDrill();
+    void saveProfilePocket();
 
     QString name() const;
     void setName(const QString& name);
@@ -32,6 +32,22 @@ private:
     const Tool tool;
     QString m_name;
     double m_depth;
+
+    inline QString g0() { return "G0"; }
+    inline QString g1() { return "G1"; }
+    inline QString x(double val) { return "X" + format(val); }
+    inline QString y(double val) { return "Y" + format(val); }
+    inline QString z(double val) { return "Z" + format(val); }
+    inline QString feed(double val) { return "F" + format(val); }
+    inline QString s(int val) { return "S" + QString::number(val); }
+    inline QString format(double val) { return QString::number(val, 'f', 3); }
+
+    void startPath(const QPointF& point);
+    void endPath();
+    void statFile();
+    void endFile();
+
+    QList<QString> sl;
 };
 ////////////////////////////////////////////////////
 /// \brief The GItem class

@@ -53,3 +53,35 @@ void Tool::write(QJsonObject& json) const
     json["note"] = note;
     json["type"] = type;
 }
+
+bool Tool::isValid()
+{
+    bool fl = true;
+    if (qFuzzyIsNull(diameter))
+        fl = false;
+    if (qFuzzyIsNull(passDepth))
+        fl = false;
+    if (qFuzzyIsNull(feedRate))
+        if (type != Drill)
+            fl = false;
+    if (qFuzzyIsNull(plungeRate))
+        fl = false;
+    return fl;
+}
+
+QString Tool::errorStr()
+{
+    QString errorString;
+    if (qFuzzyIsNull(diameter))
+        errorString += "Tool diameter = 0!\n";
+    if (qFuzzyIsNull(passDepth))
+        if (type == Drill)
+            errorString += "Pass = 0!\n";
+        else
+            errorString += "Depth = 0!\n";
+    if (qFuzzyIsNull(feedRate))
+        errorString += "Feed rate = 0\n";
+    if (qFuzzyIsNull(plungeRate))
+        errorString += "Plunge rate = 0!\n";
+    return errorString;
+}

@@ -1,4 +1,5 @@
 #include "profileform.h"
+#include "materialsetupform.h"
 #include "ui_profileform.h"
 
 #include "filetree/filemodel.h"
@@ -29,8 +30,8 @@ ProfileForm::ProfileForm(QWidget* parent)
     , ui(new Ui::ProfileForm)
 {
     ui->setupUi(this);
-
     ui->lblToolName->setText(tool.name);
+    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
 
     auto rb_clicked = [&] {
         QStringList list = {
@@ -92,8 +93,8 @@ void ProfileForm::on_pbCreate_clicked()
 {
     MyScene* scene = MyScene::self;
 
-    if (qFuzzyIsNull(tool.diameter)) {
-        QMessageBox::warning(this, "!!!", tr("No valid tool..."));
+    if (!tool.isValid()) {
+        QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());
         return;
     }
 

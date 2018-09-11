@@ -73,6 +73,7 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
 
 void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
+
     if (drawPdf)
         return;
     double scale = views().at(0)->matrix().m11();

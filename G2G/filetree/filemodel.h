@@ -10,9 +10,9 @@
 #include <gcode/gcode.h>
 
 enum {
-    NODE_FILES,
-    NODE_MILLING,
+    NODE_GERBER_FILES,
     NODE_DRILL,
+    NODE_MILLING,
     NODE_PINS,
 };
 

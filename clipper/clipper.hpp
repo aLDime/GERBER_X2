@@ -1,4 +1,4 @@
-﻿/*******************************************************************************
+/*******************************************************************************
 *                                                                              *
 * Author    :  Angus Johnson                                                   *
 * Version   :  6.4.2                                                           *
@@ -58,7 +58,11 @@
 #include <ostream>
 #include <functional>
 #include <queue>
+
 #include <QVector>
+#include <QPolygonF>
+#include <qmath.h>
+#include <QDebug>
 namespace ClipperLib {
 
 enum ClipType { ctIntersection,

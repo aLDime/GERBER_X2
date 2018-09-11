@@ -72,6 +72,7 @@ DrillForm::DrillForm(QWidget* parent)
 {
     ui->setupUi(this);
     ui->tableView->setIconSize(QSize(Size, Size));
+    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
     connect(ui->tableView, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
     updateFiles();
     self = this;
@@ -127,7 +128,7 @@ void DrillForm::setApertures(const QMap<int, G::Aperture*>& value)
 void DrillForm::updateFiles()
 {
     ui->cbxFile->clear();
-    for (G::File* file : GerberItem::gFiles) {
+    for (G::File* file : GerberItem::files) {
         for (const G::GraphicObject& go : *file) {
             if (go.state.curDCode == G::D03) {
                 ui->cbxFile->addItem(QFileInfo(file->fileName).fileName(), QVariant::fromValue(static_cast<void*>(file)));
@@ -200,7 +201,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
                 item->setPen(Qt::NoPen);
                 item->setBrush(Qt::white);
                 item->setPos(ToQPointF(go.state.curPos));
-                item->setZValue(GerberItem::gFiles.lastKey() + 1);
+                item->setZValue(GerberItem::files.lastKey() + 1);
 
                 gia[dNum].append(item);
                 MyScene::self->addItem(item);

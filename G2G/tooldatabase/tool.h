@@ -47,6 +47,8 @@ public:
 
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;
+    bool isValid();
+    QString errorStr();
 };
 
 Q_DECLARE_METATYPE(Tool)

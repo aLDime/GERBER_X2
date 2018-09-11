@@ -1,4 +1,5 @@
 #include "pocketform.h"
+#include "materialsetupform.h"
 #include "ui_pocketform.h"
 
 #include "filetree/filemodel.h"
@@ -29,6 +30,8 @@ PocketForm::PocketForm(QWidget* parent)
     ui->setupUi(this);
     ui->lblToolName->setText(tool.name);
     ui->lblToolName_2->setText(tool2.name);
+
+    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
 
     auto rb_clicked = [&] {
         QStringList list = {
@@ -96,13 +99,13 @@ void PocketForm::on_pbCreate_clicked()
 {
     MyScene* scene = MyScene::self;
 
-    if (qFuzzyIsNull(tool.diameter)) {
-        QMessageBox::warning(this, "!!!", tr("No valid tool 1..."));
+    if (!tool.isValid()) {
+        QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());
         return;
     }
 
-    if (ui->chbxUseTwoTools->isChecked() && qFuzzyIsNull(tool2.diameter)) {
-        QMessageBox::warning(this, "!!!", tr("No valid tool 2..."));
+    if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
+        QMessageBox::warning(this, "No valid tool...!!!", tool2.errorStr());
         return;
     }
 
@@ -116,7 +119,7 @@ void PocketForm::on_pbCreate_clicked()
         return;
     }
 
-    GCode* gcode = ToolPathCreator(wPaths).ToolPathPocket({ tool }, ui->rbConventional->isChecked(), ui->dsbxDepth->value());
+    GCode* gcode = ToolPathCreator(wPaths).ToolPathPocket({ tool }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked());
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));

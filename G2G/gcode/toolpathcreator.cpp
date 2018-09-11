@@ -1,11 +1,11 @@
 #include "toolpathcreator.h"
+#include "forms/materialsetupform.h"
 #include <QCoreApplication>
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFile>
 #include <QSettings>
 #include <algorithm>
-#include "forms/materialsetupform.h"
 //GERBER_FILE ToolPathCreator::file;
 
 //Paths ToolPathCreator::mergedPolygons;
@@ -57,15 +57,18 @@ ToolPathCreator::ToolPathCreator(const Paths& value)
     mergedPaths = value;
 }
 
-GCode* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth)
+GCode* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth, bool side)
 {
-    double toolDiameter = tool[0].diameter;
-    double dOffset = toolDiameter * (uScale / 2);
+    double toolDiameter = tool[0].diameter * uScale;
+    double dOffset = toolDiameter / 2;
     double stepOver = tool[0].stepover * uScale;
 
-    mergedPaths;
-
-    GetGroupedPaths(CUTOFF, true);
+    if (side) {
+        //        dOffset *= -1;
+        //        stepOver *= -1;
+        GetGroupedPaths(CUTOFF, true, toolDiameter);
+    } else
+        GetGroupedPaths(COPPER, true);
 
     ClipperOffset offset(uScale, uScale / 1000);
     Clipper clipper;
@@ -75,20 +78,22 @@ GCode* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>&
     tmpPaths.clear();
     for (Paths paths : groupedPaths) {
         offset.Clear();
-        offset.AddPaths(paths, jtMiter /*jtRound*/, etClosedPolygon);
+        offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
         offset.Execute(paths, -dOffset);
+        CleanPolygons(paths, 0.001 * uScale);
+        //int i = 1;
         do {
             paths_1.append(paths);
             offset.Clear();
             offset.AddPaths(paths, jtMiter, etClosedPolygon);
             offset.Execute(paths, -stepOver);
-        } while (paths.size());
+        } while (paths.size() /*&& --i*/);
 
         PolyTree polyTree;
         clipper.Clear();
         clipper.AddPaths(paths_1, ptSubject, true);
         IntRect r(clipper.GetBounds());
-        int k = 1;
+        int k = tool.first().diameter * uScale;
         Path outer = {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
@@ -185,13 +190,13 @@ Paths ToolPathCreator::GetMergedPaths()
     return mergedPaths;
 }
 
-Pathss& ToolPathCreator::GetGroupedPaths(GROUP group, bool fl)
+Pathss& ToolPathCreator::GetGroupedPaths(GROUP group, bool fl, double k)
 {
     PolyTree polyTree;
     Clipper clipper;
     clipper.AddPaths(mergedPaths, ptSubject, true);
     IntRect r(clipper.GetBounds());
-    int k = /*uScale*/ 1;
+    //int k = /*uScale*/ 1;
     Path outer = {
         IntPoint(r.left - k, r.bottom + k),
         IntPoint(r.right + k, r.bottom + k),

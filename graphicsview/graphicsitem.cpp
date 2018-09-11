@@ -166,6 +166,7 @@ void ItemGroup::setZValue(qreal z)
 ///
 WorkItem::WorkItem(const Paths& paths, G::File* file)
     : paths(paths)
+    , file(file)
 {
     for (Path& path : this->paths) {
         if (path.first() != path.last())
@@ -194,8 +195,8 @@ void WorkItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen = QPen(c, 0.0);
     }
     if (option->state & QStyle::State_MouseOver) {
-        //        c.setAlpha(200);
-        //        brush.setColor(c);
+        c.setAlpha(200);
+        brush.setColor(c);
         c.setAlpha(255);
         pen = QPen(c, 0.0);
     }

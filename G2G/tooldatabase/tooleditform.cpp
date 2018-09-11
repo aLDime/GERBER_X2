@@ -119,13 +119,16 @@ void ToolEditForm::on_cbxToolType_currentIndexChanged(int index)
         ui->dsbxStepover->setEnabled(false);
         ui->dsbxStepoverPercent->setEnabled(false);
         ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/1.png")));
+        ui->label_3->setText("Pass");
         break;
     case Tool::EndMill:
         ui->dsbxAngle->setEnabled(false);
         ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/2.png")));
+        ui->label_3->setText("Depth");
         break;
     case Tool::Engraving:
         ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/3.png")));
+        ui->label_3->setText("Depth");
         break;
     }
 
@@ -206,7 +209,7 @@ void ToolEditForm::calculate(int index, double value)
 
 void ToolEditForm::valueChanged(double value)
 {
-     const QVector<void*> set{
+    const QVector<void*> set{
         ui->dsbxAngle,
         ui->dsbxDiameter,
         ui->dsbxFeedRate,

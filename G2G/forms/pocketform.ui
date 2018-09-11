@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>231</width>
-    <height>528</height>
+    <height>601</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -166,7 +166,45 @@ Depth:</string>
       </item>
       <item row="7" column="0" colspan="2">
        <layout class="QGridLayout" name="gridLayout">
-        <item row="0" column="0">
+        <item row="2" column="0">
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Direction</string>
+          </property>
+          <layout class="QVBoxLayout" name="verticalLayout_4">
+           <property name="leftMargin">
+            <number>6</number>
+           </property>
+           <property name="topMargin">
+            <number>6</number>
+           </property>
+           <property name="rightMargin">
+            <number>6</number>
+           </property>
+           <property name="bottomMargin">
+            <number>6</number>
+           </property>
+           <item>
+            <widget class="QRadioButton" name="rbClimb">
+             <property name="text">
+              <string>Climb</string>
+             </property>
+             <property name="checked">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QRadioButton" name="rbConventional">
+             <property name="text">
+              <string>Conventional</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item row="1" column="0">
          <widget class="QGroupBox" name="groupBox">
           <property name="title">
            <string>Type</string>
@@ -207,12 +245,12 @@ Depth:</string>
           </layout>
          </widget>
         </item>
-        <item row="1" column="0">
-         <widget class="QGroupBox" name="groupBox_2">
+        <item row="0" column="0">
+         <widget class="QGroupBox" name="groupBox_4">
           <property name="title">
-           <string>Direction</string>
+           <string>Aligin</string>
           </property>
-          <layout class="QVBoxLayout" name="verticalLayout_4">
+          <layout class="QVBoxLayout" name="verticalLayout_5">
            <property name="leftMargin">
             <number>6</number>
            </property>
@@ -226,9 +264,9 @@ Depth:</string>
             <number>6</number>
            </property>
            <item>
-            <widget class="QRadioButton" name="rbClimb">
+            <widget class="QRadioButton" name="rbOutside">
              <property name="text">
-              <string>Climb</string>
+              <string>Outside</string>
              </property>
              <property name="checked">
               <bool>true</bool>
@@ -236,16 +274,16 @@ Depth:</string>
             </widget>
            </item>
            <item>
-            <widget class="QRadioButton" name="rbConventional">
+            <widget class="QRadioButton" name="rbInside">
              <property name="text">
-              <string>Conventional</string>
+              <string>Inside</string>
              </property>
             </widget>
            </item>
           </layout>
          </widget>
         </item>
-        <item row="0" column="1" rowspan="2">
+        <item row="0" column="1" rowspan="3">
          <widget class="QLabel" name="lblPixmap">
           <property name="text">
            <string/>

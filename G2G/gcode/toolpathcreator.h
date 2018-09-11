@@ -48,11 +48,11 @@ public:
     //        mergedPaths = paths;
     //    }
 
-    GCode* ToolPathPocket(const QVector<Tool>& tool, bool convent, double depth);
+    GCode* ToolPathPocket(const QVector<Tool>& tool, bool convent, double depth, bool side);
     GCode* ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth);
     Paths GetMergedPaths();
 
-    Pathss& GetGroupedPaths(GROUP group, bool fl = false);
+    Pathss& GetGroupedPaths(GROUP group, bool fl = false, double k = 1);
 
 private:
     Paths mergedPaths;

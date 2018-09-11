@@ -31,23 +31,13 @@ MainWindow::MainWindow(QWidget* parent)
     , gerberParser(new G::Parser)
 {
     setupUi(this);
+    setToolTipDuration(0);
     //    MyGraphicsView::self = graphicsView;
 
-    QVector<Shtift*> shtifts{
-        new Shtift(0),
-        new Shtift(1),
-        new Shtift(2),
-        new Shtift(3)
-    };
-
-    for (int i = 0; i < 4; ++i) {
-        shtifts[i]->setBrush(QColor(255, 255, 0, 100));
-        shtifts[i]->setToolTip("Штифт " + QString::number(i + 1));
-        shtifts[i]->setShtifts(shtifts);
-        shtifts[i]->setParent(MyScene::self);
-        shtifts[i]->setZValue(std::numeric_limits<qreal>::max() - i);
-        MyScene::self->addItem(shtifts[i]);
-    }
+    new Shtift();
+    new Shtift();
+    new Shtift();
+    new Shtift();
 
     m_zeroPoint = new Point(Point::ZERO);
     m_homePoint = new Point(Point::HOME);
@@ -128,7 +118,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
     //    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Нет", "Да") == 1)
     writeSettings();
     //closeFiles();
-    for (G::File*& f : GerberItem::gFiles) {
+    for (G::File*& f : GerberItem::files) {
         delete f;
         f = nullptr;
     }

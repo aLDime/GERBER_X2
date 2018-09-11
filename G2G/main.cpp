@@ -10,6 +10,12 @@
 
 int main(int argc, char* argv[])
 {
+
+    for (int i = 0;
+         i < 1;
+         ++i) {
+        qDebug() << i;
+    }
 #ifndef linux
     HANDLE hCorvetEvent = CreateEventA(nullptr, FALSE, FALSE, ("Getber2Gcode"));
     if (GetLastError() == ERROR_ALREADY_EXISTS) {
@@ -36,9 +42,7 @@ int main(int argc, char* argv[])
     parser.addVersionOption();
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
-    QSettings s;
-    s.setValue("icons", s.value("icons", "icons/breeze/").toString());
-    QIcon::setThemeSearchPaths({ s.value("icons").toString() });
+    QIcon::setThemeSearchPaths({ "../icons/breeze/" });
 
     QIcon::setThemeName("Breeze");
 

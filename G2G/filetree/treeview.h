@@ -29,7 +29,6 @@ private:
     void hideOther(const QModelIndex& index);
 
 protected:
-    void showEvent(QShowEvent* event) override;
     void contextMenuEvent(QContextMenuEvent* event) override;
 
     // QAbstractItemView interface

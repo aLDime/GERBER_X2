@@ -13,7 +13,6 @@
         <file>tool/drill.png</file>
         <file>tool/endmill.png</file>
         <file>tool/engraving.png</file>
-        <file>icons.zip</file>
         <file>qtreeviewstylesheet/QTreeView.qss</file>
     </qresource>
 </RCC>

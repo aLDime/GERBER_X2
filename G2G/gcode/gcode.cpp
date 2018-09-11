@@ -71,13 +71,15 @@ Paths GCode::getPaths() const { return paths; }
 
 void GCode::save(const QString& name)
 {
+    if (!name.isEmpty())
+        m_name = name;
     switch (type) {
     case PROFILE:
     case POCKET:
-        save2(name);
+        saveProfilePocket();
         break;
     case DRILLING:
-        save1(name);
+        saveDrill();
         break;
     case MATERIAL_SETUP_FORM:
     default:
@@ -85,92 +87,133 @@ void GCode::save(const QString& name)
     }
 }
 
-void GCode::save1(const QString& name)
+void GCode::saveDrill()
 {
-    QList<QString> sl;
+    statFile();
     QPolygonF path(PathToQPolygon(paths.first()));
 
-    sl.append("G17"); //XY
-    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3)); //HomeZ
-    QPointF home(MaterialSetupForm::homePos);
-    home -= MaterialSetupForm::zeroPos;
-    sl.append(QString("G0X%1Y%2S%3M3").arg(home.x(), 0, 'f', 3).arg(home.y(), 0, 'f', 3).arg(tool.spindleSpeed)); //HomeXY
-    for (QPointF& point : path) {
+    for (QPointF& point : path)
         point -= MaterialSetupForm::zeroPos;
-        sl.append(QString("G0X%1Y%2").arg(point.x(), 0, 'f', 3).arg(point.y(), 0, 'f', 3)); //start xy
-        sl.append(QString("G0Z%1").arg(MaterialSetupForm::plunge, 0, 'f', 3)); //start z
-        sl.append(QString("G1Z%1F%2").arg(-m_depth, 0, 'f', 3).arg(tool.plungeRate, 0, 'f', 3)); //start z
-        sl.append(QString("G0Z%1").arg(MaterialSetupForm::clearence, 0, 'f', 3));
-    }
-    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3));
-    sl.append(QString("G0X%1Y%2").arg(home.x(), 0, 'f', 3).arg(home.y(), 0, 'f', 3));
-    sl.append("M30");
 
-    QFile file(name);
-    if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
-        for (QString& s : sl) {
-            out << s << endl;
+    for (QPointF& point : path) {
+        startPath(point);
+        for (int i = 1; m_depth > tool.passDepth * i; ++i) {
+            sl.append(g1() + z(-tool.passDepth * i) + feed(tool.plungeRate));
+            sl.append(QString("G0Z0"));
         }
+        sl.append(g1() + z(-m_depth) + feed(tool.plungeRate));
+        endPath();
     }
+    endFile();
 }
 
-void GCode::save2(const QString& name)
+void GCode::saveProfilePocket()
 {
-    QList<QString> sl;
+    statFile();
     QVector<QPolygonF> paths(PathsToQPolygons(paths));
 
-    sl.append("G17"); //XY
-    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3)); //HomeZ
-    QPointF home(MaterialSetupForm::homePos);
-    home -= MaterialSetupForm::zeroPos;
-    sl.append(QString("G0X%1Y%2S%3M3").arg(home.x(), 0, 'f', 3).arg(home.y(), 0, 'f', 3).arg(tool.spindleSpeed)); //HomeXY
+    for (QPolygonF& path : paths)
+        for (QPointF& point : path)
+            point -= MaterialSetupForm::zeroPos;
+
     QPointF lastPoint;
+
+    for (int i = 1; m_depth > tool.passDepth * i; ++i) {
+        for (QPolygonF& path : paths) {
+            QPointF point(path.last());
+
+            startPath(point);
+
+            sl.append(g1() + z(-tool.passDepth * i) + feed(tool.plungeRate)); //start z
+
+            bool fl = true;
+            for (QPointF& point : path) {
+                QString str("G1");
+                if (lastPoint.x() != point.x())
+                    str += x(point.x());
+                if (lastPoint.y() != point.y())
+                    str += y(point.y());
+                if (fl) {
+                    str += feed(tool.feedRate);
+                    fl = false;
+                }
+                sl.append(str);
+                lastPoint = point;
+            }
+            endPath();
+        }
+    }
+
     for (QPolygonF& path : paths) {
         QPointF point(path.last());
-        point -= MaterialSetupForm::zeroPos;
-        sl.append(QString("G0X%1Y%2").arg(point.x(), 0, 'f', 3).arg(point.y(), 0, 'f', 3)); //start xy
-        sl.append(QString("G0Z%1").arg(MaterialSetupForm::plunge, 0, 'f', 3)); //start z
-        sl.append(QString("G1Z%1F%2").arg(-m_depth, 0, 'f', 3).arg(tool.plungeRate, 0, 'f', 3)); //start z
+
+        startPath(point);
+
+        sl.append(g1() + z(-m_depth) + feed(tool.plungeRate)); //start z
+
         bool fl = true;
         for (QPointF& point : path) {
             QString str("G1");
-            point -= MaterialSetupForm::zeroPos;
             if (lastPoint.x() != point.x())
-                str.append(QString("X%1").arg(point.x(), 0, 'f', 3));
+                str += x(point.x());
             if (lastPoint.y() != point.y())
-                str.append(QString("Y%1").arg(point.y(), 0, 'f', 3));
+                str += y(point.y());
             if (fl) {
-                str.append(QString("F%1").arg(tool.feedRate, 0, 'f', 3));
+                str += feed(tool.feedRate);
                 fl = false;
             }
             sl.append(str);
             lastPoint = point;
         }
-        sl.append(QString("G0Z%1").arg(MaterialSetupForm::clearence, 0, 'f', 3));
+        endPath();
     }
-    sl.append(QString("G0Z%1").arg(MaterialSetupForm::z, 0, 'f', 3));
-    sl.append(QString("G0X%1Y%2").arg(home.x(), 0, 'f', 3).arg(home.y(), 0, 'f', 3));
+
+    endFile();
+}
+
+QString GCode::name() const { return m_name; }
+
+void GCode::setName(const QString& name) { m_name = name; }
+
+void GCode::startPath(const QPointF& point)
+{
+    sl.append(g0() + x(point.x()) + y(point.y())); //start xy
+    sl.append(g0() + z(MaterialSetupForm::plunge)); //start z
+}
+
+void GCode::endPath()
+{
+    sl.append(QString("G0Z%1").arg(format(MaterialSetupForm::clearence)));
+}
+
+void GCode::statFile()
+{
+    sl.clear();
+    sl.append("G17"); //XY plane
+    sl.append(g0() + z(MaterialSetupForm::z)); //HomeZ
+
+    QPointF home(MaterialSetupForm::homePos - MaterialSetupForm::zeroPos);
+    sl.append(g0() + x(home.x()) + y(home.y()) + s(tool.spindleSpeed) + "M3"); //HomeXY
+}
+
+void GCode::endFile()
+{
+    sl.append(g0() + z(MaterialSetupForm::z)); //HomeZ
+
+    QPointF home(MaterialSetupForm::homePos - MaterialSetupForm::zeroPos);
+    sl.append(g0() + x(home.x()) + y(home.y()) + s(tool.spindleSpeed) + "M3"); //HomeXY
+
     sl.append("M30");
 
-    QFile file(name);
+    QFile file(m_name);
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
-        for (QString& s : sl) {
+        for (QString& s : sl)
             out << s << endl;
-        }
     }
+    file.close();
 }
 
-QString GCode::name() const
-{
-    return m_name;
-}
-
-void GCode::setName(const QString& name)
-{
-    m_name = name;
-}
 ////////////////////////////////////////////////////
 /// \brief PathItem::PathItem
 /// \param path
@@ -178,10 +221,9 @@ void GCode::setName(const QString& name)
 PathItem::PathItem(const Path& path)
     : m_path(path)
 {
-    //    if (m_path.first() != m_path.last())
-    //        m_path.append(m_path.first());
+    if (m_path.first() != m_path.last())
+        m_path.append(m_path.first());
     m_shape.addPolygon(PathToQPolygon(m_path));
-
     double k = m_pen.widthF() / 2;
     rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
 }
@@ -252,6 +294,7 @@ int PathItem::type() const { return QGraphicsItem::UserType + 10; }
 DrillItem::DrillItem(double diameter)
     : m_diameter(diameter)
 {
+    setCacheMode(DeviceCoordinateCache);
     diameter /= 2;
     m_shape.addEllipse(QPointF(), diameter, diameter);
     rect = m_shape.boundingRect();
@@ -263,9 +306,15 @@ QPainterPath DrillItem::shape() const { return m_shape; }
 
 void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
+    painter->save();
+    if (m_pen.width() == 0)
+        painter->setRenderHint(QPainter::Antialiasing, false);
+
     painter->setBrush(m_brush);
     painter->setPen(m_pen);
     painter->drawPath(m_shape);
+
+    painter->restore();
 }
 
 int DrillItem::type() const { return QGraphicsItem::UserType + 10; }

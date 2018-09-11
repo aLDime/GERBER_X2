@@ -19,7 +19,7 @@ QRectF boardRect;
 void updateRect()
 {
     Clipper clipper;
-    for (G::File*& f : GerberItem::gFiles) {
+    for (G::File*& f : GerberItem::files) {
         if (f->itemGroup->isVisible())
             clipper.AddPaths(f->mergedPaths, ptSubject, true);
     }
@@ -29,19 +29,19 @@ void updateRect()
 }
 
 Point::Point(int type)
-    : m_pen(Qt::NoPen)
-    , m_type(type)
+    : m_type(type)
 {
+    setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable);
     if (m_type == HOME) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
-        m_brush = QBrush(QColor(0, 255, 0, 64));
+        m_color = QColor(0, 255, 0, 120);
         setToolTip("G-Code Home Point");
     } else {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
-        m_brush = QBrush(QColor(255, 0, 0, 64));
+        m_color = QColor(255, 0, 0, 120);
         setToolTip("G-Code Zero Point");
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
@@ -55,15 +55,16 @@ QRectF Point::boundingRect() const
     return m_rect;
 }
 
-void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (reinterpret_cast<MyScene*>(scene())->drawPdf)
-        return;
+    QColor c(m_color);
+    if (option->state & QStyle ::State_MouseOver)
+        c.setAlpha(255);
 
     painter->setPen(Qt::NoPen);
-    painter->setBrush(m_brush);
+    painter->setBrush(c);
     painter->drawPath(m_path);
-    painter->setPen(QPen(m_brush.color(), 1.0));
+    painter->setPen(c);
     painter->setBrush(Qt::NoBrush);
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
@@ -132,11 +133,15 @@ void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 /// \param type
 /// \param num
 ///
-Shtift::Shtift(int num)
-    : m_pen(Qt::NoPen)
+QVector<Shtift*> Shtift::m_shtifts;
+
+Shtift::Shtift()
+    : QGraphicsItem(nullptr)
 {
+    setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable);
-    if (num % 2) {
+
+    if (m_shtifts.size() % 2) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
     } else {
@@ -145,9 +150,16 @@ Shtift::Shtift(int num)
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
+
+    setToolTip("Штифт " + QString::number(m_shtifts.size() + 1));
+    setZValue(std::numeric_limits<qreal>::max() - m_shtifts.size());
+
     QSettings settings;
-    settings.beginGroup("Shtift" + QString::number(num));
+    settings.beginGroup("Shtift" + QString::number(m_shtifts.size()));
     setPos(settings.value("pos").toPointF());
+
+    m_shtifts.append(this);
+    MyScene::self->addItem(this);
 }
 
 Shtift::~Shtift()
@@ -164,34 +176,23 @@ QRectF Shtift::boundingRect() const
     return m_rect;
 }
 
-void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (reinterpret_cast<MyScene*>(scene())->drawPdf)
-        return;
+    QColor c(255, 255, 0, 120);
+    if (option->state & QStyle ::State_MouseOver)
+        c.setAlpha(255);
 
     painter->setPen(Qt::NoPen);
-    painter->setBrush(m_brush);
+    painter->setBrush(c);
     painter->drawPath(m_path);
-    painter->setPen(QPen(m_brush.color(), 1.0));
+    painter->setPen(c);
     painter->setBrush(Qt::NoBrush);
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
 QPainterPath Shtift::shape() const
 {
-    //    if (MyScene::self != nullptr && MyScene::self->drawPdf)
-    //        return QPainterPath();
     return m_shape;
-}
-
-void Shtift::setBrush(const QBrush& brush)
-{
-    m_brush = brush;
-}
-
-void Shtift::setShtifts(const QVector<Shtift*>& shtifts)
-{
-    m_shtifts = shtifts;
 }
 
 void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)

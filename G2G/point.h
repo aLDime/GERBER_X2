@@ -14,7 +14,6 @@ class Point : public QObject, public QGraphicsItem {
 public:
     Point(int type);
 
-    // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
@@ -30,14 +29,13 @@ public:
     };
 
 private:
+    QColor m_color;
     QRectF m_rect;
     QPainterPath m_path;
     QPainterPath m_shape;
-    QBrush m_brush;
-    QPen m_pen;
     int m_type;
     void updateMaterialSetupForm();
-    // QGraphicsItem interface
+
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
@@ -46,28 +44,19 @@ protected:
 class Shtift : public QObject, public QGraphicsItem {
 
 public:
-    Shtift(int num);
+    Shtift();
     ~Shtift();
-    // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
-
-    void setBrush(const QBrush& brush);
-    bool bounding() const;
-    void setBounding(bool bounding);
-    void setShtifts(const QVector<Shtift*>& shtifts);
 
 private:
     QRectF m_rect;
     QPainterPath m_path;
     QPainterPath m_shape;
-    QBrush m_brush;
-    QPen m_pen;
-    QVector<Shtift*> m_shtifts;
+    static QVector<Shtift*> m_shtifts;
     QPointF m_lastPos;
 
-    // QGraphicsItem interface
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;

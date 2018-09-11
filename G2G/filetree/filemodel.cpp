@@ -14,10 +14,10 @@ FileModel::FileModel(QObject* parent)
     , rootItem(new FolderItem("rootItem"))
 {
     self = this;
-    rootItem->add(new FolderItem("Файлы"));
-    rootItem->add(new FolderItem("Фрезеровки"));
-    rootItem->add(new FolderItem("Сверловки"));
-    rootItem->add(new FolderItem("Штифты"));
+    rootItem->add(new FolderItem("Gerber Files"));
+    rootItem->add(new FolderItem("Excellon"));
+    rootItem->add(new FolderItem("Tool Paths"));
+    rootItem->add(new FolderItem("Shtift"));
 }
 
 FileModel::~FileModel()
@@ -28,7 +28,7 @@ FileModel::~FileModel()
 
 void FileModel::addGerberFile(G::File* gerberFile)
 {
-    AbstractItem* item{ rootItem->child(NODE_FILES) };
+    AbstractItem* item{ rootItem->child(NODE_GERBER_FILES) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -48,7 +48,7 @@ void FileModel::addGcode(GCode* group)
 
 void FileModel::closeAllFiles()
 {
-    AbstractItem* item{ rootItem->child(NODE_FILES) };
+    AbstractItem* item{ rootItem->child(NODE_GERBER_FILES) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     if (rowCount) {
@@ -177,7 +177,7 @@ bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
     return true;
 }
 
-int FileModel::columnCount(const QModelIndex& parent) const
+int FileModel::columnCount(const QModelIndex& /*parent*/) const
 {
     //    if (parent.isValid())
     //        return static_cast<AbstractItem*>(parent.internalPointer())->columnCount();
