@@ -1,4 +1,5 @@
 #include "filemodel.h"
+#include "drillitem.h"
 #include "folderitem.h"
 #include "gcodeitem.h"
 #include "gerberitem.h"
@@ -36,6 +37,18 @@ void FileModel::addGerberFile(G::File* gerberFile)
     endInsertRows();
 }
 
+void FileModel::addDrlFile(DrlFile* drl)
+{
+    if (!drl)
+        return;
+    AbstractItem* item{ rootItem->child(NODE_DRILL) };
+    QModelIndex index = createIndex(0, 0, item);
+    int rowCount = item->childCount();
+    beginInsertRows(index, rowCount, rowCount);
+    item->add(new DrillItem_(drl));
+    endInsertRows();
+}
+
 void FileModel::addGcode(GCode* group)
 {
     AbstractItem* item{ rootItem->child(NODE_MILLING) };
@@ -51,6 +64,16 @@ void FileModel::closeAllFiles()
     AbstractItem* item{ rootItem->child(NODE_GERBER_FILES) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
+    if (rowCount) {
+        beginRemoveRows(index, 0, rowCount - 1);
+        for (int i = 0; i < rowCount; ++i) {
+            item->remove(0);
+        }
+        endRemoveRows();
+    }
+    item = rootItem->child(NODE_DRILL);
+    index = createIndex(0, 0, item);
+    rowCount = item->childCount();
     if (rowCount) {
         beginRemoveRows(index, 0, rowCount - 1);
         for (int i = 0; i < rowCount; ++i) {

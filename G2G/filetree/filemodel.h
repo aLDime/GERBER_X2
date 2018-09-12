@@ -7,6 +7,7 @@
 #include <QFile>
 #include <QMessageBox>
 #include <file.h>
+#include <gcode/drl.h>
 #include <gcode/gcode.h>
 
 enum {
@@ -29,6 +30,7 @@ public:
     ~FileModel();
 
     void addGerberFile(G::File* gerberFile);
+    void addDrlFile(DrlFile* drl);
     void addGcode(GCode* group);
     void closeAllFiles();
 

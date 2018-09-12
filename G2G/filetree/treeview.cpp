@@ -104,6 +104,9 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
     if (index.column() == 0 && index.parent() == m_model->index(NODE_GERBER_FILES, 0, QModelIndex())) {
         hideOther(index);
     }
+    if (index.column() == 0 && index.parent() == m_model->index(NODE_DRILL, 0, QModelIndex())) {
+        hideOther(index);
+    }
 }
 
 void TreeView::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
@@ -159,6 +162,21 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
         menu.exec(mapToGlobal(event->pos()));
     }
+
+    if (index.parent().row() == NODE_DRILL) {
+        QMenu menu(this);
+
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
+            m_model->removeRow(index.row(), index.parent());
+        });
+
+        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), [&] {
+            hideOther(index);
+        });
+
+        menu.exec(mapToGlobal(event->pos()));
+    }
+
     if (m_model->index(NODE_MILLING, 0, QModelIndex()) == index.parent()) {
         QMenu menu(this);
 

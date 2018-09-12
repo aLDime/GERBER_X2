@@ -68,7 +68,8 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     forms/pocketform.h \
     forms/toolpathutil.h \
-    gcode/drl.h
+    gcode/drl.h \
+    filetree/drillitem.h
 
 
 SOURCES += \
@@ -96,7 +97,8 @@ SOURCES += \
     tooldatabase/tooltreeview.cpp \
     forms/pocketform.cpp \
     forms/toolpathutil.cpp \
-    gcode/drl.cpp
+    gcode/drl.cpp \
+    filetree/drillitem.cpp
 
 
 

@@ -294,6 +294,16 @@ int PathItem::type() const { return QGraphicsItem::UserType + 10; }
 DrillItem::DrillItem(double diameter)
     : m_diameter(diameter)
 {
+    //            IntPoint center(hole.state.pos.x() * uScale, hole.state.pos.y() * uScale);
+    //            double radius = hole.state.currentToolDiameter * uScale / 2.0;
+    //            Path poligon(G::STEPS_PER_CIRCLE);
+    //            for (int i = 0; i < G::STEPS_PER_CIRCLE; ++i) {
+    //                poligon[i] = IntPoint(
+    //                    (qCos(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.X,
+    //                    (qSin(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.Y);
+    //            }
+    //            if (Area(poligon) < 0)
+    //                ReversePath(poligon);
     setCacheMode(DeviceCoordinateCache);
     diameter /= 2;
     m_shape.addEllipse(QPointF(), diameter, diameter);

@@ -74,7 +74,6 @@ private:
 class DrillItem : public GraphicsItem {
 public:
     DrillItem(double diameter);
-    //~WorkItem() override {}
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;

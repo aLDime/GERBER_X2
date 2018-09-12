@@ -6,6 +6,8 @@
 
 #ifndef linux
 #include <qt_windows.h>
+
+#include <gcode/drl.h>
 #endif
 
 int main(int argc, char* argv[])
@@ -22,7 +24,7 @@ int main(int argc, char* argv[])
         if (argc == 2) {
             QSettings* settings;
             settings = new QSettings("XrSoft", "G2G");
-            settings->setValue("AddFile", QString::fromLocal8Bit(argv[1]).replace(QString("\\"), QString("/")));
+            settings->setValue("AddFile", QString::fromLocal8Bit(argv[1]).replace(QString("//"), QString("/")));
             CloseHandle(hCorvetEvent);
         }
         return 0;
@@ -51,6 +53,14 @@ int main(int argc, char* argv[])
         mainWin->openFile(file);
     }
     mainWin->show();
+
+//    Drl d;
+//    d.parseFile("C:/Users/User/Downloads/gbr/Gerber Test Files/123/d24.drl");
+//    d.parseFile("C:/Users/User/Downloads/gbr/Gerber Test Files/123/d24d.drl");
+//    d.parseFile("C:/Users/User/Downloads/gbr/Gerber Test Files/123/m32.drl");
+//    d.parseFile("C:/Users/User/Downloads/gbr/Gerber Test Files/123/m32d.drl");
+//    d.parseFile("C:/Users/User/Downloads/gbr/Gerber Test Files/123/m33d.drl");
+//    QTimer::singleShot(100, Qt::CoarseTimer, mainWin, &MainWindow::close);
 
     return app.exec();
 }

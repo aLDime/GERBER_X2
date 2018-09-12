@@ -52,7 +52,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
     connect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
-    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
+    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
@@ -131,7 +131,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::open()
 {
-    QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Images (*.gbr *.*)")));
+    QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Files (*.gbr *.*)")));
     for (QString& fileName : files) {
         openFile(fileName);
     }
@@ -357,18 +357,23 @@ void MainWindow::openFile(const QString& fileName)
     static QMutex mutex;
     QMutexLocker locker(&mutex);
 
-    if (treeView->files().contains(fileName)) {
-        QMessageBox::warning(this, "", tr("The document is open."));
-        return;
-    }
+    //    if (treeView->files().contains(fileName)) {
+    //        QMessageBox::warning(this, "", tr("The document is open."));
+    //        return;
+    //    }
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
-    lastPath = QFileInfo(fileName).absolutePath();
-    emit parseFile(fileName);
+    QFileInfo fi(fileName);
+    lastPath = fi.absolutePath();
+
+    if (fi.suffix().contains("drl", Qt::CaseInsensitive)) {
+        FileModel::self->addDrlFile(Drl().parseFile(fileName));
+    } else
+        emit parseFile(fileName);
     //    setCurrentFile(fileName);
 }
 
