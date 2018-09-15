@@ -1,44 +1,45 @@
-#include "abstractitem.h"
+#include "abstractnode.h"
 
 #include <QDebug>
 
-int AbstractItem::c = 0;
+int AbstractNode::c = 0;
+QList<QString> AbstractNode::files;
 
-AbstractItem::AbstractItem()
+AbstractNode::AbstractNode()
 {
     //qDebug() << "AbstractItem" << ++c << this << m_parentItem;
 }
 
-AbstractItem::~AbstractItem()
+AbstractNode::~AbstractNode()
 {
     //qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
     qDeleteAll(childItems);
 }
 
-int AbstractItem::row() const
+int AbstractNode::row() const
 {
     if (m_parentItem)
-        return m_parentItem->childItems.indexOf(const_cast<AbstractItem*>(this));
+        return m_parentItem->childItems.indexOf(const_cast<AbstractNode*>(this));
     return 0;
 }
 
-AbstractItem* AbstractItem::child(int row)
+AbstractNode* AbstractNode::child(int row)
 {
     return childItems.value(row);
 }
 
-AbstractItem* AbstractItem::parentItem()
+AbstractNode* AbstractNode::parentItem()
 {
     return m_parentItem;
 }
 
-void AbstractItem::add(AbstractItem* item)
+void AbstractNode::add(AbstractNode* item)
 {
     item->m_parentItem = this;
     childItems.append(item);
 }
 
-void AbstractItem::insert(int row, AbstractItem* item)
+void AbstractNode::insert(int row, AbstractNode* item)
 {
     item->m_parentItem = this;
     if (row < childItems.size())
@@ -47,13 +48,12 @@ void AbstractItem::insert(int row, AbstractItem* item)
         childItems.append(item);
 }
 
-void AbstractItem::remove(int row)
+void AbstractNode::remove(int row)
 {
     delete childItems.takeAt(row);
 }
 
-int AbstractItem::childCount() const
+int AbstractNode::childCount() const
 {
     return childItems.count();
 }
-

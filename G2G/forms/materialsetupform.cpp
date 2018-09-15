@@ -7,16 +7,16 @@
 #include <mainwindow.h>
 #include <myscene.h>
 
-MaterialSetupForm* MaterialSetupForm::self = nullptr;
+MaterialSetup* MaterialSetup::self = nullptr;
 
-QPointF MaterialSetupForm::homePos;
-QPointF MaterialSetupForm::zeroPos;
-double MaterialSetupForm::z;
-double MaterialSetupForm::thickness;
-double MaterialSetupForm::clearence;
-double MaterialSetupForm::plunge;
+QPointF MaterialSetup::homePos;
+QPointF MaterialSetup::zeroPos;
+double MaterialSetup::z;
+double MaterialSetup::thickness;
+double MaterialSetup::clearence;
+double MaterialSetup::plunge;
 
-MaterialSetupForm::MaterialSetupForm(QWidget* parent)
+MaterialSetup::MaterialSetup(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::MaterialSetupForm)
 
@@ -109,7 +109,7 @@ MaterialSetupForm::MaterialSetupForm(QWidget* parent)
     });
 }
 
-MaterialSetupForm::~MaterialSetupForm()
+MaterialSetup::~MaterialSetup()
 {
     self = nullptr;
 
@@ -132,7 +132,7 @@ MaterialSetupForm::~MaterialSetupForm()
     delete ui;
 }
 
-void MaterialSetupForm::setHomePos(QPointF pos)
+void MaterialSetup::setHomePos(QPointF pos)
 {
     QSettings settings;
     settings.beginGroup("Material");
@@ -145,7 +145,7 @@ void MaterialSetupForm::setHomePos(QPointF pos)
     }
 }
 
-void MaterialSetupForm::setZeroPos(QPointF pos)
+void MaterialSetup::setZeroPos(QPointF pos)
 {
     QSettings settings;
     settings.beginGroup("Material");

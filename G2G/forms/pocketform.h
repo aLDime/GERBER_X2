@@ -30,6 +30,10 @@ private:
 
     int direction = 0;
     int type = 0;
+
+    // ToolPathUtil interface
+public:
+    void create() override;
 };
 
 #endif // POCKETFORM_H

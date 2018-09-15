@@ -8,7 +8,6 @@
 #include "tooldatabase/tooldatabase.h"
 #include <QDockWidget>
 #include <QMessageBox>
-#include <graphicsitem.h>
 #include <myclipper.h>
 #include <myscene.h>
 
@@ -31,7 +30,7 @@ PocketForm::PocketForm(QWidget* parent)
     ui->lblToolName->setText(tool.name);
     ui->lblToolName_2->setText(tool2.name);
 
-    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
+    ui->dsbxDepth->setValue(MaterialSetup::thickness);
 
     auto rb_clicked = [&] {
         QStringList list = {
@@ -97,6 +96,17 @@ void PocketForm::on_pbEdit_2_clicked() {}
 
 void PocketForm::on_pbCreate_clicked()
 {
+    create();
+}
+
+void PocketForm::on_pbClose_clicked()
+{
+    if (parent())
+        static_cast<QDockWidget*>(parent())->hide();
+}
+
+void PocketForm::create()
+{
     MyScene* scene = MyScene::self;
 
     if (!tool.isValid()) {
@@ -110,10 +120,24 @@ void PocketForm::on_pbCreate_clicked()
     }
 
     Paths wPaths;
+    G::Side side = G::Side(-1);
     for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == WorkItemType)
-            wPaths.append(static_cast<WorkItem*>(item)->getPaths());
+        if (item->type() == GERBER_ITEM) {
+            GerberItem* gi = static_cast<GerberItem*>(item);
+            if (side == G::Side(-1))
+                side = gi->file()->side;
+            if (side != gi->file()->side) {
+                QMessageBox::warning(this, "", "Working items from different sides!");
+                return;
+            }
+        }
+        if (item->type() == GERBER_ITEM || item->type() == DRILL_ITEM)
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
+
+    if (side == G::Side(-1))
+        side = G::Top;
+
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
@@ -125,12 +149,7 @@ void PocketForm::on_pbCreate_clicked()
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
         return;
     }
-    gcode->setName(ui->leName->text());
+    gcode->setFileName(ui->leName->text());
+    gcode->setSide(side);
     FileModel::self->addGcode(gcode);
-}
-
-void PocketForm::on_pbClose_clicked()
-{
-    if (parent())
-        static_cast<QDockWidget*>(parent())->hide();
 }

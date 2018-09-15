@@ -33,7 +33,7 @@ Paths sortByStratDistance(Paths src)
 {
     Paths dst;
     dst.reserve(src.size());
-    IntPoint p1(MaterialSetupForm::homePos.x() * uScale, MaterialSetupForm::homePos.y() * uScale);
+    IntPoint p1(MaterialSetup::homePos.x() * uScale, MaterialSetup::homePos.y() * uScale);
     while (src.size()) {
         int s = 0;
         IntPoint p2;
@@ -130,7 +130,7 @@ GCode* ToolPathCreator::ToolPathPocket(/*MILLING milling,*/ const QVector<Tool>&
         }
     }
 
-    return new GCode(sortByStratDistance(tmpPaths) /*tmp2*/ /*tmpPaths*/, tool[0], depth, POCKET);
+    return new GCode(sortByStratDistance(tmpPaths) /*tmp2*/ /*tmpPaths*/, tool[0], depth, Pocket);
 }
 
 GCode* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, bool convent, double depth)
@@ -182,7 +182,7 @@ GCode* ToolPathCreator::ToolPathProfile(MILLING milling, const Tool& tool, bool 
     for (Path& path : tmpPaths)
         fixBegin(path);
 
-    return new GCode(sortByStratDistance(tmpPaths) /*tmpPaths*/ /*tmp2*/, tool, depth, PROFILE);
+    return new GCode(sortByStratDistance(tmpPaths) /*tmpPaths*/ /*tmp2*/, tool, depth, Profile);
 }
 
 Paths ToolPathCreator::GetMergedPaths()

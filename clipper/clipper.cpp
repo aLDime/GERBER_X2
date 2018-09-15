@@ -4097,7 +4097,7 @@ void ClipperOffset::DoRound(int j, int k)
 
         //double a1 = qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X)) + 180;
         //double a2 = ((int)qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X) / g)) * g + 180;
-        qDebug() << "DoRound";
+        //qDebug() << "DoRound";
         //        for (int i = 0; i < spc; ++i) {
         //if (a2 > (int)a1)
         //    a2 -= g;

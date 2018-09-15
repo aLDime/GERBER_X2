@@ -3,22 +3,24 @@
 
 #include "gerber.h"
 
-#include <QtMath>
 #include <QMap>
+#include <QtMath>
 namespace G {
 
 enum ApertureType {
-    CIRCULAR,
-    RECTANGLE,
-    OBROUND,
-    POLYGON,
-    APERTURE_MACRO,
+    Circle,
+    Rectangle,
+    Obround,
+    Polygon,
+    Macro,
 };
 
-class Aperture {
+class AbstractAperture {
+    Q_DISABLE_COPY(AbstractAperture)
+
 public:
-    Aperture();
-    virtual ~Aperture();
+    AbstractAperture();
+    virtual ~AbstractAperture();
 
     bool isDrilled() const { return m_drillDiam != 0.0; }
     bool isFlashed() const { return m_isFlashed; }
@@ -49,9 +51,9 @@ protected:
 /////////////////////////////////////////////////////
 /// \brief The GACircular class
 ///
-class ApCircular : public Aperture {
+class ApCircle : public AbstractAperture {
 public:
-    ApCircular(double diam, double drillDiam);
+    ApCircle(double diam, double drillDiam);
     QString name() override;
     ApertureType type() const override;
 
@@ -65,7 +67,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GARectangle class
 ///
-class ApRectangle : public Aperture {
+class ApRectangle : public AbstractAperture {
 public:
     ApRectangle(double width, double height, double drillDiam);
     QString name() override;
@@ -82,7 +84,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAObround class
 ///
-class ApObround : public Aperture {
+class ApObround : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam);
     QString name() override;
@@ -99,7 +101,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAPolygon class
 ///
-class ApPolygon : public Aperture {
+class ApPolygon : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam);
     double rotation() const;
@@ -120,7 +122,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAMacro class
 ///
-class ApMacro : public Aperture {
+class ApMacro : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients);
     QString name() override;

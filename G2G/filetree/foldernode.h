@@ -1,14 +1,14 @@
 #ifndef FOLDER_H
 #define FOLDER_H
 
-#include "abstractitem.h"
+#include "abstractnode.h"
 
-class FolderItem : public AbstractItem {
+class FolderNode : public AbstractNode {
     QString name;
 
 public:
-    FolderItem(const QString& name);
-    ~FolderItem();
+    FolderNode(const QString& name);
+    ~FolderNode();
     // AbstractItem interface
 public:
     QVariant data(const QModelIndex& index, int role) const override;

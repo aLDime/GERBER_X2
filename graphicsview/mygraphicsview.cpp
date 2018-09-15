@@ -9,6 +9,15 @@
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
+#include <mainwindow.h>
+
+//#include <filetree/filemodel.h>
+//#include <forms/materialsetupform.h>
+//#include <gcode/gcode.h>
+//#include <gi/itemgroup.h>
+//#include <point.h>
+//#include <tooldatabase/tool.h>
+//#include <tooldatabase/tooldatabase.h>
 
 MyGraphicsView* MyGraphicsView::self = nullptr;
 
@@ -205,13 +214,14 @@ void MyGraphicsView::dragMoveEvent(QDragMoveEvent* event)
     event->acceptProposedAction();
 }
 
-void MyGraphicsView::contextMenuEvent(QContextMenuEvent* event)
-{
-    QMenu menu(this);
-    menu.addAction(QIcon(), tr("&Pointer Mode..."), []() { qDebug() << "&Pointer Mode..."; });
-    menu.exec(event->globalPos());
-    QGraphicsView::contextMenuEvent(event);
-}
+//void MyGraphicsView::contextMenuEvent(QContextMenuEvent* event)
+//{
+//    QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
+//    if (item->type() == POINT_SHTIFT) {
+//        MainWindow::self->createShtiftPath(event);
+//    }
+//    QGraphicsView::contextMenuEvent(event);
+//}
 
 void MyGraphicsView::resizeEvent(QResizeEvent* event)
 {

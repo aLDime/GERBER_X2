@@ -26,6 +26,7 @@ DISTFILES += \
 include(../graphicsview/mygraphicsview.pri)
 include(../gerber/gerber.pri)
 include(../clipper/clipper.pri)
+include(../file/file.pri)
 
 
 DEFINES += QT_DEPRECATED_WARNINGS G2G
@@ -45,17 +46,28 @@ win32* {
 HEADERS += \
     application.h \
     drillforapertureform.h \
-    filetree/abstractitem.h \
+    filetree/abstractnode.h \
+    filetree/drillnode.h \
+    filetree/fileholder.h \
     filetree/filemodel.h \
-    filetree/folderitem.h \
-    filetree/gcodeitem.h \
-    filetree/gerberitem.h \
+    filetree/foldernode.h \
+    filetree/gcodenode.h \
+    filetree/gerbernode.h \
     filetree/treeview.h \
     forms/drillform.h \
     forms/materialsetupform.h \
+    forms/pocketform.h \
     forms/profileform.h \
+    forms/toolpathutil.h \
+    gcode/drl.h \
     gcode/gcode.h \
     gcode/toolpathcreator.h \
+    gi/drillitem.h \
+    gi/gerberitem.h \
+    gi/graphicsitem.h \
+    gi/itemgroup.h \
+    gi/pathitem.h \
+    gi/rawitem.h \
     mainwindow.h \
     openingdialog.h \
     point.h \
@@ -66,25 +78,32 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    forms/pocketform.h \
-    forms/toolpathutil.h \
-    gcode/drl.h \
-    filetree/drillitem.h
 
 
 SOURCES += \
     drillforapertureform.cpp \
-    filetree/abstractitem.cpp \
+    filetree/abstractnode.cpp \
+    filetree/drillnode.cpp \
+    filetree/fileholder.cpp \
     filetree/filemodel.cpp \
-    filetree/folderitem.cpp \
-    filetree/gcodeitem.cpp \
-    filetree/gerberitem.cpp \
+    filetree/foldernode.cpp \
+    filetree/gcodenode.cpp \
+    filetree/gerbernode.cpp \
     filetree/treeview.cpp \
     forms/drillform.cpp \
     forms/materialsetupform.cpp \
+    forms/pocketform.cpp \
     forms/profileform.cpp \
+    forms/toolpathutil.cpp \
+    gcode/drl.cpp \
     gcode/gcode.cpp \
     gcode/toolpathcreator.cpp \
+    gi/drillitem.cpp \
+    gi/gerberitem.cpp \
+    gi/graphicsitem.cpp \
+    gi/itemgroup.cpp \
+    gi/pathitem.cpp \
+    gi/rawitem.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \
@@ -95,10 +114,6 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    forms/pocketform.cpp \
-    forms/toolpathutil.cpp \
-    gcode/drl.cpp \
-    filetree/drillitem.cpp
 
 
 

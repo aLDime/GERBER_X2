@@ -1,7 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "abstractitem.h"
+#include "abstractnode.h"
 #include <QAbstractItemModel>
 #include <QDebug>
 #include <QFile>
@@ -19,7 +19,7 @@ enum {
 
 class FileModel : public QAbstractItemModel {
     Q_OBJECT
-    AbstractItem* rootItem;
+    AbstractNode* rootItem;
 
 signals:
     void updateActions();
@@ -30,7 +30,7 @@ public:
     ~FileModel();
 
     void addGerberFile(G::File* gerberFile);
-    void addDrlFile(DrlFile* drl);
+    void addDrlFile(Drill* drl);
     void addGcode(GCode* group);
     void closeAllFiles();
 

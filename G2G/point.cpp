@@ -10,7 +10,8 @@
 #include <QSettings>
 #include <clipper.hpp>
 
-#include <filetree/gerberitem.h>
+#include "filetree/FileHolder.h"
+#include "gi/graphicsitem.h"
 
 using namespace ClipperLib;
 
@@ -19,10 +20,7 @@ QRectF boardRect;
 void updateRect()
 {
     Clipper clipper;
-    for (G::File*& f : GerberItem::files) {
-        if (f->itemGroup->isVisible())
-            clipper.AddPaths(f->mergedPaths, ptSubject, true);
-    }
+    clipper.AddPaths(FileHolder::getPaths(), ptSubject, true);
     IntRect r(clipper.GetBounds());
     boardRect.setTopLeft(QPointF(r.left * dScale, r.top * dScale));
     boardRect.setBottomRight(QPointF(r.right * dScale, r.bottom * dScale));
@@ -78,6 +76,8 @@ QPainterPath Point::shape() const
 
 void Point::resetPos()
 {
+    if (!this)
+        return;
     updateRect();
     if (m_type == HOME)
         setPos(boardRect.bottomRight());
@@ -110,9 +110,9 @@ void Point::setPosY(double y)
 void Point::updateMaterialSetupForm()
 {
     if (m_type == HOME)
-        MaterialSetupForm::self->setHomePos(pos());
+        MaterialSetup::self->setHomePos(pos());
     else
-        MaterialSetupForm::self->setZeroPos(pos());
+        MaterialSetup::self->setZeroPos(pos());
 }
 
 void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -258,6 +258,8 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Shtift::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
+    if (!(flags() & QGraphicsItem::ItemIsMovable))
+        return;
     updateRect();
     QPointF p[]{
         QPointF(boardRect.topLeft() + QPointF(-3, -3)),
@@ -284,4 +286,19 @@ void Shtift::mousePressEvent(QGraphicsSceneMouseEvent* event)
 void Shtift::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseReleaseEvent(event);
+}
+
+int Point::type() const
+{
+    return m_type ? POINT_HOME : POINT_ZERO;
+}
+
+int Shtift::type() const
+{
+    return POINT_SHTIFT;
+}
+
+QVector<Shtift*> Shtift::shtifts()
+{
+    return m_shtifts;
 }

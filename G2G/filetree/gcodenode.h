@@ -1,16 +1,16 @@
 #ifndef MILLING_H
 #define MILLING_H
 
-#include "abstractitem.h"
+#include "abstractnode.h"
 #include <QGraphicsItemGroup>
 #include <gcode/gcode.h>
 
-class GcodeItem : public AbstractItem {
+class GcodeNode : public AbstractNode {
     Qt::CheckState checkState = Qt::Checked;
 
 public:
-    GcodeItem(GCode* group);
-    ~GcodeItem();
+    GcodeNode(GCode* group);
+    ~GcodeNode();
 
     // AbstractItem interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
@@ -18,7 +18,6 @@ public:
     int childCount(/*const QModelIndex& parent*/) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    static QMap<int, GCode*> gCode;
 
 private:
     const int m_id;

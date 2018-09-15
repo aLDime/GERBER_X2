@@ -24,15 +24,15 @@ class MathParser {
 public:
     MathParser(QMap<QString, double>& variables);
     double getVariable(QString variableName);
-    double Parse(const QString& s = "");
+    double parse(const QString& s = "");
 
 private:
     QMap<QString, double>* variables;
-    Result PlusMinus(QString s);
-    Result Bracket(QString s);
-    Result FunctionVariable(QString s);
-    Result MulDiv(QString s);
-    Result Num(QString s);
+    Result plusMinus(QString s);
+    Result bracket(QString s);
+    Result functionVariable(QString s);
+    Result mulDiv(QString s);
+    Result num(QString s);
     // Тут определяем все нашие функции, которыми мы можем пользоватся в формулах
     Result processFunction(QString func, Result r);
 };

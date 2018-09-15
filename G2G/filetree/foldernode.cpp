@@ -1,18 +1,18 @@
-#include "folderitem.h"
-#include "gerberitem.h"
+#include "foldernode.h"
+#include "gerbernode.h"
 
 #include <QIcon>
 
-FolderItem::FolderItem(const QString& name)
+FolderNode::FolderNode(const QString& name)
     : name(name)
 {
 }
 
-FolderItem::~FolderItem()
+FolderNode::~FolderNode()
 {
 }
 
-QVariant FolderItem::data(const QModelIndex& index, int role) const
+QVariant FolderNode::data(const QModelIndex& index, int role) const
 {
     if (index.column())
         return QVariant();
@@ -29,22 +29,22 @@ QVariant FolderItem::data(const QModelIndex& index, int role) const
     }
 }
 
-Qt::ItemFlags FolderItem::flags(const QModelIndex& /*index*/) const
+Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const
 {
     return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
 }
 
-int FolderItem::childCount() const
+int FolderNode::childCount() const
 {
     return childItems.size();
 }
 
-int FolderItem::columnCount() const
+int FolderNode::columnCount() const
 {
     return 1;
 }
 
-bool FolderItem::setData(const QModelIndex& index, const QVariant& value, int role)
+bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (index.column())
         return false;

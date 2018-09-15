@@ -10,76 +10,80 @@
 
 using namespace ClipperLib;
 namespace G {
-enum ZERO_OMISSION_MODE {
-    OMIT_LEADING_ZEROS,
+enum ZeroOmissionMode {
+    OmitLeadingZeros,
 #ifdef DEPRECATED
-    OMIT_TRAILING_ZEROS,
+    OmitTrailingZeros,
 #endif
 };
 
-enum UNIT_MODE {
-    INCHES,
-    MILLIMETERS,
+enum UnitMode {
+    Inches,
+    Millimeters,
 };
 
-enum IMAGE_POLARITY {
-    POSITIVE,
+enum ImagePolarity {
+    Positive,
 #ifdef DEPRECATED_IMAGE_POLARITY
-    NEGATIVE,
+    Negative,
 #endif
 
 };
 
-enum COORDINATE_VALUES_NOTATION {
-    ABSOLUTE_NOTATION,
+enum CoordinateValuesNotation {
+    AbsoluteNotation,
 #ifdef DEPRECATED
-    INCREMENTAL_NOTATION,
+    IncrementalNotation,
 #endif
 };
 
-enum INTERPOLATION_MODE {
-    LINEAR = 1,
-    CLOCKWISE_CIRCULAR = 2,
-    COUNTERCLOCKWISE_CIRCULAR = 3
+enum InterpolationMode {
+    Linear = 1,
+    ClockwiseCircular = 2,
+    CounterclockwiseCircular = 3
 };
 
-enum REGION_MODE {
-    OFF,
-    ON
+enum RegionMode {
+    Off,
+    On
 };
 
-enum STEP_REPEAT {
-    SR_CLOSE,
-    SR_OPEN
+enum StepRepeat {
+    SrClose,
+    SrOpen
 };
 
-enum QUADRANT_MODE {
-    UNDEF,
-    SINGLE,
-    MULTI
+enum QuadrantMode {
+    Undef,
+    Single,
+    Multi
 };
 
-enum D_CODE {
+enum DCode {
     D01 = 1,
     D02 = 2,
     D03 = 3
 };
 
-enum LAYER {
-    TOP_ASSY,
-    TOP_SILK,
-    TOP_PASTE,
-    TOP_MASK,
-    TOP,
-    BOT,
-    BOT_MASK,
-    BOT_PASTE,
-    BOT_SILK,
-    BOT_ASSY,
-    BOARD,
+enum Layer {
+    Assy,
+    Silk,
+    Paste,
+    Mask,
+    Copper,
+    Board,
+};
+enum Side {
+    Top,
+    Bottom
 };
 
-enum G_CODE {
+enum Miror {
+    Vertical,
+    Horizontal
+};
+
+enum GCode {
     // Graphics state operators defining the interpolateparameter defining the interpolate operation (D01).
     G01 = 1, // Sets the interpolation mode tolinear
     G02 = 2, // Sets the interpolation mode to ‘Clockwise circular interpolation’
@@ -106,74 +110,65 @@ enum G_CODE {
 #endif
 };
 
-enum ATTRIBUTE_TYPE {
-    ATTRIBUTE, // TF
-    APERTURE_ATTRIBUTE, // TA
-    OBJECT_ATTRIBUTE, // TO
-    DELETE_ATTRIBUTE // TD
+enum AttributeType {
+    AttributeA, // TF
+    ApertureAttribute, // TA
+    ObjectAttribute, // TO
+    DeleteAttribute // TD
 };
 
-enum {
-    STEPS_PER_CIRCLE = 72
+enum { StepsPerCircle = 72 };
+
+enum PrimitiveType {
+    Aperture,
+    Line,
+    Region,
 };
 
-enum PRIMITIVE_TYPE {
-    APERTURE,
-    LINE,
-    REGION,
-};
-
-class Format {
-public:
-    UNIT_MODE unitMode = MILLIMETERS;
+struct Format {
+    UnitMode unitMode = Millimeters;
 
     // Warning: Trailing zero omission is deprecated
-    ZERO_OMISSION_MODE zeroOmisMode = OMIT_LEADING_ZEROS;
+    ZeroOmissionMode zeroOmisMode = OmitLeadingZeros;
 
-    // Warning: Currently the only allowed notation is absolute notation. The incremental notation is deprecated.
-    COORDINATE_VALUES_NOTATION coordValueNotation = ABSOLUTE_NOTATION;
+    // Warning: Currently the only allowed notation is absolute notation.
+    // The incremental notation is deprecated.
+    CoordinateValuesNotation coordValueNotation = AbsoluteNotation;
 
     // Warning: Using less than 4 decimal places is deprecated.
-    int xDecimal = 4;
     int xInteger = 3;
-    // Warning: Using less than 4 decimal places is deprecated.
-    int yDecimal = 4;
+    int xDecimal = 4;
     int yInteger = 3;
+    int yDecimal = 4;
 };
 
-class State {
-public:
-    //    COORDINATE_VALUES_NOTATION coordValueNotation = ABSOLUTE_NOTATION;
-    //    UNIT_MODE unitMode = MILLIMETERS;
-    //    ZERO_OMISSION_MODE zeroOmisMode = OMIT_LEADING_ZEROS;
+struct State {
     void reset()
     {
-        curDCode = D02;
         format = Format();
-        curGCode = G01;
-        imgPolarity = POSITIVE;
-        curAperture = 0;
+        dCode = D02;
+        gCode = G01;
+        imgPolarity = Positive;
+        interpolation = Linear;
+        type = Aperture;
+        quadrant = Undef;
+        region = Off;
+        aperture = 0;
+        lastAperture = 0;
         lineNum = 0;
-        lstAperture = 0;
-        interpolation = LINEAR;
         curPos = IntPoint();
-        quadrant = UNDEF;
-        region = OFF;
-        type = APERTURE;
     }
-    D_CODE curDCode = D02;
-    G_CODE curGCode = G01;
-    IMAGE_POLARITY imgPolarity = POSITIVE;
-    INTERPOLATION_MODE interpolation = LINEAR;
-    PRIMITIVE_TYPE type = APERTURE;
-    QUADRANT_MODE quadrant = UNDEF;
-    REGION_MODE region = OFF;
-    Format format;
-
-    int curAperture = 0;
+    static Format format;
+    DCode dCode = D02;
+    GCode gCode = G01;
+    ImagePolarity imgPolarity = Positive;
+    InterpolationMode interpolation = Linear;
+    PrimitiveType type = Aperture;
+    QuadrantMode quadrant = Undef;
+    RegionMode region = Off;
+    int aperture = 0;
+    int lastAperture = 0;
     int lineNum = 0;
-    int lstAperture = 0;
-
     IntPoint curPos;
 };
 }

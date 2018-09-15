@@ -1,6 +1,7 @@
 #include "treeview.h"
-#include "abstractitem.h"
-#include "gerberitem.h"
+#include "abstractnode.h"
+#include "fileholder.h"
+#include "gerbernode.h"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -28,7 +29,7 @@ TreeView::TreeView(QWidget* parent)
     setModel(m_model);
     setAlternatingRowColors(true);
     setAnimated(true);
-    connect(GerberItem::repaintTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
+    connect(GerberNode::repaintTimer(), &QTimer::timeout, this, &TreeView::updateIcons);
     connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
@@ -74,8 +75,14 @@ void TreeView::addFile(G::File* gerberFile)
 QString TreeView::files()
 {
     QString f;
-    QModelIndex index = m_model->index(0, 0, QModelIndex());
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->childCount();
+    QModelIndex index = m_model->index(NODE_GERBER_FILES, 0, QModelIndex());
+    int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
+    for (int row = 0; row < rowCount; ++row) {
+        f += m_model->index(row, 0, index).data().toString() + "|";
+    }
+    index = m_model->index(NODE_DRILL, 0, QModelIndex());
+    //qDebug() << index.data();
+    rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
         f += m_model->index(row, 0, index).data().toString() + "|";
     }
@@ -92,7 +99,7 @@ void TreeView::updateTree()
 void TreeView::updateIcons()
 {
     QModelIndex index = m_model->index(0, 0, QModelIndex());
-    int rowCount = static_cast<AbstractItem*>(index.internalPointer())->childCount();
+    int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
     for (int r = 0; r < rowCount; ++r)
         update(m_model->index(r, 0, index));
     if (DrillForm::self)
@@ -111,33 +118,32 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 
 void TreeView::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-
-    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_GERBER_FILES) {
-        QModelIndex& index = selected.indexes().first();
-        if (index.isValid()) {
-            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-            int id = GerberItem::files.key(file);
-            file->itemGroup->setZValue(id);
-        }
-    }
-    if (!deselected.indexes().isEmpty() && deselected.indexes().first().parent().row() == NODE_GERBER_FILES) {
-        QModelIndex& index = deselected.indexes().first();
-        if (index.isValid()) {
-            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-            int id = GerberItem::files.key(file);
-            file->itemGroup->setZValue(-id);
-        }
-    }
+    //    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_GERBER_FILES) {
+    //        QModelIndex& index = selected.indexes().first();
+    //        if (index.isValid()) {
+    //            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
+    //            int id = FileHolder::gerberFiles().key(file);
+    //            file->itemGroup()->setZValue(id);
+    //        }
+    //    }
+    //    if (!deselected.indexes().isEmpty() && deselected.indexes().first().parent().row() == NODE_GERBER_FILES) {
+    //        QModelIndex& index = deselected.indexes().first();
+    //        if (index.isValid()) {
+    //            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
+    //            int id = FileHolder::gerberFiles().key(file);
+    //            file->itemGroup()->setZValue(-id);
+    //        }
+    //    }
 }
 
 void TreeView::hideOther(const QModelIndex& index)
 {
-    const int rowCount = static_cast<AbstractItem*>(index.parent().internalPointer())->childCount();
+    const int rowCount = static_cast<AbstractNode*>(index.parent().internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
 
         QModelIndex index2 = index.sibling(row, 0);
 
-        AbstractItem* item = static_cast<AbstractItem*>(index2.internalPointer());
+        AbstractNode* item = static_cast<AbstractNode*>(index2.internalPointer());
         if (row == index.row())
             item->setData(index2, Qt::Checked, Qt::CheckStateRole);
         else
@@ -215,12 +221,12 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 //            int id = item->id();
 //            qDebug() << id;
 //        }
-//        //GerberItem::gFiles[id]->itemGroup->setZValue(id);
+//        //GerberItem::gFiles[id]->itemGroup()->setZValue(id);
 //    }
 //    if (!dIndexes.isEmpty() && dIndexes.first().parent().row() == NODE_FILES) {
 //        int id = static_cast<GerberItem*>(dIndexes.first().internalPointer())->id();
 //        //qDebug() << id;
-//        //GerberItem::gFiles[id]->itemGroup->setZValue(-id);
+//        //GerberItem::gFiles[id]->itemGroup()->setZValue(-id);
 //    }
 //    QTreeView::selectionChanged(selected, deselected);
 //}

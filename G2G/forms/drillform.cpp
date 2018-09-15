@@ -12,8 +12,9 @@
 #include <myscene.h>
 
 #include "tooldatabase/tooldatabase.h"
-#include <filetree/gerberitem.h>
+#include <filetree/gerbernode.h>
 
+#include <filetree/FileHolder.h>
 #include <filetree/filemodel.h>
 
 using namespace ClipperLib;
@@ -25,7 +26,7 @@ enum {
     ToolRole = Qt::UserRole + 1
 };
 
-QIcon draw(G::Aperture* aperture)
+QIcon draw(G::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
 
@@ -72,7 +73,7 @@ DrillForm::DrillForm(QWidget* parent)
 {
     ui->setupUi(this);
     ui->tableView->setIconSize(QSize(Size, Size));
-    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
+    ui->dsbxDepth->setValue(MaterialSetup::thickness);
     connect(ui->tableView, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
     updateFiles();
     self = this;
@@ -86,22 +87,24 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
-void DrillForm::setApertures(const QMap<int, G::Aperture*>& value)
+void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>& value)
 {
     clear();
 
     apertures = value;
     model = new QStandardItemModel(this);
 
-    QMapIterator<int, G::Aperture*> i(apertures);
+    QMapIterator<int, QSharedPointer<G::AbstractAperture>> i(apertures);
     QString verticalHeaderLabels;
     while (i.hasNext()) {
         i.next();
         if (i.value()->isFlashed()) {
             verticalHeaderLabels.append("D" + QString::number(i.key()) + "|");
-            QString name(QString("max Ø %1 mm").arg(i.value()->size()));
-
-            QStandardItem* item1 = new QStandardItem(draw(i.value()), name);
+            //QString name(QString("max Ø %1mm").arg(i.value()->size()));
+            QString name(i.value()->name());
+            if (i.value()->isDrilled())
+                name += QString(", drill Ø%1mm").arg(i.value()->drillDiameter());
+            QStandardItem* item1 = new QStandardItem(draw(i.value().data()), name);
             item1->setFlags(Qt::ItemIsEnabled);
             item1->setData(i.key(), D_NumberRole);
 
@@ -128,11 +131,11 @@ void DrillForm::setApertures(const QMap<int, G::Aperture*>& value)
 void DrillForm::updateFiles()
 {
     ui->cbxFile->clear();
-    for (G::File* file : GerberItem::files) {
+    for (G::File* file : FileHolder::files<G::File>()) {
         for (const G::GraphicObject& go : *file) {
-            if (go.state.curDCode == G::D03) {
-                ui->cbxFile->addItem(QFileInfo(file->fileName).fileName(), QVariant::fromValue(static_cast<void*>(file)));
-                ui->cbxFile->setItemData(ui->cbxFile->count() - 1, file->itemGroup->brush().color(), Qt::BackgroundColorRole);
+            if (go.state.dCode == G::D03) {
+                ui->cbxFile->addItem(file->fileName(), QVariant::fromValue(static_cast<void*>(file)));
+                ui->cbxFile->setItemData(ui->cbxFile->count() - 1, file->itemGroup()->brush().color(), Qt::BackgroundColorRole);
                 ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
                 break;
             }
@@ -158,9 +161,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
             stdItem->setData(QVariant::fromValue(tool), ToolRole);
             if (!gid.contains(dNum)) {
                 for (QGraphicsPathItem* itemA : gia[dNum]) {
-                    //                    QSizeF size;
-                    //                    size *= tool.diameter;
-                    //                    QPointF point(tool.diameter / 2, tool.diameter / 2);
+
                     DrillItem* item = new DrillItem(tool.diameter);
                     item->setPen(Qt::NoPen);
                     item->setBrush(Qt::red);
@@ -170,10 +171,6 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
                     MyScene::self->addItem(item);
                 }
             } else {
-                //                QSizeF size;
-                //                size *= tool.diameter;
-                //                QPointF point(tool.diameter / 2, tool.diameter / 2);
-                //                QRectF rect(point, size);
                 for (DrillItem* item : gid[dNum])
                     item->setDiameter(tool.diameter);
             }
@@ -187,7 +184,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
     const G::File* file = static_cast<G::File*>(ui->cbxFile->currentData().value<void*>());
     if (!gia.contains(dNum)) {
         for (const G::GraphicObject& go : *file) {
-            if (go.state.curDCode == G::D03 && go.state.curAperture == dNum) {
+            if (go.state.dCode == G::D03 && go.state.aperture == dNum) {
                 G::State state(go.state);
                 state.curPos = IntPoint();
 
@@ -199,9 +196,9 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
                 QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
 
                 item->setPen(Qt::NoPen);
-                item->setBrush(Qt::white);
+                item->setBrush(Qt::magenta);
                 item->setPos(ToQPointF(go.state.curPos));
-                item->setZValue(GerberItem::files.lastKey() + 1);
+                //                item->setZValue(FileHolder::gerberFiles().lastKey() + 1);
 
                 gia[dNum].append(item);
                 MyScene::self->addItem(item);
@@ -220,7 +217,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
     } else {
         if (previous.isValid() && previous.row() != current.row())
             for (QGraphicsPathItem* item : gia[dNum])
-                item->setBrush(Qt::white);
+                item->setBrush(Qt::magenta);
     }
     if (previous.isValid() && previous.row() != current.row()) {
         int dNumPrev = previous.sibling(previous.row(), 0).data(D_NumberRole).toInt();
@@ -249,11 +246,13 @@ void DrillForm::on_pbCreate_clicked()
 {
     QMap<int, Tool> tools;
     QMap<int, Path> pos;
+    QMap<int, QVector<int>> dCode;
 
     for (int row = 0; row < model->rowCount(); ++row) {
         Tool tool = model->item(row, 1)->data(ToolRole).value<Tool>();
         int dNum = model->item(row, 0)->data(D_NumberRole).toInt();
         if (tool.id > -1) {
+            dCode[tool.id].append(dNum);
             for (DrillItem* item : gid[dNum]) {
                 QPointF p(item->pos());
                 pos[tool.id].append(IntPoint(p.x() * uScale, p.y() * uScale));
@@ -268,7 +267,7 @@ void DrillForm::on_pbCreate_clicked()
         Path src(pos[i.key()]);
         Path dst;
         dst.reserve(src.size());
-        IntPoint p1(MaterialSetupForm ::homePos.x() * uScale, MaterialSetupForm::homePos.y() * uScale);
+        IntPoint p1(MaterialSetup::homePos.x() * uScale, MaterialSetup::homePos.y() * uScale);
         while (src.size()) {
             int s = 0;
             IntPoint p2;
@@ -284,8 +283,14 @@ void DrillForm::on_pbCreate_clicked()
             dst.append(src.takeAt(s));
             p1 = dst.last();
         }
-        GCode* gcode = new GCode({ dst }, i.value(), ui->dsbxDepth->value(), DRILLING);
-        gcode->setName(i.value().name);
+        GCode* gcode = new GCode({ dst }, i.value(), ui->dsbxDepth->value(), Drilling);
+        QString str;
+        for (int d : dCode[i.key()]) {
+            str += "D" + QString::number(d) + ", ";
+        }
+        str.remove(str.size() - 2, 2);
+        gcode->setFileName(i.value().name + " (" + str + ")");
+        gcode->setSide(static_cast<G::File*>(ui->cbxFile->currentData().value<void*>())->side);
         FileModel::self->addGcode(gcode);
     }
 }

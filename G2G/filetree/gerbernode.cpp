@@ -1,48 +1,45 @@
-#include "gerberitem.h"
+#include "gerbernode.h"
 
+#include "fileholder.h"
 #include <QFileInfo>
 #include <mainwindow.h>
-#include <myscene.h>
 
-QTimer GerberItem::m_repaintTimer;
-QMap<int, G::File*> GerberItem::files;
+QTimer GerberNode::m_repaintTimer;
 
-GerberItem::GerberItem(G::File* file)
-    : m_id(files.size() ? files.lastKey() + 1 : 0)
+GerberNode::GerberNode(G::File* file)
+    : m_id(FileHolder::addFile(file))
 {
-    files[m_id] = file;
-    files[m_id]->itemGroup->addToTheScene(MyScene::self);
-    files[m_id]->itemGroup->setZValue(-m_id);
+    AbstractNode::files.append(file->fileName());
+    FileHolder::file<G::File>(m_id)->itemGroup()->addToTheScene();
+    FileHolder::file<G::File>(m_id)->itemGroup()->setZValue(-m_id);
     MyGraphicsView::self->ZoomFit();
     MyGraphicsView::self->Zoom100();
     MainWindow::self->closeAllAct->setEnabled(true);
-
-    connect(&m_repaintTimer, &QTimer::timeout, this, &GerberItem::repaint);
+    connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
 }
 
-GerberItem::~GerberItem()
+GerberNode::~GerberNode()
 {
     if (MainWindow::self && MainWindow::self->isVisible())
-        MainWindow::self->closeAllAct->setEnabled(parentItem()->childCount());
-    if (files.contains(m_id) && files[m_id])
-        delete files.take(m_id);
+        MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
+    FileHolder::deleteFile(m_id);
     if (MyScene::self) {
         MyScene::self->setSceneRect(0, 0, 0, 0);
         MyScene::self->update();
     }
-    m_repaintTimer.start(100);
+    m_repaintTimer.start(1);
 }
 
-bool GerberItem::setData(const QModelIndex& index, const QVariant& value, int role)
+bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
     case 0:
         switch (role) {
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            files[m_id]->itemGroup->setVisible(checkState == Qt::Checked);
+            FileHolder::file<G::File>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
             return true;
         default:
             return false;
@@ -50,7 +47,7 @@ bool GerberItem::setData(const QModelIndex& index, const QVariant& value, int ro
     case 1:
         switch (role) {
         case Qt::EditRole:
-            files[m_id]->side = static_cast<G::Side>(value.toBool());
+            FileHolder::file<G::File>(m_id)->side = static_cast<G::Side>(value.toBool());
             return true;
         default:
             return false;
@@ -61,11 +58,11 @@ bool GerberItem::setData(const QModelIndex& index, const QVariant& value, int ro
     return false;
 }
 
-int GerberItem::columnCount() const { return 3; }
+int GerberNode::columnCount() const { return 3; }
 
-int GerberItem::childCount() const { return 0; }
+int GerberNode::childCount() const { return 0; }
 
-Qt::ItemFlags GerberItem::flags(const QModelIndex& index) const
+Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 {
     switch (index.column()) {
     case 0:
@@ -77,27 +74,27 @@ Qt::ItemFlags GerberItem::flags(const QModelIndex& index) const
     }
 }
 
-QVariant GerberItem::data(const QModelIndex& index, int role) const
+QVariant GerberNode::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
     case 0:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QFileInfo(files[m_id]->fileName).fileName();
-        case Qt::EditRole:
-            return files[m_id]->fileName;
+            return FileHolder::file<G::File>(m_id)->fileName();
+//        case Qt::EditRole:
+//            return FileHolder::file<G::File>(m_id)->fileName;
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole: {
             QPixmap pixmap(16, 16);
-            QColor color = files[m_id]->itemGroup->brush().color();
+            QColor color = FileHolder::file<G::File>(m_id)->itemGroup()->brush().color();
             color.setAlpha(255);
             pixmap.fill(color);
             return pixmap;
         }
         case Qt::UserRole:
-            return QVariant::fromValue(static_cast<void*>(files[m_id]));
+            return QVariant::fromValue(static_cast<void*>(FileHolder::file<G::File>(m_id)));
         default:
             return QVariant();
         }
@@ -105,9 +102,9 @@ QVariant GerberItem::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[files[m_id]->side];
+            return QString("Top|Bottom").split('|')[FileHolder::file<G::File>(m_id)->side];
         case Qt::EditRole:
-            return static_cast<bool>(files[m_id]->side);
+            return static_cast<bool>(FileHolder::file<G::File>(m_id)->side);
         default:
             return QVariant();
         }
@@ -118,16 +115,16 @@ QVariant GerberItem::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
-QTimer* GerberItem::repaintTimer()
+QTimer* GerberNode::repaintTimer()
 {
     return &m_repaintTimer;
 }
 
-void GerberItem::repaint()
+void GerberNode::repaint()
 {
     int count = m_parentItem->childCount();
     int k = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
-    files[m_id]->itemGroup->setBrush(color);
+    FileHolder::file<G::File>(m_id)->itemGroup()->setBrush(color);
     MyScene::self->update();
 }

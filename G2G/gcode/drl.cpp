@@ -3,27 +3,29 @@
 #include <QDebug>
 #include <QFile>
 #include <QTextStream>
-#include <filetree/drillitem.h>
-#include <graphicsitem.h>
+#include <filetree/drillnode.h>
+#include <gi/drillitem.h>
+#include <limits>
 
-Drl::Drl(QObject* parent)
+DrillParser::DrillParser(QObject* parent)
     : QObject(parent)
 {
 }
 
-DrlFile* Drl::parseFile(const QString& fileName)
+Drill* DrillParser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
-    qDebug() << fileName;
+    //qDebug() << fileName;
     m_state.reset();
-    m_file = new DrlFile;
-    m_file->fileName = fileName;
+    m_file = new Drill;
+    m_file->setFileName(fileName);
     QTextStream in(&file);
     QString line;
     while (in.readLineInto(&line)) {
+        m_file->lines().append(line);
         try {
             if (parseComment(line))
                 continue;
@@ -43,7 +45,7 @@ DrlFile* Drl::parseFile(const QString& fileName)
             if (parseFormat(line))
                 continue;
 
-            qDebug() << "херня какаято:" << line;
+            qWarning() << "херня какаято:" << line;
 
         } catch (const QString& errStr) {
             qWarning() << "exeption:" << errStr;
@@ -59,34 +61,24 @@ DrlFile* Drl::parseFile(const QString& fileName)
         delete m_file;
         m_file = nullptr;
     } else {
-        m_file->itemGroup = new ItemGroup;
+        m_file->setItemGroup(new ItemGroup);
         for (Hole& hole : *m_file) {
-            //            IntPoint center(hole.state.pos.x() * uScale, hole.state.pos.y() * uScale);
-            //            double radius = hole.state.currentToolDiameter * uScale / 2.0;
-            //            Path poligon(G::STEPS_PER_CIRCLE);
-            //            for (int i = 0; i < G::STEPS_PER_CIRCLE; ++i) {
-            //                poligon[i] = IntPoint(
-            //                    (qCos(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.X,
-            //                    (qSin(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.Y);
-            //            }
-            //            if (Area(poligon) < 0)
-            //                ReversePath(poligon);
-
-            m_file->itemGroup->append(new DrillItem(hole.state.currentToolDiameter /*{ poligon }, m_file*/));
-            m_file->itemGroup->last()->setToolTip(QString("Hole %1").arg(hole.state.tCode));
-            m_file->itemGroup->last()->setPos(hole.state.pos);
-            m_file->itemGroup->last()->setBrush(Qt::white);
+            m_file->itemGroup()->append(new DrillItem(hole.state.currentToolDiameter, m_file));
+            m_file->itemGroup()->last()->setToolTip(QString("Tool %1, Ø%2mm").arg(hole.state.tCode).arg(hole.state.currentToolDiameter));
+            m_file->itemGroup()->last()->setPos(hole.state.pos);
         }
+        m_file->itemGroup()->setZValue(std::numeric_limits<double>::max());
     }
     return m_file;
 }
 
-bool Drl::parseComment(const QString& line)
+bool DrillParser::parseComment(const QString& line)
 {
     const QRegExp match(";(.*)$");
     if (match.exactMatch(line)) {
-        const QRegExp matchFormat("\\D*Format:\\D*(\\d)\\.(\\d).+");
+        const QRegExp matchFormat(".*([0-9]).([0-9]).*");
         if (matchFormat.exactMatch(match.cap(1))) {
+            //qDebug() << matchFormat.capturedTexts();
             m_state.format.integer = matchFormat.cap(1).toInt();
             m_state.format.decimal = matchFormat.cap(2).toInt();
         }
@@ -95,7 +87,7 @@ bool Drl::parseComment(const QString& line)
     return false;
 }
 
-bool Drl::parseGCode(const QString& line)
+bool DrillParser::parseGCode(const QString& line)
 {
     const QRegExp match("^G([0]?[0-9]{2})$");
     if (match.exactMatch(line)) {
@@ -114,7 +106,7 @@ bool Drl::parseGCode(const QString& line)
     return false;
 }
 
-bool Drl::parseMCode(const QString& line)
+bool DrillParser::parseMCode(const QString& line)
 {
     const QRegExp match("^M([0]?[0-9]{2})$");
     if (match.exactMatch(line)) {
@@ -141,9 +133,9 @@ bool Drl::parseMCode(const QString& line)
     return false;
 }
 
-bool Drl::parseTCode(const QString& line)
+bool DrillParser::parseTCode(const QString& line)
 {
-    const QRegExp match("^T([0]?[0-9]{2})(?:C([+-]?\\d*\\.?\\d+))?$");
+    const QRegExp match("^T([0]?[0-9]{1})(?:C(\\d*\\.?\\d+))?.*$");
     if (match.exactMatch(line)) {
         m_state.tCode = match.cap(1).toInt();
         if (!match.cap(2).isEmpty()) {
@@ -156,12 +148,12 @@ bool Drl::parseTCode(const QString& line)
     return false;
 }
 
-bool Drl::parsePos(const QString& line)
+bool DrillParser::parsePos(const QString& line)
 {
     static double x = 0.0;
     static double y = 0.0;
 
-    QRegExp match("(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?");
+    QRegExp match("(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?$");
     if (match.exactMatch(line)) {
 
         const double k = m_state.format.unitMode ? 1.0 : 25.4;
@@ -191,17 +183,16 @@ bool Drl::parsePos(const QString& line)
                 m_state.pos.setY(y);
             }
         }
-        qDebug() << match.capturedTexts() << m_state.pos;
+        //        qDebug() << match.capturedTexts() << m_state.pos;
         x = m_state.pos.x();
         y = m_state.pos.y();
-
         m_file->append(Hole(m_state, m_file));
         return true;
     }
     return false;
 }
 
-bool Drl::parseFormat(const QString& line)
+bool DrillParser::parseFormat(const QString& line)
 {
     if (line.contains(QRegExp("METRIC"))) {
         m_state.format.unitMode = MILLIMETERS;

@@ -1,8 +1,8 @@
 #include "filemodel.h"
-#include "drillitem.h"
-#include "folderitem.h"
-#include "gcodeitem.h"
-#include "gerberitem.h"
+#include "drillnode.h"
+#include "foldernode.h"
+#include "gcodenode.h"
+#include "gerbernode.h"
 #include <QApplication>
 #include <QDebug>
 #include <QMimeData>
@@ -12,13 +12,13 @@ FileModel* FileModel::self = nullptr;
 
 FileModel::FileModel(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new FolderItem("rootItem"))
+    , rootItem(new FolderNode("rootItem"))
 {
     self = this;
-    rootItem->add(new FolderItem("Gerber Files"));
-    rootItem->add(new FolderItem("Excellon"));
-    rootItem->add(new FolderItem("Tool Paths"));
-    rootItem->add(new FolderItem("Shtift"));
+    rootItem->add(new FolderNode("Gerber Files"));
+    rootItem->add(new FolderNode("Excellon"));
+    rootItem->add(new FolderNode("Tool Paths"));
+    rootItem->add(new FolderNode("Shtift"));
 }
 
 FileModel::~FileModel()
@@ -29,39 +29,39 @@ FileModel::~FileModel()
 
 void FileModel::addGerberFile(G::File* gerberFile)
 {
-    AbstractItem* item{ rootItem->child(NODE_GERBER_FILES) };
+    AbstractNode* item{ rootItem->child(NODE_GERBER_FILES) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new GerberItem(gerberFile));
+    item->add(new GerberNode(gerberFile));
     endInsertRows();
 }
 
-void FileModel::addDrlFile(DrlFile* drl)
+void FileModel::addDrlFile(Drill* drl)
 {
     if (!drl)
         return;
-    AbstractItem* item{ rootItem->child(NODE_DRILL) };
+    AbstractNode* item{ rootItem->child(NODE_DRILL) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new DrillItem_(drl));
+    item->add(new DrillNode(drl));
     endInsertRows();
 }
 
 void FileModel::addGcode(GCode* group)
 {
-    AbstractItem* item{ rootItem->child(NODE_MILLING) };
+    AbstractNode* item{ rootItem->child(NODE_MILLING) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new GcodeItem(group));
+    item->add(new GcodeNode(group));
     endInsertRows();
 }
 
 void FileModel::closeAllFiles()
 {
-    AbstractItem* item{ rootItem->child(NODE_GERBER_FILES) };
+    AbstractNode* item{ rootItem->child(NODE_GERBER_FILES) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     if (rowCount) {
@@ -71,7 +71,30 @@ void FileModel::closeAllFiles()
         }
         endRemoveRows();
     }
+
     item = rootItem->child(NODE_DRILL);
+    index = createIndex(0, 0, item);
+    rowCount = item->childCount();
+    if (rowCount) {
+        beginRemoveRows(index, 0, rowCount - 1);
+        for (int i = 0; i < rowCount; ++i) {
+            item->remove(0);
+        }
+        endRemoveRows();
+    }
+
+    item = rootItem->child(NODE_MILLING);
+    index = createIndex(0, 0, item);
+    rowCount = item->childCount();
+    if (rowCount) {
+        beginRemoveRows(index, 0, rowCount - 1);
+        for (int i = 0; i < rowCount; ++i) {
+            item->remove(0);
+        }
+        endRemoveRows();
+    }
+
+    item = rootItem->child(NODE_PINS);
     index = createIndex(0, 0, item);
     rowCount = item->childCount();
     if (rowCount) {
@@ -118,14 +141,14 @@ QModelIndex FileModel::index(int row, int column, const QModelIndex& parent) con
     if (!hasIndex(row, column, parent))
         return QModelIndex();
 
-    AbstractItem* parentItem;
+    AbstractNode* parentItem;
 
     if (!parent.isValid())
         parentItem = rootItem;
     else
-        parentItem = static_cast<AbstractItem*>(parent.internalPointer());
+        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
 
-    AbstractItem* childItem = parentItem->child(row);
+    AbstractNode* childItem = parentItem->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
     else
@@ -137,8 +160,8 @@ QModelIndex FileModel::parent(const QModelIndex& child) const
     if (!child.isValid())
         return QModelIndex();
 
-    AbstractItem* childItem = static_cast<AbstractItem*>(child.internalPointer());
-    AbstractItem* parentItem = childItem->parentItem();
+    AbstractNode* childItem = static_cast<AbstractNode*>(child.internalPointer());
+    AbstractNode* parentItem = childItem->parentItem();
 
     if (parentItem == rootItem)
         return QModelIndex();
@@ -150,7 +173,7 @@ QVariant FileModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-    AbstractItem* item = static_cast<AbstractItem*>(index.internalPointer());
+    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
     return item->data(index, role);
 }
 
@@ -158,7 +181,7 @@ bool FileModel::setData(const QModelIndex& index, const QVariant& value, int rol
 {
     if (!index.isValid())
         return false;
-    AbstractItem* item = static_cast<AbstractItem*>(index.internalPointer());
+    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
     return item->setData(index, value, role);
 }
 
@@ -179,17 +202,17 @@ Qt::ItemFlags FileModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
-    AbstractItem* item = static_cast<AbstractItem*>(index.internalPointer());
+    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
     return item->flags(index);
 }
 
 bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    qDebug() << parent << parent.data();
-    qDebug() << row << count;
-    AbstractItem* item = nullptr;
+    //qDebug() << parent << parent.data();
+    //qDebug() << row << count;
+    AbstractNode* item = nullptr;
     if (parent.isValid())
-        item = static_cast<AbstractItem*>(parent.internalPointer());
+        item = static_cast<AbstractNode*>(parent.internalPointer());
     else
         item = rootItem;
 
@@ -212,14 +235,14 @@ int FileModel::columnCount(const QModelIndex& /*parent*/) const
 
 int FileModel::rowCount(const QModelIndex& parent) const
 {
-    AbstractItem* parentItem;
+    AbstractNode* parentItem;
     if (parent.column() > 0)
         return 0;
 
     if (!parent.isValid())
         parentItem = rootItem;
     else
-        parentItem = static_cast<AbstractItem*>(parent.internalPointer());
+        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
 
     return parentItem->childCount();
 }

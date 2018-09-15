@@ -3,7 +3,9 @@
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFileDialog>
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
+#include <QMenu>
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
@@ -19,7 +21,7 @@ MyScene::MyScene(QObject* parent)
 
 MyScene::~MyScene()
 {
-    clear();
+    //clear();
     self = nullptr;
 }
 

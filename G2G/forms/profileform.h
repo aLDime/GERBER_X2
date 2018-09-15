@@ -26,6 +26,10 @@ private:
 
     int direction = 0;
     int side = 0;
+
+    // ToolPathUtil interface
+public:
+    void create() override;
 };
 
 #endif // PROFILEFORM_H

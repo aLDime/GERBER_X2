@@ -3,6 +3,7 @@
 
 #include <QMap>
 #include <QObject>
+#include <abstractfile.h>
 #include <myclipper.h>
 
 using namespace ClipperLib;
@@ -50,40 +51,45 @@ struct State {
     QPointF pos;
 };
 
-class DrlFile;
+class Drill;
 class ItemGroup;
 
 class Hole {
 public:
     Hole(
         const State& state,
-        DrlFile* gFile)
+        Drill* gFile)
         : state(state)
         , gFile(gFile)
     {
     }
     State state;
-    DrlFile* gFile = nullptr;
+    Drill* gFile = nullptr;
 };
 
-class DrlFile : public QList<Hole> {
+class Drill : public AbstractFile<Hole> {
 public:
-    DrlFile() {}
-    ~DrlFile()
-    {
-        if (itemGroup)
-            delete itemGroup;
-    }
-    ItemGroup* itemGroup = nullptr;
+    Drill() {}
+    ~Drill() {}
+    //    QSharedPointer<ItemGroup> itemGroup;
     QMap<int, double> m_toolDiameter;
-    QString fileName;
+    //    QString fileName;
     //Paths paths;
+    FileType type() const override { return DrillFile; }
+
+protected:
+    Paths merge() const override
+    {
+        for (GraphicsItem* item : *m_itemGroup.data())
+            m_mergedPaths.append(item->paths());
+        return m_mergedPaths;
+    }
 };
-class Drl : public QObject {
+class DrillParser : public QObject {
     Q_OBJECT
 public:
-    explicit Drl(QObject* parent = nullptr);
-    DrlFile* parseFile(const QString& fileName);
+    explicit DrillParser(QObject* parent = nullptr);
+    Drill* parseFile(const QString& fileName);
 
 signals:
 
@@ -105,7 +111,7 @@ private:
     ///
 
     State m_state;
-    DrlFile* m_file = nullptr;
+    Drill* m_file = nullptr;
 };
 
 #endif // DRL_H

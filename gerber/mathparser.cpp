@@ -16,11 +16,11 @@ double MathParser::getVariable(QString variableName)
     return variables->value(variableName, 0.0);
 }
 
-double MathParser::Parse(const QString& s)
+double MathParser::parse(const QString& s)
 {
     Result result;
     try {
-        result = PlusMinus(s);
+        result = plusMinus(s);
         if (!result.rest.isEmpty()) {
             qWarning() << "Error: can't full parse"
                        << "\"" << s << "\"";
@@ -33,9 +33,9 @@ double MathParser::Parse(const QString& s)
     return result.acc;
 }
 
-Result MathParser::PlusMinus(QString s) //throws Exception
+Result MathParser::plusMinus(QString s) //throws Exception
 {
-    Result current = MulDiv(s);
+    Result current = mulDiv(s);
     double acc = current.acc;
 
     while (current.rest.length() > 0) {
@@ -45,7 +45,7 @@ Result MathParser::PlusMinus(QString s) //throws Exception
         QChar sign = current.rest.at(0);
         QString next = current.rest.mid(1);
 
-        current = MulDiv(next);
+        current = mulDiv(next);
         if (sign == '+')
             acc += current.acc;
         else
@@ -54,21 +54,21 @@ Result MathParser::PlusMinus(QString s) //throws Exception
     return Result(acc, current.rest);
 }
 
-Result MathParser::Bracket(QString s) //throws Exception
+Result MathParser::bracket(QString s) //throws Exception
 {
     QChar zeroChar = s.at(0);
     if (zeroChar == '(') {
-        Result r = PlusMinus(s.mid(1));
+        Result r = plusMinus(s.mid(1));
         if (!r.rest.isEmpty() && r.rest.at(0) == ')')
             r.rest = r.rest.mid(1);
         else
             qWarning() << "Error: not close bracket";
         return r;
     }
-    return FunctionVariable(s);
+    return functionVariable(s);
 }
 
-Result MathParser::FunctionVariable(QString s) //throws Exception
+Result MathParser::functionVariable(QString s) //throws Exception
 {
     QString f;
     int i = 0;
@@ -86,18 +86,18 @@ Result MathParser::FunctionVariable(QString s) //throws Exception
     }
     if (!f.isEmpty()) { // если что-нибудь нашли
         if (s.length() > i && s.at(i) == '(') { // и следующий символ скобка значит - это функция
-            Result r = Bracket(s.mid(f.length()));
+            Result r = bracket(s.mid(f.length()));
             return processFunction(f, r);
         }
         else // иначе - это переменная
             return Result(getVariable(f) * sign, s.mid(f.length()));
     }
-    return Num(s);
+    return num(s);
 }
 
-Result MathParser::MulDiv(QString s) //throws Exception
+Result MathParser::mulDiv(QString s) //throws Exception
 {
-    Result current = Bracket(s);
+    Result current = bracket(s);
 
     double acc = current.acc;
     while (true) {
@@ -109,7 +109,7 @@ Result MathParser::MulDiv(QString s) //throws Exception
             return current;
 
         QString next = current.rest.mid(1);
-        Result right = Bracket(next);
+        Result right = bracket(next);
 
         if (sign == '*')
             acc *= right.acc;
@@ -120,7 +120,7 @@ Result MathParser::MulDiv(QString s) //throws Exception
     }
 }
 
-Result MathParser::Num(QString s) //throws Exception
+Result MathParser::num(QString s) //throws Exception
 {
     int i = 0;
     int dot_cnt = 0;

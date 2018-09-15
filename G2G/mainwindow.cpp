@@ -14,8 +14,8 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
-#include <filetree/gcodeitem.h>
-#include <filetree/gerberitem.h>
+#include <filetree/gcodenode.h>
+#include <filetree/gerbernode.h>
 #include <limits>
 #include <myscene.h>
 #include <parser.h>
@@ -52,11 +52,43 @@ MainWindow::MainWindow(QWidget* parent)
     connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
     connect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
-    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile);
+    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
+    graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(graphicsView, &MyGraphicsView::customContextMenuRequested, [=](const QPoint& pos) {
+        QGraphicsItem* item = MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
+        if (item && item->type() == POINT_SHTIFT) {
+            QMenu menu;
+            menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), [=] {
+                ToolDatabase tdb(this, { Tool::Drill });
+                if (tdb.exec()) {
+                    Tool tool(tdb.tool());
+                    Path dst;
 
+                    for (Shtift* item : Shtift::shtifts()) {
+                        item->setFlag(QGraphicsItem::ItemIsMovable, false);
+                        IntPoint point(item->pos().x() * uScale, item->pos().y() * uScale);
+                        if (dst.contains(point))
+                            continue;
+                        dst.append(point);
+                    }
+
+                    QSettings settings;
+                    double depth = QInputDialog::getDouble(this, "", "Set Depth", settings.value("Shtift/depth").toDouble(), 0, 100, 2);
+                    if (depth == 0.0)
+                        return;
+                    settings.setValue("Shtift/depth", depth);
+
+                    GCode* gcode = new GCode({ dst }, tool, depth, Drilling);
+                    gcode->setFileName("POINT_SHTIFT");
+                    FileModel::self->addGcode(gcode);
+                }
+            });
+            menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 24)));
+        }
+    });
     //    if (0) {
     //        QPainterPath painterPath;
     //        QFont font;
@@ -73,12 +105,10 @@ MainWindow::MainWindow(QWidget* parent)
     //        scene->addItem(pathItem);
     //    }
 
-    readSettings();
-
     QLatin1String styleSheet("QGroupBox, .QFrame {"
                              //"background-color: rgb(255,255,255);"
                              "border: 1px solid gray;"
-                             //"border-radius: 5px;"
+                             "border-radius: 5px;"
                              "margin-top: 1ex; /* leave space at the top for the title */"
                              "}"
                              "QGroupBox::title {"
@@ -89,7 +119,12 @@ MainWindow::MainWindow(QWidget* parent)
                              "}");
 
     setStyleSheet(styleSheet);
+
     self = this;
+
+    readSettings();
+
+    //    graphicsView->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -117,15 +152,15 @@ void MainWindow::closeEvent(QCloseEvent* event)
 {
     //    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Нет", "Да") == 1)
     writeSettings();
-    //closeFiles();
-    for (G::File*& f : GerberItem::files) {
-        delete f;
-        f = nullptr;
-    }
-    for (GCode*& f : GcodeItem::gCode) {
-        delete f;
-        f = nullptr;
-    }
+    closeFiles();
+    //    for (G::File*& f : GerberNode::files) {
+    //        delete f;
+    //        f = nullptr;
+    //    }
+    //    for (GCode*& f : GcodeNode::gCode) {
+    //        delete f;
+    //        f = nullptr;
+    //    }
     event->accept();
 }
 
@@ -161,13 +196,13 @@ void MainWindow::createActions()
     QAction* action = nullptr;
 
     //==================== fileMenu ====================
-
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->setObjectName(QStringLiteral("fileMenu"));
 
     fileToolBar = addToolBar(tr("File"));
     fileToolBar->setIconSize(QSize(24, 24));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
+    fileToolBar->setMovable(false);
     connect(fileToolBar, &QToolBar::customContextMenuRequested,
         [=](const QPoint& pos) {
             QMenu menu(this);
@@ -232,7 +267,7 @@ void MainWindow::createActions()
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
-
+    zoomToolBar->setMovable(false);
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Zoom fit best"), [=]() { graphicsView->ZoomFit(); });
     action->setShortcut(QKeySequence::FullScreen);
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("Zoom original"), [=]() { graphicsView->Zoom100(); });
@@ -245,6 +280,7 @@ void MainWindow::createActions()
     //==================== Selection ====================
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
+    s->setMovable(false);
     action = s->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), [=]() {
         for (QGraphicsItem* item : MyScene::self->items())
             if (item->isVisible())
@@ -256,10 +292,10 @@ void MainWindow::createActions()
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
-
+    toolpathToolBar->setMovable(false);
     dockWidget = new QDockWidget(this);
     dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
-    addDockWidget(Qt::RightDockWidgetArea, dockWidget);
+    addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
     dockWidget->hide();
     connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
         if (!visible) {
@@ -277,25 +313,25 @@ void MainWindow::createActions()
 
     toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"),
         tr("Profile"), [=] {
-            createDockWidget(new ProfileForm(), PROFILE);
+            createDockWidget(new ProfileForm(), Profile);
         }));
     toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"),
         tr("Pocket"), [=] {
-            createDockWidget(new PocketForm(), POCKET);
+            createDockWidget(new PocketForm(), Pocket);
         }));
     toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"),
         tr("Drilling"), [=] {
-            createDockWidget(new DrillForm(), DRILLING);
+            createDockWidget(new DrillForm(), Drilling);
         }));
     toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"),
         tr("Setup Material "), [=] {
-            createDockWidget(new MaterialSetupForm(), MATERIAL_SETUP_FORM);
+            createDockWidget(new MaterialSetup(), Material);
         }));
 
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetupForm(), MATERIAL_SETUP_FORM); });
+    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), Material); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"),
         tr("Tool Base"), [=]() {
@@ -336,10 +372,11 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value)
 {
     static QProgressDialog progress;
     if (!value) {
-        progress.setModal(true);
-        progress.setMaximum(max);
-        progress.setValue(value);
+        progress.setCancelButton(nullptr);
         progress.setLabelText(fileName);
+        progress.setMaximum(max);
+        progress.setModal(true);
+        progress.setValue(0);
         progress.show();
     } else if (max == value)
         progress.hide();
@@ -364,17 +401,16 @@ void MainWindow::openFile(const QString& fileName)
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+        //QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
     QFileInfo fi(fileName);
     lastPath = fi.absolutePath();
 
     if (fi.suffix().contains("drl", Qt::CaseInsensitive)) {
-        FileModel::self->addDrlFile(Drl().parseFile(fileName));
+        FileModel::self->addDrlFile(DrillParser().parseFile(fileName));
     } else
         emit parseFile(fileName);
-    //    setCurrentFile(fileName);
 }
 
 void MainWindow::setRecentFilesVisible(bool visible)

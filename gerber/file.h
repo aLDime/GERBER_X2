@@ -3,25 +3,11 @@
 
 #include "aperture.h"
 #include "gerber.h"
-#include "graphicsitem.h"
+
+#include <abstractfile.h>
+#include <gi/itemgroup.h>
+
 namespace G {
-
-enum Layer {
-    Copper,
-    Mask,
-    Silk,
-    Board,
-};
-
-enum Miror {
-    Vertical,
-    Horizontal
-};
-
-enum Side {
-    Top,
-    Bottom
-};
 
 class File;
 
@@ -48,32 +34,30 @@ public:
     Path path;
 };
 
-class File : public QList<GraphicObject> {
+class File : public AbstractFile<GraphicObject> {
 public:
-    File();
+    File(const QString& fileName = "");
     ~File();
 
-    enum GROUP {
-        COPPER,
-        CUTOFF,
+    enum Group {
+        CopperGroup,
+        CutoffGroup,
     };
 
-    Paths Merge();
-    Pathss& GetGroupedPaths(GROUP group = COPPER, bool fl = false);
-
-    ItemGroup* itemGroup = nullptr;
-    QList<QString> lines;
-    QMap<int, Aperture*> apertures;
-    QString fileName;
-    Paths mergedPaths;
-    Pathss groupedPaths;
+    //    QSharedPointer<ItemGroup> itemGroup;
+    //    QList<QString> lines;
+    QMap<int, QSharedPointer<AbstractAperture>> apertures;
+    //    QString fileName;
+    //    Paths mergedPaths;
+    //    Pathss m_groupedPaths;
 
     Layer layer = Copper;
     Miror miror = Vertical;
     Side side = Top;
+    FileType type() const override { return GerberFile; }
 
-private:
-    void grouping(PolyNode* node, Pathss* pathss, GROUP group);
+protected:
+    Paths merge() const override;
 };
 
 Q_DECLARE_METATYPE(File)

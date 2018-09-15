@@ -7,6 +7,8 @@
 
 #include <gcode/gcode.h>
 
+#include <gi/drillitem.h>
+
 namespace Ui {
 class DrillForm;
 }
@@ -21,7 +23,7 @@ public:
     ~DrillForm();
     static DrillForm* self;
 
-    void setApertures(const QMap<int, G::Aperture*>& value);
+    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture> > &value);
     void updateFiles();
 
 private slots:
@@ -36,7 +38,7 @@ private slots:
 private:
     QStandardItemModel* model;
     Ui::DrillForm* ui;
-    QMap<int, G::Aperture*> apertures;
+    QMap<int, QSharedPointer<G::AbstractAperture>> apertures;
 
     QMap<int, QVector<QGraphicsPathItem*>> gia;
     QMap<int, QVector<DrillItem*>> gid;

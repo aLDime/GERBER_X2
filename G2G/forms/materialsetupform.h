@@ -7,12 +7,12 @@ namespace Ui {
 class MaterialSetupForm;
 }
 
-class MaterialSetupForm : public QWidget {
+class MaterialSetup : public QWidget {
     Q_OBJECT
 
 public:
-    explicit MaterialSetupForm(QWidget* parent = nullptr);
-    ~MaterialSetupForm();
+    explicit MaterialSetup(QWidget* parent = nullptr);
+    ~MaterialSetup();
 
     void setHomePos(QPointF pos);
     void setZeroPos(QPointF pos);
@@ -23,7 +23,7 @@ public:
     static double thickness;
     static double clearence;
     static double plunge;
-    static MaterialSetupForm* self;
+    static MaterialSetup* self;
 
 private:
     Ui::MaterialSetupForm* ui;

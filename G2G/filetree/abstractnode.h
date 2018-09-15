@@ -4,21 +4,21 @@
 #include <QAbstractItemModel>
 #include <QVariant>
 
-class AbstractItem {
-    AbstractItem(const AbstractItem&) = delete;
-    AbstractItem& operator=(const AbstractItem&) = delete;
+class AbstractNode {
+    AbstractNode(const AbstractNode&) = delete;
+    AbstractNode& operator=(const AbstractNode&) = delete;
     static int c;
 
 public:
-    AbstractItem();
-    virtual ~AbstractItem();
-    AbstractItem* child(int row);
-    AbstractItem* parentItem();
+    AbstractNode();
+    virtual ~AbstractNode();
+    AbstractNode* child(int row);
+    AbstractNode* parentItem();
 
     int row() const;
 
-    void add(AbstractItem* item);
-    void insert(int row, AbstractItem* item);
+    void add(AbstractNode* item);
+    void insert(int row, AbstractNode* item);
     void remove(int row);
     virtual int childCount() const;
 
@@ -26,10 +26,11 @@ public:
     virtual int columnCount() const = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
+    static QList<QString> files;
 
 protected:
-    AbstractItem* m_parentItem = nullptr;
-    QList<AbstractItem*> childItems;
+    AbstractNode* m_parentItem = nullptr;
+    QList<AbstractNode*> childItems;
 };
 
 #endif // TREEITEM_H

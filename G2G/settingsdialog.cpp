@@ -75,13 +75,13 @@ void SettingsDialog::showEvent(QShowEvent* event)
 
 void SettingsDialog::reject()
 {
-    qDebug() << "reject";
+    //qDebug() << "reject";
     QDialog::reject();
 }
 
 void SettingsDialog::accept()
 {
-    qDebug() << "accept";
+    //qDebug() << "accept";
     writeSettings();
     QDialog::accept();
 }

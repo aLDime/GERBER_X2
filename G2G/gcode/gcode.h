@@ -3,35 +3,41 @@
 
 #include <QGraphicsItemGroup>
 #include <QObject>
-#include <graphicsitem.h>
+#include <abstractfile.h>
+#include <gerber.h>
+#include <gi/itemgroup.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
 
 enum GCodeType {
-    PROFILE,
-    POCKET,
-    DRILLING,
-    MATERIAL_SETUP_FORM
+    Profile,
+    Pocket,
+    Drilling,
+    Material
 };
 
-class GCode : public ItemGroup {
+class GCode : public AbstractFile<int> {
 public:
-    GCode(const Paths& paths, const Tool& tool, double m_depth, GCodeType type);
+    GCode(const Paths& paths, const Tool& tool, double depth, GCodeType type);
 
     Paths getPaths() const;
     void save(const QString& name = QString());
     void saveDrill();
     void saveProfilePocket();
 
-    QString name() const;
-    void setName(const QString& name);
-    const GCodeType type;
+    GCodeType gtype() const;
+
+    G::Side side() const;
+    void setSide(const G::Side& side);
+    FileType type() const override { return GCodeFile; }
 
 private:
-    const Paths paths;
-    const Tool tool;
-    QString m_name;
+    const GCodeType m_type;
+
+    const Paths m_paths;
+    const Tool m_tool;
     double m_depth;
+    G::Side m_side = G::Top;
 
     inline QString g0() { return "G0"; }
     inline QString g1() { return "G1"; }
@@ -48,45 +54,9 @@ private:
     void endFile();
 
     QList<QString> sl;
+
+protected:
+    virtual Paths merge() const { return m_paths; }
 };
-////////////////////////////////////////////////////
-/// \brief The GItem class
-///
-class PathItem : public GraphicsItem {
-public:
-    PathItem(const Path& m_path);
-    //~WorkItem() override {}
 
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    double w = 0.0;
-
-private:
-    QPainterPath m_shape;
-    Path m_path;
-    QRectF rect;
-};
-////////////////////////////////////////////////////
-/// \brief The DrillItem class
-///
-class DrillItem : public GraphicsItem {
-public:
-    DrillItem(double diameter);
-
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override;
-    double w = 0.0;
-
-    double diameter() const;
-    void setDiameter(double diameter);
-
-private:
-    QPainterPath m_shape;
-    double m_diameter;
-    QRectF rect;
-};
 #endif // GCODE_H

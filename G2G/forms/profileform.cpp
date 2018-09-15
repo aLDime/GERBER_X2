@@ -9,7 +9,6 @@
 #include "gcode/toolpathcreator.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QMessageBox>
-#include <graphicsitem.h>
 #include <myclipper.h>
 #include <myscene.h>
 
@@ -31,7 +30,7 @@ ProfileForm::ProfileForm(QWidget* parent)
 {
     ui->setupUi(this);
     ui->lblToolName->setText(tool.name);
-    ui->dsbxDepth->setValue(MaterialSetupForm::thickness);
+    ui->dsbxDepth->setValue(MaterialSetup::thickness);
 
     auto rb_clicked = [&] {
         QStringList list = {
@@ -91,6 +90,17 @@ void ProfileForm::on_pbEdit_clicked()
 
 void ProfileForm::on_pbCreate_clicked()
 {
+    create();
+}
+
+void ProfileForm::on_pbClose_clicked()
+{
+    if (parent())
+        static_cast<QDockWidget*>(parent())->hide();
+}
+
+void ProfileForm::create()
+{
     MyScene* scene = MyScene::self;
 
     if (!tool.isValid()) {
@@ -99,10 +109,26 @@ void ProfileForm::on_pbCreate_clicked()
     }
 
     Paths wPaths;
+    G::Side side = G::Side(-1);
+
     for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == WorkItemType)
-            wPaths.append(static_cast<WorkItem*>(item)->getPaths());
+        if (item->type() == GERBER_ITEM) {
+            GerberItem* gi = static_cast<GerberItem*>(item);
+            if (side == G::Side(-1))
+                side = gi->file()->side;
+            if (side != gi->file()->side) {
+                QMessageBox::warning(this, "", "Working items from different sides!");
+                return;
+            }
+        }
+        if (item->type() == GERBER_ITEM || item->type() == DRILL_ITEM)
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        //        if (item->type() == GERBER_ITEM)
+        //            wPaths.append(static_cast<GerberItem*>(item)->paths());
     }
+
+    if (side == G::Side(-1))
+        side = G::Top;
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
@@ -112,16 +138,11 @@ void ProfileForm::on_pbCreate_clicked()
     GCode* gcode = ToolPathCreator(wPaths).ToolPathProfile(static_cast<MILLING>(side), tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value());
 
     if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
+        QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the Working items!"));
         return;
     }
 
-    gcode->setName(ui->leName->text());
+    gcode->setFileName(ui->leName->text());
+    gcode->setSide(side);
     FileModel::self->addGcode(gcode);
-}
-
-void ProfileForm::on_pbClose_clicked()
-{
-    if (parent())
-        static_cast<QDockWidget*>(parent())->hide();
 }

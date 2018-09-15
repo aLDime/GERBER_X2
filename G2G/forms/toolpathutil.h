@@ -10,6 +10,7 @@ public:
     ~ToolPathUtil();
     void readTools(const QVector<Tool*>& tool) const;
     void writeTools(const QVector<Tool*>& tool) const;
+    virtual void create() = 0;
 
 protected:
     Tool tool;

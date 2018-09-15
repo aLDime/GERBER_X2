@@ -17,6 +17,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
+    int type() const override;
 
     void resetPos();
     void setPos(const QPointF& pos);
@@ -49,6 +50,8 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
+    int type() const override;
+    static QVector<Shtift *> shtifts();
 
 private:
     QRectF m_rect;
