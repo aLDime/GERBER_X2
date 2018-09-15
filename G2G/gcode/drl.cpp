@@ -30,6 +30,9 @@ Drill* DrillParser::parseFile(const QString& fileName)
             if (parseComment(line))
                 continue;
 
+            if (parseFormat(line))
+                continue;
+
             if (parseGCode(line))
                 continue;
 
@@ -40,9 +43,6 @@ Drill* DrillParser::parseFile(const QString& fileName)
                 continue;
 
             if (parsePos(line))
-                continue;
-
-            if (parseFormat(line))
                 continue;
 
             qWarning() << "херня какаято:" << line;
@@ -200,6 +200,11 @@ bool DrillParser::parseFormat(const QString& line)
     }
     if (line.contains(QRegExp("INCH"))) {
         m_state.format.unitMode = INCHES;
+        return true;
+    }
+    if (line.contains(QRegExp("FMAT,2"))) {
+        m_state.format.integer = 1;
+        m_state.format.decimal = 5;
         return true;
     }
     return false;

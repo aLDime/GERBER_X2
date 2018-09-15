@@ -23,8 +23,6 @@ void ItemGroup::addToTheScene()
     if (MyScene::self)
         for (QGraphicsItem* item : *this)
             MyScene::self->addItem(item);
-    MainWindow::self->zero()->resetPos();
-    MainWindow::self->home()->resetPos();
 }
 
 void ItemGroup::setBrush(const QBrush& brush)

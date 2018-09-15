@@ -8,22 +8,27 @@
 DrillNode::DrillNode(Drill* file)
     : m_id(FileHolder::addFile(file))
 {
-    AbstractNode::files.append(file->fileName());
+    AbstractNode::files.append(file->shortFileName());
     FileHolder::file<Drill>(m_id)->itemGroup()->addToTheScene();
     //FileHolder::file<Drill>(m_id)->itemGroup()->setZValue(-m_id);
     MyGraphicsView::self->ZoomFit();
     MyGraphicsView::self->Zoom100();
     MainWindow::self->closeAllAct->setEnabled(true);
+    MainWindow::self->zero()->resetPos();
+    MainWindow::self->home()->resetPos();
+    Shtift::shtifts()[0]->resetPos();
 }
 
 DrillNode::~DrillNode()
 {
-
     FileHolder::deleteFile(m_id);
     MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     if (MyScene::self) {
         MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
+        MainWindow::self->zero()->resetPos();
+        MainWindow::self->home()->resetPos();
+        Shtift::shtifts()[0]->resetPos();
     }
 }
 
@@ -66,9 +71,8 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
+            return FileHolder::file<Drill>(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file<Drill>(m_id)->fileName();
-        case Qt::EditRole:
             return FileHolder::file<Drill>(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;

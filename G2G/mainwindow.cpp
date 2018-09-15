@@ -14,6 +14,7 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
+#include <filetree/fileholder.h>
 #include <filetree/gcodenode.h>
 #include <filetree/gerbernode.h>
 #include <limits>
@@ -49,7 +50,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-    connect(gerberParser, &G::Parser::fileReady, treeView, &TreeView::addFile);
+    connect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
+    connect(gerberParser, &G::Parser::fileReady, [=](G::File* file) { prependToRecentFiles(file->fileName()); });
     connect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
     connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
@@ -89,21 +91,22 @@ MainWindow::MainWindow(QWidget* parent)
             menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 24)));
         }
     });
-    //    if (0) {
-    //        QPainterPath painterPath;
-    //        QFont font;
-    //        font.setPointSizeF(10);
-    //        painterPath.addText(QPointF(1, -23), font, "Gerber X2");
-    //        painterPath.addText(QPointF(1, -12), font, "to");
-    //        painterPath.addText(QPointF(1, -01), font, "G Code");
-    //        QGraphicsPathItem* pathItem = new QGraphicsPathItem(painterPath);
-    //        pathItem->setAcceptHoverEvents(true);
-    //        pathItem->setBrush(QColor(255, 180, 120));
-    //        pathItem->setPen(Qt::NoPen);
-    //        QTransform tr = QTransform::fromScale(2, -2);
-    //        pathItem->setTransform(tr);
-    //        scene->addItem(pathItem);
-    //    }
+
+    if (0) {
+        QPainterPath painterPath;
+        QFont font;
+        font.setPointSizeF(10);
+        painterPath.addText(QPointF(1, -23), font, "Gerber X2");
+        painterPath.addText(QPointF(1, -12), font, "to");
+        painterPath.addText(QPointF(1, -01), font, "G Code");
+        QGraphicsPathItem* pathItem = new QGraphicsPathItem(painterPath);
+        pathItem->setAcceptHoverEvents(true);
+        pathItem->setBrush(QColor(255, 180, 120));
+        pathItem->setPen(Qt::NoPen);
+        QTransform tr = QTransform::fromScale(2, -2);
+        pathItem->setTransform(tr);
+        MyScene::self->addItem(pathItem);
+    }
 
     QLatin1String styleSheet("QGroupBox, .QFrame {"
                              //"background-color: rgb(255,255,255);"
@@ -234,6 +237,12 @@ void MainWindow::createActions()
         recentFileActs[i] = recentMenu->addAction(QString(), this, &MainWindow::openRecentFile);
         recentFileActs[i]->setVisible(false);
     }
+    recentFileActs[MaxRecentFiles] = recentMenu->addAction("Clear Recent Files", [=] {
+        QSettings settings;
+        writeRecentFiles({}, settings);
+        updateRecentFileActions();
+        setRecentFilesVisible(MainWindow::hasRecentFiles());
+    });
 
     recentFileSeparator = fileMenu->addSeparator();
 
@@ -356,7 +365,7 @@ void MainWindow::readSettings()
     lastPath = settings.value("lastPath").toString();
     QString files = settings.value("files").toString();
     for (const QString& file : files.split('|', QString::SkipEmptyParts))
-        openFile(lastPath + "/" + file);
+        openFile(file);
 }
 
 void MainWindow::writeSettings()
@@ -365,7 +374,7 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
-    settings.setValue("files", treeView->files());
+    settings.setValue("files", FileHolder::fileNames());
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)
@@ -394,21 +403,25 @@ void MainWindow::openFile(const QString& fileName)
     static QMutex mutex;
     QMutexLocker locker(&mutex);
 
-    //    if (treeView->files().contains(fileName)) {
-    //        QMessageBox::warning(this, "", tr("The document is open."));
-    //        return;
-    //    }
+    if (FileHolder::fileNames().contains(fileName)) {
+        QMessageBox::warning(this, "", tr("The document is open."));
+        return;
+    }
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        //QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+        QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
     QFileInfo fi(fileName);
     lastPath = fi.absolutePath();
 
     if (fi.suffix().contains("drl", Qt::CaseInsensitive)) {
-        FileModel::self->addDrlFile(DrillParser().parseFile(fileName));
+        Drill* dFile = DrillParser().parseFile(fileName);
+        if (dFile) {
+            FileModel::self->addDrlFile(dFile);
+            prependToRecentFiles(dFile->fileName());
+        }
     } else
         emit parseFile(fileName);
 }
@@ -478,6 +491,8 @@ void MainWindow::updateRecentFileActions()
     }
     for (; i < MaxRecentFiles; ++i)
         recentFileActs[i]->setVisible(false);
+
+    recentFileActs[MaxRecentFiles]->setVisible(count);
 }
 
 void MainWindow::openRecentFile()
@@ -485,24 +500,6 @@ void MainWindow::openRecentFile()
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
         openFile(action->data().toString());
 }
-
-//bool MainWindow::saveFile(const QString& fileName)
-//{
-//    QFile file(fileName);
-//    if (!file.open(QFile::WriteOnly | QFile::Text)) {
-//        QMessageBox::warning(this, tr("SDI"),
-//            tr("Cannot write file %1:\n%2.")
-//                .arg(QDir::toNativeSeparators(fileName), file.errorString()));
-//        return false;
-//    }
-//    QTextStream out(&file);
-//    //    QApplication::setOverrideCursor(Qt::WaitCursor);
-//    //    out << textEdit->toPlainText();
-//    QApplication::restoreOverrideCursor();
-//    setCurrentFile(fileName);
-//    statusBar()->showMessage(tr("File saved"), 2000);
-//    return true;
-//}
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
@@ -519,7 +516,7 @@ void MainWindow::setCurrentFile(const QString& fileName)
     setWindowModified(false);
 
     if (!isUntitled && windowFilePath() != curFile)
-        MainWindow::prependToRecentFiles(curFile);
+        prependToRecentFiles(curFile);
 
     setWindowFilePath(curFile);
 }
@@ -533,7 +530,7 @@ void MainWindow::showSettingsDialog()
 {
     SettingsDialog settings(this);
     if (settings.exec()) {
-        readSettings();
+        //readSettings();
     }
 }
 

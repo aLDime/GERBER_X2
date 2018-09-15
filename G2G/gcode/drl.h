@@ -16,15 +16,21 @@ enum UNIT_MODE {
 enum M_CODE {
     M00,
     M30 = 30, // end of file
-    M48 = 48, // begin of file
+    M48 = 48, // begin of file // HEADER
     M71 = 71, // mm
     M72 = 72, // in
 };
 
 enum G_CODE {
     G00,
+    //self.statements.append(RouteModeStmt())
+    //self.state = 'ROUT'
     G05 = 5,
+    //self.statements.append(DrillModeStmt())
+    //self.state = 'DRILL'
     G90 = 90,
+    //self.statements.append(AbsoluteModeStmt())
+    //self.notation = 'absolute'
 };
 
 struct State {

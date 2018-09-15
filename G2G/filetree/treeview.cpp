@@ -68,34 +68,12 @@ TreeView::~TreeView()
 {
 }
 
-void TreeView::addFile(G::File* gerberFile)
-{
-    m_model->addGerberFile(gerberFile);
-    updateTree();
-}
-
-QString TreeView::files()
-{
-    QString f;
-    QModelIndex index = m_model->index(NodeGerberFiles, 0, QModelIndex());
-    int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
-    for (int row = 0; row < rowCount; ++row) {
-        f += m_model->index(row, 0, index).data().toString() + "|";
-    }
-    index = m_model->index(NodeDrillFiles, 0, QModelIndex());
-    //qDebug() << index.data();
-    rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
-    for (int row = 0; row < rowCount; ++row) {
-        f += m_model->index(row, 0, index).data().toString() + "|";
-    }
-    return f;
-}
 
 void TreeView::updateTree()
 {
     expandAll();
-    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column)
-        resizeColumnToContents(column);
+//    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column)
+//        resizeColumnToContents(column);
 }
 
 void TreeView::updateIcons()

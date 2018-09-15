@@ -8,7 +8,7 @@ PathItem::PathItem(const Path& path)
     if (m_paths[0][0] != m_paths[0].last())
         m_paths[0].append(m_paths[0][0]);
     m_shape.addPolygon(PathToQPolygon(m_paths[0]));
-    double k = m_pen.widthF() / 2;
+    const double k = m_pen.widthF() / 2;
     rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
     //    setAcceptTouchEvents(false);
     //    setAcceptedMouseButtons(false);
@@ -18,10 +18,7 @@ PathItem::PathItem(const Path& path)
     setCacheMode(DeviceCoordinateCache);
 }
 
-QRectF PathItem::boundingRect() const
-{
-    return rect;
-}
+QRectF PathItem::boundingRect() const { return rect; }
 
 QPainterPath PathItem::shape() const { return m_shape; }
 
@@ -77,7 +74,4 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
 
 int PathItem::type() const { return PATH_ITEM; }
 
-Paths PathItem::paths() const
-{
-    return m_paths;
-}
+Paths PathItem::paths() const { return m_paths; }

@@ -29,13 +29,13 @@ GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double d
     case Profile:
         for (const Path& path : paths) {
             item = new PathItem(path);
-            item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setPen(QPen(QColor(50, 50, 50), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             itemGroup()->append(item);
         }
         p.reserve(paths.size());
         for (const Path& path : paths) {
             item = new PathItem(path);
-            item->setPen(QPen(Qt::black, 0.0, Qt::DashLine));
+            item->setPen(QPen(Qt::red, 0.0));
             itemGroup()->append(item);
             p.append(path.first());
         }
@@ -46,15 +46,15 @@ GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double d
         break;
     case Pocket:
         item = new GerberItem(paths2, nullptr);
-        item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setBrush(QColor(100, 100, 100));
+        item->setPen(QPen(QColor(50, 50, 50), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setBrush(QColor(50, 50, 50));
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         p.reserve(paths.size());
         itemGroup()->append(item);
         for (const Path& path : paths) {
             item = new PathItem(path);
-            item->setPen(QPen(Qt::black, 0.0, Qt::DashLine));
+            item->setPen(QPen(Qt::red, 0.0));
             itemGroup()->append(item);
             p.append(path.first());
         }

@@ -1,6 +1,8 @@
 #include "settingsdialog.h"
 
+#include <QGLWidget>
 #include <QtWidgets>
+#include <mygraphicsview.h>
 
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
@@ -51,7 +53,7 @@ void SettingsDialog::onListCategoriesCurrentRowChanged(int currentRow)
 
 void SettingsDialog::readSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     settings.beginGroup("Viewer");
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
     chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
@@ -60,10 +62,18 @@ void SettingsDialog::readSettings()
 
 void SettingsDialog::writeSettings()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     settings.beginGroup("Viewer");
-    settings.setValue("OpenGl", chbOpenGl->isChecked());
-    settings.setValue("Antialiasing", chbAntialiasing->isChecked());
+    if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
+        MyGraphicsView::self->setViewport(chbOpenGl->isChecked() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+        MyGraphicsView::self->viewport()->setObjectName("viewport");
+        MyGraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
+        settings.setValue("OpenGl", chbOpenGl->isChecked());
+    }
+    if (settings.value("Antialiasing").toBool() != chbAntialiasing->isChecked()) {
+        MyGraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
+        settings.setValue("Antialiasing", chbAntialiasing->isChecked());
+    }
     settings.endGroup();
 }
 

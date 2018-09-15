@@ -134,7 +134,7 @@ void DrillForm::updateFiles()
     for (G::File* file : FileHolder::files<G::File>()) {
         for (const G::GraphicObject& go : *file) {
             if (go.state.dCode == G::D03) {
-                ui->cbxFile->addItem(file->fileName(), QVariant::fromValue(static_cast<void*>(file)));
+                ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
                 ui->cbxFile->setItemData(ui->cbxFile->count() - 1, file->itemGroup()->brush().color(), Qt::BackgroundColorRole);
                 ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
                 break;

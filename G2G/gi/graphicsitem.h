@@ -33,6 +33,8 @@ protected:
     QPainterPath m_shape;
     mutable Paths m_paths;
     QRectF m_rect;
+
+
 };
 
 #endif // GERBERITEM_H

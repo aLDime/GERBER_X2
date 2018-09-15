@@ -11,10 +11,6 @@ File::File(const QString& fileName)
 
 File::~File()
 {
-    qDebug("~File()");
-    //    qDeleteAll(apertures);
-    //    if (itemGroup)
-    //        delete itemGroup;
 }
 
 Paths File::merge() const

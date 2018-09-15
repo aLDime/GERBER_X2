@@ -35,6 +35,18 @@ Paths FileHolder::getPaths()
     return paths;
 }
 
+QString FileHolder::fileNames()
+{
+    QMutexLocker locker(&m_mutex);
+    QString paths;
+    for (const QSharedPointer<AbstractFile>& sp : m_files) {
+        AbstractFile* item = sp.data();
+        if (item && (item->type() == GerberFile || item->type() == DrillFile))
+            paths.append(item->fileName()).append('|');
+    }
+    return paths;
+}
+
 void FileHolder::deleteFile(int id)
 {
     QMutexLocker locker(&m_mutex);

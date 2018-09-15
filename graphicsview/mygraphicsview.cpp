@@ -24,11 +24,9 @@ MyGraphicsView* MyGraphicsView::self = nullptr;
 MyGraphicsView::MyGraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-
-    setRenderHint(QPainter::Antialiasing, true);
-    //    setOptimizationFlags(DontSavePainterState);
-    //    setViewportUpdateMode(SmartViewportUpdate);
-    //    setViewportUpdateMode(BoundingRectViewportUpdate);
+    setOptimizationFlags(DontSavePainterState);
+    setViewportUpdateMode(SmartViewportUpdate);
+    setViewportUpdateMode(BoundingRectViewportUpdate);
     setDragMode(RubberBandDrag);
     //    setTransformationAnchor(AnchorUnderMouse);
     //    setResizeAnchor(AnchorUnderMouse);
@@ -67,11 +65,10 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
 
     QSettings settings;
     settings.beginGroup("Viewer");
-    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", true).toBool());
     setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+    setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
-
     SetScene(new MyScene(this));
     self = this;
 }

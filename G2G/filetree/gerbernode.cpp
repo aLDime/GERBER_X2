@@ -10,7 +10,7 @@ using namespace G;
 GerberNode::GerberNode(File* file)
     : m_id(FileHolder::addFile(file))
 {
-    AbstractNode::files.append(file->fileName());
+    AbstractNode::files.append(file->shortFileName());
     FileHolder::file<File>(m_id)->itemGroup()->addToTheScene();
     FileHolder::file<File>(m_id)->itemGroup()->setZValue(-m_id);
     MyGraphicsView::self->ZoomFit();
@@ -19,6 +19,9 @@ GerberNode::GerberNode(File* file)
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
+    MainWindow::self->zero()->resetPos();
+    MainWindow::self->home()->resetPos();
+    Shtift::shtifts()[0]->resetPos();
 }
 
 GerberNode::~GerberNode()
@@ -28,6 +31,9 @@ GerberNode::~GerberNode()
     if (MyScene::self) {
         MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
+        MainWindow::self->zero()->resetPos();
+        MainWindow::self->home()->resetPos();
+        Shtift::shtifts()[0]->resetPos();
     }
     m_repaintTimer.start(1);
 }
@@ -80,6 +86,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
+            return FileHolder::file<File>(m_id)->shortFileName();
         case Qt::ToolTipRole:
             return FileHolder::file<File>(m_id)->fileName();
         case Qt::CheckStateRole:

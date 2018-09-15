@@ -60,7 +60,7 @@ private:
     void readSettings();
     void writeSettings();
 
-    QAction* recentFileActs[MaxRecentFiles];
+    QAction* recentFileActs[MaxRecentFiles + 1];
     QAction* recentFileSeparator;
     QAction* recentFileSubMenuAct;
 

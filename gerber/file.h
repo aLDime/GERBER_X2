@@ -36,7 +36,7 @@ public:
 
 class File : public AbstractFile, public QList<GraphicObject> {
 public:
-    File(const QString& fileName = "");
+    File(const QString& shortFileName = "");
     ~File();
 
     enum Group {

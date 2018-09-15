@@ -43,7 +43,7 @@ public:
 
     int id = -1;
 
-    double getDiameter(double depth = 0.0) const;
+    double getDiameter(double depth) const;
 
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;

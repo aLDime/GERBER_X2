@@ -40,7 +40,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         pen = QPen(cp, 0.0);
     }
     if (option->state & QStyle::State_MouseOver) {
-        cb = cb.darker();
+        cb = cb.darker(150);
         b.setColor(cb);
         //        b.setStyle(Qt::Dense4Pattern);
         //        b.setMatrix(matrix().scale(1/MyGraphicsView::self->matrix().m11(), 1/MyGraphicsView::self->matrix().m11()));
@@ -49,12 +49,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     }
 
     painter->setBrush(b);
-    if (m_file)
-        painter->setPen(pen);
-    else {
-        painter->setPen(m_pen);
-        qDebug() << m_pen.widthF();
-    }
+    painter->setPen(m_file ? pen : m_pen);
     painter->drawPath(m_shape);
 }
 

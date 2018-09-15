@@ -19,11 +19,10 @@ public:
 
     // GraphicsItem interface
     Paths paths() const override;
+
 private:
     double m_diameter;
     const Drill* m_file;
-
-
 };
 
 #endif // DRILLITEM_H

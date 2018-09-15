@@ -37,6 +37,7 @@ public:
     static bool isEmpty();
 
     static Paths getPaths();
+    static QString fileNames();
 
     template <typename T>
     static QVector<T*> files()

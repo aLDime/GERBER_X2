@@ -21,7 +21,7 @@ DrillItem::DrillItem(double diameter, Drill* file)
     //            if (Area(poligon) < 0)
     //                ReversePath(poligon);
     setCacheMode(DeviceCoordinateCache);
-    diameter /= 2;
+    m_diameter /= 2;
     m_shape.addEllipse(QPointF(), diameter, diameter);
     m_rect = m_shape.boundingRect();
     setAcceptHoverEvents(true);
@@ -52,10 +52,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
 int DrillItem::type() const { return DRILL_ITEM; }
 
-double DrillItem::diameter() const
-{
-    return m_diameter;
-}
+double DrillItem::diameter() const { return m_diameter; }
 
 void DrillItem::setDiameter(double diameter)
 {
@@ -70,10 +67,7 @@ void DrillItem::setDiameter(double diameter)
     m_rect = m_shape.boundingRect();
 }
 
-const Drill* DrillItem::file() const
-{
-    return m_file;
-}
+const Drill* DrillItem::file() const { return m_file; }
 
 Paths DrillItem::paths() const
 {

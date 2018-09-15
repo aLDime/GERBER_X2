@@ -51,6 +51,7 @@ public:
     QPainterPath shape() const override;
     int type() const override;
     static QVector<Shtift*> shtifts();
+    void resetPos();
 
 private:
     QRectF m_rect;

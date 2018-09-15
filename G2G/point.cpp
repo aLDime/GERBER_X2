@@ -260,17 +260,7 @@ void Shtift::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
-    updateRect();
-    QPointF p[]{
-        QPointF(boardRect.topLeft() + QPointF(-3, -3)),
-        QPointF(boardRect.topRight() + QPointF(+3, -3)),
-        QPointF(boardRect.bottomRight() + QPointF(+3, +3)),
-        QPointF(boardRect.bottomLeft() + QPointF(-3, +3)),
-    };
-
-    for (int i = 0; i < 4; ++i)
-        m_shtifts[i]->setPos(p[i]);
-
+    resetPos();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
@@ -301,4 +291,18 @@ int Shtift::type() const
 QVector<Shtift*> Shtift::shtifts()
 {
     return m_shtifts;
+}
+
+void Shtift::resetPos()
+{
+    updateRect();
+    QPointF p[]{
+        QPointF(boardRect.topLeft() + QPointF(-3, -3)),
+        QPointF(boardRect.topRight() + QPointF(+3, -3)),
+        QPointF(boardRect.bottomRight() + QPointF(+3, +3)),
+        QPointF(boardRect.bottomLeft() + QPointF(-3, +3)),
+    };
+
+    for (int i = 0; i < 4; ++i)
+        m_shtifts[i]->setPos(p[i]);
 }

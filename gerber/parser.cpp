@@ -508,9 +508,10 @@ Paths Parser::createLine()
         }
 #endif
     } else {
+        //потровится ести нет апертуры!!!!!!!
         double size = file->apertures[state.aperture /*lstAperture*/]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
-            size = 0.01 * uScale;
+            size = 1;
 
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
         offset.AddPath(path, jtRound, etOpenRound);

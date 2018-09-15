@@ -55,12 +55,12 @@ ToolPathCreator::ToolPathCreator(const Paths& value)
 
 GCode* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth, bool side)
 {
-    double toolDiameter = tool[0].diameter * uScale;
+    double toolDiameter = tool[0].getDiameter(depth) * uScale;
     double dOffset = toolDiameter / 2;
     double stepOver = tool[0].stepover * uScale;
 
     if (side) {
-        groupedPaths(CutoffPaths, toolDiameter + 1);
+        groupedPaths(CutoffPaths, toolDiameter + 5);
     } else
         groupedPaths(CopperPaths);
 
@@ -74,9 +74,9 @@ GCode* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& t
         offset.Clear();
         offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
         offset.Execute(paths, -dOffset);
-        fillPaths.append(paths);
 
-        CleanPolygons(paths, 0.001 * uScale);
+        CleanPolygons(paths, 0.003 * uScale);
+        fillPaths.append(paths);
 
         do {
             tmpPaths.append(paths);

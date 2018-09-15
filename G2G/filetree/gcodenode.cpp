@@ -53,6 +53,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
+            return FileHolder::file<GCode>(m_id)->shortFileName();
         case Qt::ToolTipRole:
             return FileHolder::file<GCode>(m_id)->fileName();
         case Qt::CheckStateRole:

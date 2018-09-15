@@ -25,7 +25,8 @@ public:
         //        delete itemGroup;
     }
 
-    QString fileName() const { return QFileInfo(m_fileName).fileName(); }
+    QString shortFileName() const { return QFileInfo(m_fileName).fileName(); }
+    QString fileName() const { return m_fileName; }
     void setFileName(const QString& fileName) { m_fileName = fileName; }
 
     ItemGroup* itemGroup() const { return m_itemGroup.data(); }
