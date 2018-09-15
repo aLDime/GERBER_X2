@@ -6,22 +6,10 @@
 #include "gcode/gcode.h"
 #include <QDockWidget>
 
-#include "gcode/toolpathcreator.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QMessageBox>
 #include <myclipper.h>
 #include <myscene.h>
-
-enum {
-    OUTSIDE,
-    INSIDE,
-    ON,
-};
-
-enum {
-    CLIMB,
-    CONVENTIONAL
-};
 
 ProfileForm::ProfileForm(QWidget* parent)
     : QWidget(parent)
@@ -45,18 +33,18 @@ ProfileForm::ProfileForm(QWidget* parent)
         QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
 
         if (ui->rbOutside->isChecked())
-            side = OUTSIDE;
+            side = Outer;
         else if (ui->rbInside->isChecked())
-            side = INSIDE;
+            side = Inner;
         else if (ui->rbOn->isChecked())
-            side = ON;
+            side = On;
 
         ui->leName->setText(name[side]);
 
         if (ui->rbClimb->isChecked())
-            direction = CLIMB;
+            direction = Climb;
         else if (ui->rbConventional->isChecked())
-            direction = CONVENTIONAL;
+            direction = Conventional;
 
         ui->lblPixmap->setPixmap(QPixmap(list[side + direction * 3]));
     };
@@ -109,33 +97,31 @@ void ProfileForm::create()
     }
 
     Paths wPaths;
-    G::Side side = G::Side(-1);
+    G::Side boardSide = static_cast<G::Side>(-1);
 
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GERBER_ITEM) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (side == G::Side(-1))
-                side = gi->file()->side;
-            if (side != gi->file()->side) {
+            if (boardSide == G::Side(-1))
+                boardSide = gi->file()->side;
+            if (boardSide != gi->file()->side) {
                 QMessageBox::warning(this, "", "Working items from different sides!");
                 return;
             }
         }
         if (item->type() == GERBER_ITEM || item->type() == DRILL_ITEM)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
-        //        if (item->type() == GERBER_ITEM)
-        //            wPaths.append(static_cast<GerberItem*>(item)->paths());
     }
 
-    if (side == G::Side(-1))
-        side = G::Top;
+    if (boardSide == static_cast<G::Side>(-1))
+        boardSide = G::Top;
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
     }
 
-    GCode* gcode = ToolPathCreator(wPaths).ToolPathProfile(static_cast<MILLING>(side), tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value());
+    GCode* gcode = ToolPathCreator(wPaths).createProfile(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), side);
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the Working items!"));
@@ -143,6 +129,6 @@ void ProfileForm::create()
     }
 
     gcode->setFileName(ui->leName->text());
-    gcode->setSide(side);
+    gcode->setSide(boardSide);
     FileModel::self->addGcode(gcode);
 }

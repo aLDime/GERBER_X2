@@ -4,8 +4,7 @@
 #include <QFile>
 #include <QPainter>
 #include <QTextStream>
-#include <gi/drillitem.h>
-#include <gi/pathitem.h>
+#include <gi/itemgroup.h>
 #include <mygraphicsview.h>
 
 ///////////////////////////////////////////////
@@ -14,54 +13,63 @@
 /// \param tool
 /// \param m_depth
 ///
-GCode::GCode(const Paths& paths, const Tool& tool, double depth, GCodeType type)
+GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type)
     : m_paths(paths)
+    , m_paths2(paths2)
     , m_tool(tool)
     , m_depth(depth)
     , m_type(type)
 {
+
     setItemGroup(new ItemGroup);
-    PathItem* item;
-    DrillItem* itemd;
+    GraphicsItem* item;
     Path p;
-    p.reserve(paths.size());
+
     switch (type) {
     case Profile:
-    case Pocket:
         for (const Path& path : paths) {
-            p.append(path);
-            //            item = new PathItem(path);
-            //            //item->setPen(QPen(QColor::fromHsvF((0.83333 / paths.size()) * i++, 1.0, 1.0, 0.5), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            //            item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            //            append(item);
+            item = new PathItem(path);
+            item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            itemGroup()->append(item);
         }
-        item = new PathItem(p);
-        //item->setPen(QPen(QColor::fromHsvF((0.83333 / paths.size()) * i++, 1.0, 1.0, 0.5), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        itemGroup()->append(item);
-        p.clear();
-        p.squeeze();
+        p.reserve(paths.size());
         for (const Path& path : paths) {
             item = new PathItem(path);
             item->setPen(QPen(Qt::black, 0.0, Qt::DashLine));
-            //  item->w = d;
             itemGroup()->append(item);
             p.append(path.first());
         }
         item = new PathItem(p);
         item->setPen(QPen(Qt::green, 0.0));
-        //  item->w = 10;
         itemGroup()->append(item);
-        //  setPen(QPen(QColor(50, 50, 50), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         itemGroup()->setBrush(Qt::NoBrush);
+        break;
+    case Pocket:
+        item = new GerberItem(paths2, nullptr);
+        item->setPen(QPen(QColor(100, 100, 100), tool.getDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setBrush(QColor(100, 100, 100));
+        item->setAcceptHoverEvents(false);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+        p.reserve(paths.size());
+        itemGroup()->append(item);
+        for (const Path& path : paths) {
+            item = new PathItem(path);
+            item->setPen(QPen(Qt::black, 0.0, Qt::DashLine));
+            itemGroup()->append(item);
+            p.append(path.first());
+        }
+        item = new PathItem(p);
+        item->setPen(QPen(Qt::green, 0.0));
+        item->setBrush(Qt::NoBrush);
+        itemGroup()->append(item);
         break;
     case Drilling:
         for (const IntPoint& point : paths.first()) {
-            itemd = new DrillItem(tool.diameter);
-            itemd->setPos(ToQPointF(point));
-            itemd->setPen(QPen(Qt::red, 0.0));
-            itemd->setBrush(Qt::red);
-            itemGroup()->append(itemd);
+            item = new DrillItem(tool.diameter);
+            item->setPos(ToQPointF(point));
+            item->setPen(QPen(Qt::red, 0.0));
+            item->setBrush(Qt::red);
+            itemGroup()->append(item);
         }
         item = new PathItem(paths.first());
         item->setPen(QPen(Qt::green, 0.0));

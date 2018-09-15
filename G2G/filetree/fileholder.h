@@ -18,8 +18,8 @@ public:
     static T* file(int id)
     {
         QMutexLocker locker(&m_mutex);
-        QMap<int, QSharedPointer<T>>* files = reinterpret_cast<QMap<int, QSharedPointer<T>>*>(&m_files);
-        return files->value(id).data();
+        AbstractFile* file = m_files.value(id).data();
+        return static_cast<T*>(file);
     }
 
     static void deleteFile(int id);
@@ -30,32 +30,30 @@ public:
         QMutexLocker locker(&m_mutex);
         const int id = m_id;
         ++m_id;
-        QMap<int, QSharedPointer<T>>* files = reinterpret_cast<QMap<int, QSharedPointer<T>>*>(&m_files);
-        files->insert(id, QSharedPointer<T>(file));
+        m_files.insert(id, QSharedPointer<AbstractFile>(file));
         return id;
     }
 
-    static bool isEmpty() ;
+    static bool isEmpty();
 
     static Paths getPaths();
 
     template <typename T>
-    static QVector<T*> files() /*const*/
+    static QVector<T*> files()
     {
         QMutexLocker locker(&m_mutex);
-        QMap<int, QSharedPointer<T>>* files = reinterpret_cast<QMap<int, QSharedPointer<T>>*>(&m_files);
         QVector<T*> rfiles;
-        rfiles.reserve(files->size());
-        for (const QSharedPointer<T>& sp : *files) {
-            if (dynamic_cast<T*>(sp.data()))
-                rfiles.append(sp.data());
+        for (const QSharedPointer<AbstractFile>& sp : m_files) {
+            T* file = dynamic_cast<T*>(sp.data());
+            if (file)
+                rfiles.append(file);
         }
         return rfiles;
     }
 
 private:
     static QMutex m_mutex;
-    static QMap<int, QSharedPointer<AbstractFile<int>>> m_files;
+    static QMap<int, QSharedPointer<AbstractFile>> m_files;
     static int m_id;
 };
 

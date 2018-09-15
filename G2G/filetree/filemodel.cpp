@@ -18,7 +18,6 @@ FileModel::FileModel(QObject* parent)
     rootItem->add(new FolderNode("Gerber Files"));
     rootItem->add(new FolderNode("Excellon"));
     rootItem->add(new FolderNode("Tool Paths"));
-    rootItem->add(new FolderNode("Shtift"));
 }
 
 FileModel::~FileModel()
@@ -29,7 +28,7 @@ FileModel::~FileModel()
 
 void FileModel::addGerberFile(G::File* gerberFile)
 {
-    AbstractNode* item{ rootItem->child(NODE_GERBER_FILES) };
+    AbstractNode* item{ rootItem->child(NodeGerberFiles) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -41,7 +40,7 @@ void FileModel::addDrlFile(Drill* drl)
 {
     if (!drl)
         return;
-    AbstractNode* item{ rootItem->child(NODE_DRILL) };
+    AbstractNode* item{ rootItem->child(NodeDrillFiles) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -51,7 +50,7 @@ void FileModel::addDrlFile(Drill* drl)
 
 void FileModel::addGcode(GCode* group)
 {
-    AbstractNode* item{ rootItem->child(NODE_MILLING) };
+    AbstractNode* item{ rootItem->child(NodeToolPath) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -61,7 +60,7 @@ void FileModel::addGcode(GCode* group)
 
 void FileModel::closeAllFiles()
 {
-    AbstractNode* item{ rootItem->child(NODE_GERBER_FILES) };
+    AbstractNode* item{ rootItem->child(NodeGerberFiles) };
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     if (rowCount) {
@@ -72,7 +71,7 @@ void FileModel::closeAllFiles()
         endRemoveRows();
     }
 
-    item = rootItem->child(NODE_DRILL);
+    item = rootItem->child(NodeDrillFiles);
     index = createIndex(0, 0, item);
     rowCount = item->childCount();
     if (rowCount) {
@@ -83,7 +82,7 @@ void FileModel::closeAllFiles()
         endRemoveRows();
     }
 
-    item = rootItem->child(NODE_MILLING);
+    item = rootItem->child(NodeToolPath);
     index = createIndex(0, 0, item);
     rowCount = item->childCount();
     if (rowCount) {
@@ -93,47 +92,6 @@ void FileModel::closeAllFiles()
         }
         endRemoveRows();
     }
-
-    item = rootItem->child(NODE_PINS);
-    index = createIndex(0, 0, item);
-    rowCount = item->childCount();
-    if (rowCount) {
-        beginRemoveRows(index, 0, rowCount - 1);
-        for (int i = 0; i < rowCount; ++i) {
-            item->remove(0);
-        }
-        endRemoveRows();
-    }
-    //    item = rootItem->child(NODE_MILLING);
-    //    index = createIndex(0, 0, item);
-    //    rowCount = item->childCount();
-    //    if (rowCount) {
-    //        beginRemoveRows(index, 0, rowCount - 1);
-    //        for (int i = 0; i < rowCount; ++i) {
-    //            item->remove(0);
-    //        }
-    //        endRemoveRows();
-    //    }
-    //    item = rootItem->child(NODE_DRILL);
-    //    index = createIndex(0, 0, item);
-    //    rowCount = item->childCount();
-    //    if (rowCount) {
-    //        beginRemoveRows(index, 0, rowCount - 1);
-    //        for (int i = 0; i < rowCount; ++i) {
-    //            item->remove(0);
-    //        }
-    //        endRemoveRows();
-    //    }
-    //    item = rootItem->child(NODE_PINS);
-    //    index = createIndex(0, 0, item);
-    //    rowCount = item->childCount();
-    //    if (rowCount) {
-    //        beginRemoveRows(index, 0, rowCount - 1);
-    //        for (int i = 0; i < rowCount; ++i) {
-    //            item->remove(0);
-    //        }
-    //        endRemoveRows();
-    //    }
 }
 
 QModelIndex FileModel::index(int row, int column, const QModelIndex& parent) const
@@ -191,6 +149,8 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
         switch (section) {
         case 0:
             return QString("Name");
+        case 1:
+            return QString("Side");
         default:
             return QString("");
         }
@@ -230,7 +190,7 @@ int FileModel::columnCount(const QModelIndex& /*parent*/) const
     //    else
     //        return rootItem->columnCount();
 
-    return 3;
+    return 2;
 }
 
 int FileModel::rowCount(const QModelIndex& parent) const

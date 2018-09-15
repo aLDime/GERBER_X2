@@ -136,7 +136,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         }
     }
 
-    qWarning() << "elapsed" << t.elapsed();
+    //qWarning() << "elapsed" << t.elapsed();
 
     if (file->isEmpty())
         delete file;

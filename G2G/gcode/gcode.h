@@ -16,9 +16,9 @@ enum GCodeType {
     Material
 };
 
-class GCode : public AbstractFile<int> {
+class GCode : public AbstractFile {
 public:
-    GCode(const Paths& paths, const Tool& tool, double depth, GCodeType type);
+    GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type);
 
     Paths getPaths() const;
     void save(const QString& name = QString());
@@ -30,6 +30,7 @@ public:
     G::Side side() const;
     void setSide(const G::Side& side);
     FileType type() const override { return GCodeFile; }
+    Paths m_paths2;
 
 private:
     const GCodeType m_type;

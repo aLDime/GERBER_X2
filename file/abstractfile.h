@@ -13,8 +13,8 @@ enum FileType {
     GCodeFile,
 };
 
-template <typename T = int>
-class AbstractFile : public QList<T> {
+//template <typename T = int>
+class AbstractFile { // : public QList<T> {
 public:
     AbstractFile() {}
     ~AbstractFile()

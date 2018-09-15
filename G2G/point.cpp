@@ -31,7 +31,7 @@ Point::Point(int type)
 {
     setAcceptHoverEvents(true);
     setFlags(QGraphicsItem::ItemIsMovable);
-    if (m_type == HOME) {
+    if (m_type == Home) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
         m_color = QColor(0, 255, 0, 120);
@@ -79,7 +79,7 @@ void Point::resetPos()
     if (!this)
         return;
     updateRect();
-    if (m_type == HOME)
+    if (m_type == Home)
         setPos(boardRect.bottomRight());
     else
         setPos(boardRect.topLeft());
@@ -109,7 +109,7 @@ void Point::setPosY(double y)
 
 void Point::updateMaterialSetupForm()
 {
-    if (m_type == HOME)
+    if (m_type == Home)
         MaterialSetup::self->setHomePos(pos());
     else
         MaterialSetup::self->setZeroPos(pos());

@@ -12,13 +12,8 @@
 #include <myscene.h>
 
 enum {
-    OFFSET,
-    RASTER,
-};
-
-enum {
-    CLIMB,
-    CONVENTIONAL
+    Offset,
+    Raster,
 };
 
 PocketForm::PocketForm(QWidget* parent)
@@ -43,9 +38,9 @@ PocketForm::PocketForm(QWidget* parent)
         QStringList name = { "Pocket Offset", "Pocket Raster" };
 
         if (ui->rbOffset->isChecked())
-            type = OFFSET;
+            type = Offset;
         else if (ui->rbRaster->isChecked())
-            type = RASTER;
+            type = Raster;
 
         ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
         ui->dsbxAngle->setEnabled(ui->rbRaster->isChecked());
@@ -53,9 +48,9 @@ PocketForm::PocketForm(QWidget* parent)
         ui->leName->setText(name[type]);
 
         if (ui->rbClimb->isChecked())
-            direction = CLIMB;
+            direction = Climb;
         else if (ui->rbConventional->isChecked())
-            direction = CONVENTIONAL;
+            direction = Conventional;
 
         ui->lblPixmap->setPixmap(QPixmap(list[type + direction * 2]));
     };
@@ -120,13 +115,13 @@ void PocketForm::create()
     }
 
     Paths wPaths;
-    G::Side side = G::Side(-1);
+    G::Side boardSide = G::Side(-1);
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GERBER_ITEM) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (side == G::Side(-1))
-                side = gi->file()->side;
-            if (side != gi->file()->side) {
+            if (boardSide == G::Side(-1))
+                boardSide = gi->file()->side;
+            if (boardSide != gi->file()->side) {
                 QMessageBox::warning(this, "", "Working items from different sides!");
                 return;
             }
@@ -135,21 +130,21 @@ void PocketForm::create()
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (side == G::Side(-1))
-        side = G::Top;
+    if (boardSide == G::Side(-1))
+        boardSide = G::Top;
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
     }
 
-    GCode* gcode = ToolPathCreator(wPaths).ToolPathPocket({ tool }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked());
+    GCode* gcode = ToolPathCreator(wPaths).createPocket({ tool }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked());
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
         return;
     }
     gcode->setFileName(ui->leName->text());
-    gcode->setSide(side);
+    gcode->setSide(boardSide);
     FileModel::self->addGcode(gcode);
 }

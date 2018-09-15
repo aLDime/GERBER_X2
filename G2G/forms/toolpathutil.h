@@ -1,8 +1,14 @@
 #ifndef TOOLPATHUTIL_H
 #define TOOLPATHUTIL_H
 
+#include "gcode/toolpathcreator.h"
 #include "tooldatabase/tool.h"
 #include <QVector>
+
+enum Direction {
+    Climb,
+    Conventional
+};
 
 class ToolPathUtil {
 public:
@@ -15,6 +21,8 @@ public:
 protected:
     Tool tool;
     Tool tool2;
+    Direction direction = Climb;
+    SideOfMilling side = Outer;
 
 private:
     const QString m_name;

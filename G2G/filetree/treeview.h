@@ -24,7 +24,7 @@ private:
     FileModel* m_model;
 
     void on_doubleClicked(const QModelIndex& index);
-    void on_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     void hideOther(const QModelIndex& index);
 
@@ -33,7 +33,7 @@ protected:
 
     // QAbstractItemView interface
 protected slots:
-    //void selectionChanged(const QItemSelection &selected, const QItemSelection &deselected) override;
+    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 };
 
 #endif // MYTREEVIEW_H

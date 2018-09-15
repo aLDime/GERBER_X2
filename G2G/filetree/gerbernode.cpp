@@ -5,13 +5,14 @@
 #include <mainwindow.h>
 
 QTimer GerberNode::m_repaintTimer;
+using namespace G;
 
-GerberNode::GerberNode(G::File* file)
+GerberNode::GerberNode(File* file)
     : m_id(FileHolder::addFile(file))
 {
     AbstractNode::files.append(file->fileName());
-    FileHolder::file<G::File>(m_id)->itemGroup()->addToTheScene();
-    FileHolder::file<G::File>(m_id)->itemGroup()->setZValue(-m_id);
+    FileHolder::file<File>(m_id)->itemGroup()->addToTheScene();
+    FileHolder::file<File>(m_id)->itemGroup()->setZValue(-m_id);
     MyGraphicsView::self->ZoomFit();
     MyGraphicsView::self->Zoom100();
     MainWindow::self->closeAllAct->setEnabled(true);
@@ -22,11 +23,10 @@ GerberNode::GerberNode(G::File* file)
 
 GerberNode::~GerberNode()
 {
-    if (MainWindow::self && MainWindow::self->isVisible())
-        MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     FileHolder::deleteFile(m_id);
+    MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     if (MyScene::self) {
-        MyScene::self->setSceneRect(0, 0, 0, 0);
+        MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
     }
     m_repaintTimer.start(1);
@@ -39,7 +39,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         switch (role) {
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            FileHolder::file<G::File>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file<File>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
             return true;
         default:
             return false;
@@ -47,7 +47,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case 1:
         switch (role) {
         case Qt::EditRole:
-            FileHolder::file<G::File>(m_id)->side = static_cast<G::Side>(value.toBool());
+            FileHolder::file<File>(m_id)->side = static_cast<Side>(value.toBool());
             return true;
         default:
             return false;
@@ -81,20 +81,18 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return FileHolder::file<G::File>(m_id)->fileName();
-//        case Qt::EditRole:
-//            return FileHolder::file<G::File>(m_id)->fileName;
+            return FileHolder::file<File>(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole: {
             QPixmap pixmap(16, 16);
-            QColor color = FileHolder::file<G::File>(m_id)->itemGroup()->brush().color();
+            QColor color = FileHolder::file<File>(m_id)->itemGroup()->brush().color();
             color.setAlpha(255);
             pixmap.fill(color);
             return pixmap;
         }
         case Qt::UserRole:
-            return QVariant::fromValue(static_cast<void*>(FileHolder::file<G::File>(m_id)));
+            return QVariant::fromValue(static_cast<void*>(FileHolder::file<File>(m_id)));
         default:
             return QVariant();
         }
@@ -102,9 +100,9 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file<G::File>(m_id)->side];
+            return QString("Top|Bottom").split('|')[FileHolder::file<File>(m_id)->side];
         case Qt::EditRole:
-            return static_cast<bool>(FileHolder::file<G::File>(m_id)->side);
+            return static_cast<bool>(FileHolder::file<File>(m_id)->side);
         default:
             return QVariant();
         }
@@ -125,6 +123,6 @@ void GerberNode::repaint()
     int count = m_parentItem->childCount();
     int k = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
-    FileHolder::file<G::File>(m_id)->itemGroup()->setBrush(color);
+    FileHolder::file<File>(m_id)->itemGroup()->setBrush(color);
     MyScene::self->update();
 }

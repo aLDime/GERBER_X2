@@ -39,8 +39,8 @@ MainWindow::MainWindow(QWidget* parent)
     new Shtift();
     new Shtift();
 
-    m_zeroPoint = new Point(Point::ZERO);
-    m_homePoint = new Point(Point::HOME);
+    m_zeroPoint = new Point(Point::Zero);
+    m_homePoint = new Point(Point::Home);
 
     MyScene::self->addItem(m_zeroPoint);
     MyScene::self->addItem(m_homePoint);
@@ -81,7 +81,7 @@ MainWindow::MainWindow(QWidget* parent)
                         return;
                     settings.setValue("Shtift/depth", depth);
 
-                    GCode* gcode = new GCode({ dst }, tool, depth, Drilling);
+                    GCode* gcode = new GCode({ dst }, {}, tool, depth, Drilling);
                     gcode->setFileName("POINT_SHTIFT");
                     FileModel::self->addGcode(gcode);
                 }

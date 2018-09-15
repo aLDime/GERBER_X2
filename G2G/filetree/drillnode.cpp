@@ -20,10 +20,9 @@ DrillNode::~DrillNode()
 {
 
     FileHolder::deleteFile(m_id);
-    if (MainWindow::self && MainWindow::self->isVisible())
-        MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
+    MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     if (MyScene::self) {
-        MyScene::self->setSceneRect(0, 0, 0, 0);
+        MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
     }
 }

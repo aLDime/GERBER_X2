@@ -67,7 +67,7 @@ public:
     Drill* gFile = nullptr;
 };
 
-class Drill : public AbstractFile<Hole> {
+class Drill : public AbstractFile, public QList<Hole> {
 public:
     Drill() {}
     ~Drill() {}

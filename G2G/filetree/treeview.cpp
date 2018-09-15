@@ -60,6 +60,8 @@ TreeView::TreeView(QWidget* parent)
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
+    header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    header()->setSectionResizeMode(1, QHeaderView::Stretch);
 }
 
 TreeView::~TreeView()
@@ -75,12 +77,12 @@ void TreeView::addFile(G::File* gerberFile)
 QString TreeView::files()
 {
     QString f;
-    QModelIndex index = m_model->index(NODE_GERBER_FILES, 0, QModelIndex());
+    QModelIndex index = m_model->index(NodeGerberFiles, 0, QModelIndex());
     int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
         f += m_model->index(row, 0, index).data().toString() + "|";
     }
-    index = m_model->index(NODE_DRILL, 0, QModelIndex());
+    index = m_model->index(NodeDrillFiles, 0, QModelIndex());
     //qDebug() << index.data();
     rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
@@ -108,10 +110,10 @@ void TreeView::updateIcons()
 
 void TreeView::on_doubleClicked(const QModelIndex& index)
 {
-    if (index.column() == 0 && index.parent() == m_model->index(NODE_GERBER_FILES, 0, QModelIndex())) {
+    if (index.column() == 0 && index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex())) {
         hideOther(index);
     }
-    if (index.column() == 0 && index.parent() == m_model->index(NODE_DRILL, 0, QModelIndex())) {
+    if (index.column() == 0 && index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
         hideOther(index);
     }
 }
@@ -155,7 +157,7 @@ void TreeView::hideOther(const QModelIndex& index)
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QModelIndex index = indexAt(event->pos());
-    if (index.parent().row() == NODE_GERBER_FILES) {
+    if (index.parent().row() == NodeGerberFiles) {
         QMenu menu(this);
 
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
@@ -169,7 +171,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.exec(mapToGlobal(event->pos()));
     }
 
-    if (index.parent().row() == NODE_DRILL) {
+    if (index.parent().row() == NodeDrillFiles) {
         QMenu menu(this);
 
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
@@ -183,7 +185,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         menu.exec(mapToGlobal(event->pos()));
     }
 
-    if (m_model->index(NODE_MILLING, 0, QModelIndex()) == index.parent()) {
+    if (m_model->index(NodeToolPath, 0, QModelIndex()) == index.parent()) {
         QMenu menu(this);
 
         menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), [&] {
@@ -209,24 +211,23 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     }
 }
 
-//void TreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
-//{
+void TreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+{
+    //    QModelIndexList sIndexes(selected.indexes());
+    //    QModelIndexList dIndexes(deselected.indexes());
 
-//    QModelIndexList sIndexes(selected.indexes());
-//    QModelIndexList dIndexes(deselected.indexes());
-
-//    if (!sIndexes.isEmpty() && sIndexes.first().parent().row() == NODE_FILES) {
-//        GerberItem* item = static_cast<GerberItem*>(sIndexes.first().internalPointer());
-//        if (item) {
-//            int id = item->id();
-//            qDebug() << id;
-//        }
-//        //GerberItem::gFiles[id]->itemGroup()->setZValue(id);
-//    }
-//    if (!dIndexes.isEmpty() && dIndexes.first().parent().row() == NODE_FILES) {
-//        int id = static_cast<GerberItem*>(dIndexes.first().internalPointer())->id();
-//        //qDebug() << id;
-//        //GerberItem::gFiles[id]->itemGroup()->setZValue(-id);
-//    }
-//    QTreeView::selectionChanged(selected, deselected);
-//}
+    //    if (!sIndexes.isEmpty() && sIndexes.first().parent().row() == NODE_FILES) {
+    //        GerberItem* item = static_cast<GerberItem*>(sIndexes.first().internalPointer());
+    //        if (item) {
+    //            int id = item->id();
+    //            qDebug() << id;
+    //        }
+    //        //GerberItem::gFiles[id]->itemGroup()->setZValue(id);
+    //    }
+    //    if (!dIndexes.isEmpty() && dIndexes.first().parent().row() == NODE_FILES) {
+    //        int id = static_cast<GerberItem*>(dIndexes.first().internalPointer())->id();
+    //        //qDebug() << id;
+    //        //GerberItem::gFiles[id]->itemGroup()->setZValue(-id);
+    //    }
+    QTreeView::selectionChanged(selected, deselected);
+}

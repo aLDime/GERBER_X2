@@ -11,7 +11,7 @@ File::File(const QString& fileName)
 
 File::~File()
 {
-    //qDebug("~File()");
+    qDebug("~File()");
     //    qDeleteAll(apertures);
     //    if (itemGroup)
     //        delete itemGroup;

@@ -24,8 +24,6 @@ private slots:
 private:
     Ui::ProfileForm* ui;
 
-    int direction = 0;
-    int side = 0;
 
     // ToolPathUtil interface
 public:

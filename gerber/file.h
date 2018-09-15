@@ -34,7 +34,7 @@ public:
     Path path;
 };
 
-class File : public AbstractFile<GraphicObject> {
+class File : public AbstractFile, public QList<GraphicObject> {
 public:
     File(const QString& fileName = "");
     ~File();

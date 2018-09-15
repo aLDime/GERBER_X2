@@ -5,10 +5,9 @@
 
 #include <QBrush>
 #include <QGraphicsItem>
-#include <QObject>
 #include <QPen>
 
-class Point : public QObject, public QGraphicsItem {
+class Point : public QGraphicsObject {
     Q_OBJECT
 
 public:
@@ -25,8 +24,8 @@ public:
     void setPosY(double y);
 
     enum {
-        ZERO,
-        HOME
+        Zero,
+        Home
     };
 
 private:
@@ -51,7 +50,7 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
     int type() const override;
-    static QVector<Shtift *> shtifts();
+    static QVector<Shtift*> shtifts();
 
 private:
     QRectF m_rect;

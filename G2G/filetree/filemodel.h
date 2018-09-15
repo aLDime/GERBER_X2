@@ -10,11 +10,10 @@
 #include <gcode/drl.h>
 #include <gcode/gcode.h>
 
-enum {
-    NODE_GERBER_FILES,
-    NODE_DRILL,
-    NODE_MILLING,
-    NODE_PINS,
+enum RootNodes{
+    NodeGerberFiles,
+    NodeDrillFiles,
+    NodeToolPath,
 };
 
 class FileModel : public QAbstractItemModel {

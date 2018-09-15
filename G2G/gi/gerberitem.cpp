@@ -49,7 +49,12 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     }
 
     painter->setBrush(b);
-    painter->setPen(pen);
+    if (m_file)
+        painter->setPen(pen);
+    else {
+        painter->setPen(m_pen);
+        qDebug() << m_pen.widthF();
+    }
     painter->drawPath(m_shape);
 }
 
