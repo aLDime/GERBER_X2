@@ -5,7 +5,7 @@
 #include <QWidget>
 
 enum {
-    RULER_BREADTH = 24
+    RulerBreadth = 24
 };
 
 class QDRuler : public QWidget {

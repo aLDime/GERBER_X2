@@ -143,9 +143,9 @@ struct Format {
 };
 
 struct State {
-    void reset()
+    void reset(Format* f)
     {
-        format = Format();
+        format = f;
         dCode = D02;
         gCode = G01;
         imgPolarity = Positive;
@@ -158,7 +158,7 @@ struct State {
         lineNum = 0;
         curPos = IntPoint();
     }
-    static Format format;
+    Format* format = nullptr;
     DCode dCode = D02;
     GCode gCode = G01;
     ImagePolarity imgPolarity = Positive;

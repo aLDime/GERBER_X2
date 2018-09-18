@@ -53,7 +53,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawPath(m_shape);
 }
 
-int GerberItem::type() const { return GERBER_ITEM; }
+int GerberItem::type() const { return GerberItemType; }
 
 Paths GerberItem::paths() const { return m_paths; }
 

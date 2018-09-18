@@ -105,7 +105,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
             // Number format
             // Example: %FSLAX24Y24*%
-            // TODO: This is ignoring most of the format. Implement the rest.
+            // TODO: This is ignoring most of the format-> Implement the rest.
             if (parseFormat(gerberLine))
                 continue;
 
@@ -297,7 +297,7 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl)
 {
     bool ok;
     double d = Str.toDouble(&ok);
-    if (state.format.unitMode == Inches && inchControl)
+    if (state.format->unitMode == Inches && inchControl)
         d *= 25.4;
     if (scale)
         d *= uScale;
@@ -310,10 +310,10 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal)
     int sign = 1;
     if (!Str.isEmpty()) {
         if (!decimal) {
-            decimal = state.format.xDecimal;
+            decimal = state.format->xDecimal;
         }
         if (!integer) {
-            integer = state.format.xInteger;
+            integer = state.format->xInteger;
         }
         if (Str.indexOf("+") == 0) {
             Str.remove(0, 1);
@@ -327,7 +327,7 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal)
             Str.setNum(Str.split('.').first().toInt() + ("0." + Str.split('.').last()).toDouble());
         }
         while (Str.length() < integer + decimal) {
-            switch (state.format.zeroOmisMode) {
+            switch (state.format->zeroOmisMode) {
             case OmitLeadingZeros:
                 Str = QString(integer + decimal - Str.length(), '0') + Str;
                 //Str = "0" + Str;
@@ -395,7 +395,7 @@ void Parser::reset(const QString& fileName)
     apertureMacro.clear();
     path.clear();
     file = new File(fileName);
-    state.reset();
+    state.reset(&file->format);
 
     sr.x = 0;
     sr.y = 0;
@@ -416,12 +416,12 @@ IntPoint Parser::parsePosition(const QString& xyStr)
     static const QRegExp match(QStringLiteral("(?:G[01]{1,2})?(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?"));
     if (match.indexIn(xyStr) > -1) {
         cInt tmp = 0;
-        if (parseNumber(match.cap(1), tmp, state.format.xInteger, state.format.xDecimal)) {
-            state.format.coordValueNotation == AbsoluteNotation ? state.curPos.X = tmp : state.curPos.X += tmp;
+        if (parseNumber(match.cap(1), tmp, state.format->xInteger, state.format->xDecimal)) {
+            state.format->coordValueNotation == AbsoluteNotation ? state.curPos.X = tmp : state.curPos.X += tmp;
         }
         tmp = 0;
-        if (parseNumber(match.cap(2), tmp, state.format.yInteger, state.format.yDecimal)) {
-            state.format.coordValueNotation == AbsoluteNotation ? state.curPos.Y = tmp : state.curPos.Y += tmp;
+        if (parseNumber(match.cap(2), tmp, state.format->yInteger, state.format->yDecimal)) {
+            state.format->coordValueNotation == AbsoluteNotation ? state.curPos.Y = tmp : state.curPos.Y += tmp;
         }
     }
     if (2.0e-310 > state.curPos.X && state.curPos.X > 0.0) {
@@ -633,7 +633,7 @@ bool Parser::parseStepRepeat(const QString& gLine)
         sr.y = match.cap(2).toInt();
         sr.i = match.cap(3).toDouble() * uScale;
         sr.j = match.cap(4).toDouble() * uScale;
-        if (state.format.unitMode == Inches) {
+        if (state.format->unitMode == Inches) {
             sr.i *= 25.4;
             sr.j *= 25.4;
         }
@@ -757,17 +757,17 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         if (match.cap(2).isEmpty()) {
             x = state.curPos.X;
         } else {
-            parseNumber(match.cap(2), x, state.format.xInteger, state.format.xDecimal);
+            parseNumber(match.cap(2), x, state.format->xInteger, state.format->xDecimal);
         }
 
         if (match.cap(3).isEmpty()) {
             y = state.curPos.Y;
         } else {
-            parseNumber(match.cap(3), y, state.format.yInteger, state.format.yDecimal);
+            parseNumber(match.cap(3), y, state.format->yInteger, state.format->yDecimal);
         }
 
-        parseNumber(match.cap(4), i, state.format.xInteger, state.format.xDecimal);
-        parseNumber(match.cap(5), j, state.format.yInteger, state.format.yDecimal);
+        parseNumber(match.cap(4), i, state.format->xInteger, state.format->xDecimal);
+        parseNumber(match.cap(5), j, state.format->yInteger, state.format->yDecimal);
 
         switch (match.cap(1).toInt()) {
         case G02:
@@ -918,42 +918,42 @@ bool Parser::parseFormat(const QString& gLine)
     if (match.exactMatch(gLine)) {
         switch (zeroOmissionModeList.indexOf(match.cap(1))) {
         case OmitLeadingZeros:
-            state.format.zeroOmisMode = OmitLeadingZeros;
+            state.format->zeroOmisMode = OmitLeadingZeros;
             break;
 #ifdef DEPRECATED
         case OmitTrailingZeros:
-            state.format.zeroOmisMode = OmitTrailingZeros;
+            state.format->zeroOmisMode = OmitTrailingZeros;
             break;
 #endif
         }
         switch (coordinateValuesNotationList.indexOf(match.cap(2))) {
         case AbsoluteNotation:
-            state.format.coordValueNotation = AbsoluteNotation;
+            state.format->coordValueNotation = AbsoluteNotation;
             break;
 #ifdef DEPRECATED
         case IncrementalNotation:
-            state.format.coordValueNotation = IncrementalNotation;
+            state.format->coordValueNotation = IncrementalNotation;
             break;
 #endif
         }
-        state.format.xInteger = match.cap(3).toInt();
-        state.format.xDecimal = match.cap(4).toInt();
-        state.format.yInteger = match.cap(5).toInt();
-        state.format.yDecimal = match.cap(6).toInt();
+        state.format->xInteger = match.cap(3).toInt();
+        state.format->xDecimal = match.cap(4).toInt();
+        state.format->yInteger = match.cap(5).toInt();
+        state.format->yDecimal = match.cap(6).toInt();
 
-        int intVal = state.format.xInteger;
+        int intVal = state.format->xInteger;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
         }
-        intVal = state.format.xDecimal;
+        intVal = state.format->xDecimal;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
         }
-        intVal = state.format.yInteger;
+        intVal = state.format->yInteger;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
         }
-        intVal = state.format.yDecimal;
+        intVal = state.format->yDecimal;
         if (intVal < 0 || intVal > 8) {
             throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
         }
@@ -996,11 +996,11 @@ bool Parser::parseGCode(const QString& gLine)
             break;
 #ifdef DEPRECATED
         case G70:
-            state.format.unitMode = Inches;
+            state.format->unitMode = Inches;
             state.gCode = G70;
             break;
         case G71:
-            state.format.unitMode = Millimeters;
+            state.format->unitMode = Millimeters;
             state.gCode = G71;
             break;
 #endif
@@ -1014,11 +1014,11 @@ bool Parser::parseGCode(const QString& gLine)
             break;
 #ifdef DEPRECATED
         case G90:
-            state.format.coordValueNotation = AbsoluteNotation;
+            state.format->coordValueNotation = AbsoluteNotation;
             state.gCode = G90;
             break;
         case G91:
-            state.format.coordValueNotation = IncrementalNotation;
+            state.format->coordValueNotation = IncrementalNotation;
             state.gCode = G91;
 #endif
             break;
@@ -1148,10 +1148,10 @@ bool Parser::parseUnitMode(const QString& gLine)
     if (match.exactMatch(gLine)) {
         switch (slUnitType.indexOf(match.cap(1))) {
         case Inches:
-            state.format.unitMode = Inches;
+            state.format->unitMode = Inches;
             break;
         case Millimeters:
-            state.format.unitMode = Millimeters;
+            state.format->unitMode = Millimeters;
             break;
         }
         return true;

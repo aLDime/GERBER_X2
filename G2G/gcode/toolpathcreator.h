@@ -24,8 +24,8 @@ class ToolPathCreator {
 public:
     ToolPathCreator(const Paths& value);
 
-    GCode* createPocket(const QVector<Tool>& tool, bool convent, double depth, bool side);
-    GCode *createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side);
+    GCodeFile* createPocket(const QVector<Tool>& tool, bool convent, double depth, bool side);
+    GCodeFile *createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side);
 
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
 

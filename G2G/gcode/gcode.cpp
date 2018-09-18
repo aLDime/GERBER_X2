@@ -13,7 +13,7 @@
 /// \param tool
 /// \param m_depth
 ///
-GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type)
+GCodeFile::GCodeFile(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type)
     : m_paths(paths)
     , m_paths2(paths2)
     , m_tool(tool)
@@ -55,6 +55,11 @@ GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double d
         for (const Path& path : paths) {
             item = new PathItem(path);
             item->setPen(QPen(Qt::red, 0.0));
+            item->setAcceptDrops(false);
+            item->setAcceptedMouseButtons(false);
+            item->setAcceptHoverEvents(false);
+            item->setAcceptTouchEvents(false);
+            //item->setActive(false);
             itemGroup()->append(item);
             p.append(path.first());
         }
@@ -81,9 +86,9 @@ GCode::GCode(const Paths& paths, const Paths& paths2, const Tool& tool, double d
     itemGroup()->addToTheScene();
 }
 
-Paths GCode::getPaths() const { return m_paths; }
+Paths GCodeFile::getPaths() const { return m_paths; }
 
-void GCode::save(const QString& name)
+void GCodeFile::save(const QString& name)
 {
     if (!name.isEmpty())
         m_fileName = name;
@@ -100,7 +105,7 @@ void GCode::save(const QString& name)
     }
 }
 
-void GCode::saveDrill()
+void GCodeFile::saveDrill()
 {
     statFile();
     QPolygonF path(PathToQPolygon(m_paths.first()));
@@ -134,7 +139,7 @@ void GCode::saveDrill()
     endFile();
 }
 
-void GCode::saveProfilePocket()
+void GCodeFile::saveProfilePocket()
 {
     statFile();
     QVector<QPolygonF> paths(PathsToQPolygons(m_paths));
@@ -215,34 +220,34 @@ void GCode::saveProfilePocket()
     endFile();
 }
 
-GCodeType GCode::gtype() const
+GCodeType GCodeFile::gtype() const
 {
     return m_type;
 }
 
-G::Side GCode::side() const
+G::Side GCodeFile::side() const
 {
     return m_side;
 }
 
-void GCode::setSide(const G::Side& side)
+void GCodeFile::setSide(const G::Side& side)
 {
     m_side = side;
     m_fileName += side ? " (Bottom)" : " (Top)";
 }
 
-void GCode::startPath(const QPointF& point)
+void GCodeFile::startPath(const QPointF& point)
 {
     sl.append(g0() + x(point.x()) + y(point.y())); //start xy
     sl.append(g0() + z(MaterialSetup::plunge)); //start z
 }
 
-void GCode::endPath()
+void GCodeFile::endPath()
 {
     sl.append(QString("G0Z%1").arg(format(MaterialSetup::clearence)));
 }
 
-void GCode::statFile()
+void GCodeFile::statFile()
 {
     sl.clear();
     sl.append("G17"); //XY plane
@@ -252,7 +257,7 @@ void GCode::statFile()
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
 }
 
-void GCode::endFile()
+void GCodeFile::endFile()
 {
     sl.append(g0() + z(MaterialSetup::z)); //HomeZ
 

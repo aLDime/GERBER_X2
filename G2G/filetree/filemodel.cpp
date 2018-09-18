@@ -36,7 +36,7 @@ void FileModel::addGerberFile(G::File* gerberFile)
     endInsertRows();
 }
 
-void FileModel::addDrlFile(Drill* drl)
+void FileModel::addDrlFile(DrillFile* drl)
 {
     if (!drl)
         return;
@@ -48,7 +48,7 @@ void FileModel::addDrlFile(Drill* drl)
     endInsertRows();
 }
 
-void FileModel::addGcode(GCode* group)
+void FileModel::addGcode(GCodeFile* group)
 {
     AbstractNode* item{ rootItem->child(NodeToolPath) };
     QModelIndex index = createIndex(0, 0, item);

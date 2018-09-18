@@ -26,7 +26,7 @@ QDRuler::QDRuler(QDRuler::RULER_TYPE rulerType, QWidget* parent)
 
 QSize QDRuler::minimumSizeHint() const
 {
-    return QSize(RULER_BREADTH, RULER_BREADTH);
+    return QSize(RulerBreadth, RulerBreadth);
 }
 
 QDRuler::RULER_TYPE QDRuler::RulerType() const
@@ -76,7 +76,7 @@ void QDRuler::SetRulerZoom(const qreal rulerZoom_)
 void QDRuler::SetCursorPos(const QPoint cursorPos_)
 {
     cursorPos = this->mapFromGlobal(cursorPos_);
-    cursorPos += QPoint(RULER_BREADTH, RULER_BREADTH);
+    cursorPos += QPoint(RulerBreadth, RulerBreadth);
     update();
 }
 
@@ -117,7 +117,7 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::darkGray, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, RULER_BREADTH * 0.6);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, RulerBreadth * 0.6);
     drawText = false;
 
     // drawing a scale of 0.2
@@ -126,12 +126,12 @@ void QDRuler::paintEvent(QPaintEvent* event)
         drawText = true;
     }
     meterPen = QPen(Qt::green, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, RULER_BREADTH * 0.3);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, RulerBreadth * 0.3);
     drawText = false;
 
     // drawing a scale of 1.0
     meterPen = QPen(Qt::red, 0.0);
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, RULER_BREADTH * 0);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, RulerBreadth * 0);
 
     // drawing the current mouse position indicator
     if (mouseTracking) {

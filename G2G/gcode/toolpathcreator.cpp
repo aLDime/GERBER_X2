@@ -53,7 +53,7 @@ ToolPathCreator::ToolPathCreator(const Paths& value)
 {
 }
 
-GCode* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth, bool side)
+GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth, bool side)
 {
     double toolDiameter = tool[0].getDiameter(depth) * uScale;
     double dOffset = toolDiameter / 2;
@@ -126,10 +126,10 @@ GCode* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& t
         }
     }
 
-    return new GCode(sortByStratDistance(m_returnPaths), fillPaths, tool[0], depth, Pocket);
+    return new GCodeFile(sortByStratDistance(m_returnPaths), fillPaths, tool[0], depth, Pocket);
 }
 
-GCode* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)
+GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)
 {
 
     double toolDiameter = tool.getDiameter(depth);
@@ -179,7 +179,7 @@ GCode* ToolPathCreator::createProfile(const Tool& tool, bool convent, double dep
     for (Path& path : m_returnPaths)
         fixBegin(path);
 
-    return new GCode(sortByStratDistance(m_returnPaths), {}, tool, depth, Profile);
+    return new GCodeFile(sortByStratDistance(m_returnPaths), {}, tool, depth, Profile);
 }
 
 Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)

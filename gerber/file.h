@@ -17,12 +17,12 @@ public:
         const State& state,
         const Paths& paths,
         File* gFile,
-        const QStringList& gerberStrings = QStringList(),
+        const QStringList& /*gerberStrings*/ = QStringList(),
         const Path& path = Path())
         : state(state)
         , paths(paths)
         , gFile(gFile)
-        , gerberStrings(gerberStrings)
+        //        , gerberStrings(gerberStrings)
         , path(path)
     {
     }
@@ -30,7 +30,7 @@ public:
     State state;
     Paths paths;
     File* gFile = nullptr;
-    QStringList gerberStrings;
+    //    QStringList gerberStrings;
     Path path;
 };
 
@@ -44,17 +44,13 @@ public:
         CutoffGroup,
     };
 
-    //    QSharedPointer<ItemGroup> itemGroup;
-    //    QList<QString> lines;
+    Format format;
     QMap<int, QSharedPointer<AbstractAperture>> apertures;
-    //    QString fileName;
-    //    Paths mergedPaths;
-    //    Pathss m_groupedPaths;
 
     Layer layer = Copper;
     Miror miror = Vertical;
     Side side = Top;
-    FileType type() const override { return GerberFile; }
+    FileType type() const override { return FileType::Gerber; }
 
 protected:
     Paths merge() const override;

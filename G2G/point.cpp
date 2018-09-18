@@ -280,12 +280,12 @@ void Shtift::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 
 int Point::type() const
 {
-    return m_type ? POINT_HOME : POINT_ZERO;
+    return m_type ? PointHomeType : PointZeroType;
 }
 
 int Shtift::type() const
 {
-    return POINT_SHTIFT;
+    return ShtiftType;
 }
 
 QVector<Shtift*> Shtift::shtifts()

@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
     graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(graphicsView, &MyGraphicsView::customContextMenuRequested, [=](const QPoint& pos) {
         QGraphicsItem* item = MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
-        if (item && item->type() == POINT_SHTIFT) {
+        if (item && item->type() == ShtiftType) {
             QMenu menu;
             menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), [=] {
                 ToolDatabase tdb(this, { Tool::Drill });
@@ -83,8 +83,8 @@ MainWindow::MainWindow(QWidget* parent)
                         return;
                     settings.setValue("Shtift/depth", depth);
 
-                    GCode* gcode = new GCode({ dst }, {}, tool, depth, Drilling);
-                    gcode->setFileName("POINT_SHTIFT");
+                    GCodeFile* gcode = new GCodeFile({ dst }, {}, tool, depth, Drilling);
+                    gcode->setFileName("Shtift");
                     FileModel::self->addGcode(gcode);
                 }
             });
@@ -417,7 +417,7 @@ void MainWindow::openFile(const QString& fileName)
     lastPath = fi.absolutePath();
 
     if (fi.suffix().contains("drl", Qt::CaseInsensitive)) {
-        Drill* dFile = DrillParser().parseFile(fileName);
+        DrillFile* dFile = DrillParser().parseFile(fileName);
         if (dFile) {
             FileModel::self->addDrlFile(dFile);
             prependToRecentFiles(dFile->fileName());

@@ -9,7 +9,7 @@ class GcodeNode : public AbstractNode {
     Qt::CheckState checkState = Qt::Checked;
 
 public:
-    GcodeNode(GCode* group);
+    GcodeNode(GCodeFile* group);
     ~GcodeNode();
 
     // AbstractItem interface

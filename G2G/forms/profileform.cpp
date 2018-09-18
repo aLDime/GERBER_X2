@@ -100,7 +100,7 @@ void ProfileForm::create()
     G::Side boardSide = static_cast<G::Side>(-1);
 
     for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == GERBER_ITEM) {
+        if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
             if (boardSide == G::Side(-1))
                 boardSide = gi->file()->side;
@@ -109,7 +109,7 @@ void ProfileForm::create()
                 return;
             }
         }
-        if (item->type() == GERBER_ITEM || item->type() == DRILL_ITEM)
+        if (item->type() == GerberItemType || item->type() == DrillItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
@@ -121,7 +121,7 @@ void ProfileForm::create()
         return;
     }
 
-    GCode* gcode = ToolPathCreator(wPaths).createProfile(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), side);
+    GCodeFile* gcode = ToolPathCreator(wPaths).createProfile(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), side);
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the Working items!"));

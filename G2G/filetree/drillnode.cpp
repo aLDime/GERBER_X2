@@ -5,11 +5,11 @@
 #include <QFileInfo>
 #include <mainwindow.h>
 
-DrillNode::DrillNode(Drill* file)
+DrillNode::DrillNode(DrillFile* file)
     : m_id(FileHolder::addFile(file))
 {
     AbstractNode::files.append(file->shortFileName());
-    FileHolder::file<Drill>(m_id)->itemGroup()->addToTheScene();
+    FileHolder::file<DrillFile>(m_id)->itemGroup()->addToTheScene();
     //FileHolder::file<Drill>(m_id)->itemGroup()->setZValue(-m_id);
     MyGraphicsView::self->ZoomFit();
     MyGraphicsView::self->Zoom100();
@@ -39,7 +39,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
         switch (role) {
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            FileHolder::file<Drill>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file<DrillFile>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
             return true;
         default:
             return false;
@@ -71,15 +71,15 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file<Drill>(m_id)->shortFileName();
+            return FileHolder::file<DrillFile>(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file<Drill>(m_id)->fileName();
+            return FileHolder::file<DrillFile>(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole:
             return QIcon::fromTheme("roll");
         case Qt::UserRole:
-            return QVariant::fromValue(static_cast<void*>(FileHolder::file<Drill>(m_id)));
+            return QVariant::fromValue(static_cast<void*>(FileHolder::file<DrillFile>(m_id)));
         default:
             return QVariant();
         }

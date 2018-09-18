@@ -7,10 +7,10 @@
 #include <gi/itemgroup.h>
 
 using namespace ClipperLib;
-enum FileType {
-    GerberFile,
-    DrillFile,
-    GCodeFile,
+enum class FileType {
+    Gerber,
+    Drill,
+    GCode,
 };
 
 //template <typename T = int>

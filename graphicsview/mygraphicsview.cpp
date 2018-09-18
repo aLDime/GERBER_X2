@@ -24,9 +24,10 @@ MyGraphicsView* MyGraphicsView::self = nullptr;
 MyGraphicsView::MyGraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    setOptimizationFlags(DontSavePainterState);
+    setCacheMode(CacheBackground);
+    setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
+    //setViewportUpdateMode(SmartViewportUpdate);
     setViewportUpdateMode(SmartViewportUpdate);
-    setViewportUpdateMode(BoundingRectViewportUpdate);
     setDragMode(RubberBandDrag);
     //    setTransformationAnchor(AnchorUnderMouse);
     //    setResizeAnchor(AnchorUnderMouse);
@@ -36,7 +37,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     ////////////////////////////////////
 
     // add two rulers on top and left.
-    setViewportMargins(RULER_BREADTH, RULER_BREADTH, 0, 0);
+    setViewportMargins(RulerBreadth, RulerBreadth, 0, 0);
 
     // add grid layout
     QGridLayout* gridLayout = new QGridLayout();
@@ -49,7 +50,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     // add items to grid layout
     QLabel* corner = new QLabel("mm", this);
     corner->setAlignment(Qt::AlignCenter);
-    corner->setFixedSize(RULER_BREADTH, RULER_BREADTH);
+    corner->setFixedSize(RulerBreadth, RulerBreadth);
     gridLayout->addWidget(corner, 0, 0);
     gridLayout->addWidget(hRuler, 0, 1);
     gridLayout->addWidget(vRuler, 1, 0);

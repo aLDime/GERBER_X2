@@ -6,7 +6,7 @@
 
 using namespace ClipperLib;
 
-DrillItem::DrillItem(double diameter, Drill* file)
+DrillItem::DrillItem(double diameter, DrillFile* file)
     : m_diameter(diameter)
     , m_file(file)
 {
@@ -21,8 +21,7 @@ DrillItem::DrillItem(double diameter, Drill* file)
     //            if (Area(poligon) < 0)
     //                ReversePath(poligon);
     setCacheMode(DeviceCoordinateCache);
-    m_diameter /= 2;
-    m_shape.addEllipse(QPointF(), diameter, diameter);
+    m_shape.addEllipse(QPointF(), diameter / 2, diameter / 2);
     m_rect = m_shape.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -50,7 +49,7 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
     painter->restore();
 }
 
-int DrillItem::type() const { return DRILL_ITEM; }
+int DrillItem::type() const { return DrillItemType; }
 
 double DrillItem::diameter() const { return m_diameter; }
 
@@ -59,15 +58,14 @@ void DrillItem::setDiameter(double diameter)
     if (m_diameter == diameter)
         return;
     m_diameter = diameter;
-    diameter /= 2;
     QPainterPath path;
-    path.addEllipse(QPointF(), diameter, diameter);
+    path.addEllipse(QPointF(), diameter / 2, diameter / 2);
     m_shape = path;
     update(m_rect);
     m_rect = m_shape.boundingRect();
 }
 
-const Drill* DrillItem::file() const { return m_file; }
+const DrillFile* DrillItem::file() const { return m_file; }
 
 Paths DrillItem::paths() const
 {

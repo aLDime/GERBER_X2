@@ -29,8 +29,8 @@ public:
     ~FileModel();
 
     void addGerberFile(G::File* gerberFile);
-    void addDrlFile(Drill* drl);
-    void addGcode(GCode* group);
+    void addDrlFile(DrillFile* drl);
+    void addGcode(GCodeFile* group);
     void closeAllFiles();
 
 public:

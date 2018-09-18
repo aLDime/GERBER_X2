@@ -2,10 +2,10 @@
 #define DRILLITEM_H
 
 #include "graphicsitem.h"
-class Drill;
+class DrillFile;
 class DrillItem : public GraphicsItem {
 public:
-    DrillItem(double diameter, Drill* file = nullptr);
+    DrillItem(double diameter, DrillFile* file = nullptr);
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
@@ -15,14 +15,14 @@ public:
     double diameter() const;
     void setDiameter(double diameter);
 
-    const Drill* file() const;
+    const DrillFile* file() const;
 
     // GraphicsItem interface
     Paths paths() const override;
 
 private:
     double m_diameter;
-    const Drill* m_file;
+    const DrillFile* m_file;
 };
 
 #endif // DRILLITEM_H

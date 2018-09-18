@@ -2,8 +2,6 @@
 
 using namespace G;
 
-Format State::format;
-
 File::File(const QString& fileName)
 {
     m_fileName = fileName;

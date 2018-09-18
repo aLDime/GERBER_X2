@@ -4,7 +4,7 @@
 #include <QFileInfo>
 #include <QIcon>
 
-GcodeNode::GcodeNode(GCode* group)
+GcodeNode::GcodeNode(GCodeFile* group)
     : m_id(FileHolder::addFile(group))
 {
 }
@@ -25,7 +25,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
     //            return true;
     case Qt::CheckStateRole:
         checkState = value.value<Qt::CheckState>();
-        FileHolder::file<GCode>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+        FileHolder::file<GCodeFile>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
         return true;
     default:
         return false;
@@ -53,13 +53,13 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file<GCode>(m_id)->shortFileName();
+            return FileHolder::file<GCodeFile>(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file<GCode>(m_id)->fileName();
+            return FileHolder::file<GCodeFile>(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole:
-            switch (FileHolder::file<GCode>(m_id)->type()) {
+            switch (FileHolder::file<GCodeFile>(m_id)->type()) {
             case Profile:
                 return QIcon::fromTheme("object-to-path");
             case Pocket:
@@ -70,7 +70,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
                 return QIcon::fromTheme("roll");
             }
         case Qt::UserRole:
-            return QVariant::fromValue(reinterpret_cast<quint64>(FileHolder::file<GCode>(m_id)));
+            return QVariant::fromValue(reinterpret_cast<quint64>(FileHolder::file<GCodeFile>(m_id)));
         default:
             return QVariant();
         }
@@ -78,7 +78,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file<GCode>(m_id)->side()];
+            return QString("Top|Bottom").split('|')[FileHolder::file<GCodeFile>(m_id)->side()];
         default:
             return QVariant();
         }

@@ -9,7 +9,7 @@ class DrillNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    DrillNode(Drill* file);
+    DrillNode(DrillFile* file);
     ~DrillNode();
     // AbstractItem interface
 public:

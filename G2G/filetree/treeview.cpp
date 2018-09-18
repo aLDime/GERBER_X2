@@ -181,7 +181,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
                 return;
 
             settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
-            GCode* gcp = reinterpret_cast<GCode*>(index.data(Qt::UserRole).toULongLong());
+            GCodeFile* gcp = reinterpret_cast<GCodeFile*>(index.data(Qt::UserRole).toULongLong());
             gcp->save(name);
         });
 

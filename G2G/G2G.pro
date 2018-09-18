@@ -3,8 +3,6 @@ QT += core gui opengl widgets
 TARGET = Getber2Gcode
 TEMPLATE = app
 
-CONFIG += c++17 #console
-
 QMAKE_CXXFLAGS += /std:c++17
 
 FORMS += \

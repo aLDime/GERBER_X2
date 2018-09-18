@@ -22,7 +22,7 @@ Paths AbstractAperture::draw(const State& state)
         if (state.imgPolarity == Negative)
             ReversePath(var);
 #endif
-        if (state.format.unitMode == Inches && type() == Macro) {
+        if (state.format->unitMode == Inches && type() == Macro) {
             for (IntPoint& pt : var) {
                 pt.X *= 25.4;
                 pt.Y *= 25.4;

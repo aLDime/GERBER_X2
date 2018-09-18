@@ -8,13 +8,13 @@
 using namespace ClipperLib;
 
 enum {
-    GERBER_ITEM = QGraphicsItem::UserType + 1,
-    DRILL_ITEM,
-    PATH_ITEM,
-    RAW_ITEM,
-    POINT_HOME,
-    POINT_ZERO,
-    POINT_SHTIFT,
+    GerberItemType = QGraphicsItem::UserType + 1,
+    DrillItemType,
+    PathItemType,
+    RAW_ITEM_Type,
+    PointHomeType,
+    PointZeroType,
+    ShtiftType,
 };
 
 class GraphicsItem : public QGraphicsItem {
@@ -33,8 +33,6 @@ protected:
     QPainterPath m_shape;
     mutable Paths m_paths;
     QRectF m_rect;
-
-
 };
 
 #endif // GERBERITEM_H

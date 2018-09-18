@@ -8,20 +8,26 @@
 
 using namespace ClipperLib;
 
-enum UNIT_MODE {
-    INCHES,
-    MILLIMETERS,
+enum UnitMode {
+    Inches,
+    Millimeters,
 };
 
-enum M_CODE {
+enum ZeroMode {
+    LeadingZeros,
+    TrailingZeros,
+};
+
+enum MCode {
     M00,
     M30 = 30, // end of file
-    M48 = 48, // begin of file // HEADER
+    M48 = 48, // Beginning of a Part Program Header
     M71 = 71, // mm
     M72 = 72, // in
+    M95 = 95, // End of a Part Program Header or %
 };
 
-enum G_CODE {
+enum GCode {
     G00,
     //self.statements.append(RouteModeStmt())
     //self.state = 'ROUT'
@@ -36,7 +42,7 @@ enum G_CODE {
 struct State {
     void reset()
     {
-        format.unitMode = MILLIMETERS;
+        format.unitMode = Millimeters;
         format.decimal = 3;
         format.integer = 3;
         gCode = G00;
@@ -46,42 +52,43 @@ struct State {
         pos = QPointF();
     }
     struct Format {
-        UNIT_MODE unitMode = MILLIMETERS;
+        ZeroMode zeroMode = LeadingZeros;
+        UnitMode unitMode = Millimeters;
         int decimal = 3;
         int integer = 3;
     } format;
-    G_CODE gCode = G00;
-    M_CODE mCode = M00;
+    GCode gCode = G00;
+    MCode mCode = M00;
     int tCode = 0;
     double currentToolDiameter = 0.0;
     QPointF pos;
 };
 
-class Drill;
+class DrillFile;
 class ItemGroup;
 
 class Hole {
 public:
     Hole(
         const State& state,
-        Drill* gFile)
+        DrillFile* gFile )
         : state(state)
         , gFile(gFile)
     {
     }
     State state;
-    Drill* gFile = nullptr;
+    DrillFile* gFile = nullptr;
 };
 
-class Drill : public AbstractFile, public QList<Hole> {
+class DrillFile : public AbstractFile, public QList<Hole> {
 public:
-    Drill() {}
-    ~Drill() {}
+    DrillFile() {}
+    ~DrillFile() {}
     //    QSharedPointer<ItemGroup> itemGroup;
     QMap<int, double> m_toolDiameter;
     //    QString fileName;
     //Paths paths;
-    FileType type() const override { return DrillFile; }
+    FileType type() const override { return FileType::Drill; }
 
 protected:
     Paths merge() const override
@@ -95,7 +102,7 @@ class DrillParser : public QObject {
     Q_OBJECT
 public:
     explicit DrillParser(QObject* parent = nullptr);
-    Drill* parseFile(const QString& fileName);
+    DrillFile* parseFile(const QString& fileName);
 
 signals:
 
@@ -117,7 +124,7 @@ private:
     ///
 
     State m_state;
-    Drill* m_file = nullptr;
+    DrillFile* m_file = nullptr;
 };
 
 #endif // DRL_H

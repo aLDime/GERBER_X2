@@ -17,7 +17,7 @@ bool FileHolder::isEmpty()
 {
     QMutexLocker locker(&m_mutex);
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        if (sp.data() && (sp.data()->type() == GerberFile || sp.data()->type() == DrillFile))
+        if (sp.data() && (sp.data()->type() == FileType::Gerber || sp.data()->type() == FileType::Drill))
             return true;
     }
     return false;
@@ -29,7 +29,7 @@ Paths FileHolder::getPaths()
     Paths paths;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item && (item->type() == GerberFile || item->type() == DrillFile) && item->itemGroup()->isVisible())
+        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill) && item->itemGroup()->isVisible())
             paths.append(item->mergedPaths());
     }
     return paths;
@@ -41,7 +41,7 @@ QString FileHolder::fileNames()
     QString paths;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item && (item->type() == GerberFile || item->type() == DrillFile))
+        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
             paths.append(item->fileName()).append('|');
     }
     return paths;

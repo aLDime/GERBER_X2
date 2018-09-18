@@ -283,7 +283,7 @@ void DrillForm::on_pbCreate_clicked()
             dst.append(src.takeAt(s));
             p1 = dst.last();
         }
-        GCode* gcode = new GCode({ dst }, {}, i.value(), ui->dsbxDepth->value(), Drilling);
+        GCodeFile* gcode = new GCodeFile({ dst }, {}, i.value(), ui->dsbxDepth->value(), Drilling);
         QString str;
         for (int d : dCode[i.key()]) {
             str += "D" + QString::number(d) + ", ";

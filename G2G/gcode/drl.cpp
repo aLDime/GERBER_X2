@@ -12,7 +12,7 @@ DrillParser::DrillParser(QObject* parent)
 {
 }
 
-Drill* DrillParser::parseFile(const QString& fileName)
+DrillFile* DrillParser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -20,7 +20,7 @@ Drill* DrillParser::parseFile(const QString& fileName)
 
     //qDebug() << fileName;
     m_state.reset();
-    m_file = new Drill;
+    m_file = new DrillFile;
     m_file->setFileName(fileName);
     QTextStream in(&file);
     QString line;
@@ -119,15 +119,22 @@ bool DrillParser::parseMCode(const QString& line)
             break;
         case M71:
             m_state.mCode = M71;
-            m_state.format.unitMode = MILLIMETERS;
+            m_state.format.unitMode = Millimeters;
             break;
         case M72:
             m_state.mCode = M72;
-            m_state.format.unitMode = INCHES;
+            m_state.format.unitMode = Inches;
+            break;
+        case M95:
+            m_state.mCode = M95;
             break;
         default:
             break;
         }
+        return true;
+    }
+    if (line == "%" && m_state.mCode == M48) {
+        m_state.mCode = M95;
         return true;
     }
     return false;
@@ -141,6 +148,7 @@ bool DrillParser::parseTCode(const QString& line)
         if (!match.cap(2).isEmpty()) {
             const double k = m_state.format.unitMode ? 1.0 : 25.4;
             m_file->m_toolDiameter[m_state.tCode] = match.cap(2).toDouble() * k;
+
         } else
             m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
         return true;
@@ -195,16 +203,16 @@ bool DrillParser::parsePos(const QString& line)
 bool DrillParser::parseFormat(const QString& line)
 {
     if (line.contains(QRegExp("METRIC"))) {
-        m_state.format.unitMode = MILLIMETERS;
+        m_state.format.unitMode = Millimeters;
         return true;
     }
     if (line.contains(QRegExp("INCH"))) {
-        m_state.format.unitMode = INCHES;
+        m_state.format.unitMode = Inches;
         return true;
     }
     if (line.contains(QRegExp("FMAT,2"))) {
-        m_state.format.integer = 1;
-        m_state.format.decimal = 5;
+//        m_state.format.integer = 1;
+//        m_state.format.decimal = 5;
         return true;
     }
     return false;
