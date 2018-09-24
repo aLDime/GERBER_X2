@@ -60,8 +60,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
     graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(graphicsView, &MyGraphicsView::customContextMenuRequested, [=](const QPoint& pos) {
-        QGraphicsItem* item = MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
-        if (item && item->type() == ShtiftType) {
+        //        QGraphicsItem* item = ;
+        if (dynamic_cast<Shtift*>(MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform())) /*item && item->type() == ShtiftType*/) {
             QMenu menu;
             menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), [=] {
                 ToolDatabase tdb(this, { Tool::Drill });
@@ -153,18 +153,12 @@ Point* MainWindow::home() const
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    //    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Нет", "Да") == 1)
-    writeSettings();
-    closeFiles();
-    //    for (G::File*& f : GerberNode::files) {
-    //        delete f;
-    //        f = nullptr;
-    //    }
-    //    for (GCode*& f : GcodeNode::gCode) {
-    //        delete f;
-    //        f = nullptr;
-    //    }
-    event->accept();
+    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Да", "Да?") == 0) {
+        writeSettings();
+        closeFiles();
+        event->accept();
+    } else
+        event->ignore();
 }
 
 void MainWindow::open()
@@ -347,6 +341,17 @@ void MainWindow::createActions()
             ToolDatabase tdb(this, {});
             tdb.exec();
         });
+
+    QToolBar* toolBar = addToolBar(tr("Cursor mode"));
+    toolBar->setMovable(false);
+    action = toolBar->addAction(QIcon::fromTheme("transform-crop"), "Select", [=] {
+        MyGraphicsView::self->setDragMode(QGraphicsView::RubberBandDrag);
+        MyGraphicsView::self->setInteractive(true);
+    });
+    action = toolBar->addAction(QIcon::fromTheme("transform-browse"), "Drag", [=] {
+        MyGraphicsView::self->setDragMode(QGraphicsView::ScrollHandDrag);
+        MyGraphicsView::self->setInteractive(false);
+    });
 }
 
 void MainWindow::createStatusBar()

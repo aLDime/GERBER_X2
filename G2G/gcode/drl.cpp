@@ -148,7 +148,7 @@ bool DrillParser::parseTCode(const QString& line)
         if (!match.cap(2).isEmpty()) {
             const double k = m_state.format.unitMode ? 1.0 : 25.4;
             m_file->m_toolDiameter[m_state.tCode] = match.cap(2).toDouble() * k;
-
+            m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
         } else
             m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
         return true;
@@ -211,8 +211,8 @@ bool DrillParser::parseFormat(const QString& line)
         return true;
     }
     if (line.contains(QRegExp("FMAT,2"))) {
-//        m_state.format.integer = 1;
-//        m_state.format.decimal = 5;
+        //        m_state.format.integer = 1;
+        //        m_state.format.decimal = 5;
         return true;
     }
     return false;

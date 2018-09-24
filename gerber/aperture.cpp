@@ -5,7 +5,10 @@
 
 using namespace G;
 
-AbstractAperture::AbstractAperture() {}
+AbstractAperture::AbstractAperture(const Format* format)
+    : m_format(format)
+{
+}
 
 AbstractAperture::~AbstractAperture() {}
 
@@ -22,7 +25,7 @@ Paths AbstractAperture::draw(const State& state)
         if (state.imgPolarity == Negative)
             ReversePath(var);
 #endif
-        if (state.format->unitMode == Inches && type() == Macro) {
+        if (/*state.*/ m_format->unitMode == Inches && type() == Macro) {
             for (IntPoint& pt : var) {
                 pt.X *= 25.4;
                 pt.Y *= 25.4;
@@ -114,7 +117,8 @@ void AbstractAperture::translate(Path& path, IntPoint pos)
 }
 /////////////////////////////////////////////////////
 
-ApCircle::ApCircle(double diam, double drillDiam)
+ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
+    : AbstractAperture(format)
 {
     m_diam = diam;
     m_drillDiam = drillDiam;
@@ -132,7 +136,8 @@ void ApCircle::draw()
 }
 /////////////////////////////////////////////////////
 
-ApRectangle::ApRectangle(double width, double height, double drillDiam)
+ApRectangle::ApRectangle(double width, double height, double drillDiam, const Format* format)
+    : AbstractAperture(format)
 {
     m_width = width;
     m_height = height;
@@ -150,7 +155,8 @@ void ApRectangle::draw()
 }
 /////////////////////////////////////////////////////
 
-ApObround::ApObround(double width, double height, double drillDiam)
+ApObround::ApObround(double width, double height, double drillDiam, const Format* format)
+    : AbstractAperture(format)
 {
 
     m_width = width;
@@ -185,7 +191,8 @@ void ApObround::draw()
 }
 /////////////////////////////////////////////////////
 
-ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam)
+ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format)
+    : AbstractAperture(format)
 {
     m_diam = diam;
     m_verticesCount = nVertices;
@@ -207,7 +214,7 @@ void ApPolygon::draw()
     const double step = 360.0 / m_verticesCount;
     const double diam = this->m_diam * uScale;
     for (int i = 0; i < m_verticesCount; ++i) {
-        poligon.push_back(IntPoint(qCos(qDegreesToRadians(step * i)) * diam / 2, qSin(qDegreesToRadians(step * i)) * diam / 2));
+        poligon.push_back(IntPoint(qCos(qDegreesToRadians(step * i)) * diam / 2.0, qSin(qDegreesToRadians(step * i)) * diam / 2.0));
     }
     if (m_rotation > 0.1) {
         rotate(poligon, m_rotation);
@@ -217,14 +224,15 @@ void ApPolygon::draw()
 }
 /////////////////////////////////////////////////////
 
-ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients)
+ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
+    : AbstractAperture(format)
 {
     m_macro = macro;
     m_modifiers = modifiers;
     while (m_modifiers.last().isEmpty()) {
         m_modifiers.removeLast();
     }
-    m_macroCoefficients = macroCoefficients;
+    m_coefficients = coefficients;
 }
 
 QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); }
@@ -247,7 +255,7 @@ void ApMacro::draw()
     QList<double> mod;
     Path polygon;
 
-    QMap<QString, double> macroCoefficients{ m_macroCoefficients };
+    QMap<QString, double> macroCoefficients{ m_coefficients };
 
     QVector<QPair<bool, Path>> items;
     try {

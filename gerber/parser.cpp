@@ -564,26 +564,26 @@ bool Parser::parseAperture(const QString& gLine)
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            file->apertures[apid] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole));
+            file->apertures[apid] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, &file->format));
 
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole)));
+            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
 
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole)));
+            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
             break;
         case Polygon:
             if (paramList.length() > 2)
                 rotation = toDouble(paramList[2]);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole)));
+            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &file->format)));
 
             break;
         case Macro:
@@ -592,7 +592,7 @@ bool Parser::parseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             }
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApMacro(apType, apertureMacro[apType].split('*'), macroCoeff)));
+            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApMacro(apType, apertureMacro[apType].split('*'), macroCoeff, &file->format)));
             break;
         }
         return true;

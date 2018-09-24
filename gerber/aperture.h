@@ -19,7 +19,7 @@ class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)
 
 public:
-    AbstractAperture();
+    AbstractAperture(const Format* m_format);
     virtual ~AbstractAperture();
 
     bool isDrilled() const { return m_drillDiam != 0.0; }
@@ -41,6 +41,7 @@ protected:
 
     Paths m_paths;
     virtual void draw() = 0;
+    const Format* m_format;
 
     Path circle(double diametr, IntPoint center = IntPoint());
     Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
@@ -53,7 +54,7 @@ protected:
 ///
 class ApCircle : public AbstractAperture {
 public:
-    ApCircle(double diam, double drillDiam);
+    ApCircle(double diam, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
 
@@ -69,7 +70,7 @@ private:
 ///
 class ApRectangle : public AbstractAperture {
 public:
-    ApRectangle(double width, double height, double drillDiam);
+    ApRectangle(double width, double height, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
 
@@ -86,7 +87,7 @@ private:
 ///
 class ApObround : public AbstractAperture {
 public:
-    ApObround(double width, double height, double drillDiam);
+    ApObround(double width, double height, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
 
@@ -103,7 +104,7 @@ private:
 ///
 class ApPolygon : public AbstractAperture {
 public:
-    ApPolygon(double diam, int nVertices, double rotation, double drillDiam);
+    ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format);
     double rotation() const;
     int verticesCount() const;
 
@@ -124,7 +125,7 @@ private:
 ///
 class ApMacro : public AbstractAperture {
 public:
-    ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& macroCoefficients);
+    ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format);
     QString name() override;
     ApertureType type() const override;
 
@@ -133,7 +134,7 @@ protected:
 
 private:
     QList<QString> m_modifiers;
-    QMap<QString, double> m_macroCoefficients;
+    QMap<QString, double> m_coefficients;
     QString m_macro;
 
     Path drawCenterLine(const QList<double>& mod);
