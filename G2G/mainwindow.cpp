@@ -342,16 +342,16 @@ void MainWindow::createActions()
             tdb.exec();
         });
 
-    QToolBar* toolBar = addToolBar(tr("Cursor mode"));
-    toolBar->setMovable(false);
-    action = toolBar->addAction(QIcon::fromTheme("transform-crop"), "Select", [=] {
-        MyGraphicsView::self->setDragMode(QGraphicsView::RubberBandDrag);
-        MyGraphicsView::self->setInteractive(true);
-    });
-    action = toolBar->addAction(QIcon::fromTheme("transform-browse"), "Drag", [=] {
-        MyGraphicsView::self->setDragMode(QGraphicsView::ScrollHandDrag);
-        MyGraphicsView::self->setInteractive(false);
-    });
+    //    QToolBar* toolBar = addToolBar(tr("Cursor mode"));
+    //    toolBar->setMovable(false);
+    //    action = toolBar->addAction(QIcon::fromTheme("transform-crop"), "Select", [=] {
+    //        MyGraphicsView::self->setDragMode(QGraphicsView::RubberBandDrag);
+    //        MyGraphicsView::self->setInteractive(true);
+    //    });
+    //    action = toolBar->addAction(QIcon::fromTheme("transform-browse"), "Drag", [=] {
+    //        MyGraphicsView::self->setDragMode(QGraphicsView::ScrollHandDrag);
+    //        MyGraphicsView::self->setInteractive(false);
+    //    });
 }
 
 void MainWindow::createStatusBar()

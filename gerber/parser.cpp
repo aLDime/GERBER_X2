@@ -495,24 +495,36 @@ Paths Parser::createLine()
 {
 
     Paths solution;
-    if (0) {
-        Path pattern = file->apertures[state.aperture /*lstAperture*/]->draw(state)[0];
-        if (Area(pattern) < 0) {
-            ReversePath(pattern);
-        }
-        //pattern.push_back(pattern[0]);
-        MinkowskiSum(pattern, path, solution, false);
+    if (1) {
+        if (file->apertures[state.aperture]->type() != Circle) {
+            State tmpState(state);
+            tmpState.curPos = IntPoint();
+            Path pattern = file->apertures[state.aperture]->draw(tmpState)[0];
+            if (Area(pattern) < 0)
+                ReversePath(pattern);
+            MinkowskiSum(pattern, path, solution, false);
 #ifdef DEPRECATED_IMAGE_POLARITY
-        if (state.imgPolarity == Negative) {
-            ReversePaths(solution);
-        }
+            if (state.imgPolarity == Negative)
+                ReversePaths(solution);
 #endif
+        } else {
+            //потровится ести нет апертуры!!!!!!!
+            double size = file->apertures[state.aperture]->size() * uScale * 0.5;
+            if (qFuzzyIsNull(size))
+                size = 1;
+            ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
+            offset.AddPath(path, jtRound, etOpenRound);
+            offset.Execute(solution, size);
+#ifdef DEPRECATED_IMAGE_POLARITY
+            if (state.imgPolarity == Negative)
+                ReversePaths(solution);
+#endif
+        }
     } else {
         //потровится ести нет апертуры!!!!!!!
-        double size = file->apertures[state.aperture /*lstAperture*/]->size() * uScale * 0.5;
+        double size = file->apertures[state.aperture]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
             size = 1;
-
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
         offset.AddPath(path, jtRound, etOpenRound);
         offset.Execute(solution, size);
