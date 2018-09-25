@@ -20,6 +20,7 @@ RESOURCES += \
 
 DISTFILES += \
     qdarkstyle/style.qss \
+    res/toolpath/bookOfComplaintsAndSuggestions.txt
 
 include(../graphicsview/mygraphicsview.pri)
 include(../gerber/gerber.pri)

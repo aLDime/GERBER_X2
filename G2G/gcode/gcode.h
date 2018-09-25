@@ -40,8 +40,29 @@ private:
     double m_depth;
     G::Side m_side = G::Top;
 
-    inline QString g0() { return "G0"; }
-    inline QString g1() { return "G1"; }
+    enum GCode {
+        G00 = 0,
+        G01 = 1,
+        G02 = 2,
+        G03 = 3,
+    };
+    GCode m_gCode = G00;
+    inline QString g0()
+    {
+        if (m_gCode != G00) {
+            m_gCode = G00;
+            return "G0";
+        }
+        return "";
+    }
+    inline QString g1()
+    {
+        if (m_gCode != G01) {
+            m_gCode = G01;
+            return "G1";
+        }
+        return "";
+    }
     inline QString x(double val) { return "X" + format(val); }
     inline QString y(double val) { return "Y" + format(val); }
     inline QString z(double val) { return "Z" + format(val); }

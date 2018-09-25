@@ -148,34 +148,28 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
 {
     switch (event->modifiers()) {
     case Qt::ControlModifier:
-        if (event->delta() > 0) {
-            ZoomIn();
-        } else {
-            ZoomOut();
-        }
+        if (event->angleDelta().x() != 0)
+            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        else
+            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+        event->accept();
         break;
     case Qt::ShiftModifier:
         QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        event->accept();
         break;
     case Qt::NoModifier:
-        if (event->angleDelta().x() != 0) {
-            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        } else {
-            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-        }
+        if (event->delta() > 0)
+            ZoomIn();
+        else
+            ZoomOut();
+        event->accept();
         break;
     default:
         QGraphicsView::wheelEvent(event);
+        break;
     }
 }
-
-//void MyGraphicsView::TogglePointerMode()
-//{
-//    static bool selectModeButton = true;
-//    setDragMode(selectModeButton ? QGraphicsView::RubberBandDrag : QGraphicsView::ScrollHandDrag);
-//    //setInteractive(selectModeButton);
-//    selectModeButton = !selectModeButton;
-//}
 
 void MyGraphicsView::UpdateRuler()
 {
@@ -225,4 +219,55 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
     UpdateRuler();
+}
+
+void MyGraphicsView::mousePressEvent(QMouseEvent* event)
+{
+    qDebug() << "mousePressEvent";
+    if (event->buttons() & Qt::MiddleButton) {
+        setInteractive(false);
+        // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
+        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, 0, event->modifiers());
+        QGraphicsView::mouseReleaseEvent(&releaseEvent);
+        setDragMode(ScrollHandDrag);
+        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
+        QGraphicsView::mousePressEvent(&fakeEvent);
+    } else if (event->button() == Qt::RightButton) {
+        // это что бы при вызове контекстного меню ничего постороннего не было
+        setDragMode(NoDrag);
+        setInteractive(false);
+        QGraphicsView::mousePressEvent(event);
+    } else {
+        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
+        QGraphicsView::mousePressEvent(event);
+    }
+}
+
+void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
+{
+    qDebug() << "mouseReleaseEvent";
+    if (event->button() == Qt::MiddleButton) {
+        // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
+        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
+        QGraphicsView::mouseReleaseEvent(&fakeEvent);
+        setDragMode(RubberBandDrag);
+        setInteractive(true);
+    } else if (event->button() == Qt::RightButton) {
+        // это что бы при вызове контекстного меню ничего постороннего не было
+        QGraphicsView::mousePressEvent(event);
+        setDragMode(RubberBandDrag);
+        setInteractive(true);
+    } else {
+        QGraphicsView::mouseReleaseEvent(event);
+    }
+}
+
+void MyGraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
+{
+    QGraphicsView::mouseDoubleClickEvent(event);
+}
+
+void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)
+{
+    QGraphicsView::mouseMoveEvent(event);
 }

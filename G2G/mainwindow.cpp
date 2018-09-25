@@ -177,7 +177,7 @@ void MainWindow::closeFiles()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About G2G"), tr("G2G"));
+    QMessageBox::about(this, tr("About G2G"), QString(__TIMESTAMP__).append("\nMSC_VER: ") + QString::number(_MSC_VER));
 }
 
 void MainWindow::init()

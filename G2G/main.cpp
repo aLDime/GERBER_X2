@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setApplicationName("G2G");
     QCoreApplication::setOrganizationName("XrSoft");
-    QCoreApplication::setApplicationVersion("0.2.3");
+//    QCoreApplication::setApplicationVersion("0.2.3");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());

@@ -131,7 +131,7 @@ void GCodeFile::saveDrill()
         startPath(point);
         for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
             sl.append(g1() + z(-m_tool.passDepth * i) + feed(m_tool.plungeRate));
-            sl.append(QString("G0Z0"));
+            sl.append(QString(g0() + "Z0"));
         }
         sl.append(g1() + z(-m_depth) + feed(m_tool.plungeRate));
         endPath();
@@ -177,7 +177,7 @@ void GCodeFile::saveProfilePocket()
 
             bool fl = true;
             for (QPointF& point : path) {
-                QString str("G1");
+                QString str(g1());
                 if (lastPoint.x() != point.x())
                     str += x(point.x());
                 if (lastPoint.y() != point.y())
@@ -202,7 +202,7 @@ void GCodeFile::saveProfilePocket()
 
         bool fl = true;
         for (QPointF& point : path) {
-            QString str("G1");
+            QString str(g1());
             if (lastPoint.x() != point.x())
                 str += x(point.x());
             if (lastPoint.y() != point.y())
@@ -244,13 +244,13 @@ void GCodeFile::startPath(const QPointF& point)
 
 void GCodeFile::endPath()
 {
-    sl.append(QString("G0Z%1").arg(format(MaterialSetup::clearence)));
+    sl.append(QString(g0() + "Z%1").arg(format(MaterialSetup::clearence)));
 }
 
 void GCodeFile::statFile()
 {
     sl.clear();
-    sl.append("G17"); //XY plane
+    sl.append("G21 G17 G90"); //G17 XY plane
     sl.append(g0() + z(MaterialSetup::z)); //HomeZ
 
     QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
