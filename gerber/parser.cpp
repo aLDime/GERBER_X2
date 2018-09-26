@@ -493,21 +493,38 @@ Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center)
 
 Paths Parser::createLine()
 {
-
     Paths solution;
     if (1) {
-        if (file->apertures[state.aperture]->type() != Circle) {
+        if (file->apertures[state.aperture]->type() == Rectangle) {
             State tmpState(state);
             tmpState.curPos = IntPoint();
             Path pattern = file->apertures[state.aperture]->draw(tmpState)[0];
-            if (Area(pattern) < 0)
-                ReversePath(pattern);
-            MinkowskiSum(pattern, path, solution, false);
+            Clipper clipper;
+            for (int j = 0, end = path.size() - 1; j < end; ++j) {
+                Path tmp;
+                for (int i = 0, end = pattern.size(); i < end; ++i) {
+                    tmp.append(IntPoint(pattern[(i + 0) % end].X + path[j + 0].X, pattern[(i + 0) % end].Y + path[j + 0].Y));
+                    tmp.append(IntPoint(pattern[(i + 1) % end].X + path[j + 0].X, pattern[(i + 1) % end].Y + path[j + 0].Y));
+                    tmp.append(IntPoint(pattern[(i + 1) % end].X + path[j + 1].X, pattern[(i + 1) % end].Y + path[j + 1].Y));
+                    tmp.append(IntPoint(pattern[(i + 0) % end].X + path[j + 1].X, pattern[(i + 0) % end].Y + path[j + 1].Y));
+                    if (Area(tmp) < 0)
+                        ReversePath(tmp);
+                    //solution.append(tmp);
+                    //A.clear();
+                    clipper.AddPath(tmp, ptClip, true);
+                    clipper.AddPaths(solution, ptSubject, true);
+                    clipper.Execute(ctUnion, solution, pftPositive);
+                }
+            }
+
+//            if (Area(pattern) < 0)
+//                ReversePath(pattern);
+//            MinkowskiSum(pattern, path, solution, false);
 #ifdef DEPRECATED_IMAGE_POLARITY
             if (state.imgPolarity == Negative)
                 ReversePaths(solution);
 #endif
-        } else {
+        } else if (file->apertures[state.aperture]->type() == Circle) {
             //потровится ести нет апертуры!!!!!!!
             double size = file->apertures[state.aperture]->size() * uScale * 0.5;
             if (qFuzzyIsNull(size))
@@ -519,6 +536,8 @@ Paths Parser::createLine()
             if (state.imgPolarity == Negative)
                 ReversePaths(solution);
 #endif
+        } else {
+            throw "createLine() not support for other apertures!";
         }
     } else {
         //потровится ести нет апертуры!!!!!!!
