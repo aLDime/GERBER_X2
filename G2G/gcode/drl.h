@@ -141,6 +141,7 @@ struct State {
         currentToolDiameter = 0.0;
         pos = QPointF();
         path.clear();
+        line = 0;
     }
 
     struct Format {
@@ -156,6 +157,7 @@ struct State {
     double currentToolDiameter = 0.0;
     QPointF pos;
     QPolygonF path;
+    int line = 0;
 };
 
 class DrillFile;
@@ -211,7 +213,7 @@ private:
 
     bool parsePos(const QString& line);
 
-    bool parseRepeatHole(const QString& line);
+    bool parseRepeat(const QString& line);
 
     bool parseFormat(const QString& line);
 

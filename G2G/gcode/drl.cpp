@@ -25,6 +25,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     QString line;
     while (in.readLineInto(&line)) {
         m_file->lines().append(line);
+        ++m_state.line;
         try {
             if (parseComment(line))
                 continue;
@@ -41,7 +42,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
             if (parseTCode(line))
                 continue;
 
-            if (parseRepeatHole(line))
+            if (parseRepeat(line))
                 continue;
 
             if (parsePos(line))
@@ -66,7 +67,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
         m_file->setItemGroup(new ItemGroup);
         for (Hole& hole : *m_file) {
             m_file->itemGroup()->append(new DrillItem(hole.state.currentToolDiameter, m_file));
-            m_file->itemGroup()->last()->setToolTip(QString("Tool %1, Ø%2mm").arg(hole.state.tCode).arg(hole.state.currentToolDiameter));
+            m_file->itemGroup()->last()->setToolTip(QString("Tool %1, Ø%2mm(%3)").arg(hole.state.tCode).arg(hole.state.currentToolDiameter).arg(hole.state.line));
             m_file->itemGroup()->last()->setPos(hole.state.pos);
         }
         m_file->itemGroup()->setZValue(std::numeric_limits<double>::max());
@@ -203,7 +204,7 @@ bool DrillParser::parsePos(const QString& line)
     return false;
 }
 
-bool DrillParser::parseRepeatHole(const QString& line)
+bool DrillParser::parseRepeat(const QString& line)
 {
 
     QRegExp match("^R(\\d+)"
