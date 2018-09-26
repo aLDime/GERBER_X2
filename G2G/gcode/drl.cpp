@@ -17,8 +17,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
-
-    //qDebug() << fileName;
+    qDebug() << fileName;
     m_state.reset();
     m_file = new DrillFile;
     m_file->setFileName(fileName);
@@ -40,6 +39,9 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
                 continue;
 
             if (parseTCode(line))
+                continue;
+
+            if (parseRepeatHole(line))
                 continue;
 
             if (parsePos(line))
@@ -72,11 +74,28 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     return m_file;
 }
 
+bool DrillParser::isDrillFile(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+        return false;
+    QTextStream in(&file);
+    QString line;
+    const QRegExp match("^T([0]?[0-9]{1})[FSC]((\\d*\\.?\\d+))?.*$");
+    while (in.readLineInto(&line)) {
+        if (match.exactMatch(line)) {
+            //qDebug() << match.capturedTexts();
+            return true;
+        }
+    }
+    return false;
+}
+
 bool DrillParser::parseComment(const QString& line)
 {
-    const QRegExp match(";(.*)$");
+    const QRegExp match("^;(.*)$");
     if (match.exactMatch(line)) {
-        const QRegExp matchFormat(".*([0-9]).([0-9]).*");
+        const QRegExp matchFormat(".*FORMAT.*([0-9]).([0-9]).*", Qt::CaseInsensitive);
         if (matchFormat.exactMatch(match.cap(1))) {
             //qDebug() << matchFormat.capturedTexts();
             m_state.format.integer = matchFormat.cap(1).toInt();
@@ -142,12 +161,20 @@ bool DrillParser::parseMCode(const QString& line)
 
 bool DrillParser::parseTCode(const QString& line)
 {
-    const QRegExp match("^T([0]?[0-9]{1})(?:C(\\d*\\.?\\d+))?.*$");
+    const QRegExp match("^T([0-9]{1,2})"
+                        "(?:([CFS])(\\d*\\.?\\d+))?"
+                        "(?:([CFS])(\\d*\\.?\\d+))?"
+                        "(?:([CFS])(\\d*\\.?\\d+))?"
+                        ".*$");
+    //const QRegExp match("^T([0]?[0-9]{1})(?:C(\\d*\\.?\\d+))?.*$");
     if (match.exactMatch(line)) {
+        const QStringList capturedTexts(match.capturedTexts());
+        const int index = capturedTexts.indexOf("C");
+        //        qDebug() << capturedTexts << index;
         m_state.tCode = match.cap(1).toInt();
-        if (!match.cap(2).isEmpty()) {
+        if (index > 0) {
             const double k = m_state.format.unitMode ? 1.0 : 25.4;
-            m_file->m_toolDiameter[m_state.tCode] = match.cap(2).toDouble() * k;
+            m_file->m_toolDiameter[m_state.tCode] = match.cap(index + 1).toDouble() * k;
             m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
         } else
             m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
@@ -161,40 +188,38 @@ bool DrillParser::parsePos(const QString& line)
     static double x = 0.0;
     static double y = 0.0;
 
-    QRegExp match("(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?$");
+    QRegExp match("^(?:G(\\d+))?"
+                  "(?:X([+-]?\\d*\\.?\\d+))?"
+                  "(?:Y([+-]?\\d*\\.?\\d+))?"
+                  ".*$");
     if (match.exactMatch(line)) {
-
-        const double k = m_state.format.unitMode ? 1.0 : 25.4;
-        if (match.cap(1).contains('.') || match.cap(2).contains('.')) {
-            if (match.cap(1).isEmpty())
-                m_state.pos.setX(x);
-            else
-                m_state.pos.setX(match.cap(1).toDouble() * k);
-
-            if (match.cap(2).isEmpty())
-                m_state.pos.setY(y);
-            else
-                m_state.pos.setY(match.cap(2).toDouble() * k);
-        } else {
-            if (match.cap(1).isEmpty())
-                m_state.pos.setX(x);
-            else {
-                double x = match.cap(1).toInt() * pow(0.1, m_state.format.decimal) * k;
-
-                m_state.pos.setX(x);
-            }
-
-            if (match.cap(2).isEmpty())
-                m_state.pos.setY(y);
-            else {
-                double y = match.cap(2).toInt() * pow(0.1, m_state.format.decimal) * k;
-                m_state.pos.setY(y);
-            }
-        }
-        //        qDebug() << match.capturedTexts() << m_state.pos;
-        x = m_state.pos.x();
-        y = m_state.pos.y();
+        QStringList capturedTexts(match.capturedTexts());
+        qDebug() << capturedTexts;
+        parseNumber(match.cap(2), m_state.pos.rx());
+        parseNumber(match.cap(3), m_state.pos.ry());
         m_file->append(Hole(m_state, m_file));
+        return true;
+    }
+    return false;
+}
+
+bool DrillParser::parseRepeatHole(const QString& line)
+{
+
+    QRegExp match("^R(\\d+)"
+                  "(?:X([+-]?\\d*\\.?\\d+))?"
+                  "(?:Y([+-]?\\d*\\.?\\d+))?"
+                  "$");
+    if (match.exactMatch(line)) {
+        qDebug() << match.capturedTexts();
+        int count = match.cap(1).toInt();
+        QPointF p;
+        parseNumber(match.cap(2), p.rx());
+        parseNumber(match.cap(3), p.ry());
+        for (int i = 0; i < count; ++i) {
+            m_state.pos += p;
+            m_file->append(Hole(m_state, m_file));
+        }
         return true;
     }
     return false;
@@ -202,18 +227,79 @@ bool DrillParser::parsePos(const QString& line)
 
 bool DrillParser::parseFormat(const QString& line)
 {
-    if (line.contains(QRegExp("METRIC"))) {
-        m_state.format.unitMode = Millimeters;
+    static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
+    static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
+    static const QRegExp match("^(METRIC|INCH).*(LZ|TZ)?$");
+    if (match.exactMatch(line)) {
+        qDebug() << match.capturedTexts();
+        switch (unitMode.indexOf(match.cap(1))) {
+        case Inches:
+            m_state.format.unitMode = Inches;
+            break;
+        case Millimeters:
+            m_state.format.unitMode = Millimeters;
+            break;
+        default:
+            break;
+        }
+        switch (zeroMode.indexOf(match.cap(2))) {
+        case LeadingZeros:
+            m_state.format.zeroMode = LeadingZeros;
+            break;
+        case TrailingZeros:
+            m_state.format.zeroMode = TrailingZeros;
+            break;
+        default:
+            break;
+        }
         return true;
     }
-    if (line.contains(QRegExp("INCH"))) {
+    static const QRegExp match2("^(FMAT).*(2)?$");
+    if (match2.exactMatch(line)) {
+        qDebug() << match2.capturedTexts();
         m_state.format.unitMode = Inches;
+        m_state.format.zeroMode = LeadingZeros;
         return true;
     }
-    if (line.contains(QRegExp("FMAT,2"))) {
-        //        m_state.format.integer = 1;
-        //        m_state.format.decimal = 5;
-        return true;
-    }
+
     return false;
+}
+
+bool DrillParser::parseNumber(QString Str, double& val, int integer, int decimal)
+{
+    bool flag = false;
+    int sign = 1;
+    if (!Str.isEmpty()) {
+        if (Str.contains('.')) {
+            val = Str.toDouble();
+        } else {
+            if (!decimal)
+                decimal = m_state.format.decimal;
+            if (!integer)
+                integer = m_state.format.integer;
+
+            if (Str.startsWith('+')) {
+                Str.remove(0, 1);
+                sign = 1;
+            } else if (Str.startsWith('-')) {
+                Str.remove(0, 1);
+                sign = -1;
+            }
+            if (Str.length() < integer + decimal) {
+                switch (m_state.format.zeroMode) {
+                case LeadingZeros:
+                    Str = Str + QString(integer + decimal - Str.length(), '0');
+                    break;
+                case TrailingZeros:
+                    Str = QString(integer + decimal - Str.length(), '0') + Str;
+                    break;
+                }
+            }
+            val = Str.toDouble() * pow(10.0, -decimal) * sign;
+        }
+        if (m_state.format.unitMode == Inches)
+            val *= 25.4;
+        return true;
+    }
+    return flag;
 }

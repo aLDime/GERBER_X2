@@ -420,9 +420,9 @@ void MainWindow::openFile(const QString& fileName)
     }
     QFileInfo fi(fileName);
     lastPath = fi.absolutePath();
-
-    if (fi.suffix().contains("drl", Qt::CaseInsensitive)) {
-        DrillFile* dFile = DrillParser().parseFile(fileName);
+    DrillParser dp;
+    if (dp.isDrillFile(fileName)) {
+        DrillFile* dFile = dp.parseFile(fileName);
         if (dFile) {
             FileModel::self->addDrlFile(dFile);
             prependToRecentFiles(dFile->fileName());
