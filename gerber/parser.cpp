@@ -494,32 +494,56 @@ Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center)
 Paths Parser::createLine()
 {
     Paths solution;
+    //Clipper clipper;
     if (1) {
         if (file->apertures[state.aperture]->type() == Rectangle) {
             State tmpState(state);
             tmpState.curPos = IntPoint();
             Path pattern = file->apertures[state.aperture]->draw(tmpState)[0];
-            Clipper clipper;
-            for (int j = 0, end = path.size() - 1; j < end; ++j) {
-                Path tmp;
-                for (int i = 0, end = pattern.size(); i < end; ++i) {
-                    tmp.append(IntPoint(pattern[(i + 0) % end].X + path[j + 0].X, pattern[(i + 0) % end].Y + path[j + 0].Y));
-                    tmp.append(IntPoint(pattern[(i + 1) % end].X + path[j + 0].X, pattern[(i + 1) % end].Y + path[j + 0].Y));
-                    tmp.append(IntPoint(pattern[(i + 1) % end].X + path[j + 1].X, pattern[(i + 1) % end].Y + path[j + 1].Y));
-                    tmp.append(IntPoint(pattern[(i + 0) % end].X + path[j + 1].X, pattern[(i + 0) % end].Y + path[j + 1].Y));
-                    if (Area(tmp) < 0)
-                        ReversePath(tmp);
-                    //solution.append(tmp);
-                    //A.clear();
-                    clipper.AddPath(tmp, ptClip, true);
-                    clipper.AddPaths(solution, ptSubject, true);
-                    clipper.Execute(ctUnion, solution, pftPositive);
+            ReversePath(pattern);
+            for (int i = 0, end = path.size() - 1; i < end; ++i) {
+                int iv = 0;
+                int iw = 0;
+                const int nv = pattern.size();
+                const int nw = 2;
+                double va;
+                double wa;
+                Path A;
+                Path W({ path[i], path[i + 1] });
+                wa = Angle(W[(iw + 1) % nw], W[(iw) % nw]);
+                va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
+                while (va < wa) {
+                    ++iv;
+                    va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
                 }
+                qDebug() << iv;
+                while (A.size() < (nv + nw)) {
+                    A.append(IntPoint(pattern[iv % nv].X + W[iw % nw].X, pattern[iv % nv].Y + W[iw % nw].Y));
+                    va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
+                    wa = Angle(W[(iw + 1) % nw], W[(iw) % nw]);
+                    if (va < wa)
+                        ++iv;
+                    else if (va > wa)
+                        ++iw;
+                    else {
+                        ++iv;
+                        ++iw;
+                    }
+//                    if (va > wa)
+//                        ++iv;
+//                    else if (va < wa)
+//                        ++iw;
+//                    else {
+//                        ++iv;
+//                        ++iw;
+//                    }
+                }
+                solution.append(A);
             }
+            //clipper.AddPaths(solution, ptSubject, true);
+            //clipper.Execute(ctUnion, solution, pftNonZero);
+            ReversePaths(solution);
 
-//            if (Area(pattern) < 0)
-//                ReversePath(pattern);
-//            MinkowskiSum(pattern, path, solution, false);
 #ifdef DEPRECATED_IMAGE_POLARITY
             if (state.imgPolarity == Negative)
                 ReversePaths(solution);
@@ -535,6 +559,7 @@ Paths Parser::createLine()
 #ifdef DEPRECATED_IMAGE_POLARITY
             if (state.imgPolarity == Negative)
                 ReversePaths(solution);
+
 #endif
         } else {
             throw "createLine() not support for other apertures!";

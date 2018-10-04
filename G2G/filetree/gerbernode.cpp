@@ -13,8 +13,6 @@ GerberNode::GerberNode(File* file)
     AbstractNode::files.append(file->shortFileName());
     FileHolder::file<File>(m_id)->itemGroup()->addToTheScene();
     FileHolder::file<File>(m_id)->itemGroup()->setZValue(-m_id);
-    MyGraphicsView::self->ZoomFit();
-    MyGraphicsView::self->Zoom100();
     MainWindow::self->closeAllAct->setEnabled(true);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
@@ -22,6 +20,8 @@ GerberNode::GerberNode(File* file)
     MainWindow::self->zero()->resetPos();
     MainWindow::self->home()->resetPos();
     Shtift::shtifts()[0]->resetPos();
+    MyGraphicsView::self->ZoomFit();
+    MyGraphicsView::self->Zoom100();
 }
 
 GerberNode::~GerberNode()
