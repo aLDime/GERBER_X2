@@ -509,10 +509,10 @@ Paths Parser::createLine()
                 double va;
                 double wa;
                 Path A;
-                Path W({ path[i], path[i + 1] });
+                Path W({ path[i + 1], path[i] });
                 wa = Angle(W[(iw + 1) % nw], W[(iw) % nw]);
                 va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
-                while (va < wa) {
+                while (va > wa) {
                     ++iv;
                     va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
                 }
