@@ -90,8 +90,8 @@ void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
 
     const int с = 100;
     QVector<QColor> color{
-        QColor(с, с, с, 30),
-        QColor(с, с, с, 80),
+        QColor(с, с, с, 50),
+        QColor(с, с, с, 100),
         QColor(с, с, с, 200)
     };
 

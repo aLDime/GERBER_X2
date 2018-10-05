@@ -529,14 +529,14 @@ Paths Parser::createLine()
                         ++iv;
                         ++iw;
                     }
-//                    if (va > wa)
-//                        ++iv;
-//                    else if (va < wa)
-//                        ++iw;
-//                    else {
-//                        ++iv;
-//                        ++iw;
-//                    }
+                    //                    if (va > wa)
+                    //                        ++iv;
+                    //                    else if (va < wa)
+                    //                        ++iw;
+                    //                    else {
+                    //                        ++iv;
+                    //                        ++iw;
+                    //                    }
                 }
                 solution.append(A);
             }
@@ -636,7 +636,7 @@ bool Parser::parseAperture(const QString& gLine)
             break;
         case Polygon:
             if (paramList.length() > 2)
-                rotation = toDouble(paramList[2]);
+                rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
             file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &file->format)));
