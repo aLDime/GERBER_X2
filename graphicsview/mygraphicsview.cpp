@@ -3,21 +3,12 @@
 #include "mygraphicsview.h"
 #include "myscene.h"
 #include "qdruler.h"
-#include <QDebug>
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
 #include <mainwindow.h>
-
-//#include <filetree/filemodel.h>
-//#include <forms/materialsetupform.h>
-//#include <gcode/gcode.h>
-//#include <gi/itemgroup.h>
-//#include <point.h>
-//#include <tooldatabase/tool.h>
-//#include <tooldatabase/tooldatabase.h>
 
 MyGraphicsView* MyGraphicsView::self = nullptr;
 
@@ -26,14 +17,9 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
 {
     setCacheMode(CacheBackground);
     setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
-    //setViewportUpdateMode(SmartViewportUpdate);
     setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
-    //    setTransformationAnchor(AnchorUnderMouse);
-    //    setResizeAnchor(AnchorUnderMouse);
-    //    setAcceptDrops(true);
     setInteractive(true);
-    //    setMouseTracking(true);
     ////////////////////////////////////
 
     // add two rulers on top and left.
@@ -109,10 +95,10 @@ void MyGraphicsView::Zoom100()
     UpdateRuler();
 }
 
-enum {
-    DURATION = 300,
-    INTERVAL = 30
-};
+//enum {
+//    DURATION = 300,
+//    INTERVAL = 30
+//};
 
 void MyGraphicsView::ZoomIn()
 {
@@ -159,10 +145,12 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
         event->accept();
         break;
     case Qt::NoModifier:
-        if (event->delta() > 0)
-            ZoomIn();
-        else
-            ZoomOut();
+        if (abs(event->delta()) == 120) {
+            if (event->delta() > 0)
+                ZoomIn();
+            else
+                ZoomOut();
+        }
         event->accept();
         break;
     default:
@@ -205,15 +193,6 @@ void MyGraphicsView::dragMoveEvent(QDragMoveEvent* event)
 {
     event->acceptProposedAction();
 }
-
-//void MyGraphicsView::contextMenuEvent(QContextMenuEvent* event)
-//{
-//    QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-//    if (item->type() == POINT_SHTIFT) {
-//        MainWindow::self->createShtiftPath(event);
-//    }
-//    QGraphicsView::contextMenuEvent(event);
-//}
 
 void MyGraphicsView::resizeEvent(QResizeEvent* event)
 {

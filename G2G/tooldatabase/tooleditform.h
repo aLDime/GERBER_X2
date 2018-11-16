@@ -10,6 +10,7 @@ class ToolEditForm;
 }
 
 class ToolItem;
+class QDoubleSpinBox;
 
 class ToolEditForm : public QWidget {
     Q_OBJECT
@@ -46,6 +47,7 @@ private:
 
     void updateName();
     void setRed();
+    void flicker(QDoubleSpinBox* dsbx);
     void setVisibleWidgets(bool visible);
 };
 

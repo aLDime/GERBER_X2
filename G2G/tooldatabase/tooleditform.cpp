@@ -6,6 +6,7 @@
 #include <QDebug>
 #include <QPicture>
 #include <QSettings>
+#include <QTimer>
 
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget(parent)
@@ -65,6 +66,16 @@ void ToolEditForm::setItem(ToolItem* item)
 void ToolEditForm::setRed()
 {
     ui->pbApply->setStyleSheet("QPushButton { background-color: #80FF0000;}");
+}
+
+void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
+{
+    if (!dsbx->value()) {
+        for (int i = 0, t = 0; i < 3; ++i) {
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx] { dsbx->setStyleSheet("QDoubleSpinBox { background-color: #FF0000;}"); });
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx] { dsbx->setStyleSheet(""); });
+        }
+    }
 }
 
 void ToolEditForm::setVisibleWidgets(bool visible)
@@ -156,7 +167,6 @@ void ToolEditForm::on_teNote_textChanged()
 
 void ToolEditForm::calculate(int index, double value)
 {
-
     switch (index) {
     case Tool::Angle:
         m_tool.angle = value;
@@ -165,8 +175,10 @@ void ToolEditForm::calculate(int index, double value)
         m_tool.diameter = value;
         ui->dsbxOneTurnCut->setMaximum(value);
         ui->dsbxStepover->setMaximum(value);
-        ui->dsbxOneTurnCutPercent->setValue((ui->dsbxOneTurnCut->value() / value) * 100.0);
-        ui->dsbxStepoverPercent->setValue((ui->dsbxStepover->value() / value) * 100.0);
+        //        ui->dsbxOneTurnCutPercent->setValue((ui->dsbxOneTurnCut->value() / value) * 100.0);
+        //        ui->dsbxStepoverPercent->setValue((ui->dsbxStepover->value() / value) * 100.0);
+        ui->dsbxOneTurnCutPercent->valueChanged(ui->dsbxOneTurnCutPercent->value());
+        ui->dsbxStepoverPercent->valueChanged(ui->dsbxStepoverPercent->value());
         break;
     case Tool::FeedRate:
         m_tool.feedRate = value / m_feed;
@@ -228,13 +240,46 @@ void ToolEditForm::valueChanged(double value)
 
 void ToolEditForm::on_pbApply_clicked()
 {
-    if (m_item) {
+    if (m_item && m_tool.isValid()) {
         m_item->tool() = m_tool;
         m_item->setName(m_tool.name);
         m_item->setNote(m_tool.note);
         emit itemChanged(m_item);
+        ui->pbApply->setStyleSheet("");
+    } else {
+        switch (m_tool.type) {
+        case Tool::Drill:
+            flicker(ui->dsbxDiameter);
+            flicker(ui->dsbxOneTurnCut);
+            flicker(ui->dsbxPassDepth);
+            flicker(ui->dsbxPlungeRate);
+            flicker(ui->dsbxSpindleSpeed);
+            flicker(ui->dsbxOneTurnCutPercent);
+            break;
+        case Tool::EndMill:
+            flicker(ui->dsbxDiameter);
+            flicker(ui->dsbxFeedRate);
+            flicker(ui->dsbxOneTurnCut);
+            flicker(ui->dsbxPassDepth);
+            flicker(ui->dsbxPlungeRate);
+            flicker(ui->dsbxSpindleSpeed);
+            flicker(ui->dsbxStepover);
+            flicker(ui->dsbxOneTurnCutPercent);
+            flicker(ui->dsbxStepoverPercent);
+            break;
+        case Tool::Engraving:
+            flicker(ui->dsbxDiameter);
+            flicker(ui->dsbxFeedRate);
+            flicker(ui->dsbxOneTurnCut);
+            flicker(ui->dsbxPassDepth);
+            flicker(ui->dsbxPlungeRate);
+            flicker(ui->dsbxSpindleSpeed);
+            flicker(ui->dsbxStepover);
+            flicker(ui->dsbxOneTurnCutPercent);
+            flicker(ui->dsbxStepoverPercent);
+            break;
+        }
     }
-    ui->pbApply->setStyleSheet("");
 }
 
 void ToolEditForm::setTool(const Tool& tool)

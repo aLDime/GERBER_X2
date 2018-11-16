@@ -13,7 +13,9 @@ FORMS += \
     forms/materialsetupform.ui \
     forms/drillform.ui \
     forms/profileform.ui \
-    forms/pocketform.ui
+    forms/pocketform.ui \
+    aboutform.ui \
+    aboutform.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -77,6 +79,8 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
+    aboutform.h \
+    aboutform.h
 
 
 SOURCES += \
@@ -113,6 +117,8 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
+    aboutform.cpp \
+    aboutform.cpp
 
 
 

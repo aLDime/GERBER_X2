@@ -540,6 +540,7 @@ Paths Parser::createLine()
                 }
                 solution.append(A);
             }
+            SimplifyPolygons(solution);
             //clipper.AddPaths(solution, ptSubject, true);
             //clipper.Execute(ctUnion, solution, pftNonZero);
             ReversePaths(solution);

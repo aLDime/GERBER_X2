@@ -1,4 +1,5 @@
 #include "mainwindow.h"
+#include "aboutform.h"
 #include "drillforapertureform.h"
 #include "forms/drillform.h"
 #include "forms/materialsetupform.h"
@@ -29,7 +30,10 @@ MainWindow* MainWindow::self = nullptr;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
+
     , gerberParser(new G::Parser)
+    , m_zeroPoint(new Point(Point::Zero))
+    , m_homePoint(new Point(Point::Home))
 {
     setupUi(this);
     setToolTipDuration(0);
@@ -39,9 +43,6 @@ MainWindow::MainWindow(QWidget* parent)
     new Shtift();
     new Shtift();
     new Shtift();
-
-    m_zeroPoint = new Point(Point::Zero);
-    m_homePoint = new Point(Point::Home);
 
     MyScene::self->addItem(m_zeroPoint);
     MyScene::self->addItem(m_homePoint);
@@ -126,8 +127,6 @@ MainWindow::MainWindow(QWidget* parent)
     self = this;
 
     readSettings();
-
-    //    graphicsView->installEventFilter(this);
 }
 
 MainWindow::~MainWindow()
@@ -153,9 +152,16 @@ Point* MainWindow::home() const
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if (QMessageBox::question(this, "", "Вы действительно хотите выйти из программы?", "Да", "Да?") == 0) {
+    if (QMessageBox::question(this, "", "Do you really want to quit the program?", "Yes", "No") == 0) {
         writeSettings();
         closeFiles();
+        //        disconnect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
+        //        disconnect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
+        //        disconnect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
+        //        disconnect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
+        //        disconnect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile);
+        //        if (gerberThread.isRunning())
+        //            gerberThread.terminate();
         event->accept();
     } else
         event->ignore();
@@ -177,7 +183,8 @@ void MainWindow::closeFiles()
 
 void MainWindow::about()
 {
-    QMessageBox::about(this, tr("About G2G"), QString(__TIMESTAMP__).append("\nMSC_VER: ") + QString::number(_MSC_VER));
+    AboutForm a(this);
+    a.exec();
 }
 
 void MainWindow::init()
