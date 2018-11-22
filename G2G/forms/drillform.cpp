@@ -194,11 +194,11 @@ void DrillForm::updateFiles()
     }
     for (DrillFile* file : FileHolder::files<DrillFile>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-        QPixmap pixmap(Size, Size);
-        QColor color(file->itemGroup()->brush().color());
-        color.setAlpha(255);
-        pixmap.fill(color);
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon(pixmap), Qt::DecorationRole);
+//        QPixmap pixmap(Size, Size);
+//        QColor color(file->itemGroup()->brush().color());
+//        color.setAlpha(255);
+//        pixmap.fill(color);
+        ui->cbxFile->setItemData(ui->cbxFile->count() - 1,QIcon::fromTheme("roll"), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 }
