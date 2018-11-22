@@ -51,6 +51,14 @@ void MyScene::RenderPdf()
     drawPdf = false;
 }
 
+QRectF MyScene::itemsBoundingRect()
+{
+    drawPdf = true;
+    QRectF rect(QGraphicsScene::itemsBoundingRect());
+    drawPdf = false;
+    return rect;
+}
+
 void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     if (drawPdf)

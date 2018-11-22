@@ -1,5 +1,7 @@
 #include "tooldatabase.h"
+#include "tooleditform.h"
 #include "toolitem.h"
+#include "tooltreeview.h"
 #include "ui_tooledit.h"
 
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
@@ -7,7 +9,6 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     , ui(new Ui::ToolEdit)
     , m_types(types)
 {
-
     ui->setupUi(this);
     ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
 

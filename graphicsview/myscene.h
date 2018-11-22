@@ -14,6 +14,7 @@ public:
     void RenderPdf();
 
     static MyScene* self;
+    QRectF itemsBoundingRect();
 
 private:
     bool drawPdf;

@@ -13,6 +13,7 @@ public:
         Drill,
         EndMill,
         Engraving,
+        Group
     };
 
     enum {
@@ -31,7 +32,7 @@ public:
 
     QString name;
     QString note;
-    Type type = Drill;
+    Type type = Group;
     double angle = 0.0;
     double diameter = 0.0;
     double feedRate = 0.0;

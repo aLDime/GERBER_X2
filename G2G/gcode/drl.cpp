@@ -70,7 +70,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
             m_file->itemGroup()->last()->setToolTip(QString("Tool %1, Ø%2mm(%3)").arg(hole.state.tCode).arg(hole.state.currentToolDiameter).arg(hole.state.line));
             m_file->itemGroup()->last()->setPos(hole.state.pos);
         }
-        m_file->itemGroup()->setZValue(std::numeric_limits<double>::max());
+        //m_file->itemGroup()->setZValue(std::numeric_limits<double>::max());
     }
     return m_file;
 }

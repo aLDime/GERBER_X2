@@ -16,15 +16,18 @@ enum {
     PointZeroType,
     ShtiftType,
 };
-
+class ItemGroup;
 class GraphicsItem : public QGraphicsItem {
 public:
     GraphicsItem();
+    ~GraphicsItem();
     QBrush brush() const;
     QPen pen() const;
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
+    void setItemGroup(ItemGroup* itemGroup);
+    ItemGroup* parentItemGroup() const;
 
 protected:
     QPen m_pen;
@@ -33,6 +36,9 @@ protected:
     QPainterPath m_shape;
     mutable Paths m_paths;
     QRectF m_rect;
+
+private:
+    ItemGroup* m_ig = nullptr;
 };
 
 #endif // GERBERITEM_H

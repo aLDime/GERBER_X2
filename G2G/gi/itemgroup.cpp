@@ -9,6 +9,12 @@ ItemGroup::~ItemGroup()
         qDeleteAll(*this);
 }
 
+void ItemGroup::append(GraphicsItem* value)
+{
+    value->setItemGroup(this);
+    QList::append(value);
+}
+
 void ItemGroup::setVisible(const bool visible)
 {
     if (m_visible != visible) {

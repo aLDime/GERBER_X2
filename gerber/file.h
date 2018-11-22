@@ -35,6 +35,8 @@ public:
 };
 
 class File : public AbstractFile, public QList<GraphicObject> {
+    friend class Parser;
+
 public:
     File(const QString& shortFileName = "");
     ~File();
@@ -45,15 +47,19 @@ public:
     };
 
     Format format;
-    QMap<int, QSharedPointer<AbstractAperture>> apertures;
 
     Layer layer = Copper;
     Miror miror = Vertical;
     Side side = Top;
     FileType type() const override { return FileType::Gerber; }
 
+    QMap<int, QSharedPointer<AbstractAperture>> getApertures() const;
+
 protected:
     Paths merge() const override;
+
+private:
+    QMap<int, QSharedPointer<AbstractAperture>> apertures;
 };
 
 Q_DECLARE_METATYPE(File)

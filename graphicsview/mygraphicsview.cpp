@@ -134,17 +134,6 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
 {
     switch (event->modifiers()) {
     case Qt::ControlModifier:
-        if (event->angleDelta().x() != 0)
-            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        else
-            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-        event->accept();
-        break;
-    case Qt::ShiftModifier:
-        QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        event->accept();
-        break;
-    case Qt::NoModifier:
         if (abs(event->delta()) == 120) {
             if (event->delta() > 0)
                 ZoomIn();
@@ -153,10 +142,46 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
         }
         event->accept();
         break;
+    case Qt::ShiftModifier:
+        QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        event->accept();
+        break;
+    case Qt::NoModifier:
+        if (event->angleDelta().x() != 0)
+            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        else
+            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+        event->accept();
+        break;
     default:
         QGraphicsView::wheelEvent(event);
         break;
     }
+    //    switch (event->modifiers()) {
+    //    case Qt::ControlModifier:
+    //        if (event->angleDelta().x() != 0)
+    //            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+    //        else
+    //            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+    //        event->accept();
+    //        break;
+    //    case Qt::ShiftModifier:
+    //        QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+    //        event->accept();
+    //        break;
+    //    case Qt::NoModifier:
+    //        if (abs(event->delta()) == 120) {
+    //            if (event->delta() > 0)
+    //                ZoomIn();
+    //            else
+    //                ZoomOut();
+    //        }
+    //        event->accept();
+    //        break;
+    //    default:
+    //        QGraphicsView::wheelEvent(event);
+    //        break;
+    //    }
 }
 
 void MyGraphicsView::UpdateRuler()

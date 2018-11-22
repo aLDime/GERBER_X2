@@ -23,7 +23,8 @@ public:
     ~DrillForm();
     static DrillForm* self;
 
-    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture> > &value);
+    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>& value);
+    void setHoles(const QMap<int, double>& value);
     void updateFiles();
 
 private slots:
@@ -38,13 +39,13 @@ private slots:
 private:
     QStandardItemModel* model;
     Ui::DrillForm* ui;
-    QMap<int, QSharedPointer<G::AbstractAperture>> apertures;
 
+    bool m_isAperture = false;
+    QMap<int, QSharedPointer<G::AbstractAperture>> apertures;
+    QMap<int, double> tools;
     QMap<int, QVector<QGraphicsPathItem*>> gia;
     QMap<int, QVector<DrillItem*>> gid;
 
-    //    QVector<QGraphicsPathItem*> gia;
-    //    QVector<QGraphicsEllipseItem*> gid;
     void clear();
 };
 

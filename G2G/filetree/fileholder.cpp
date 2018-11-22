@@ -23,6 +23,11 @@ bool FileHolder::isEmpty()
     return false;
 }
 
+int FileHolder::size()
+{
+    return m_files.size();
+}
+
 Paths FileHolder::getPaths()
 {
     QMutexLocker locker(&m_mutex);

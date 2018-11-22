@@ -37,6 +37,11 @@ Paths File::merge() const
     return m_mergedPaths;
 }
 
+QMap<int, QSharedPointer<AbstractAperture> > File::getApertures() const
+{
+    return apertures;
+}
+
 //Pathss& File::groupedPaths(Group group, bool fl)
 //{
 //    PolyTree polyTree;

@@ -2,14 +2,15 @@
 #define ITEMGROUP_H
 
 #include "drillitem.h"
+#include "gerberitem.h"
 #include "graphicsitem.h"
 #include "pathitem.h"
 #include "rawitem.h"
-#include "gerberitem.h"
 
 class ItemGroup : public QList<GraphicsItem*> {
 public:
     ~ItemGroup();
+    void append(GraphicsItem* value);
     void setVisible(const bool visible);
     bool isVisible() { return m_visible; }
     void addToTheScene();

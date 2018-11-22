@@ -298,6 +298,16 @@ void MainWindow::createActions()
     });
     action->setShortcut(QKeySequence::SelectAll);
 
+    action = s->addAction(QIcon::fromTheme(""/*"edit-select-all"*/), tr("Delete Selected"), [=]() {
+        for (QGraphicsItem* item : MyScene::self->items())
+            if (item->isSelected() && item->type() != DrillItemType)
+                delete item;
+        MainWindow::self->zero()->resetPos();
+        MainWindow::self->home()->resetPos();
+        Shtift::shtifts()[0]->resetPos();
+    });
+    action->setShortcut(QKeySequence::Delete);
+
     //==================== toolpathToolBar ====================
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setIconSize(QSize(24, 24));

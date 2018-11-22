@@ -277,6 +277,13 @@ void ToolEditForm::on_pbApply_clicked()
             flicker(ui->dsbxStepover);
             flicker(ui->dsbxOneTurnCutPercent);
             flicker(ui->dsbxStepoverPercent);
+        case Tool::Group:
+        default:
+            m_item->tool() = m_tool;
+            m_item->setName(m_tool.name);
+            m_item->setNote(m_tool.note);
+            emit itemChanged(m_item);
+            ui->pbApply->setStyleSheet("");
             break;
         }
     }

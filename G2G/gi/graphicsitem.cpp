@@ -1,4 +1,5 @@
 #include "graphicsitem.h"
+#include "itemgroup.h"
 //#include "gerber.h"
 //#include "point.h"
 //#include <QApplication>
@@ -19,6 +20,12 @@ GraphicsItem::GraphicsItem()
     m_brush.setColor(Qt::white);
 }
 
+GraphicsItem::~GraphicsItem()
+{
+    if (m_ig)
+        m_ig->takeAt(m_ig->indexOf(this));
+}
+
 QBrush GraphicsItem::brush() const { return m_brush; }
 
 QPen GraphicsItem::pen() const { return m_pen; }
@@ -26,3 +33,7 @@ QPen GraphicsItem::pen() const { return m_pen; }
 void GraphicsItem::setBrush(const QBrush& brush) { m_brush = brush; }
 
 void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
+
+void GraphicsItem::setItemGroup(ItemGroup* itemGroup) { m_ig = itemGroup; }
+
+ItemGroup* GraphicsItem::parentItemGroup() const { return m_ig; }

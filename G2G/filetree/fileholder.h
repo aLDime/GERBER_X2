@@ -35,6 +35,7 @@ public:
     }
 
     static bool isEmpty();
+    static int size();
 
     static Paths getPaths();
     static QString fileNames();
