@@ -72,8 +72,6 @@ TreeView::~TreeView()
 void TreeView::updateTree()
 {
     expandAll();
-//    for (int column = 0; column < m_model->columnCount(QModelIndex()); ++column)
-//        resizeColumnToContents(column);
 }
 
 void TreeView::updateIcons()

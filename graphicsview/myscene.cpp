@@ -14,55 +14,68 @@ MyScene* MyScene::self = nullptr;
 
 MyScene::MyScene(QObject* parent)
     : QGraphicsScene(parent)
-    , drawPdf(false)
+    , m_drawPdf(false)
 {
     self = this;
 }
 
 MyScene::~MyScene()
 {
-    //clear();
     self = nullptr;
 }
 
 void MyScene::RenderPdf()
 {
-    QString curFile = QFileDialog::getSaveFileName(/*this->parent()*/ nullptr, tr("Save PDF file"), /*curFile.left(curFile.lastIndexOf('.')) + ".pdf"*/ "", tr("File(*.pdf)"));
+    QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), "File", tr("File(*.pdf)"));
     if (curFile.isEmpty())
         return;
 
-    drawPdf = true;
+    m_drawPdf = true;
 
-    QPdfWriter pdfWriter(curFile.left(curFile.lastIndexOf('.')) + ".pdf");
+    QRectF rect;
 
-    QRectF rect(itemsBoundingRect());
+    for (QGraphicsItem* item : items())
+        if (item->isVisible() && !item->boundingRect().isNull())
+            rect |= item->boundingRect();
+
+    //QRectF rect(QGraphicsScene::itemsBoundingRect());
     QSizeF size(rect.size());
 
-    pdfWriter.setPageSizeMM(size);
+    qDebug() << size << rect;
 
+    QPdfWriter pdfWriter(curFile);
+    pdfWriter.setPageSizeMM(size);
     pdfWriter.setMargins({ 0, 0, 0, 0 });
     pdfWriter.setResolution(1000000);
 
     QPainter painter(&pdfWriter);
     painter.setTransform(QTransform().scale(1.0, -1.0));
     painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
+    render(&painter,
+        QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
+        rect, Qt::IgnoreAspectRatio);
 
-    render(&painter);
-    drawPdf = false;
+    m_drawPdf = false;
 }
 
 QRectF MyScene::itemsBoundingRect()
 {
-    drawPdf = true;
+    m_drawPdf = true;
     QRectF rect(QGraphicsScene::itemsBoundingRect());
-    drawPdf = false;
+    m_drawPdf = false;
     return rect;
+}
+
+bool MyScene::drawPdf() const
+{
+    return m_drawPdf;
 }
 
 void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
 {
-    if (drawPdf)
+    if (m_drawPdf)
         return;
+
     painter->fillRect(rect, Qt::black);
     return;
 
@@ -84,8 +97,9 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
 void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
 {
 
-    if (drawPdf)
+    if (m_drawPdf)
         return;
+
     double scale = views().at(0)->matrix().m11();
     if (qFuzzyIsNull(scale))
         return;

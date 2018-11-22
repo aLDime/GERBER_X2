@@ -50,13 +50,16 @@ Point::Point(int type)
 
 QRectF Point::boundingRect() const
 {
-    if (MyScene::self && MyScene::self->drawPdf)
+    if (MyScene::self && MyScene::self->m_drawPdf)
         return QRectF();
     return m_rect;
 }
 
 void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (MyScene::self && MyScene::self->m_drawPdf)
+        return;
+
     QColor c(m_color);
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
@@ -69,7 +72,13 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath Point::shape() const { return m_shape; }
+QPainterPath Point::shape() const
+{
+    if (MyScene::self && MyScene::self->m_drawPdf)
+        return QPainterPath();
+
+    return m_shape;
+}
 
 void Point::resetPos()
 {
@@ -166,13 +175,17 @@ Shtift::~Shtift()
 
 QRectF Shtift::boundingRect() const
 {
-    if (MyScene::self != nullptr && MyScene::self->drawPdf)
+    if (MyScene::self != nullptr && MyScene::self->m_drawPdf)
         return QRectF();
+
     return m_rect;
 }
 
 void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (MyScene::self && MyScene::self->m_drawPdf)
+        return;
+
     QColor c(255, 255, 0, 120);
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
@@ -185,7 +198,12 @@ void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath Shtift::shape() const { return m_shape; }
+QPainterPath Shtift::shape() const
+{
+    if (MyScene::self && MyScene::self->m_drawPdf)
+        return QPainterPath();
+    return m_shape;
+}
 
 void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {

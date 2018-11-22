@@ -3,6 +3,7 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <mygraphicsview.h>
+#include <myscene.h>
 
 GerberItem::GerberItem(const Paths& paths, G::File* file)
     : m_file(file)
@@ -18,9 +19,7 @@ GerberItem::GerberItem(const Paths& paths, G::File* file)
     setFlag(ItemIsSelectable, true);
 }
 
-GerberItem::~GerberItem()
-{
-}
+GerberItem::~GerberItem() {}
 
 QRectF GerberItem::boundingRect() const { return m_rect; }
 
@@ -28,6 +27,13 @@ QPainterPath GerberItem::shape() const { return m_shape; }
 
 void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (MyScene::self && MyScene::self->drawPdf()) {
+        painter->setBrush(m_brush.color());
+        painter->setPen(Qt::NoPen);
+        painter->drawPath(m_shape);
+        return;
+    }
+
     QColor cb(m_brush.color());
     QBrush b(cb);
     QColor cp(cb);

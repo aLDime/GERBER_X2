@@ -244,6 +244,10 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
 
 void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
+    auto setColor = [](QGraphicsPathItem* item, Qt::GlobalColor color) {
+        item->setPen(QPen(color, 0.0));
+        item->setBrush(color);
+    };
     int dNum = current.sibling(current.row(), 0).data(D_NumberRole).toInt();
     if (!gia.contains(dNum)) {
         if (m_isAperture) {
@@ -260,8 +264,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
 
                     QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
 
-                    item->setPen(Qt::NoPen);
-                    item->setBrush(Qt::magenta);
+                    setColor(item, Qt::magenta);
                     item->setPos(ToQPointF(go.state.curPos));
                     //                item->setZValue(FileHolder::gerberFiles().lastKey() + 1);
 
@@ -277,8 +280,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
                     painterPath.addEllipse(QPointF(0, 0), hole.state.currentToolDiameter * 0.5, hole.state.currentToolDiameter * 0.5);
                     QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
 
-                    item->setPen(Qt::NoPen);
-                    item->setBrush(Qt::magenta);
+                    setColor(item, Qt::magenta);
                     item->setPos(hole.state.pos);
                     item->setZValue(FileHolder::size());
 
@@ -290,12 +292,12 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
     } else {
         if (previous.isValid() && previous.row() != current.row())
             for (QGraphicsPathItem* item : gia[dNum])
-                item->setBrush(Qt::magenta);
+                setColor(item, Qt::magenta);
     }
     if (previous.isValid() && previous.row() != current.row()) {
         int dNumPrev = previous.sibling(previous.row(), 0).data(D_NumberRole).toInt();
         for (QGraphicsPathItem* item : gia[dNumPrev])
-            item->setBrush(Qt::darkGray);
+            setColor(item, Qt::darkGray);
     }
 }
 

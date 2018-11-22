@@ -16,8 +16,10 @@ public:
     static MyScene* self;
     QRectF itemsBoundingRect();
 
+    bool drawPdf() const;
+
 private:
-    bool drawPdf;
+    bool m_drawPdf;
 
     // QGraphicsScene interface
 protected:

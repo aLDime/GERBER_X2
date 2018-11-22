@@ -287,7 +287,7 @@ void MainWindow::createActions()
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->ZoomOut(); });
     action->setShortcut(QKeySequence::ZoomOut);
 
-    //==================== Selection ====================
+    //==================== Selection / Delete selected ====================
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
     s->setMovable(false);
@@ -298,13 +298,21 @@ void MainWindow::createActions()
     });
     action->setShortcut(QKeySequence::SelectAll);
 
-    action = s->addAction(QIcon::fromTheme(""/*"edit-select-all"*/), tr("Delete Selected"), [=]() {
+    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
+        QList<QGraphicsItem*> list;
         for (QGraphicsItem* item : MyScene::self->items())
             if (item->isSelected() && item->type() != DrillItemType)
-                delete item;
-        MainWindow::self->zero()->resetPos();
-        MainWindow::self->home()->resetPos();
-        Shtift::shtifts()[0]->resetPos();
+                list << item;
+        if (list.size() && QMessageBox::question(this, "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+            for (QGraphicsItem* item : list)
+                if (item->isSelected() && item->type() != DrillItemType)
+                    delete item;
+            MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
+            MyScene::self->update();
+            MainWindow::self->zero()->resetPos();
+            MainWindow::self->home()->resetPos();
+            Shtift::shtifts()[0]->resetPos();
+        }
     });
     action->setShortcut(QKeySequence::Delete);
 
