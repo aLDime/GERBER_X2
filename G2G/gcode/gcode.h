@@ -41,12 +41,13 @@ private:
     G::Side m_side = G::Top;
 
     enum GCode {
+        G_null = -1,
         G00 = 0,
         G01 = 1,
         G02 = 2,
         G03 = 3,
     };
-    GCode m_gCode = G00;
+    GCode m_gCode = G_null;
     inline QString g0()
     {
         if (m_gCode != G00) {

@@ -61,8 +61,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(graphicsView, &MyGraphicsView::FileDroped, this, &MainWindow::openFile);
     graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(graphicsView, &MyGraphicsView::customContextMenuRequested, [=](const QPoint& pos) {
-        //        QGraphicsItem* item = ;
-        if (dynamic_cast<Shtift*>(MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform())) /*item && item->type() == ShtiftType*/) {
+        if (dynamic_cast<Shtift*>(MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform()))) {
             QMenu menu;
             menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), [=] {
                 ToolDatabase tdb(this, { Tool::Drill });
@@ -73,8 +72,10 @@ MainWindow::MainWindow(QWidget* parent)
                     for (Shtift* item : Shtift::shtifts()) {
                         item->setFlag(QGraphicsItem::ItemIsMovable, false);
                         IntPoint point(item->pos().x() * uScale, item->pos().y() * uScale);
-                        if (dst.contains(point))
+                        if (dst.contains(point)) {
+                            qDebug() << "continue";
                             continue;
+                        }
                         dst.append(point);
                     }
 

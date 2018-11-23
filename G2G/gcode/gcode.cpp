@@ -113,14 +113,16 @@ void GCodeFile::saveDrill()
     double maxX = -std::numeric_limits<double>::max();
     double minX = +std::numeric_limits<double>::max();
 
-    for (QPointF& point : path) {
+    for (QPointF& point : path)
         point -= MaterialSetup::zeroPos;
-        if (m_side && maxX < point.x())
-            maxX = point.x();
-        if (m_side && minX > point.x())
-            minX = point.x();
-    }
+
     if (m_side) {
+        for (QPointF& point : path) {
+            if (maxX < point.x())
+                maxX = point.x();
+            if (minX > point.x())
+                minX = point.x();
+        }
         const double k = minX + maxX;
         for (QPointF& point : path) {
             point.rx() = -point.x() + k;
@@ -128,6 +130,7 @@ void GCodeFile::saveDrill()
     }
 
     for (QPointF& point : path) {
+        qDebug() << "saveDrill" << point << path.size();
         startPath(point);
         for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
             sl.append(g1() + z(-m_tool.passDepth * i) + feed(m_tool.plungeRate));
