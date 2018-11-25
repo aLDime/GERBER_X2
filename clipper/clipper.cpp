@@ -1547,8 +1547,10 @@ bool Clipper::Execute(ClipType clipType, Paths& solution,
 {
     if (m_ExecuteLocked)
         return false;
+#ifndef use_lines
     if (m_HasOpenPaths)
         throw clipperException("Error: PolyTree struct is needed for open path clipping.");
+#endif
     m_ExecuteLocked = true;
     solution.resize(0);
     m_SubjFillType = subjFillType;

@@ -120,6 +120,7 @@ MaterialSetup::~MaterialSetup()
     settings.setValue("SafeZ", ui->dsbxSafeZ->value());
     settings.setValue("Clearenc", ui->dsbxClearence->value());
     settings.setValue("Plunge", ui->dsbxPlunge->value());
+    settings.setValue("Thickness", ui->dsbxThickness->value());
     settings.endGroup();
 
     homePos = QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value());

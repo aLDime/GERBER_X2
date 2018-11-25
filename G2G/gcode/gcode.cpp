@@ -8,11 +8,54 @@
 #include <mygraphicsview.h>
 
 ///////////////////////////////////////////////
-/// \brief GCodeProfile::GCodeProfile
-/// \param paths
-/// \param tool
-/// \param m_depth
-///
+void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
+{
+    static cInt top = 0;
+    static cInt bottom = 0;
+    Clipper clipper;
+    clipper.AddPaths(paths, ptSubject, true);
+    const IntRect rect(clipper.GetBounds());
+
+    if (fl) {
+        top = rect.top - 1;
+        bottom = rect.bottom + 1;
+    }
+
+    const cInt k = rect.right - rect.left;
+    Paths paths1;
+    Paths paths2;
+    qDebug() << ((rect.bottom - rect.top) * dScale);
+    if (k < (uScale * 10)) {
+        range.append(qMakePair(rect.left, rect.right));
+        pathss.append(paths);
+    } else {
+        cInt c = k * 0.5;
+        Path outerLeft{
+            IntPoint(rect.left - 1, top),
+            IntPoint(rect.left + c + 1, top),
+            IntPoint(rect.left + c + 1, bottom),
+            IntPoint(rect.left - 1, bottom)
+        };
+        clipper.Clear();
+        clipper.AddPaths(paths, ptSubject, false);
+        clipper.AddPath(outerLeft, ptClip, true);
+        clipper.Execute(ctIntersection, paths1, pftPositive);
+        performance(range, pathss, paths1, false);
+
+        Path outerRight{
+            IntPoint(rect.right - c - 1, top),
+            IntPoint(rect.right + 1, top),
+            IntPoint(rect.right + 1, bottom),
+            IntPoint(rect.right - c - 1, bottom)
+        };
+        clipper.Clear();
+        clipper.AddPaths(paths, ptSubject, false);
+        clipper.AddPath(outerRight, ptClip, true);
+        clipper.Execute(ctIntersection, paths2, pftPositive);
+        performance(range, pathss, paths2, false);
+    }
+}
+
 GCodeFile::GCodeFile(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type)
     : m_paths(paths)
     , m_paths2(paths2)
@@ -24,60 +67,102 @@ GCodeFile::GCodeFile(const Paths& paths, const Paths& paths2, const Tool& tool, 
     setItemGroup(new ItemGroup);
     GraphicsItem* item;
     Path p;
+    Paths tmpPaths2(paths);
+    Paths tmpPaths;
+    Pathss pathss;
+    Clipper clipper;
+    QVector<QPair<cInt, cInt>> range;
+
+    QColor cutColor(255, 255, 255);
+    QColor pathColor(Qt::black);
+    QColor g0Color(Qt::red);
 
     switch (type) {
     case Profile:
-        for (const Path& path : paths) {
-            item = new PathItem(path);
-            item->setPen(QPen(QColor(50, 50, 50), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        for (Path& path : tmpPaths2)
+            if (path.first() != path.last())
+                path.append(path.first());
+
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             itemGroup()->append(item);
         }
         p.reserve(paths.size());
-        for (const Path& path : paths) {
-            item = new PathItem(path);
-            item->setPen(QPen(Qt::red, 0.0));
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            item->setPen(QPen(pathColor, 0.0));
             itemGroup()->append(item);
             p.append(path.first());
         }
-        item = new PathItem(p);
-        item->setPen(QPen(Qt::green, 0.0));
+        item = new PathItem({ p });
+        item->setPen(QPen(g0Color, 0.0));
         itemGroup()->append(item);
         itemGroup()->setBrush(Qt::NoBrush);
         break;
     case Pocket:
-        item = new GerberItem(paths2, nullptr);
-        item->setPen(QPen(QColor(50, 50, 50), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setBrush(QColor(50, 50, 50));
-        item->setAcceptHoverEvents(false);
-        item->setFlag(QGraphicsItem::ItemIsSelectable, false);
-        p.reserve(paths.size());
-        itemGroup()->append(item);
-        for (const Path& path : paths) {
-            item = new PathItem(path);
-            item->setPen(QPen(Qt::red, 0.0));
-            item->setAcceptDrops(false);
-            item->setAcceptedMouseButtons(false);
+        if (1) {
+            item = new GerberItem(paths2, nullptr);
+            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setBrush(cutColor);
             item->setAcceptHoverEvents(false);
-            item->setAcceptTouchEvents(false);
-            //item->setActive(false);
+            item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+            p.reserve(paths.size());
             itemGroup()->append(item);
-            p.append(path.first());
+
+            clipper.Clear();
+            clipper.AddPaths(tmpPaths2, ptSubject, true);
+            const IntRect rect(clipper.GetBounds());
+
+            for (Path& path : tmpPaths2)
+                if (path.first() != path.last())
+                    path.append(path.first());
+
+            cInt ky = uScale * 10;
+            performance(range, pathss, tmpPaths2);
+            qDebug() << range.size() << pathss.size();
+            for (int i = 0; i < range.size(); ++i) {
+                for (cInt y = rect.top; y < rect.bottom; y += ky) {
+                    qDebug() << i << y;
+                    Path outer{
+                        IntPoint(range[i].first - 1, y - 1),
+                        IntPoint(range[i].second + 1, y - 1),
+                        IntPoint(range[i].second + 1, y + ky + 1),
+                        IntPoint(range[i].first - 1, y + ky + 1)
+                    };
+                    clipper.Clear();
+                    clipper.AddPaths(pathss[i], ptSubject, false);
+                    clipper.AddPath(outer, ptClip, true);
+                    clipper.Execute(ctIntersection, tmpPaths, /*pftNonZero*/ pftPositive);
+                    item = new PathItem(tmpPaths);
+                    item->setPen(QPen(pathColor /*QColor::fromHsv(ci += 10, 255, 255)*/, 0.0));
+                    item->setAcceptDrops(false);
+                    item->setAcceptedMouseButtons(false);
+                    item->setAcceptHoverEvents(false);
+                    item->setAcceptTouchEvents(false);
+                    //item->setActive(false);
+                    itemGroup()->append(item);
+                }
+            }
+
+            for (const Path& path : paths)
+                p.append(path.first());
+            item = new PathItem({ p });
+            item->setPen(QPen(g0Color, 0.0));
+            item->setBrush(Qt::NoBrush);
+            itemGroup()->append(item);
         }
-        item = new PathItem(p);
-        item->setPen(QPen(Qt::green, 0.0));
-        item->setBrush(Qt::NoBrush);
-        itemGroup()->append(item);
         break;
     case Drilling:
         for (const IntPoint& point : paths.first()) {
             item = new DrillItem(tool.diameter);
             item->setPos(ToQPointF(point));
-            item->setPen(QPen(Qt::red, 0.0));
-            item->setBrush(Qt::red);
+            item->setPen(QPen(pathColor, 0.0));
+            item->setBrush(cutColor);
             itemGroup()->append(item);
         }
-        item = new PathItem(paths.first());
-        item->setPen(QPen(Qt::green, 0.0));
+        item = new PathItem({ paths.first() });
+        item->setPen(QPen(g0Color, 0.0));
         itemGroup()->append(item);
         break;
     default:
@@ -277,13 +362,3 @@ void GCodeFile::endFile()
     }
     file.close();
 }
-
-////////////////////////////////////////////////////
-/// \brief PathItem::PathItem
-/// \param path
-///
-
-////////////////////////////////////////////////////
-/// \brief PathItem::PathItem
-/// \param path
-///
