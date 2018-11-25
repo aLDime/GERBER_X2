@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QJsonArray>
 #include <QPixmap>
+bool ToolItem::m_deleteEnable = false;
 
 ToolItem::ToolItem(const ToolItem& item)
 {
@@ -33,7 +34,7 @@ ToolItem::ToolItem()
 
 ToolItem::~ToolItem()
 {
-    if (m_isTool)
+    if (m_isTool && m_deleteEnable)
         ToolDatabase::tools.remove(m_toolId);
     qDeleteAll(childItems);
 }
@@ -137,17 +138,11 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
                 return QVariant();
             }
         case Qt::DecorationRole:
-            if (index.column() == 0 && m_isTool) {
-                switch (ToolDatabase::tools[m_toolId].type) {
-                case Tool::Drill:
-                    return QIcon::fromTheme("stroke-cap-butt");
-                case Tool::EndMill:
-                    return QIcon::fromTheme("stroke-cap-round");
-                case Tool::Engraving:
-                    return QIcon::fromTheme("stroke-cap-square");
-                }
-            }
-            return QIcon::fromTheme("folder-sync");
+            if (index.column() == 0)
+                if (m_isTool)
+                    return ToolDatabase::tools[m_toolId].icon();
+                else
+                    return QIcon::fromTheme("folder-sync");
         case Qt::UserRole:
             return ToolDatabase::tools[m_toolId].type;
         case Qt::UserRole + 1:
@@ -203,6 +198,11 @@ void ToolItem::setNote(const QString& value)
     (m_isTool ? ToolDatabase::tools[m_toolId].note : m_note) = value;
 }
 
+void ToolItem::setDeleteEnable(bool deleteEnable)
+{
+    m_deleteEnable = deleteEnable;
+}
+
 QString ToolItem::name() const
 {
     return m_isTool ? ToolDatabase::tools[m_toolId].name : m_name;
@@ -232,8 +232,10 @@ void ToolItem::insertChild(int row, ToolItem* item)
 
 void ToolItem::removeChild(int row)
 {
+    m_deleteEnable = true;
     delete childItems.at(row);
     childItems.removeAt(row);
+    m_deleteEnable = false;
 }
 
 ToolItem* ToolItem::parent() { return parentItem; }

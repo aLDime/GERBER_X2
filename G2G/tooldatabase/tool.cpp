@@ -89,6 +89,20 @@ bool Tool::isValid()
     return fl;
 }
 
+QIcon Tool::icon()
+{
+    switch (type) {
+    case Tool::Drill:
+        return QIcon::fromTheme("stroke-cap-butt");
+    case Tool::EndMill:
+        return QIcon::fromTheme("stroke-cap-round");
+    case Tool::Engraving:
+        return QIcon::fromTheme("stroke-cap-square");
+    default:
+        return QIcon();
+    }
+}
+
 QString Tool::errorStr()
 {
     QString errorString;

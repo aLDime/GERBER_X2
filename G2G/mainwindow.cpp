@@ -392,8 +392,10 @@ void MainWindow::readSettings()
     QSettings settings;
     if (isHidden()) {
         const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-
         restoreGeometry(geometry);
+
+        const QByteArray state = settings.value("state", QByteArray()).toByteArray();
+        restoreState(state);
     }
     lastPath = settings.value("lastPath").toString();
     QString files = settings.value("files").toString();

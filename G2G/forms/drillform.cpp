@@ -20,12 +20,13 @@
 using namespace ClipperLib;
 
 DrillForm* DrillForm::self = nullptr;
-enum {
-    Size = 20,
-    D_NumberRole = Qt::UserRole + 1,
-    ToolRole = Qt::UserRole + 1
-};
+enum { Size = 24 };
 
+/////////////////////////////////////////////
+/// \brief draw
+/// \param aperture
+/// \return
+///
 QIcon draw(G::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
@@ -62,6 +63,17 @@ QIcon draw(G::AbstractAperture* aperture)
 }
 
 /////////////////////////////////////////////
+/// \brief setColor
+/// \param item
+/// \param color
+///
+void setColor(QGraphicsPathItem* item, Qt::GlobalColor color)
+{
+    item->setPen(QPen(color, 0.0));
+    item->setBrush(color);
+}
+
+/////////////////////////////////////////////
 /// \brief DrillForm::DrillForm
 /// \param parent
 ///
@@ -89,40 +101,44 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
 {
     m_isAperture = true;
     clear();
-
-    apertures = value;
-    model = new /*QStandardItemModel*/DrillModel(this);
-
-    QMapIterator<int, QSharedPointer<G::AbstractAperture>> i(apertures);
-    QString verticalHeaderLabels;
-    while (i.hasNext()) {
-        i.next();
-        if (i.value()->isFlashed()) {
-            verticalHeaderLabels.append("D" + QString::number(i.key()) + "|");
-            QString name(i.value()->name());
-            if (i.value()->isDrilled())
-                name += QString(", drill Ø%1mm").arg(i.value()->drillDiameter());
-            QStandardItem* item1 = new QStandardItem(draw(i.value().data()), name);
-            item1->setFlags(Qt::ItemIsEnabled);
-            item1->setData(i.key(), D_NumberRole);
-
-            Tool tool;
-            QMapIterator<int, Tool> i(ToolDatabase::tools);
-            while (i.hasNext()) {
-                i.next();
-                qDebug() << i.value().name;
+    m_apertures = value;
+    model = new DrillModel(m_isAperture, this);
+    QMap<int, QSharedPointer<G::AbstractAperture>>::const_iterator apertureIt;
+    for (apertureIt = m_apertures.begin(); apertureIt != m_apertures.end(); ++apertureIt) {
+        if (apertureIt.value()->isFlashed()) {
+            double drillDiameter = 0.0;
+            QString name(apertureIt.value()->name());
+            if (apertureIt.value()->isDrilled()) {
+                drillDiameter = apertureIt.value()->drillDiameter();
+                name += QString(", drill Ø%1mm").arg(drillDiameter);
             }
 
-            QStandardItem* item2 = new QStandardItem("Select Drill");
-            item2->setFlags(Qt::ItemIsEnabled);
-            item2->setData(QVariant::fromValue(tool), ToolRole);
+            model->appendRow(name, draw(apertureIt.value().data()), apertureIt.key());
 
-            model->appendRow({ item1, item2 });
+            const G::File* file = static_cast<G::File*>(ui->cbxFile->currentData().value<void*>());
+            for (const G::GraphicObject& go : *file) {
+                if (go.state.dCode == G::D03 && go.state.aperture == apertureIt.key()) {
+                    G::State state(go.state);
+                    state.curPos = IntPoint();
+
+                    QPainterPath painterPath;
+                    for (QPolygonF& polygon : PathsToQPolygons(m_apertures[apertureIt.key()]->draw(state)))
+                        painterPath.addPolygon(polygon);
+                    painterPath.addEllipse(QPointF(0, 0), m_apertures[apertureIt.key()]->drillDiameter() * 0.5, m_apertures[apertureIt.key()]->drillDiameter() * 0.5);
+
+                    QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
+
+                    setColor(item, Qt::darkGray);
+                    item->setPos(ToQPointF(go.state.curPos));
+                    m_giaperture[apertureIt.key()].append(item);
+                    MyScene::self->addItem(item);
+                }
+            }
+
+            if (drillDiameter != 0.0)
+                pickUpTool(apertureIt.key(), drillDiameter);
         }
     }
-
-    model->setHorizontalHeaderLabels(QString("Aperture|Tool").split('|'));
-    model->setVerticalHeaderLabels(verticalHeaderLabels.split('|', QString::SkipEmptyParts));
 
     delete ui->tableView->model();
     ui->tableView->setModel(model);
@@ -138,15 +154,12 @@ void DrillForm::setHoles(const QMap<int, double>& value)
     m_isAperture = false;
     clear();
 
-    tools = value;
-    model = new QStandardItemModel(this);
+    m_tools = value;
+    model = new DrillModel(m_isAperture, this);
 
-    QMapIterator<int, double> i(tools);
-    QString verticalHeaderLabels;
-    while (i.hasNext()) {
-        i.next();
-        verticalHeaderLabels.append("T" + QString::number(i.key()) + "|");
-        QString name(QString("Tool Ø%1mm").arg(i.value()));
+    QMap<int, double>::const_iterator apertureIt;
+    for (apertureIt = m_tools.begin(); apertureIt != m_tools.end(); ++apertureIt) {
+        QString name(QString("Tool Ø%1mm").arg(apertureIt.value()));
 
         QPixmap pixmap(Size, Size);
         pixmap.fill(Qt::transparent);
@@ -158,19 +171,27 @@ void DrillForm::setHoles(const QMap<int, double>& value)
         painter.drawEllipse(QRect(0, 0, Size - 1, Size - 1));
         QIcon icon(pixmap);
 
-        QStandardItem* item1 = new QStandardItem(icon, name);
-        item1->setFlags(Qt::ItemIsEnabled);
-        item1->setData(i.key(), D_NumberRole);
+        model->appendRow(name, icon, apertureIt.key());
 
-        QStandardItem* item2 = new QStandardItem("Select Drill");
-        item2->setFlags(Qt::ItemIsEnabled);
-        item2->setData(-1, ToolRole);
+        const DrillFile* file = static_cast<DrillFile*>(ui->cbxFile->currentData().value<void*>());
+        for (const Hole& hole : *file) {
+            if (hole.state.tCode == apertureIt.key()) {
+                QPainterPath painterPath;
+                painterPath.addEllipse(QPointF(0, 0), hole.state.currentToolDiameter * 0.5, hole.state.currentToolDiameter * 0.5);
+                QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
 
-        model->appendRow({ item1, item2 });
+                setColor(item, Qt::darkGray);
+                item->setPos(hole.state.pos);
+                item->setZValue(FileHolder::size());
+
+                m_giaperture[apertureIt.key()].append(item);
+                MyScene::self->addItem(item);
+            }
+        }
+
+        if (apertureIt.value() != 0.0)
+            pickUpTool(apertureIt.key(), apertureIt.value());
     }
-
-    model->setHorizontalHeaderLabels(QString("Aperture|Tool").split('|'));
-    model->setVerticalHeaderLabels(verticalHeaderLabels.split('|', QString::SkipEmptyParts));
 
     delete ui->tableView->model();
     ui->tableView->setModel(model);
@@ -188,7 +209,6 @@ void DrillForm::updateFiles()
         for (const G::GraphicObject& go : *file) {
             if (go.state.dCode == G::D03) {
                 ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-                //ui->cbxFile->setItemData(ui->cbxFile->count() - 1, file->itemGroup()->brush().color(), Qt::BackgroundColorRole);
                 QPixmap pixmap(Size, Size);
                 QColor color(file->itemGroup()->brush().color());
                 color.setAlpha(255);
@@ -201,10 +221,6 @@ void DrillForm::updateFiles()
     }
     for (DrillFile* file : FileHolder::files<DrillFile>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-        //        QPixmap pixmap(Size, Size);
-        //        QColor color(file->itemGroup()->brush().color());
-        //        color.setAlpha(255);
-        //        pixmap.fill(color);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon::fromTheme("roll"), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
@@ -221,28 +237,16 @@ void DrillForm::on_cbxFile_currentIndexChanged(int /*index*/)
 
 void DrillForm::on_doubleClicked(const QModelIndex& current)
 {
-
     if (current.column() == 1) {
-        ToolDatabase tdb(this, { Tool::Drill });
+        ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
         if (tdb.exec()) {
-            int dNum = current.sibling(current.row(), 0).data(D_NumberRole).toInt();
-            Tool tool(tdb.tool());
-            QStandardItem* stdItem = static_cast<const QStandardItemModel*>(current.model())->itemFromIndex(current);
-            stdItem->setData(tool.name, Qt::DisplayRole);
-            stdItem->setData(QVariant::fromValue(tool), ToolRole);
-            if (!gid.contains(dNum)) {
-                for (QGraphicsPathItem* itemA : gia[dNum]) {
-
-                    DrillItem* item = new DrillItem(tool.diameter);
-                    item->setPen(Qt::NoPen);
-                    item->setBrush(Qt::red);
-                    item->setZValue(itemA->zValue());
-                    item->setPos(itemA->pos());
-                    gid[dNum].append(item);
-                    MyScene::self->addItem(item);
-                }
+            int apertureId = model->apertureId(current.row());
+            const Tool tool(tdb.tool());
+            model->setToolId(current.row(), tool.id);
+            if (!m_gid.contains(apertureId)) {
+                createHoles(apertureId, tool.diameter);
             } else {
-                for (DrillItem* item : gid[dNum])
+                for (DrillItem* item : m_gid[apertureId])
                     item->setDiameter(tool.diameter);
             }
         }
@@ -251,71 +255,26 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
 
 void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
 {
-    auto setColor = [](QGraphicsPathItem* item, Qt::GlobalColor color) {
-        item->setPen(QPen(color, 0.0));
-        item->setBrush(color);
-    };
-    int dNum = current.sibling(current.row(), 0).data(D_NumberRole).toInt();
-    if (!gia.contains(dNum)) {
-        if (m_isAperture) {
-            const G::File* file = static_cast<G::File*>(ui->cbxFile->currentData().value<void*>());
-            for (const G::GraphicObject& go : *file) {
-                if (go.state.dCode == G::D03 && go.state.aperture == dNum) {
-                    G::State state(go.state);
-                    state.curPos = IntPoint();
-
-                    QPainterPath painterPath;
-                    for (QPolygonF& polygon : PathsToQPolygons(apertures[dNum]->draw(state)))
-                        painterPath.addPolygon(polygon);
-                    painterPath.addEllipse(QPointF(0, 0), apertures[dNum]->drillDiameter() * 0.5, apertures[dNum]->drillDiameter() * 0.5);
-
-                    QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
-
-                    setColor(item, Qt::magenta);
-                    item->setPos(ToQPointF(go.state.curPos));
-                    //                item->setZValue(FileHolder::gerberFiles().lastKey() + 1);
-
-                    gia[dNum].append(item);
-                    MyScene::self->addItem(item);
-                }
-            }
-        } else {
-            const DrillFile* file = static_cast<DrillFile*>(ui->cbxFile->currentData().value<void*>());
-            for (const Hole& hole : *file) {
-                if (hole.state.tCode == dNum) {
-                    QPainterPath painterPath;
-                    painterPath.addEllipse(QPointF(0, 0), hole.state.currentToolDiameter * 0.5, hole.state.currentToolDiameter * 0.5);
-                    QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
-
-                    setColor(item, Qt::magenta);
-                    item->setPos(hole.state.pos);
-                    item->setZValue(FileHolder::size());
-
-                    gia[dNum].append(item);
-                    MyScene::self->addItem(item);
-                }
-            }
-        }
-    } else {
-        if (previous.isValid() && previous.row() != current.row())
-            for (QGraphicsPathItem* item : gia[dNum])
-                setColor(item, Qt::magenta);
+    if (previous.isValid() && previous.row() != current.row()) {
+        int apertureId = model->apertureId(current.row());
+        for (QGraphicsPathItem* item : m_giaperture[apertureId])
+            setColor(item, Qt::magenta);
     }
     if (previous.isValid() && previous.row() != current.row()) {
-        int dNumPrev = previous.sibling(previous.row(), 0).data(D_NumberRole).toInt();
-        for (QGraphicsPathItem* item : gia[dNumPrev])
+        int apertureId = model->apertureId(previous.row());
+        for (QGraphicsPathItem* item : m_giaperture[apertureId])
             setColor(item, Qt::darkGray);
     }
 }
 
 void DrillForm::clear()
 {
-    for (QVector<QGraphicsPathItem*>& vector : gia)
+    for (QVector<QGraphicsPathItem*>& vector : m_giaperture)
         qDeleteAll(vector);
-    gia.clear();
-    for (QVector<DrillItem*>& vector : gid)
+    m_giaperture.clear();
+    for (QVector<DrillItem*>& vector : m_gid)
         qDeleteAll(vector);
-    gid.clear();
+    m_gid.clear();
 }
 
 void DrillForm::on_pbClose_clicked()
@@ -326,27 +285,24 @@ void DrillForm::on_pbClose_clicked()
 
 void DrillForm::on_pbCreate_clicked()
 {
-    QMap<int, Tool> tools;
     QMap<int, Path> pos;
-    QMap<int, QVector<int>> dCode;
+    QMap<int, QVector<int>> apetrureId;
 
     for (int row = 0; row < model->rowCount(); ++row) {
-        Tool tool = model->item(row, 1)->data(ToolRole).value<Tool>();
-        int dNum = model->item(row, 0)->data(D_NumberRole).toInt();
-        if (tool.id > -1) {
-            dCode[tool.id].append(dNum);
-            for (DrillItem* item : gid[dNum]) {
+        int tool = model->toolId(row);
+        int dNum = model->apertureId(row);
+        if (tool != -1) {
+            apetrureId[tool].append(dNum);
+            for (DrillItem* item : m_gid[dNum]) {
                 QPointF p(item->pos());
-                pos[tool.id].append(IntPoint(p.x() * uScale, p.y() * uScale));
+                pos[tool].append(IntPoint(p.x() * uScale, p.y() * uScale));
             }
-            tools[tool.id] = tool;
         }
     }
 
-    QMapIterator<int, Tool> i(tools);
-    while (i.hasNext()) {
-        i.next();
-        Path src(pos[i.key()]);
+    QMap<int, Path>::iterator iterator;
+    for (iterator = pos.begin(); iterator != pos.end(); ++iterator) {
+        Path src(pos[iterator.key()]);
         Path dst;
         dst.reserve(src.size());
         IntPoint p1(MaterialSetup::homePos.x() * uScale, MaterialSetup::homePos.y() * uScale);
@@ -365,23 +321,56 @@ void DrillForm::on_pbCreate_clicked()
             dst.append(src.takeAt(s));
             p1 = dst.last();
         }
-        GCodeFile* gcode = new GCodeFile({ dst }, i.value(), ui->dsbxDepth->value(), Drilling);
+        GCodeFile* gcode = new GCodeFile({ dst }, ToolDatabase::tools[iterator.key()], ui->dsbxDepth->value(), Drilling);
         QString str;
-        for (int d : dCode[i.key()]) {
-            if (m_isAperture)
-                str += "D" + QString::number(d) + ", ";
-            else
-                str += "T" + QString::number(d) + ", ";
-        }
+        for (int id : apetrureId[iterator.key()])
+            str += (m_isAperture ? "D" : "T") + QString::number(id) + ", ";
         str.remove(str.size() - 2, 2);
-        gcode->setFileName(i.value().name + " (" + str + ")");
+
+        gcode->setFileName(ToolDatabase::tools[iterator.key()].name + " (" + str + ")");
         gcode->setSide(static_cast<G::File*>(ui->cbxFile->currentData().value<void*>())->side);
         FileModel::self->addGcode(gcode);
     }
 }
 
-void DrillModel::appendRow(const QString& name, QIcon& icon, int id)
+void DrillForm::createHoles(int apertureId, double diameter)
 {
+    for (const QGraphicsPathItem* itemA : m_giaperture[apertureId]) {
+        DrillItem* item = new DrillItem(diameter);
+        item->setPen(Qt::NoPen);
+        item->setBrush(Qt::red);
+        item->setZValue(itemA->zValue());
+        item->setPos(itemA->pos());
+        m_gid[apertureId].append(item);
+        MyScene::self->addItem(item);
+    }
+}
+
+void DrillForm::pickUpTool(int apertureId, double diameter)
+{
+    const double drillDiameterMin = diameter * 0.99;
+    const double drillDiameterMax = diameter * 1.01;
+    QMap<int, Tool>::const_iterator toolIt;
+    for (toolIt = ToolDatabase::tools.begin(); toolIt != ToolDatabase::tools.end(); ++toolIt) {
+        if (toolIt.value().type == Tool::Drill || toolIt.value().type == Tool::EndMill) {
+            if (drillDiameterMin <= toolIt.value().diameter && toolIt.value().diameter <= drillDiameterMax) {
+                qDebug() << toolIt.value().name;
+                model->setToolId(model->rowCount() - 1, toolIt.key());
+                createHoles(apertureId, toolIt.value().diameter);
+                break;
+            }
+        }
+    }
+}
+/////////////////////////////////////////////
+/// \brief DrillModel::appendRow
+/// \param name
+/// \param icon
+/// \param id
+///
+void DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
+{
+    m_data.append(Row(name, icon, id));
 }
 
 int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return m_data.size(); }
@@ -390,11 +379,49 @@ int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return 2; }
 
 QVariant DrillModel::data(const QModelIndex& index, int role) const
 {
+    int row = index.row();
+    if (!index.column())
+        switch (role) {
+        case Qt::DisplayRole:
+            return m_data[row].name[0];
+        case Qt::DecorationRole:
+            return m_data[row].icon[0];
+        case Qt::UserRole:
+            return m_data[row].id[0];
+        default:
+            break;
+        }
+    else {
+        if (m_data[row].id[1] == -1)
+            switch (role) {
+            case Qt::DisplayRole:
+                return "Select Tool";
+            case Qt::TextAlignmentRole:
+                return Qt::AlignCenter;
+            case Qt::UserRole:
+                return m_data[row].id[index.column()];
+            default:
+                break;
+            }
+        else
+            switch (role) {
+            case Qt::DisplayRole:
+                return ToolDatabase::tools[m_data[row].id[1]].name;
+            case Qt::DecorationRole:
+                return ToolDatabase::tools[m_data[row].id[1]].icon();
+            case Qt::UserRole:
+                return m_data[row].id[index.column()];
+            default:
+                break;
+            }
+    }
+    return QVariant();
 }
 
 QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
-    if (role == Qt::DisplayRole) {
+    switch (role) {
+    case Qt::DisplayRole:
         if (orientation == Qt::Horizontal) {
             switch (section) {
             case 0:
@@ -404,8 +431,11 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
             }
 
         } else {
-            return m_data[section].id;
+            return (m_isAperture ? "D" : "T") + QString::number(m_data[section].id[0]);
         }
+    case Qt::TextAlignmentRole:
+        return Qt::AlignCenter;
+    default:
+        return QVariant();
     }
-    return QVariant();
 }

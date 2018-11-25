@@ -68,7 +68,6 @@ TreeView::~TreeView()
 {
 }
 
-
 void TreeView::updateTree()
 {
     expandAll();
@@ -94,7 +93,7 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
     }
 }
 
-void TreeView::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void TreeView::on_selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
 {
     //    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_GERBER_FILES) {
     //        QModelIndex& index = selected.indexes().first();

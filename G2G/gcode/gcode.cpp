@@ -161,7 +161,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             item->setBrush(cutColor);
             itemGroup()->append(item);
         }
-        item = new PathItem({ toolPaths.first() });
+        item = new PathItem(toolPaths);
         item->setPen(QPen(g0Color, 0.0));
         itemGroup()->append(item);
         break;

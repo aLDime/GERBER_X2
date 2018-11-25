@@ -21,6 +21,7 @@ ToolModel::ToolModel(QObject* parent)
 ToolModel::~ToolModel()
 {
     exportTools();
+    rootItem->setDeleteEnable(false);
     delete rootItem;
 }
 

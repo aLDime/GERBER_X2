@@ -1,6 +1,7 @@
 #ifndef TOOL_H
 #define TOOL_H
 
+#include <QIcon>
 #include <QJsonObject>
 #include <QObject>
 
@@ -49,6 +50,7 @@ public:
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;
     bool isValid();
+    QIcon icon();
     QString errorStr();
 };
 

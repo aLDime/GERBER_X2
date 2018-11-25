@@ -25,8 +25,7 @@ public:
 
     static void readTools();
     static void readTools(const QJsonObject& json);
-    static void writeTools(QJsonObject &json);
-
+    static void writeTools(QJsonObject& json);
     static QMap<int, Tool> tools;
 
 private:

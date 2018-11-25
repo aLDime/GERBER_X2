@@ -49,7 +49,10 @@ public:
     QString note() const;
     void setNote(const QString& value);
 
+    static void setDeleteEnable(bool deleteEnable);
+
 private:
+    static bool m_deleteEnable;
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
     int m_toolId = 0;
