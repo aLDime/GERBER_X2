@@ -1,5 +1,7 @@
 #include "toolmodel.h"
+#include "tooldatabase.h"
 #include "toolitem.h"
+
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -263,8 +265,9 @@ void ToolModel::exportTools()
         return;
     }
 
-    QJsonObject treeObject;
-    rootItem->write(treeObject);
+    QJsonObject jsonObject;
+    //rootItem->write(treeObject);
+    ToolDatabase::writeTools(jsonObject);
 
     ToolItem* item;
     QList<ToolItem*> stack;
@@ -276,7 +279,6 @@ void ToolModel::exportTools()
     row.append(0);
 
     while (stack.size()) {
-        //qDebug() << "1" << stack.size() << row.last() << row;
         if (stack.last()->childCount() && row.last()) {
             stack.pop_back();
             row.pop_back();
@@ -286,9 +288,7 @@ void ToolModel::exportTools()
         } else if (stack.last() == rootItem && stack.last()->childCount() == 0) {
             break;
         }
-        //qDebug() << "2" << stack.size() << row.last() << row;
         while (stack.last()->childCount() > row.last()) {
-            //qDebug() << "3" << stack.size() << row.last() << row;
             item = stack.last()->child(row.last());
             QJsonObject treeNode;
             if (item->isTool()) {
@@ -306,13 +306,11 @@ void ToolModel::exportTools()
                 break;
             }
             ++row.last();
-            //qDebug() << "4" << stack.size() << row.last() << row;
         }
-        //qDebug() << "5" << stack.size() << row.last() << row;
     }
-    treeObject["tree"] = treeArray;
-    QJsonDocument saveDoc(treeObject);
-    saveFile.write(saveDoc.toBinaryData());
+    jsonObject["tree"] = treeArray;
+    QJsonDocument saveDoc(jsonObject);
+    saveFile.write(saveDoc.toJson());
 }
 
 void ToolModel::importTools()
@@ -325,8 +323,9 @@ void ToolModel::importTools()
         return;
     }
 
-    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
-    rootItem->read(loadDoc.object());
+    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+    //    rootItem->read(loadDoc.object());
+    ToolDatabase::readTools(loadDoc.object());
 
     QList<ToolItem*> parentsStack;
     QList<int> nestingStack;

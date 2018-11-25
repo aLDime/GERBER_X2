@@ -126,7 +126,7 @@ GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool
         }
     }
 
-    return new GCodeFile(sortByStratDistance(m_returnPaths), fillPaths, tool[0], depth, Pocket);
+    return new GCodeFile(sortByStratDistance(m_returnPaths), tool[0], depth, Pocket, fillPaths);
 }
 
 GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)
@@ -179,7 +179,7 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
     for (Path& path : m_returnPaths)
         fixBegin(path);
 
-    return new GCodeFile(sortByStratDistance(m_returnPaths), {}, tool, depth, Profile);
+    return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
 }
 
 Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)

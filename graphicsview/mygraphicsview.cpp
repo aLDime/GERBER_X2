@@ -52,7 +52,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
 
     QSettings settings;
     settings.beginGroup("Viewer");
-    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)) : new QWidget);
     setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
@@ -227,7 +227,6 @@ void MyGraphicsView::resizeEvent(QResizeEvent* event)
 
 void MyGraphicsView::mousePressEvent(QMouseEvent* event)
 {
-    qDebug() << "mousePressEvent";
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
@@ -249,7 +248,6 @@ void MyGraphicsView::mousePressEvent(QMouseEvent* event)
 
 void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
 {
-    qDebug() << "mouseReleaseEvent";
     if (event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
         QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());

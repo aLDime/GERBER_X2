@@ -1,7 +1,9 @@
 #ifndef DRILLFORM_H
 #define DRILLFORM_H
 
+#include <QAbstractTableModel>
 #include <QGraphicsItem>
+#include <QIcon>
 #include <QWidget>
 #include <aperture.h>
 
@@ -13,7 +15,8 @@ namespace Ui {
 class DrillForm;
 }
 
-class QStandardItemModel;
+//class QStandardItemModel;
+class DrillModel;
 
 class DrillForm : public QWidget {
     Q_OBJECT
@@ -31,13 +34,11 @@ private slots:
     void on_cbxFile_currentIndexChanged(int index);
     void on_doubleClicked(const QModelIndex& current);
     void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
-
     void on_pbClose_clicked();
-
     void on_pbCreate_clicked();
 
 private:
-    QStandardItemModel* model;
+    DrillModel /*QStandardItemModel*/* model;
     Ui::DrillForm* ui;
 
     bool m_isAperture = false;
@@ -49,4 +50,28 @@ private:
     void clear();
 };
 
+class DrillModel : public QAbstractTableModel {
+public:
+    DrillModel(QObject* parent = nullptr)
+        : QAbstractTableModel(parent)
+    {
+    }
+
+    void appendRow(const QString& name, QIcon& icon, int id);
+
+    // QAbstractItemModel interface
+public:
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
+    QVariant data(const QModelIndex& index, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+
+private:
+    typedef struct {
+        QString name[2];
+        QIcon icon[2];
+        int id[2];
+    } row;
+    QList<row> m_data;
+};
 #endif // DRILLFORM_H

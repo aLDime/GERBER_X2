@@ -18,7 +18,7 @@ enum GCodeType {
 
 class GCodeFile : public AbstractFile {
 public:
-    GCodeFile(const Paths& paths, const Paths& paths2, const Tool& tool, double depth, GCodeType type);
+    GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
 
     Paths getPaths() const;
     void save(const QString& name = QString());
@@ -30,12 +30,12 @@ public:
     G::Side side() const;
     void setSide(const G::Side& side);
     FileType type() const override { return FileType::GCode; }
-    Paths m_paths2;
+    Paths m_pocketPaths;
 
 private:
     const GCodeType m_type;
 
-    const Paths m_paths;
+    const Paths m_toolPaths;
     const Tool m_tool;
     double m_depth;
     G::Side m_side = G::Top;
@@ -79,7 +79,7 @@ private:
     QList<QString> sl;
 
 protected:
-    virtual Paths merge() const { return m_paths; }
+    virtual Paths merge() const { return m_toolPaths; }
 };
 
 #endif // GCODE_H

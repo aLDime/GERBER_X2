@@ -85,7 +85,7 @@ MainWindow::MainWindow(QWidget* parent)
                         return;
                     settings.setValue("Shtift/depth", depth);
 
-                    GCodeFile* gcode = new GCodeFile({ dst }, {}, tool, depth, Drilling);
+                    GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
                     gcode->setFileName("Shtift");
                     FileModel::self->addGcode(gcode);
                 }
@@ -126,6 +126,8 @@ MainWindow::MainWindow(QWidget* parent)
     setStyleSheet(styleSheet);
 
     self = this;
+
+    ToolDatabase::readTools();
 
     readSettings();
 }

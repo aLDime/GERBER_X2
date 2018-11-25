@@ -1,11 +1,10 @@
 #include "toolitem.h"
+#include "tooldatabase.h"
 #include "toolmodel.h"
 
 #include <QIcon>
 #include <QJsonArray>
 #include <QPixmap>
-
-QMap<int, Tool> ToolItem::tools;
 
 ToolItem::ToolItem(const ToolItem& item)
 {
@@ -35,35 +34,35 @@ ToolItem::ToolItem()
 ToolItem::~ToolItem()
 {
     if (m_isTool)
-        tools.remove(m_toolId);
+        ToolDatabase::tools.remove(m_toolId);
     qDeleteAll(childItems);
 }
 
-void ToolItem::read(const QJsonObject& json)
-{
-    QJsonArray toolArray = json["tools"].toArray();
-    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
-        Tool tool;
-        QJsonObject toolObject = toolArray[treeIndex].toObject();
-        tool.read(toolObject);
-        tool.id = toolObject["id"].toInt();
-        ToolItem::tools[tool.id] = tool;
-    }
-}
+//void ToolItem::read(const QJsonObject& json)
+//{
+//    QJsonArray toolArray = json["tools"].toArray();
+//    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+//        Tool tool;
+//        QJsonObject toolObject = toolArray[treeIndex].toObject();
+//        tool.read(toolObject);
+//        tool.id = toolObject["id"].toInt();
+//        ToolDatabase::tools[tool.id] = tool;
+//    }
+//}
 
-void ToolItem::write(QJsonObject& json)
-{
-    QJsonArray toolArray;
-    QMap<int, Tool>::iterator i = tools.begin();
-    while (i != tools.constEnd()) {
-        QJsonObject toolObject;
-        i.value().write(toolObject);
-        toolObject["id"] = i.key();
-        toolArray.append(toolObject);
-        ++i;
-    }
-    json["tools"] = toolArray;
-}
+//void ToolItem::write(QJsonObject& json)
+//{
+//    QJsonArray toolArray;
+//    QMap<int, Tool>::iterator i = ToolDatabase::tools.begin();
+//    while (i != ToolDatabase::tools.constEnd()) {
+//        QJsonObject toolObject;
+//        i.value().write(toolObject);
+//        toolObject["id"] = i.key();
+//        toolArray.append(toolObject);
+//        ++i;
+//    }
+//    json["tools"] = toolArray;
+//}
 
 int ToolItem::row() const
 {
@@ -139,7 +138,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
             }
         case Qt::DecorationRole:
             if (index.column() == 0 && m_isTool) {
-                switch (tools[m_toolId].type) {
+                switch (ToolDatabase::tools[m_toolId].type) {
                 case Tool::Drill:
                     return QIcon::fromTheme("stroke-cap-butt");
                 case Tool::EndMill:
@@ -150,7 +149,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
             }
             return QIcon::fromTheme("folder-sync");
         case Qt::UserRole:
-            return tools[m_toolId].type;
+            return ToolDatabase::tools[m_toolId].type;
         case Qt::UserRole + 1:
             return m_toolId;
         default:
@@ -177,7 +176,7 @@ Tool& ToolItem::tool()
 {
     static Tool tmp;
     if (m_isTool)
-        return tools[m_toolId];
+        return ToolDatabase::tools[m_toolId];
     return tmp;
 }
 
@@ -189,29 +188,29 @@ bool ToolItem::isTool() const
 void ToolItem::setIsTool()
 {
     m_isTool = true;
-    if (tools.size())
-        m_toolId = tools.lastKey() + 1;
-    tools[m_toolId].diameter = 0.0;
+    if (ToolDatabase::tools.size())
+        m_toolId = ToolDatabase::tools.lastKey() + 1;
+    ToolDatabase::tools[m_toolId].diameter = 0.0;
 }
 
 QString ToolItem::note() const
 {
-    return m_isTool ? (tools[m_toolId].note.isEmpty() ? "Tool Id " + QString::number(m_toolId) : tools[m_toolId].note) : m_note;
+    return m_isTool ? (ToolDatabase::tools[m_toolId].note.isEmpty() ? "Tool Id " + QString::number(m_toolId) : ToolDatabase::tools[m_toolId].note) : m_note;
 }
 
 void ToolItem::setNote(const QString& value)
 {
-    (m_isTool ? tools[m_toolId].note : m_note) = value;
+    (m_isTool ? ToolDatabase::tools[m_toolId].note : m_note) = value;
 }
 
 QString ToolItem::name() const
 {
-    return m_isTool ? tools[m_toolId].name : m_name;
+    return m_isTool ? ToolDatabase::tools[m_toolId].name : m_name;
 }
 
 void ToolItem::setName(const QString& value)
 {
-    (m_isTool ? tools[m_toolId].name : m_name) = value;
+    (m_isTool ? ToolDatabase::tools[m_toolId].name : m_name) = value;
 }
 
 void ToolItem::addChild(ToolItem* item)

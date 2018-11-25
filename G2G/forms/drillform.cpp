@@ -91,7 +91,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
     clear();
 
     apertures = value;
-    model = new QStandardItemModel(this);
+    model = new /*QStandardItemModel*/DrillModel(this);
 
     QMapIterator<int, QSharedPointer<G::AbstractAperture>> i(apertures);
     QString verticalHeaderLabels;
@@ -106,9 +106,16 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
             item1->setFlags(Qt::ItemIsEnabled);
             item1->setData(i.key(), D_NumberRole);
 
+            Tool tool;
+            QMapIterator<int, Tool> i(ToolDatabase::tools);
+            while (i.hasNext()) {
+                i.next();
+                qDebug() << i.value().name;
+            }
+
             QStandardItem* item2 = new QStandardItem("Select Drill");
             item2->setFlags(Qt::ItemIsEnabled);
-            item2->setData(-1, ToolRole);
+            item2->setData(QVariant::fromValue(tool), ToolRole);
 
             model->appendRow({ item1, item2 });
         }
@@ -194,11 +201,11 @@ void DrillForm::updateFiles()
     }
     for (DrillFile* file : FileHolder::files<DrillFile>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-//        QPixmap pixmap(Size, Size);
-//        QColor color(file->itemGroup()->brush().color());
-//        color.setAlpha(255);
-//        pixmap.fill(color);
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1,QIcon::fromTheme("roll"), Qt::DecorationRole);
+        //        QPixmap pixmap(Size, Size);
+        //        QColor color(file->itemGroup()->brush().color());
+        //        color.setAlpha(255);
+        //        pixmap.fill(color);
+        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon::fromTheme("roll"), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 }
@@ -358,7 +365,7 @@ void DrillForm::on_pbCreate_clicked()
             dst.append(src.takeAt(s));
             p1 = dst.last();
         }
-        GCodeFile* gcode = new GCodeFile({ dst }, {}, i.value(), ui->dsbxDepth->value(), Drilling);
+        GCodeFile* gcode = new GCodeFile({ dst }, i.value(), ui->dsbxDepth->value(), Drilling);
         QString str;
         for (int d : dCode[i.key()]) {
             if (m_isAperture)
@@ -371,4 +378,34 @@ void DrillForm::on_pbCreate_clicked()
         gcode->setSide(static_cast<G::File*>(ui->cbxFile->currentData().value<void*>())->side);
         FileModel::self->addGcode(gcode);
     }
+}
+
+void DrillModel::appendRow(const QString& name, QIcon& icon, int id)
+{
+}
+
+int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return m_data.size(); }
+
+int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return 2; }
+
+QVariant DrillModel::data(const QModelIndex& index, int role) const
+{
+}
+
+QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    if (role == Qt::DisplayRole) {
+        if (orientation == Qt::Horizontal) {
+            switch (section) {
+            case 0:
+                return "Aperture";
+            case 1:
+                return "Tool";
+            }
+
+        } else {
+            return m_data[section].id;
+        }
+    }
+    return QVariant();
 }

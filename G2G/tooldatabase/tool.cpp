@@ -32,10 +32,20 @@ void Tool::read(const QJsonObject& json)
     plungeRate = json["plungeRate"].toDouble();
     spindleSpeed = json["spindleSpeed"].toDouble();
     stepover = json["stepover"].toDouble();
-
     name = json["name"].toString();
     note = json["note"].toString();
     type = static_cast<Type>(json["type"].toInt());
+    //    angle = json["1"].toDouble();
+    //    diameter = json["2"].toDouble();
+    //    feedRate = json["3"].toDouble();
+    //    oneTurnCut = json["4"].toDouble();
+    //    passDepth = json["5"].toDouble();
+    //    plungeRate = json["6"].toDouble();
+    //    spindleSpeed = json["7"].toDouble();
+    //    stepover = json["8"].toDouble();
+    //    name = json["9"].toString();
+    //    note = json["10"].toString();
+    //    type = static_cast<Type>(json["11"].toInt());
 }
 
 void Tool::write(QJsonObject& json) const
@@ -48,10 +58,20 @@ void Tool::write(QJsonObject& json) const
     json["plungeRate"] = plungeRate;
     json["spindleSpeed"] = spindleSpeed;
     json["stepover"] = stepover;
-
     json["name"] = name;
     json["note"] = note;
     json["type"] = type;
+    //    json["1"] = angle;
+    //    json["2"] = diameter;
+    //    json["3"] = feedRate;
+    //    json["4"] = oneTurnCut;
+    //    json["5"] = passDepth;
+    //    json["6"] = plungeRate;
+    //    json["7"] = spindleSpeed;
+    //    json["8"] = stepover;
+    //    json["9"] = name;
+    //    json["10"] = note;
+    //    json["11"] = type;
 }
 
 bool Tool::isValid()

@@ -3,8 +3,8 @@
 
 #include "tool.h"
 
-#include <QModelIndex>
 #include <QDebug>
+#include <QModelIndex>
 #include <QObject>
 #include <QVariant>
 
@@ -17,8 +17,8 @@ public:
     ToolItem(const ToolItem& item);
     ~ToolItem();
 
-    void read(const QJsonObject& json);
-    void write(QJsonObject& json);
+    //    void read(const QJsonObject& json);
+    //    void write(QJsonObject& json);
 
     int row() const;
     int childCount() const;
@@ -48,7 +48,6 @@ public:
 
     QString note() const;
     void setNote(const QString& value);
-    static QMap<int, Tool> tools;
 
 private:
     ToolItem* parentItem = nullptr;
