@@ -75,7 +75,7 @@ GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool
         offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
         offset.Execute(paths, -dOffset);
 
-        CleanPolygons(paths, 0.002 * uScale);
+        CleanPolygons(paths, 0.0009 * uScale);
         fillPaths.append(paths);
 
         do {

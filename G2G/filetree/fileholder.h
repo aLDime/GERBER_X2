@@ -18,8 +18,8 @@ public:
     static T* file(int id)
     {
         QMutexLocker locker(&m_mutex);
-        AbstractFile* file = m_files.value(id).data();
-        return static_cast<T*>(file);
+        //AbstractFile* file = m_files.value(id).data();
+        return static_cast<T*>(m_files.value(id).data());
     }
 
     static void deleteFile(int id);

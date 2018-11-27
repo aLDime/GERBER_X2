@@ -330,15 +330,16 @@ void MainWindow::createActions()
     dockWidget->hide();
     connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
         if (!visible) {
-            QTimer::singleShot(100, [=] {
-                if (dockWidget->isHidden()) {
-                    for (QAction* action : toolpathActionList)
-                        action->setChecked(false);
-
-                    if (dockWidget->widget() != nullptr)
-                        dockWidget->widget()->deleteLater();
-                }
-            });
+            //QTimer::singleShot(100, [=] {
+            //                if (dockWidget->isHidden()) {
+            for (QAction* action : toolpathActionList)
+                action->setChecked(false);
+            if (dockWidget->widget() != nullptr)
+                dockWidget->widget()->deleteLater();
+            dockWidget->toggleViewAction()->setVisible(false);
+            QTimer::singleShot(1000, [=] { centralwidget->resize(centralwidget->size() + QSize(10, 10)); });
+            //                }
+            //});
         }
     });
 

@@ -4,8 +4,8 @@
 #include <QFileInfo>
 #include <QIcon>
 
-GcodeNode::GcodeNode(GCodeFile* group)
-    : m_id(FileHolder::addFile(group))
+GcodeNode::GcodeNode(GCodeFile* gCode)
+    : m_id(FileHolder::addFile(gCode))
 {
 }
 
