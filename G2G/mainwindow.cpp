@@ -281,9 +281,9 @@ void MainWindow::createActions()
     zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     zoomToolBar->setMovable(false);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Zoom fit best"), [=]() { graphicsView->ZoomFit(); });
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), [=]() { graphicsView->ZoomFit(); });
     action->setShortcut(QKeySequence::FullScreen);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("Zoom original"), [=]() { graphicsView->Zoom100(); });
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), [=]() { graphicsView->Zoom100(); });
     action->setShortcut(tr("Ctrl+0"));
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), [=]() { graphicsView->ZoomIn(); });
     action->setShortcut(QKeySequence::ZoomIn);

@@ -45,6 +45,7 @@ ToolEditForm::~ToolEditForm()
     //settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
 
     delete ui;
+    ui = nullptr;
 }
 
 void ToolEditForm::setItem(ToolItem* item)
@@ -72,8 +73,8 @@ void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
 {
     if (!dsbx->value()) {
         for (int i = 0, t = 0; i < 3; ++i) {
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx] { dsbx->setStyleSheet("QDoubleSpinBox { background-color: #FF0000;}"); });
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx] { dsbx->setStyleSheet(""); });
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx, this] { if(!ui) return; dsbx->setStyleSheet("QDoubleSpinBox { background-color: #FF0000;}"); });
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx, this] { if(!ui) return; dsbx->setStyleSheet(""); });
         }
     }
 }
@@ -129,16 +130,16 @@ void ToolEditForm::on_cbxToolType_currentIndexChanged(int index)
         ui->dsbxFeedRate->setEnabled(false);
         ui->dsbxStepover->setEnabled(false);
         ui->dsbxStepoverPercent->setEnabled(false);
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/1.png")));
+        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
         ui->label_3->setText("Pass");
         break;
     case Tool::EndMill:
         ui->dsbxAngle->setEnabled(false);
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/2.png")));
+        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
         ui->label_3->setText("Depth");
         break;
     case Tool::Engraving:
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/3.png")));
+        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
         ui->label_3->setText("Depth");
         break;
     }
