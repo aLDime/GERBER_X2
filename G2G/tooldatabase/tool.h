@@ -3,6 +3,7 @@
 
 #include <QIcon>
 #include <QJsonObject>
+#include <QMap>
 #include <QObject>
 
 class Tool {
@@ -52,6 +53,16 @@ public:
     bool isValid();
     QIcon icon();
     QString errorStr();
+};
+
+class ToolHolder {
+public:
+    ToolHolder();
+
+    static void readTools();
+    static void readTools(const QJsonObject& json);
+    static void writeTools(QJsonObject& json);
+    static QMap<int, Tool> tools;
 };
 
 Q_DECLARE_METATYPE(Tool)

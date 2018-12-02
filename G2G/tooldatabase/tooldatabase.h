@@ -1,8 +1,8 @@
 #ifndef TOOLEDIT_H
 #define TOOLEDIT_H
 
-#include "tool.h"
 #include <QDialog>
+#include "tool.h"
 
 namespace Ui {
 class ToolEdit;
@@ -22,11 +22,6 @@ private:
 public:
     Tool tool() const;
     void setTool(const Tool& tool);
-
-    static void readTools();
-    static void readTools(const QJsonObject& json);
-    static void writeTools(QJsonObject& json);
-    static QMap<int, Tool> tools;
 
 private:
     Tool m_tool;

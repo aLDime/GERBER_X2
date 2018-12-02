@@ -10,7 +10,7 @@
 #include <QSettings>
 #include <clipper.hpp>
 
-#include "filetree/FileHolder.h"
+#include "staticholders/fileholder.h"
 #include "gi/graphicsitem.h"
 
 using namespace ClipperLib;

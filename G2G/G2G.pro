@@ -45,11 +45,11 @@ win32* {
 }
 
 HEADERS += \
+    aboutform.h \
     application.h \
     drillforapertureform.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
-    filetree/fileholder.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
     filetree/gcodenode.h \
@@ -73,6 +73,7 @@ HEADERS += \
     openingdialog.h \
     point.h \
     settingsdialog.h \
+    staticholders/fileholder.h \
     tooldatabase/tool.h \
     tooldatabase/tooldatabase.h \
     tooldatabase/tooleditform.h \
@@ -80,14 +81,13 @@ HEADERS += \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
     aboutform.h \
-    aboutform.h
 
 
 SOURCES += \
+    aboutform.cpp \
     drillforapertureform.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
-    filetree/fileholder.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
     filetree/gcodenode.cpp \
@@ -111,6 +111,7 @@ SOURCES += \
     mainwindow.cpp \
     point.cpp \
     settingsdialog.cpp \
+    staticholders/fileholder.cpp \
     tooldatabase/tool.cpp \
     tooldatabase/tooldatabase.cpp \
     tooldatabase/tooleditform.cpp \
@@ -118,7 +119,6 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     aboutform.cpp \
-    aboutform.cpp
 
 
 

@@ -2,6 +2,7 @@
 #include "tooldatabase.h"
 #include "toolitem.h"
 
+
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -268,7 +269,7 @@ void ToolModel::exportTools()
 
     QJsonObject jsonObject;
     //rootItem->write(treeObject);
-    ToolDatabase::writeTools(jsonObject);
+    ToolHolder::writeTools(jsonObject);
 
     ToolItem* item;
     QList<ToolItem*> stack;
@@ -326,7 +327,7 @@ void ToolModel::importTools()
 
     QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
     //    rootItem->read(loadDoc.object());
-    ToolDatabase::readTools(loadDoc.object());
+    ToolHolder::readTools(loadDoc.object());
 
     QList<ToolItem*> parentsStack;
     QList<int> nestingStack;

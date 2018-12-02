@@ -1,4 +1,7 @@
 #include "tool.h"
+#include <QFile>
+#include <QJsonArray>
+#include <QJsonDocument>
 #include <qmath.h>
 
 int toolId = qRegisterMetaType<Tool>("Tool");
@@ -118,4 +121,58 @@ QString Tool::errorStr()
     if (qFuzzyIsNull(plungeRate))
         errorString += "Plunge rate = 0!\n";
     return errorString;
+}
+
+///////////////////////////////////////////////////////
+/// \brief ToolHolder::tools
+///
+QMap<int, Tool> ToolHolder::tools;
+
+ToolHolder::ToolHolder()
+{
+}
+
+void ToolHolder::readTools()
+{
+    QFile loadFile(QStringLiteral("tools.dat"));
+    if (!loadFile.open(QIODevice::ReadOnly)) {
+        qWarning("Couldn't open tools file.");
+        return;
+    }
+    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+    QJsonArray toolArray = loadDoc.object()["tools"].toArray();
+    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+        Tool tool;
+        QJsonObject toolObject = toolArray[treeIndex].toObject();
+        tool.read(toolObject);
+        tool.id = toolObject["id"].toInt();
+
+        tools[tool.id] = tool;
+    }
+}
+
+void ToolHolder::readTools(const QJsonObject& json)
+{
+    QJsonArray toolArray = json["tools"].toArray();
+    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+        Tool tool;
+        QJsonObject toolObject = toolArray[treeIndex].toObject();
+        tool.read(toolObject);
+        tool.id = toolObject["id"].toInt();
+        tools[tool.id] = tool;
+    }
+}
+
+void ToolHolder::writeTools(QJsonObject& json)
+{
+    QJsonArray toolArray;
+    QMap<int, Tool>::iterator i = tools.begin();
+    while (i != tools.constEnd()) {
+        QJsonObject toolObject;
+        i.value().write(toolObject);
+        toolObject["id"] = i.key();
+        toolArray.append(toolObject);
+        ++i;
+    }
+    json["tools"] = toolArray;
 }

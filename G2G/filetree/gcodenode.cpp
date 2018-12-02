@@ -1,5 +1,5 @@
 #include "gcodenode.h"
-#include "fileholder.h"
+#include "staticholders/fileholder.h"
 
 #include <QFileInfo>
 #include <QIcon>

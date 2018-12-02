@@ -1,6 +1,6 @@
 #include "gerbernode.h"
 
-#include "fileholder.h"
+#include "staticholders/fileholder.h"
 #include <QFileInfo>
 #include <mainwindow.h>
 
@@ -128,7 +128,7 @@ QTimer* GerberNode::repaintTimer()
 void GerberNode::repaint()
 {
     int count = m_parentItem->childCount();
-    int k = (count > 1) ? (240.0 / (count - 1)) * row() : 0;
+    int k = (count > 1) ? (200.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
     FileHolder::file<File>(m_id)->itemGroup()->setBrush(color);
     MyScene::self->update();

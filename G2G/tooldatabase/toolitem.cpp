@@ -5,6 +5,7 @@
 #include <QIcon>
 #include <QJsonArray>
 #include <QPixmap>
+
 bool ToolItem::m_deleteEnable = false;
 
 ToolItem::ToolItem(const ToolItem& item)
@@ -35,7 +36,7 @@ ToolItem::ToolItem()
 ToolItem::~ToolItem()
 {
     if (m_isTool && m_deleteEnable)
-        ToolDatabase::tools.remove(m_toolId);
+        ToolHolder::tools.remove(m_toolId);
     qDeleteAll(childItems);
 }
 
@@ -47,15 +48,15 @@ ToolItem::~ToolItem()
 //        QJsonObject toolObject = toolArray[treeIndex].toObject();
 //        tool.read(toolObject);
 //        tool.id = toolObject["id"].toInt();
-//        ToolDatabase::tools[tool.id] = tool;
+//        ToolHolder::tools[tool.id] = tool;
 //    }
 //}
 
 //void ToolItem::write(QJsonObject& json)
 //{
 //    QJsonArray toolArray;
-//    QMap<int, Tool>::iterator i = ToolDatabase::tools.begin();
-//    while (i != ToolDatabase::tools.constEnd()) {
+//    QMap<int, Tool>::iterator i = ToolHolder::tools.begin();
+//    while (i != ToolHolder::tools.constEnd()) {
 //        QJsonObject toolObject;
 //        i.value().write(toolObject);
 //        toolObject["id"] = i.key();
@@ -140,11 +141,11 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             if (index.column() == 0)
                 if (m_isTool)
-                    return ToolDatabase::tools[m_toolId].icon();
+                    return ToolHolder::tools[m_toolId].icon();
                 else
                     return QIcon::fromTheme("folder-sync");
         case Qt::UserRole:
-            return ToolDatabase::tools[m_toolId].type;
+            return ToolHolder::tools[m_toolId].type;
         case Qt::UserRole + 1:
             return m_toolId;
         default:
@@ -170,8 +171,9 @@ int ToolItem::toolId() const
 Tool& ToolItem::tool()
 {
     static Tool tmp;
+
     if (m_isTool)
-        return ToolDatabase::tools[m_toolId];
+        return ToolHolder::tools[m_toolId];
     return tmp;
 }
 
@@ -183,19 +185,19 @@ bool ToolItem::isTool() const
 void ToolItem::setIsTool()
 {
     m_isTool = true;
-    if (ToolDatabase::tools.size())
-        m_toolId = ToolDatabase::tools.lastKey() + 1;
-    ToolDatabase::tools[m_toolId].diameter = 0.0;
+    if (ToolHolder::tools.size())
+        m_toolId = ToolHolder::tools.lastKey() + 1;
+    ToolHolder::tools[m_toolId].diameter = 0.0;
 }
 
 QString ToolItem::note() const
 {
-    return m_isTool ? (ToolDatabase::tools[m_toolId].note.isEmpty() ? "Tool Id " + QString::number(m_toolId) : ToolDatabase::tools[m_toolId].note) : m_note;
+    return m_isTool ? (ToolHolder::tools[m_toolId].note.isEmpty() ? "Tool Id " + QString::number(m_toolId) : ToolHolder::tools[m_toolId].note) : m_note;
 }
 
 void ToolItem::setNote(const QString& value)
 {
-    (m_isTool ? ToolDatabase::tools[m_toolId].note : m_note) = value;
+    (m_isTool ? ToolHolder::tools[m_toolId].note : m_note) = value;
 }
 
 void ToolItem::setDeleteEnable(bool deleteEnable)
@@ -205,12 +207,12 @@ void ToolItem::setDeleteEnable(bool deleteEnable)
 
 QString ToolItem::name() const
 {
-    return m_isTool ? ToolDatabase::tools[m_toolId].name : m_name;
+    return m_isTool ? ToolHolder::tools[m_toolId].name : m_name;
 }
 
 void ToolItem::setName(const QString& value)
 {
-    (m_isTool ? ToolDatabase::tools[m_toolId].name : m_name) = value;
+    (m_isTool ? ToolHolder::tools[m_toolId].name : m_name) = value;
 }
 
 void ToolItem::addChild(ToolItem* item)

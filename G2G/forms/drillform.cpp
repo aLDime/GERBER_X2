@@ -5,17 +5,20 @@
 #include <QDebug>
 #include <QDockWidget>
 #include <QFileInfo>
+#include <QMenu>
 #include <QMessageBox>
 #include <QPainter>
 #include <QStandardItemModel>
 #include <file.h>
 #include <myscene.h>
+#include <qevent.h>
 
 #include "tooldatabase/tooldatabase.h"
 #include <filetree/gerbernode.h>
 
-#include <filetree/FileHolder.h>
 #include <filetree/filemodel.h>
+
+#include <staticholders/fileholder.h>
 
 using namespace ClipperLib;
 
@@ -85,6 +88,36 @@ DrillForm::DrillForm(QWidget* parent)
     ui->tableView->setIconSize(QSize(Size, Size));
     ui->dsbxDepth->setValue(MaterialSetup::thickness);
     connect(ui->tableView, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
+
+    ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
+    connect(ui->tableView, &QTableView::customContextMenuRequested, [&](const QPoint& pos) {
+        QMenu menu;
+        menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [=] {
+            ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
+            if (tdb.exec()) {
+                const Tool tool(tdb.tool());
+                for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
+                    model->setToolId(current.row(), tool.id);
+                    createHoles(model->apertureId(current.row()), tool.diameter);
+                }
+            }
+        });
+
+        for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
+            if (model->toolId(current.row()) != -1) {
+                menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [=] {
+                    for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
+                        model->setToolId(current.row(), -1);
+                        removeHoles(model->apertureId(current.row()));
+                    }
+                });
+                break;
+            }
+        }
+
+        menu.exec(ui->tableView->mapToGlobal(pos /*+ QPoint(24, 24)*/));
+    });
+
     updateFiles();
     self = this;
 }
@@ -243,12 +276,7 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
             int apertureId = model->apertureId(current.row());
             const Tool tool(tdb.tool());
             model->setToolId(current.row(), tool.id);
-            if (!m_gid.contains(apertureId)) {
-                createHoles(apertureId, tool.diameter);
-            } else {
-                for (DrillItem* item : m_gid[apertureId])
-                    item->setDiameter(tool.diameter);
-            }
+            createHoles(apertureId, tool.diameter);
         }
     }
 }
@@ -321,13 +349,13 @@ void DrillForm::on_pbCreate_clicked()
             dst.append(src.takeAt(s));
             p1 = dst.last();
         }
-        GCodeFile* gcode = new GCodeFile({ dst }, ToolDatabase::tools[iterator.key()], ui->dsbxDepth->value(), Drilling);
+        GCodeFile* gcode = new GCodeFile({ dst }, ToolHolder::tools[iterator.key()], ui->dsbxDepth->value(), Drilling);
         QString str;
         for (int id : apetrureId[iterator.key()])
             str += (m_isAperture ? "D" : "T") + QString::number(id) + ", ";
         str.remove(str.size() - 2, 2);
 
-        gcode->setFileName(ToolDatabase::tools[iterator.key()].name + " (" + str + ")");
+        gcode->setFileName(ToolHolder::tools[iterator.key()].name + " (" + str + ")");
         gcode->setSide(static_cast<G::File*>(ui->cbxFile->currentData().value<void*>())->side);
         FileModel::self->addGcode(gcode);
     }
@@ -335,14 +363,30 @@ void DrillForm::on_pbCreate_clicked()
 
 void DrillForm::createHoles(int apertureId, double diameter)
 {
+    if (!m_gid.contains(apertureId)) {
+        for (const QGraphicsPathItem* itemA : m_giaperture[apertureId]) {
+            DrillItem* item = new DrillItem(diameter);
+            item->setPen(Qt::NoPen);
+            item->setBrush(Qt::red);
+            item->setZValue(itemA->zValue());
+            item->setPos(itemA->pos());
+            m_gid[apertureId].append(item);
+            MyScene::self->addItem(item);
+        }
+    } else {
+        for (DrillItem* item : m_gid[apertureId])
+            item->setDiameter(diameter);
+    }
+}
+
+void DrillForm::removeHoles(int apertureId)
+{
     for (const QGraphicsPathItem* itemA : m_giaperture[apertureId]) {
-        DrillItem* item = new DrillItem(diameter);
-        item->setPen(Qt::NoPen);
-        item->setBrush(Qt::red);
-        item->setZValue(itemA->zValue());
-        item->setPos(itemA->pos());
-        m_gid[apertureId].append(item);
-        MyScene::self->addItem(item);
+        for (DrillItem* item : m_gid[apertureId]) {
+            MyScene::self->removeItem(item);
+            delete item;
+        }
+        m_gid.remove(apertureId);
     }
 }
 
@@ -351,7 +395,7 @@ void DrillForm::pickUpTool(int apertureId, double diameter)
     const double drillDiameterMin = diameter * 0.99;
     const double drillDiameterMax = diameter * 1.01;
     QMap<int, Tool>::const_iterator toolIt;
-    for (toolIt = ToolDatabase::tools.begin(); toolIt != ToolDatabase::tools.end(); ++toolIt) {
+    for (toolIt = ToolHolder::tools.begin(); toolIt != ToolHolder::tools.end(); ++toolIt) {
         if (toolIt.value().type == Tool::Drill || toolIt.value().type == Tool::EndMill) {
             if (drillDiameterMin <= toolIt.value().diameter && toolIt.value().diameter <= drillDiameterMax) {
                 qDebug() << toolIt.value().name;
@@ -406,9 +450,9 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         else
             switch (role) {
             case Qt::DisplayRole:
-                return ToolDatabase::tools[m_data[row].id[1]].name;
+                return ToolHolder::tools[m_data[row].id[1]].name;
             case Qt::DecorationRole:
-                return ToolDatabase::tools[m_data[row].id[1]].icon();
+                return ToolHolder::tools[m_data[row].id[1]].icon();
             case Qt::UserRole:
                 return m_data[row].id[index.column()];
             default:
@@ -438,4 +482,11 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
     default:
         return QVariant();
     }
+}
+
+Qt::ItemFlags DrillModel::flags(const QModelIndex& index) const
+{
+    if (index.column())
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    return Qt::ItemIsEnabled;
 }

@@ -7,6 +7,7 @@
 #include "forms/profileform.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
+#include "staticholders/fileholder.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QApplication>
 #include <QCloseEvent>
@@ -15,7 +16,6 @@
 #include <QMessageBox>
 #include <QSettings>
 #include <QtWidgets>
-#include <filetree/fileholder.h>
 #include <filetree/gcodenode.h>
 #include <filetree/gerbernode.h>
 #include <limits>
@@ -127,7 +127,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     self = this;
 
-    ToolDatabase::readTools();
+    ToolHolder::readTools();
 
     readSettings();
 }

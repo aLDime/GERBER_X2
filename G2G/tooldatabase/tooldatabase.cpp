@@ -4,12 +4,6 @@
 #include "tooltreeview.h"
 #include "ui_tooledit.h"
 
-#include <QFile>
-#include <QJsonArray>
-#include <QJsonDocument>
-
-QMap<int, Tool> ToolDatabase::tools;
-
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)
     , ui(new Ui::ToolEdit)
@@ -58,48 +52,4 @@ Tool ToolDatabase::tool() const
 void ToolDatabase::setTool(const Tool& tool)
 {
     m_tool = tool;
-}
-
-void ToolDatabase::readTools()
-{
-    QFile loadFile(QStringLiteral("tools.dat"));
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open tools file.");
-        return;
-    }
-    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
-    QJsonArray toolArray = loadDoc.object()["tools"].toArray();
-    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
-        Tool tool;
-        QJsonObject toolObject = toolArray[treeIndex].toObject();
-        tool.read(toolObject);
-        tool.id = toolObject["id"].toInt();
-        ToolDatabase::tools[tool.id] = tool;
-    }
-}
-
-void ToolDatabase::readTools(const QJsonObject& json)
-{
-    QJsonArray toolArray = json["tools"].toArray();
-    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
-        Tool tool;
-        QJsonObject toolObject = toolArray[treeIndex].toObject();
-        tool.read(toolObject);
-        tool.id = toolObject["id"].toInt();
-        tools[tool.id] = tool;
-    }
-}
-
-void ToolDatabase::writeTools(QJsonObject& json)
-{
-    QJsonArray toolArray;
-    QMap<int, Tool>::iterator i = tools.begin();
-    while (i != tools.constEnd()) {
-        QJsonObject toolObject;
-        i.value().write(toolObject);
-        toolObject["id"] = i.key();
-        toolArray.append(toolObject);
-        ++i;
-    }
-    json["tools"] = toolArray;
 }
