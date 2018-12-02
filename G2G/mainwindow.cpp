@@ -330,57 +330,36 @@ void MainWindow::createActions()
     dockWidget->hide();
     connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
         if (!visible) {
-            //QTimer::singleShot(100, [=] {
-            //                if (dockWidget->isHidden()) {
             for (QAction* action : toolpathActionList)
                 action->setChecked(false);
             if (dockWidget->widget() != nullptr)
                 dockWidget->widget()->deleteLater();
             dockWidget->toggleViewAction()->setVisible(false);
-            QTimer::singleShot(1000, [=] { centralwidget->resize(centralwidget->size() + QSize(10, 10)); });
-            //                }
-            //});
         }
     });
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"),
-        tr("Profile"), [=] {
-            createDockWidget(new ProfileForm(), Profile);
-        }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"),
-        tr("Pocket"), [=] {
-            createDockWidget(new PocketForm(), Pocket);
-        }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"),
-        tr("Drilling"), [=] {
-            createDockWidget(new DrillForm(), Drilling);
-        }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"),
-        tr("Setup Material "), [=] {
-            createDockWidget(new MaterialSetup(), Material);
-        }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=] {
+        createDockWidget(new ProfileForm(), Profile);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=] {
+        createDockWidget(new PocketForm(), Pocket);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=] {
+        createDockWidget(new DrillForm(), Drilling);
+    }));
+    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=] {
+        createDockWidget(new MaterialSetup(), Material);
+    }));
 
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
     QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), Material); });
 
-    toolpathToolBar->addAction(QIcon::fromTheme("view-form"),
-        tr("Tool Base"), [=]() {
-            ToolDatabase tdb(this, {});
-            tdb.exec();
-        });
-
-    //    QToolBar* toolBar = addToolBar(tr("Cursor mode"));
-    //    toolBar->setMovable(false);
-    //    action = toolBar->addAction(QIcon::fromTheme("transform-crop"), "Select", [=] {
-    //        MyGraphicsView::self->setDragMode(QGraphicsView::RubberBandDrag);
-    //        MyGraphicsView::self->setInteractive(true);
-    //    });
-    //    action = toolBar->addAction(QIcon::fromTheme("transform-browse"), "Drag", [=] {
-    //        MyGraphicsView::self->setDragMode(QGraphicsView::ScrollHandDrag);
-    //        MyGraphicsView::self->setInteractive(false);
-    //    });
+    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {
+        ToolDatabase tdb(this, {});
+        tdb.exec();
+    });
 }
 
 void MainWindow::createStatusBar()
@@ -548,7 +527,7 @@ void MainWindow::setCurrentFile(const QString& fileName)
     else
         curFile = QFileInfo(fileName).canonicalFilePath();
 
-    //    textEdit->document()->setModified(false);
+    //textEdit->document()->setModified(false);
     setWindowModified(false);
 
     if (!isUntitled && windowFilePath() != curFile)

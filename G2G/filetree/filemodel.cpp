@@ -118,8 +118,7 @@ QModelIndex FileModel::parent(const QModelIndex& child) const
     if (!child.isValid())
         return QModelIndex();
 
-    AbstractNode* childItem = static_cast<AbstractNode*>(child.internalPointer());
-    AbstractNode* parentItem = childItem->parentItem();
+    AbstractNode* parentItem = static_cast<AbstractNode*>(child.internalPointer())->parentItem();
 
     if (parentItem == rootItem)
         return QModelIndex();

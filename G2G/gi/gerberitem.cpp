@@ -46,10 +46,10 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         pen = QPen(cp, 0.0);
     }
     if (option->state & QStyle::State_MouseOver) {
-        cb = cb.darker(150);
+        cb = cb.lighter(130);
         b.setColor(cb);
         //        b.setStyle(Qt::Dense4Pattern);
-        //        b.setMatrix(matrix().scale(1/MyGraphicsView::self->matrix().m11(), 1/MyGraphicsView::self->matrix().m11()));
+        //        b.setMatrix(matrix().scale(2 / MyGraphicsView::self->matrix().m11(), 2 / MyGraphicsView::self->matrix().m11()));
         cp.setAlpha(255);
         pen = QPen(cp, 0.0);
     }

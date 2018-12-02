@@ -91,6 +91,8 @@ DrillForm::DrillForm(QWidget* parent)
 
     ui->tableView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->tableView, &QTableView::customContextMenuRequested, [&](const QPoint& pos) {
+        if (ui->tableView->selectionModel()->selectedIndexes().isEmpty())
+            return;
         QMenu menu;
         menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [=] {
             ToolDatabase tdb(this, { Tool::Drill, Tool::EndMill });
@@ -363,7 +365,10 @@ void DrillForm::on_pbCreate_clicked()
 
 void DrillForm::createHoles(int apertureId, double diameter)
 {
-    if (!m_gid.contains(apertureId)) {
+    if (m_gid.contains(apertureId)) {
+        for (DrillItem* item : m_gid[apertureId])
+            item->setDiameter(diameter);
+    } else {
         for (const QGraphicsPathItem* itemA : m_giaperture[apertureId]) {
             DrillItem* item = new DrillItem(diameter);
             item->setPen(Qt::NoPen);
@@ -373,21 +378,13 @@ void DrillForm::createHoles(int apertureId, double diameter)
             m_gid[apertureId].append(item);
             MyScene::self->addItem(item);
         }
-    } else {
-        for (DrillItem* item : m_gid[apertureId])
-            item->setDiameter(diameter);
     }
 }
 
 void DrillForm::removeHoles(int apertureId)
 {
-    for (const QGraphicsPathItem* itemA : m_giaperture[apertureId]) {
-        for (DrillItem* item : m_gid[apertureId]) {
-            MyScene::self->removeItem(item);
-            delete item;
-        }
-        m_gid.remove(apertureId);
-    }
+    qDeleteAll(m_gid[apertureId]);
+    m_gid.remove(apertureId);
 }
 
 void DrillForm::pickUpTool(int apertureId, double diameter)
@@ -398,7 +395,6 @@ void DrillForm::pickUpTool(int apertureId, double diameter)
     for (toolIt = ToolHolder::tools.begin(); toolIt != ToolHolder::tools.end(); ++toolIt) {
         if (toolIt.value().type == Tool::Drill || toolIt.value().type == Tool::EndMill) {
             if (drillDiameterMin <= toolIt.value().diameter && toolIt.value().diameter <= drillDiameterMax) {
-                qDebug() << toolIt.value().name;
                 model->setToolId(model->rowCount() - 1, toolIt.key());
                 createHoles(apertureId, toolIt.value().diameter);
                 break;

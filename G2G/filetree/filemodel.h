@@ -10,7 +10,7 @@
 #include <gcode/drl.h>
 #include <gcode/gcode.h>
 
-enum RootNodes{
+enum RootNodes {
     NodeGerberFiles,
     NodeDrillFiles,
     NodeToolPath,

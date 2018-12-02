@@ -10,8 +10,8 @@
 #include <QSettings>
 #include <clipper.hpp>
 
-#include "staticholders/fileholder.h"
 #include "gi/graphicsitem.h"
+#include "staticholders/fileholder.h"
 
 using namespace ClipperLib;
 
@@ -19,13 +19,13 @@ QRectF worckRect;
 
 void updateRect()
 {
-    //    Clipper clipper;
-    //    clipper.AddPaths(FileHolder::getPaths(), ptSubject, true);
-    //    IntRect r(clipper.GetBounds());
-    //    boardRect.setTopLeft(QPointF(r.left * dScale, r.top * dScale));
-    //    boardRect.setBottomRight(QPointF(r.right * dScale, r.bottom * dScale));
-    if (MyScene::self)
-        worckRect = MyScene::self->itemsBoundingRect();
+    Clipper clipper;
+    clipper.AddPaths(FileHolder::getPaths(), ptSubject, true);
+    IntRect r(clipper.GetBounds());
+    worckRect.setTopLeft(QPointF(r.left * dScale, r.top * dScale));
+    worckRect.setBottomRight(QPointF(r.right * dScale, r.bottom * dScale));
+    //    if (MyScene::self)
+    //        worckRect = MyScene::self->itemsBoundingRect();
 }
 
 Point::Point(int type)

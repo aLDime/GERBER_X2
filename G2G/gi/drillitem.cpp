@@ -61,8 +61,8 @@ void DrillItem::setDiameter(double diameter)
     QPainterPath path;
     path.addEllipse(QPointF(), diameter / 2, diameter / 2);
     m_shape = path;
-    update(m_rect);
     m_rect = m_shape.boundingRect();
+    update(m_rect);
 }
 
 const DrillFile* DrillItem::file() const { return m_file; }
