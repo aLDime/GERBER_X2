@@ -1,6 +1,8 @@
 #ifndef ABOUTFORM_H
 #define ABOUTFORM_H
 
+#pragma once
+
 #include <QDialog>
 
 namespace Ui {

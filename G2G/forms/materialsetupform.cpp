@@ -16,8 +16,8 @@ double MaterialSetup::thickness;
 double MaterialSetup::clearence;
 double MaterialSetup::plunge;
 
-MaterialSetup::MaterialSetup(QWidget* parent)
-    : QWidget(parent)
+MaterialSetup::MaterialSetup(QWidget* prnt)
+    : QWidget(prnt)
     , ui(new Ui::MaterialSetupForm)
 
 {
@@ -84,7 +84,7 @@ MaterialSetup::MaterialSetup(QWidget* parent)
             && ui->dsbxThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
-            static_cast<QDockWidget*>(this->parent())->hide();
+            static_cast<QWidget*>(parent())->close();
             return;
         }
         QString s("QDoubleSpinBox{background: red;}");
@@ -111,6 +111,7 @@ MaterialSetup::MaterialSetup(QWidget* parent)
 
 MaterialSetup::~MaterialSetup()
 {
+    qDebug("~MaterialSetup()");
     self = nullptr;
 
     QSettings settings;

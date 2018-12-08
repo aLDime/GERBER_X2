@@ -34,8 +34,9 @@ Paths FileHolder::getPaths()
     Paths paths;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
-        if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill) && item->itemGroup()->isVisible())
-            paths.append(item->mergedPaths());
+        if (item && item->itemGroup()->isVisible() && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
+            for (Paths& p : item->groupedPaths())
+                paths.append(p);
     }
     return paths;
 }

@@ -66,7 +66,8 @@ void ToolEditForm::setItem(ToolItem* item)
 
 void ToolEditForm::setRed()
 {
-    ui->pbApply->setStyleSheet("QPushButton { background-color: #80FF0000;}");
+    if (m_item)
+        ui->pbApply->setStyleSheet("QPushButton { background-color: #80FF0000;}");
 }
 
 void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
@@ -280,6 +281,8 @@ void ToolEditForm::on_pbApply_clicked()
             flicker(ui->dsbxStepoverPercent);
         case Tool::Group:
         default:
+            if (!m_item)
+                break;
             m_item->tool() = m_tool;
             m_item->setName(m_tool.name);
             m_item->setNote(m_tool.note);

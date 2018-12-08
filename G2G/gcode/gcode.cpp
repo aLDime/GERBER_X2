@@ -313,17 +313,6 @@ GCodeType GCodeFile::gtype() const
     return m_type;
 }
 
-G::Side GCodeFile::side() const
-{
-    return m_side;
-}
-
-void GCodeFile::setSide(const G::Side& side)
-{
-    m_side = side;
-    m_fileName += side ? " (Bottom)" : " (Top)";
-}
-
 void GCodeFile::startPath(const QPointF& point)
 {
     sl.append(g0() + x(point.x()) + y(point.y())); //start xy
@@ -341,8 +330,9 @@ void GCodeFile::statFile()
     sl.append("G21 G17 G90"); //G17 XY plane
     sl.append(g0() + z(MaterialSetup::z)); //HomeZ
 
-    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
-    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
+    //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
+    //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
+    sl.append(s(m_tool.spindleSpeed) + "M3"); //HomeXY
 }
 
 void GCodeFile::endFile()
@@ -353,8 +343,8 @@ void GCodeFile::endFile()
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
 
     sl.append("M30");
-
-    QFile file(m_fileName);
+    QString str(m_fileName);
+    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (QString& s : sl)

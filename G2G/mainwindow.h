@@ -5,10 +5,13 @@
 #include "ui_mainwindow.h"
 #include <QSettings>
 #include <QThread>
+#include <qevent.h>
 
 namespace G {
 class Parser;
 }
+
+class DockWidget;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -24,6 +27,12 @@ public:
 
     Point* zero() const;
     Point* home() const;
+
+    void resetActions()
+    {
+        for (QAction* action : toolpathActionList)
+            action->setChecked(false);
+    }
 
 signals:
     void parseFile(const QString& filename);
@@ -59,6 +68,7 @@ private:
     void showSettingsDialog();
     void readSettings();
     void writeSettings();
+    void on_customContextMenuRequested(const QPoint& pos);
 
     QAction* recentFileActs[MaxRecentFiles + 1];
     QAction* recentFileSeparator;
@@ -77,7 +87,7 @@ protected:
     void closeEvent(QCloseEvent* event) override;
 
 private:
-    QDockWidget* dockWidget;
+    DockWidget* dockWidget;
     QMenu* fileMenu;
     QMenu* helpMenu;
     QMenu* recentMenu;
@@ -86,6 +96,26 @@ private:
     QToolBar* toolpathToolBar;
     QToolBar* zoomToolBar;
     QVector<QAction*> toolpathActionList;
+};
+
+class DockWidget : public QDockWidget {
+    Q_OBJECT
+public:
+    DockWidget(QWidget* parent = nullptr)
+        : QDockWidget(parent)
+    {
+    }
+    virtual ~DockWidget() {}
+
+    // QWidget interface
+protected:
+    void closeEvent(QCloseEvent* event) override
+    {
+        if (widget())
+            delete widget();
+        MainWindow::self->resetActions();
+        event->accept();
+    }
 };
 
 #endif // MAINWINDOW_H

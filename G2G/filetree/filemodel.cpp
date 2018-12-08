@@ -15,9 +15,9 @@ FileModel::FileModel(QObject* parent)
     , rootItem(new FolderNode("rootItem"))
 {
     self = this;
-    rootItem->add(new FolderNode("Gerber Files"));
-    rootItem->add(new FolderNode("Excellon"));
-    rootItem->add(new FolderNode("Tool Paths"));
+    rootItem->append(new FolderNode("Gerber Files"));
+    rootItem->append(new FolderNode("Excellon"));
+    rootItem->append(new FolderNode("Tool Paths"));
 }
 
 FileModel::~FileModel()
@@ -28,11 +28,11 @@ FileModel::~FileModel()
 
 void FileModel::addGerberFile(G::File* gerberFile)
 {
-    AbstractNode* item{ rootItem->child(NodeGerberFiles) };
-    QModelIndex index = createIndex(0, 0, item);
+    AbstractNode* item = rootItem->child(NodeGerberFiles);
+    QModelIndex index = createIndex(0, 0, rootItem);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new GerberNode(gerberFile));
+    item->append(new GerberNode(gerberFile));
     endInsertRows();
 }
 
@@ -44,7 +44,7 @@ void FileModel::addDrlFile(DrillFile* drl)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new DrillNode(drl));
+    item->append(new DrillNode(drl));
     endInsertRows();
 }
 
@@ -54,71 +54,42 @@ void FileModel::addGcode(GCodeFile* group)
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    item->add(new GcodeNode(group));
+    item->append(new GcodeNode(group));
     endInsertRows();
 }
 
 void FileModel::closeAllFiles()
 {
-    AbstractNode* item{ rootItem->child(NodeGerberFiles) };
-    QModelIndex index = createIndex(0, 0, item);
-    int rowCount = item->childCount();
-    if (rowCount) {
-        beginRemoveRows(index, 0, rowCount - 1);
-        for (int i = 0; i < rowCount; ++i) {
-            item->remove(0);
+    AbstractNode* item;
+    for (int i = 0; i < rootItem->childCount(); ++i) {
+        item = rootItem->child(i);
+        QModelIndex index = createIndex(0, 0, item);
+        int rowCount = item->childCount();
+        if (rowCount) {
+            beginRemoveRows(index, 0, rowCount - 1);
+            for (int i = 0; i < rowCount; ++i)
+                item->remove(0);
+            endRemoveRows();
         }
-        endRemoveRows();
     }
-
-    item = rootItem->child(NodeDrillFiles);
-    index = createIndex(0, 0, item);
-    rowCount = item->childCount();
-    if (rowCount) {
-        beginRemoveRows(index, 0, rowCount - 1);
-        for (int i = 0; i < rowCount; ++i) {
-            item->remove(0);
-        }
-        endRemoveRows();
-    }
-
-    item = rootItem->child(NodeToolPath);
-    index = createIndex(0, 0, item);
-    rowCount = item->childCount();
-    if (rowCount) {
-        beginRemoveRows(index, 0, rowCount - 1);
-        for (int i = 0; i < rowCount; ++i) {
-            item->remove(0);
-        }
-        endRemoveRows();
-    }
+    resetInternalData();
 }
 
 QModelIndex FileModel::index(int row, int column, const QModelIndex& parent) const
 {
-    if (!hasIndex(row, column, parent))
-        return QModelIndex();
-
-    AbstractNode* parentItem;
-
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
-
-    AbstractNode* childItem = parentItem->child(row);
+    AbstractNode* childItem = getItem(parent)->child(row);
     if (childItem)
         return createIndex(row, column, childItem);
-    else
-        return QModelIndex();
+    return QModelIndex();
 }
 
-QModelIndex FileModel::parent(const QModelIndex& child) const
+QModelIndex FileModel::parent(const QModelIndex& index) const
 {
-    if (!child.isValid())
+
+    if (!index.isValid())
         return QModelIndex();
 
-    AbstractNode* parentItem = static_cast<AbstractNode*>(child.internalPointer())->parentItem();
+    AbstractNode* parentItem = getItem(index)->parentItem();
 
     if (parentItem == rootItem)
         return QModelIndex();
@@ -130,16 +101,30 @@ QVariant FileModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid())
         return QVariant();
-    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
+
+    AbstractNode* item = getItem(index);
+
     return item->data(index, role);
+    //    if (!index.isValid())
+    //        return QVariant();
+
+    //    AbstractNode* item = getItem(index);
+
+    //    return item->data(index, role);
 }
 
 bool FileModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (!index.isValid())
-        return false;
-    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
-    return item->setData(index, value, role);
+    bool result = getItem(index)->setData(index, value, role);
+
+    if (result)
+        emit dataChanged(index, index);
+
+    return result;
+    //    if (!index.isValid())
+    //        return false;
+    //    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
+    //    return item->setData(index, value, role);
 }
 
 QVariant FileModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -153,7 +138,6 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
         default:
             return QString("");
         }
-    //    QString("Name|Note").split('|')[section];
     return QVariant();
 }
 
@@ -161,14 +145,15 @@ Qt::ItemFlags FileModel::flags(const QModelIndex& index) const
 {
     if (!index.isValid())
         return Qt::NoItemFlags;
-    AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
+
+    AbstractNode* item = getItem(index);
+
     return item->flags(index);
 }
 
 bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    //qDebug() << parent << parent.data();
-    //qDebug() << row << count;
+    //return false;
     AbstractNode* item = nullptr;
     if (parent.isValid())
         item = static_cast<AbstractNode*>(parent.internalPointer());
@@ -179,29 +164,37 @@ bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
     for (int r = row; r < row + count; ++r)
         item->remove(r);
     endRemoveRows();
+    resetInternalData();
     return true;
 }
 
 int FileModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    //    if (parent.isValid())
-    //        return static_cast<AbstractItem*>(parent.internalPointer())->columnCount();
-    //    else
-    //        return rootItem->columnCount();
-
     return 2;
 }
 
 int FileModel::rowCount(const QModelIndex& parent) const
 {
-    AbstractNode* parentItem;
     if (parent.column() > 0)
         return 0;
+    return getItem(parent)->childCount();
 
-    if (!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
+    //    AbstractNode* parentItem;
 
-    return parentItem->childCount();
+    //    if (!parent.isValid())
+    //        parentItem = rootItem;
+    //    else
+    //        parentItem = static_cast<AbstractNode*>(parent.internalPointer());
+
+    //    return parentItem->childCount();
+}
+
+AbstractNode* FileModel::getItem(const QModelIndex& index) const
+{
+    if (index.isValid()) {
+        AbstractNode* item = static_cast<AbstractNode*>(index.internalPointer());
+        if (item)
+            return item;
+    }
+    return rootItem;
 }

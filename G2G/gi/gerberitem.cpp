@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <file.h>
 #include <mygraphicsview.h>
 #include <myscene.h>
 
@@ -9,8 +10,8 @@ GerberItem::GerberItem(const Paths& paths, G::File* file)
     : m_file(file)
 {
     m_paths = paths;
-    for (Path& path : this->m_paths) {
-        if (path.first() != path.last())
+    for (Path path : this->m_paths) {
+        if (path.size() && path.first() != path.last())
             path.append(path.first());
         m_shape.addPolygon(PathToQPolygon(path));
     }
@@ -19,7 +20,15 @@ GerberItem::GerberItem(const Paths& paths, G::File* file)
     setFlag(ItemIsSelectable, true);
 }
 
-GerberItem::~GerberItem() {}
+GerberItem::~GerberItem()
+{
+    //    if (dynamic_cast<const G::File*>(m_file)) {
+    //        int index = m_file->groupedPaths().indexOf(m_paths);
+    //        //qDebug() << "~GerberItem() index" << index;
+    //        if (index > -1)
+    //            m_file->groupedPaths().remove(index);
+    //    }
+}
 
 QRectF GerberItem::boundingRect() const { return m_rect; }
 
@@ -46,7 +55,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         pen = QPen(cp, 0.0);
     }
     if (option->state & QStyle::State_MouseOver) {
-        cb = cb.lighter(130);
+        cb = cb.dark(110);
         b.setColor(cb);
         //        b.setStyle(Qt::Dense4Pattern);
         //        b.setMatrix(matrix().scale(2 / MyGraphicsView::self->matrix().m11(), 2 / MyGraphicsView::self->matrix().m11()));

@@ -35,8 +35,6 @@ PocketForm::PocketForm(QWidget* parent)
             ":/toolpath/raster_conventional.png",
         };
 
-        QStringList name = { "Pocket Offset", "Pocket Raster" };
-
         if (ui->rbOffset->isChecked())
             type = Offset;
         else if (ui->rbRaster->isChecked())
@@ -45,7 +43,7 @@ PocketForm::PocketForm(QWidget* parent)
         ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
         ui->dsbxAngle->setEnabled(ui->rbRaster->isChecked());
 
-        ui->leName->setText(name[type]);
+        updateName();
 
         if (ui->rbClimb->isChecked())
             direction = Climb;
@@ -61,10 +59,13 @@ PocketForm::PocketForm(QWidget* parent)
     connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
 
     rb_clicked();
+
+    ui->sbxSteps->setSuffix(" - Infinity");
 }
 
 PocketForm::~PocketForm()
 {
+    qDebug("~PocketForm()");
     delete ui;
 }
 
@@ -74,6 +75,7 @@ void PocketForm::on_pbSelect_clicked()
     if (tdb.exec()) {
         tool = tdb.tool();
         ui->lblToolName->setText(tool.name);
+        updateName();
     }
 }
 void PocketForm::on_pbSelect_2_clicked()
@@ -97,7 +99,7 @@ void PocketForm::on_pbCreate_clicked()
 void PocketForm::on_pbClose_clicked()
 {
     if (parent())
-        static_cast<QDockWidget*>(parent())->hide();
+        static_cast<QWidget*>(parent())->close();
 }
 
 void PocketForm::create()
@@ -115,13 +117,13 @@ void PocketForm::create()
     }
 
     Paths wPaths;
-    G::Side boardSide = G::Side(-1);
+    Side boardSide = Side(-1);
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (boardSide == G::Side(-1))
-                boardSide = gi->file()->side;
-            if (boardSide != gi->file()->side) {
+            if (boardSide == Side(-1))
+                boardSide = gi->file()->side();
+            if (boardSide != gi->file()->side()) {
                 QMessageBox::warning(this, "", "Working items from different sides!");
                 return;
             }
@@ -130,21 +132,47 @@ void PocketForm::create()
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (boardSide == G::Side(-1))
-        boardSide = G::Top;
+    if (boardSide == Side(-1))
+        boardSide = Top;
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
         return;
     }
 
-    GCodeFile* gcode = ToolPathCreator(wPaths).createPocket({ tool }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked());
+    if (ui->chbxUseTwoTools->isChecked()) {
 
-    if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
-        return;
+        QVector<GCodeFile*> gcode = ToolPathCreator(wPaths).createPocket2({ tool, tool2 }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
+
+    } else {
+        GCodeFile* gcode = ToolPathCreator(wPaths).createPocket(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
+        if (gcode == nullptr) {
+            QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
+            return;
+        }
+        gcode->setFileName(ui->leName->text());
+        gcode->setSide(boardSide);
+        FileModel::self->addGcode(gcode);
     }
-    gcode->setFileName(ui->leName->text());
-    gcode->setSide(boardSide);
-    FileModel::self->addGcode(gcode);
+}
+
+void PocketForm::on_sbxSteps_valueChanged(int arg1)
+{
+    if (!arg1)
+        ui->sbxSteps->setSuffix(" - Infinity");
+    else
+        ui->sbxSteps->setSuffix("");
+}
+
+void PocketForm::updateName()
+{
+    QStringList name = { "Pocket Offset", "Pocket Raster" };
+    ui->leName->setText(name[type] + " (" + tool.name + ")");
+}
+
+void PocketForm::on_chbxUseTwoTools_clicked(bool checked)
+{
+    ui->lblToolName_2->setEnabled(checked);
+    ui->pbEdit_2->setEnabled(checked);
+    ui->pbSelect_2->setEnabled(checked);
 }

@@ -11,7 +11,7 @@ class MaterialSetup : public QWidget {
     Q_OBJECT
 
 public:
-    explicit MaterialSetup(QWidget* parent = nullptr);
+    explicit MaterialSetup(QWidget* prnt = nullptr);
     ~MaterialSetup();
 
     void setHomePos(QPointF pos);

@@ -29,29 +29,29 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
     setMinimumWidth(400);
 
-//    QFile file(":/QTreeView.qss");
-//    file.open(QFile::ReadOnly);
-//    setStyleSheet(file.readAll());
+    //    QFile file(":/QTreeView.qss");
+    //    file.open(QFile::ReadOnly);
+    //    setStyleSheet(file.readAll());
 
-//    int w = indentation();
-//    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
+    //    int w = indentation();
+    //    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
 
-//    QImage i(w, h, QImage::Format_ARGB32);
-//    i.fill(Qt::transparent);
-//    for (int y = 0; y < h; ++y)
-//        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-//    i.save("vline.png", "PNG");
+    //    QImage i(w, h, QImage::Format_ARGB32);
+    //    i.fill(Qt::transparent);
+    //    for (int y = 0; y < h; ++y)
+    //        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    //    i.save("vline.png", "PNG");
 
-//    for (int x = w / 2; x < w; ++x)
-//        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-//    i.save("branch-more.png", "PNG");
+    //    for (int x = w / 2; x < w; ++x)
+    //        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    //    i.save("branch-more.png", "PNG");
 
-//    i.fill(Qt::transparent);
-//    for (int y = 0; y < h / 2; ++y)
-//        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-//    for (int x = w / 2; x < w; ++x)
-//        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-//    i.save("branch-end.png", "PNG");
+    //    i.fill(Qt::transparent);
+    //    for (int y = 0; y < h / 2; ++y)
+    //        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    //    for (int x = w / 2; x < w; ++x)
+    //        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    //    i.save("branch-end.png", "PNG");
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());

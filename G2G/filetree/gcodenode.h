@@ -14,8 +14,6 @@ public:
 
     // AbstractItem interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    int columnCount(/*const QModelIndex& parent*/) const override;
-    int childCount(/*const QModelIndex& parent*/) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 

@@ -53,11 +53,12 @@ ToolPathCreator::ToolPathCreator(const Paths& value)
 {
 }
 
-GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool>& tool, bool convent, double depth, bool side)
+GCodeFile* ToolPathCreator::createPocket(const Tool& tool, bool convent, double depth, bool side, int steps)
 {
-    double toolDiameter = tool[0].getDiameter(depth) * uScale;
+
+    double toolDiameter = tool.getDiameter(depth) * uScale;
     double dOffset = toolDiameter / 2;
-    double stepOver = tool[0].stepover * uScale;
+    double stepOver = tool.stepover * uScale;
 
     if (side) {
         groupedPaths(CutoffPaths, toolDiameter + 5);
@@ -77,18 +78,34 @@ GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool
 
         CleanPolygons(paths, 0.0009 * uScale);
         fillPaths.append(paths);
-
-        do {
-            tmpPaths.append(paths);
-            offset.Clear();
-            offset.AddPaths(paths, jtMiter, etClosedPolygon);
-            offset.Execute(paths, -stepOver);
-        } while (paths.size());
+        if (steps) {
+            int counter = steps;
+            if (counter > 1) {
+                do {
+                    if (counter == 1)
+                        fillPaths.append(paths);
+                    tmpPaths.append(paths);
+                    offset.Clear();
+                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    offset.Execute(paths, -stepOver);
+                } while (paths.size() && --counter);
+            } else {
+                tmpPaths.append(paths);
+                fillPaths.append(paths);
+            }
+        } else {
+            do {
+                tmpPaths.append(paths);
+                offset.Clear();
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.Execute(paths, -stepOver);
+            } while (paths.size());
+        }
 
         clipper.Clear();
         clipper.AddPaths(tmpPaths, ptSubject, true);
         IntRect r(clipper.GetBounds());
-        int k = tool.first().diameter * uScale;
+        int k = tool.diameter * uScale;
         Path outer = {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
@@ -126,7 +143,13 @@ GCodeFile* ToolPathCreator::createPocket(/*MILLING milling,*/ const QVector<Tool
         }
     }
 
-    return new GCodeFile(sortByStratDistance(m_returnPaths), tool[0], depth, Pocket, fillPaths);
+    return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Pocket, fillPaths);
+}
+
+QVector<GCodeFile*> ToolPathCreator::createPocket2(const QVector<Tool>& tool, bool convent, double depth, bool side, int steps)
+{
+    QVector<GCodeFile*> gcf;
+    return gcf;
 }
 
 GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)

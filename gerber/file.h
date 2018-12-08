@@ -50,7 +50,6 @@ public:
 
     Layer layer = Copper;
     Miror miror = Vertical;
-    Side side = Top;
     FileType type() const override { return FileType::Gerber; }
 
     QMap<int, QSharedPointer<AbstractAperture>> getApertures() const;

@@ -9,6 +9,7 @@
 #include <QStandardItemModel>
 #include <QTimer>
 #include <QTreeView>
+class ExcellonDialog;
 
 class TreeView : public QTreeView {
     Q_OBJECT
@@ -24,14 +25,15 @@ private:
     void on_doubleClicked(const QModelIndex& index);
     void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
-    void hideOther(const QModelIndex& index);
+    void hideOther();
+    ExcellonDialog* d = nullptr;
+    QModelIndex m_menuIndex;
+    void closeFile();
+    void saveGcodeFile();
+    void showExcellonDialog();
 
 protected:
     void contextMenuEvent(QContextMenuEvent* event) override;
-
-    // QAbstractItemView interface
-protected slots:
-    void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override;
 };
 
 #endif // MYTREEVIEW_H

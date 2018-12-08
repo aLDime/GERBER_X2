@@ -18,9 +18,11 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
     qDebug() << fileName;
-    m_state.reset();
+
     m_file = new DrillFile;
     m_file->setFileName(fileName);
+    m_state.reset(&m_file->m_format);
+
     QTextStream in(&file);
     QString line;
     while (in.readLineInto(&line)) {
@@ -51,11 +53,11 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
             qWarning() << "херня какаято:" << line;
 
         } catch (const QString& errStr) {
-            qWarning() << "exeption:" << errStr;
+            qWarning() << "exeption Q:" << errStr;
             //emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
             delete m_file;
         } catch (...) {
-            qWarning() << "exeption:" << errno;
+            qWarning() << "exeption S:" << errno;
             //emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
             delete m_file;
         }
@@ -66,11 +68,10 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     } else {
         m_file->setItemGroup(new ItemGroup);
         for (Hole& hole : *m_file) {
-            m_file->itemGroup()->append(new DrillItem(hole.state.currentToolDiameter, m_file));
-            m_file->itemGroup()->last()->setToolTip(QString("Tool %1, Ø%2mm(%3)").arg(hole.state.tCode).arg(hole.state.currentToolDiameter).arg(hole.state.line));
-            m_file->itemGroup()->last()->setPos(hole.state.pos);
+            DrillItem* item = new DrillItem(&hole);
+            hole.item = item;
+            m_file->itemGroup()->append(item);
         }
-        //m_file->itemGroup()->setZValue(std::numeric_limits<double>::max());
     }
     return m_file;
 }
@@ -99,8 +100,8 @@ bool DrillParser::parseComment(const QString& line)
         const QRegExp matchFormat(".*FORMAT.*([0-9]).([0-9]).*", Qt::CaseInsensitive);
         if (matchFormat.exactMatch(match.cap(1))) {
             //qDebug() << matchFormat.capturedTexts();
-            m_state.format.integer = matchFormat.cap(1).toInt();
-            m_state.format.decimal = matchFormat.cap(2).toInt();
+            m_file->m_format.integer = matchFormat.cap(1).toInt();
+            m_file->m_format.decimal = matchFormat.cap(2).toInt();
         }
         return true;
     }
@@ -139,11 +140,11 @@ bool DrillParser::parseMCode(const QString& line)
             break;
         case M71:
             m_state.mCode = M71;
-            m_state.format.unitMode = Millimeters;
+            m_file->m_format.unitMode = Millimeters;
             break;
         case M72:
             m_state.mCode = M72;
-            m_state.format.unitMode = Inches;
+            m_file->m_format.unitMode = Inches;
             break;
         case M95:
             m_state.mCode = M95;
@@ -174,11 +175,11 @@ bool DrillParser::parseTCode(const QString& line)
         //        qDebug() << capturedTexts << index;
         m_state.tCode = match.cap(1).toInt();
         if (index > 0) {
-            const double k = m_state.format.unitMode ? 1.0 : 25.4;
-            m_file->m_toolDiameter[m_state.tCode] = match.cap(index + 1).toDouble() * k;
-            m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
-        } else
-            m_state.currentToolDiameter = m_file->m_toolDiameter[m_state.tCode];
+            //            const double k = m_file->format.unitMode ? 1.0 : 25.4;
+            m_file->m_tools[m_state.tCode] = match.cap(index + 1).toDouble() /* * k*/;
+            //            m_state.currentToolDiameter = m_file->m_tools[m_state.tCode];
+        } /*else
+            m_state.currentToolDiameter = m_file->m_tools[m_state.tCode];*/
         return true;
     }
     return false;
@@ -186,16 +187,17 @@ bool DrillParser::parseTCode(const QString& line)
 
 bool DrillParser::parsePos(const QString& line)
 {
-    static double x = 0.0;
-    static double y = 0.0;
-
     QRegExp match("^(?:G(\\d+))?"
                   "(?:X([+-]?\\d*\\.?\\d+))?"
                   "(?:Y([+-]?\\d*\\.?\\d+))?"
                   ".*$");
     if (match.exactMatch(line)) {
-        QStringList capturedTexts(match.capturedTexts());
-        qDebug() << capturedTexts;
+
+        if (!match.cap(2).isEmpty())
+            m_state.rawPos[0] = match.cap(2);
+        if (!match.cap(3).isEmpty())
+            m_state.rawPos[1] = match.cap(3);
+
         parseNumber(match.cap(2), m_state.pos.rx());
         parseNumber(match.cap(3), m_state.pos.ry());
         m_file->append(Hole(m_state, m_file));
@@ -212,7 +214,6 @@ bool DrillParser::parseRepeat(const QString& line)
                   "(?:Y([+-]?\\d*\\.?\\d+))?"
                   "$");
     if (match.exactMatch(line)) {
-        qDebug() << match.capturedTexts();
         int count = match.cap(1).toInt();
         QPointF p;
         parseNumber(match.cap(2), p.rx());
@@ -232,23 +233,22 @@ bool DrillParser::parseFormat(const QString& line)
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
     static const QRegExp match("^(METRIC|INCH).*(LZ|TZ)?$");
     if (match.exactMatch(line)) {
-        qDebug() << match.capturedTexts();
         switch (unitMode.indexOf(match.cap(1))) {
         case Inches:
-            m_state.format.unitMode = Inches;
+            m_file->m_format.unitMode = Inches;
             break;
         case Millimeters:
-            m_state.format.unitMode = Millimeters;
+            m_file->m_format.unitMode = Millimeters;
             break;
         default:
             break;
         }
         switch (zeroMode.indexOf(match.cap(2))) {
         case LeadingZeros:
-            m_state.format.zeroMode = LeadingZeros;
+            m_file->m_format.zeroMode = LeadingZeros;
             break;
         case TrailingZeros:
-            m_state.format.zeroMode = TrailingZeros;
+            m_file->m_format.zeroMode = TrailingZeros;
             break;
         default:
             break;
@@ -257,16 +257,15 @@ bool DrillParser::parseFormat(const QString& line)
     }
     static const QRegExp match2("^(FMAT).*(2)?$");
     if (match2.exactMatch(line)) {
-        qDebug() << match2.capturedTexts();
-        m_state.format.unitMode = Inches;
-        m_state.format.zeroMode = LeadingZeros;
+        m_file->m_format.unitMode = Inches;
+        m_file->m_format.zeroMode = LeadingZeros;
         return true;
     }
 
     return false;
 }
 
-bool DrillParser::parseNumber(QString Str, double& val, int integer, int decimal)
+bool DrillParser::parseNumber(QString Str, double& val)
 {
     bool flag = false;
     int sign = 1;
@@ -274,10 +273,6 @@ bool DrillParser::parseNumber(QString Str, double& val, int integer, int decimal
         if (Str.contains('.')) {
             val = Str.toDouble();
         } else {
-            if (!decimal)
-                decimal = m_state.format.decimal;
-            if (!integer)
-                integer = m_state.format.integer;
 
             if (Str.startsWith('+')) {
                 Str.remove(0, 1);
@@ -286,21 +281,135 @@ bool DrillParser::parseNumber(QString Str, double& val, int integer, int decimal
                 Str.remove(0, 1);
                 sign = -1;
             }
-            if (Str.length() < integer + decimal) {
-                switch (m_state.format.zeroMode) {
+            if (Str.length() < m_file->m_format.integer + m_file->m_format.decimal) {
+                switch (m_file->m_format.zeroMode) {
                 case LeadingZeros:
-                    Str = Str + QString(integer + decimal - Str.length(), '0');
+                    Str = Str + QString(m_file->m_format.integer + m_file->m_format.decimal - Str.length(), '0');
                     break;
                 case TrailingZeros:
-                    Str = QString(integer + decimal - Str.length(), '0') + Str;
+                    Str = QString(m_file->m_format.integer + m_file->m_format.decimal - Str.length(), '0') + Str;
                     break;
                 }
             }
-            val = Str.toDouble() * pow(10.0, -decimal) * sign;
+            val = Str.toDouble() * pow(10.0, -m_file->m_format.decimal) * sign;
         }
-        if (m_state.format.unitMode == Inches)
+        if (m_file->m_format.unitMode == Inches)
             val *= 25.4;
         return true;
     }
     return flag;
+}
+
+Format DrillFile::format() const
+{
+    return m_format;
+}
+
+void DrillFile::setFormat(const Format& value)
+{
+    m_format.zeroMode = value.zeroMode;
+    m_format.unitMode = value.unitMode;
+    m_format.decimal = value.decimal;
+    m_format.integer = value.integer;
+    m_format.offsetPos = value.offsetPos;
+    for (Hole& hole : *this) {
+        hole.state.updatePos();
+        hole.item->updateHole();
+    }
+}
+
+double DrillFile::tool(int t) const
+{
+    double tool = 0.0;
+    if (m_tools.contains(t)) {
+        tool = m_tools[t];
+        if (m_format.unitMode == Inches)
+            tool *= 25.4;
+    }
+    return tool;
+}
+
+QMap<int, double> DrillFile::tools() const
+{
+    QMap<int, double> tools(m_tools);
+    QMap<int, double>::iterator toolIt;
+    if (m_format.unitMode == Inches)
+        for (toolIt = tools.begin(); toolIt != tools.end(); ++toolIt)
+            toolIt.value() *= 25.4;
+    return tools;
+}
+
+///////////////////////////////////////////////////////
+/// \brief State::reset
+/// \param f
+///
+void State::reset(Format* f)
+{
+    format = f;
+    if (format) {
+        format->unitMode = Millimeters;
+        format->decimal = 4;
+        format->integer = 3;
+    }
+    rawPos[0].clear();
+    rawPos[1].clear();
+    gCode = G00;
+    mCode = M00;
+    tCode = 0;
+    pos = QPointF();
+    path.clear();
+    line = 0;
+}
+///////////////////////////////////////////////////////
+/// \brief State::updatePos
+///
+void State::updatePos()
+{
+    pos = QPointF(parseNumber(rawPos[0]), parseNumber(rawPos[1]));
+}
+///////////////////////////////////////////////////////
+/// \brief State::parseNumber
+/// \param Str
+/// \return
+///
+double State::parseNumber(QString Str)
+{
+    double val = 0.0;
+    int sign = 1;
+    if (!Str.isEmpty()) {
+        if (Str.contains('.')) {
+            val = Str.toDouble();
+        } else {
+
+            if (Str.startsWith('+')) {
+                Str.remove(0, 1);
+                sign = 1;
+            } else if (Str.startsWith('-')) {
+                Str.remove(0, 1);
+                sign = -1;
+            }
+            if (Str.length() < format->integer + format->decimal) {
+                switch (format->zeroMode) {
+                case LeadingZeros:
+                    Str = Str + QString(format->integer + format->decimal - Str.length(), '0');
+                    break;
+                case TrailingZeros:
+                    Str = QString(format->integer + format->decimal - Str.length(), '0') + Str;
+                    break;
+                }
+            }
+            val = Str.toDouble() * pow(10.0, -format->decimal) * sign;
+        }
+        if (format->unitMode == Inches)
+            val *= 25.4;
+    }
+    return val;
+}
+///////////////////////////////////////////////////////
+/// \brief State::currentToolDiameter
+/// \return
+///
+double State::currentToolDiameter() const
+{
+    return format->file->tool(tCode);
 }

@@ -33,10 +33,9 @@ public:
     void addGcode(GCodeFile* group);
     void closeAllFiles();
 
-public:
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
-    QModelIndex parent(const QModelIndex& child) const override;
+    QModelIndex parent(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role = Qt::EditRole) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
@@ -45,6 +44,9 @@ public:
 
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
+
+private:
+    AbstractNode* getItem(const QModelIndex& index) const;
 };
 
 #endif // MODEL_H

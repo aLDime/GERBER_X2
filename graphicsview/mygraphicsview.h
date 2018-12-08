@@ -1,4 +1,4 @@
- #ifndef VIEW_H
+#ifndef VIEW_H
 #define VIEW_H
 
 #include "mygraphicsview.h"
@@ -14,16 +14,15 @@ class MyGraphicsView : public QGraphicsView {
 public:
     explicit MyGraphicsView(QWidget* parent = 0);
     ~MyGraphicsView();
-    void SetScene(QGraphicsScene* Scene);
-    void Zoom100();
-    void ZoomFit();
-    void ZoomIn();
-    void ZoomOut();
+    void setScene(QGraphicsScene* Scene);
+    void zoom100();
+    void zoomFit();
+    void zoomIn();
+    void zoomOut();
     static MyGraphicsView* self;
 
 signals:
-    void FileDroped(const QString& file);
-    void ClearScene();
+    void fileDroped(const QString& file);
 
 private:
     double zoom = 100;

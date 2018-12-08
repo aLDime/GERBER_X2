@@ -52,16 +52,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
     file->lines() = format(gerberLines);
     if (file->lines().isEmpty())
-        emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Incorrect File!");
+        emit fileError("", file->shortFileName() + "\n" + "Incorrect File!");
 
-    emit fileProgress(QFileInfo(fileName).fileName(), file->lines().size() - 1, 0);
+    emit fileProgress(file->shortFileName(), file->lines().size(), 0);
     QElapsedTimer t;
     t.start();
     for (QString& gerberLine : file->lines()) {
-        if (!(state.lineNum % 1000))
-            emit fileProgress(QFileInfo(fileName).fileName(), file->lines().size() - 1, state.lineNum);
         gerbLines.push_back(gerberLine);
         ++state.lineNum;
+        if (!(state.lineNum % 1000))
+            emit fileProgress(file->shortFileName(), 0, state.lineNum);
         try {
 
             //qWarning() << QString("Line Num %1: '%2'").arg(state.lineNum).arg(gLine);
@@ -128,11 +128,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             // Line did not match any pattern. Warn user.
             // qWarning() << QString("Line ignored (%1): '%2'").arg(state.lineNum).arg(gerberLine);
         } catch (const QString& errStr) {
-            qWarning() << "exeption:" << errStr;
-            emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
+            qWarning() << "exeption Q:" << errStr;
+            emit fileError("", file->shortFileName() + "\n" + errStr);
         } catch (...) {
-            qWarning() << "exeption:" << errno;
-            emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
+            qWarning() << "exeption S:" << errno;
+            emit fileError("", file->shortFileName() + "\n" + "Unknown Error!");
         }
     }
 
@@ -149,12 +149,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         }
         emit fileReady(file);
     }
-    fileProgress("", 1, 1);
+    emit fileProgress(file->shortFileName(), 1, 1);
 
     gerbLines.clear();
     apertureMacro.clear();
     path.clear();
-
     mutex.unlock();
 }
 

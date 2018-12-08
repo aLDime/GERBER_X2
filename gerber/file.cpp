@@ -27,17 +27,17 @@ Paths File::merge() const
             SimplifyPolygons(tmpPaths, pftNonZero);
             clipper.AddPaths(tmpPaths, ptClip, true);
         } while (i < size() && exp == at(i).state.imgPolarity);
-        if (at(i - 1).state.imgPolarity == G::Positive) {
+
+        if (at(i - 1).state.imgPolarity == G::Positive)
             clipper.Execute(ctUnion, paths, pftPositive);
-        } else {
+        else
             clipper.Execute(ctDifference, paths, pftNonZero);
-        }
     }
     m_mergedPaths = paths;
     return m_mergedPaths;
 }
 
-QMap<int, QSharedPointer<AbstractAperture> > File::getApertures() const
+QMap<int, QSharedPointer<AbstractAperture>> File::getApertures() const
 {
     return apertures;
 }

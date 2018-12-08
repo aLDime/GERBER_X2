@@ -25,6 +25,10 @@ private slots:
     void on_pbSelect_2_clicked();
     void on_pbEdit_2_clicked();
 
+    void on_sbxSteps_valueChanged(int arg1);
+
+    void on_chbxUseTwoTools_clicked(bool checked);
+
 private:
     Ui::PocketForm* ui;
 
@@ -32,8 +36,9 @@ private:
     int type = 0;
 
     // ToolPathUtil interface
-public:
+protected:
     void create() override;
+    void updateName() override;
 };
 
 #endif // POCKETFORM_H

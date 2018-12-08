@@ -125,7 +125,7 @@ ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
     // GerberAperture interface
 }
 
-QString ApCircle::name() { return QString("CIRCLE(Ø%1)").arg(m_diam); }
+QString ApCircle::name() { return QString("CIRC(Ø%1)").arg(m_diam); } //CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
@@ -144,7 +144,7 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fo
     m_drillDiam = drillDiam;
 }
 
-QString ApRectangle::name() { return QString("RECTANGLE(W%1, H%2)").arg(m_width).arg(m_height); }
+QString ApRectangle::name() { return QString("RECT(W%1, H%2)").arg(m_width).arg(m_height); } //RECTANGLE
 
 ApertureType ApRectangle::type() const { return Rectangle; }
 
@@ -164,7 +164,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const Format
     m_drillDiam = drillDiam;
 }
 
-QString ApObround::name() { return QString("OBROUND(W%1, H%2)").arg(m_width).arg(m_height); }
+QString ApObround::name() { return QString("OBRO(W%1, H%2)").arg(m_width).arg(m_height); } //OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
@@ -204,7 +204,7 @@ double ApPolygon::rotation() const { return m_rotation; }
 
 int ApPolygon::verticesCount() const { return m_verticesCount; }
 
-QString ApPolygon::name() { return QString("POLYGON(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); }
+QString ApPolygon::name() { return QString("POLY(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } //POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
@@ -235,7 +235,7 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QM
     m_coefficients = coefficients;
 }
 
-QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); }
+QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); } //MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 

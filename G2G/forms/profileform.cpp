@@ -30,8 +30,6 @@ ProfileForm::ProfileForm(QWidget* parent)
             ":/toolpath/on_conventional.png"
         };
 
-        QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
-
         if (ui->rbOutside->isChecked())
             side = Outer;
         else if (ui->rbInside->isChecked())
@@ -39,7 +37,7 @@ ProfileForm::ProfileForm(QWidget* parent)
         else if (ui->rbOn->isChecked())
             side = On;
 
-        ui->leName->setText(name[side]);
+        updateName();
 
         if (ui->rbClimb->isChecked())
             direction = Climb;
@@ -60,6 +58,7 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 ProfileForm::~ProfileForm()
 {
+    qDebug("~PocketForm()");
     delete ui;
 }
 
@@ -69,6 +68,7 @@ void ProfileForm::on_pbSelect_clicked()
     if (tdb.exec()) {
         tool = tdb.tool();
         ui->lblToolName->setText(tool.name);
+        updateName();
     }
 }
 
@@ -84,7 +84,7 @@ void ProfileForm::on_pbCreate_clicked()
 void ProfileForm::on_pbClose_clicked()
 {
     if (parent())
-        static_cast<QDockWidget*>(parent())->hide();
+        static_cast<QWidget*>(parent())->close();
 }
 
 void ProfileForm::create()
@@ -97,14 +97,14 @@ void ProfileForm::create()
     }
 
     Paths wPaths;
-    G::Side boardSide = static_cast<G::Side>(-1);
+    Side boardSide = NullSide;
 
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (boardSide == G::Side(-1))
-                boardSide = gi->file()->side;
-            if (boardSide != gi->file()->side) {
+            if (boardSide == NullSide)
+                boardSide = gi->file()->side();
+            if (boardSide != gi->file()->side()) {
                 QMessageBox::warning(this, "", "Working items from different sides!");
                 return;
             }
@@ -113,8 +113,8 @@ void ProfileForm::create()
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (boardSide == static_cast<G::Side>(-1))
-        boardSide = G::Top;
+    if (boardSide == NullSide)
+        boardSide = Top;
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, "!!!", tr("No selected..."));
@@ -131,4 +131,10 @@ void ProfileForm::create()
     gcode->setFileName(ui->leName->text());
     gcode->setSide(boardSide);
     FileModel::self->addGcode(gcode);
+}
+
+void ProfileForm::updateName()
+{
+    static const QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
+    ui->leName->setText(name[side] + " (" + tool.name + ")");
 }

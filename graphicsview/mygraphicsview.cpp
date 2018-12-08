@@ -48,7 +48,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &MyGraphicsView::UpdateRuler);
 
     scale(1.0, -1.0); //flip vertical
-    Zoom100();
+    zoom100();
 
     QSettings settings;
     settings.beginGroup("Viewer");
@@ -56,7 +56,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
-    SetScene(new MyScene(this));
+    setScene(new MyScene(this));
     self = this;
 }
 
@@ -65,13 +65,13 @@ MyGraphicsView::~MyGraphicsView()
     self = nullptr;
 }
 
-void MyGraphicsView::SetScene(QGraphicsScene* Scene)
+void MyGraphicsView::setScene(QGraphicsScene* Scene)
 {
-    setScene(Scene);
+    QGraphicsView::setScene(Scene);
     UpdateRuler();
 }
 
-void MyGraphicsView::ZoomFit()
+void MyGraphicsView::zoomFit()
 {
     scene()->setSceneRect(scene()->itemsBoundingRect());
     fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
@@ -79,7 +79,7 @@ void MyGraphicsView::ZoomFit()
     UpdateRuler();
 }
 
-void MyGraphicsView::Zoom100()
+void MyGraphicsView::zoom100()
 {
     double x = 1.0, y = 1.0;
     if (0) {
@@ -100,7 +100,7 @@ void MyGraphicsView::Zoom100()
 //    INTERVAL = 30
 //};
 
-void MyGraphicsView::ZoomIn()
+void MyGraphicsView::zoomIn()
 {
     if (transform().m11() > 10000.0)
         return;
@@ -115,7 +115,7 @@ void MyGraphicsView::ZoomIn()
     UpdateRuler();
 }
 
-void MyGraphicsView::ZoomOut()
+void MyGraphicsView::zoomOut()
 {
     if (transform().m11() < 1.0)
         return;
@@ -132,56 +132,54 @@ void MyGraphicsView::ZoomOut()
 
 void MyGraphicsView::wheelEvent(QWheelEvent* event)
 {
-    switch (event->modifiers()) {
-    case Qt::ControlModifier:
-        if (abs(event->delta()) == 120) {
-            if (event->delta() > 0)
-                ZoomIn();
-            else
-                ZoomOut();
+    if (1)
+        switch (event->modifiers()) {
+        case Qt::ControlModifier:
+            if (abs(event->delta()) == 120) {
+                if (event->delta() > 0)
+                    zoomIn();
+                else
+                    zoomOut();
+            }
+            break;
+        case Qt::ShiftModifier:
+            if (!event->angleDelta().x())
+                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+            break;
+        case Qt::NoModifier:
+            if (!event->angleDelta().x())
+                QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+            //            else
+            //                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+            break;
+        default:
+            QGraphicsView::wheelEvent(event);
+            return;
         }
-        event->accept();
-        break;
-    case Qt::ShiftModifier:
-        QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        event->accept();
-        break;
-    case Qt::NoModifier:
-        if (event->angleDelta().x() != 0)
+    else
+        switch (event->modifiers()) {
+        case Qt::ControlModifier:
+            if (event->angleDelta().x() != 0)
+                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+            else
+                QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+            break;
+        case Qt::ShiftModifier:
             QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-        else
-            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-        event->accept();
-        break;
-    default:
-        QGraphicsView::wheelEvent(event);
-        break;
-    }
-    //    switch (event->modifiers()) {
-    //    case Qt::ControlModifier:
-    //        if (event->angleDelta().x() != 0)
-    //            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-    //        else
-    //            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-    //        event->accept();
-    //        break;
-    //    case Qt::ShiftModifier:
-    //        QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-    //        event->accept();
-    //        break;
-    //    case Qt::NoModifier:
-    //        if (abs(event->delta()) == 120) {
-    //            if (event->delta() > 0)
-    //                ZoomIn();
-    //            else
-    //                ZoomOut();
-    //        }
-    //        event->accept();
-    //        break;
-    //    default:
-    //        QGraphicsView::wheelEvent(event);
-    //        break;
-    //    }
+            break;
+        case Qt::NoModifier:
+            if (abs(event->delta()) == 120) {
+                if (event->delta() > 0)
+                    zoomIn();
+                else
+                    zoomOut();
+            }
+            break;
+        default:
+            QGraphicsView::wheelEvent(event);
+            return;
+        }
+    event->accept();
 }
 
 void MyGraphicsView::UpdateRuler()
@@ -205,12 +203,8 @@ void MyGraphicsView::dragEnterEvent(QDragEnterEvent* event)
 
 void MyGraphicsView::dropEvent(QDropEvent* event)
 {
-    if (event->mouseButtons() == Qt::LeftButton) {
-        emit ClearScene();
-    }
-    for (QUrl& var : event->mimeData()->urls()) {
-        emit FileDroped(var.toString().remove("file:///"));
-    }
+    for (QUrl& var : event->mimeData()->urls())
+        emit fileDroped(var.path().remove(0, 1));
     event->acceptProposedAction();
 }
 

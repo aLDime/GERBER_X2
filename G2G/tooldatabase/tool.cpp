@@ -38,17 +38,6 @@ void Tool::read(const QJsonObject& json)
     name = json["name"].toString();
     note = json["note"].toString();
     type = static_cast<Type>(json["type"].toInt());
-    //    angle = json["1"].toDouble();
-    //    diameter = json["2"].toDouble();
-    //    feedRate = json["3"].toDouble();
-    //    oneTurnCut = json["4"].toDouble();
-    //    passDepth = json["5"].toDouble();
-    //    plungeRate = json["6"].toDouble();
-    //    spindleSpeed = json["7"].toDouble();
-    //    stepover = json["8"].toDouble();
-    //    name = json["9"].toString();
-    //    note = json["10"].toString();
-    //    type = static_cast<Type>(json["11"].toInt());
 }
 
 void Tool::write(QJsonObject& json) const
@@ -64,17 +53,6 @@ void Tool::write(QJsonObject& json) const
     json["name"] = name;
     json["note"] = note;
     json["type"] = type;
-    //    json["1"] = angle;
-    //    json["2"] = diameter;
-    //    json["3"] = feedRate;
-    //    json["4"] = oneTurnCut;
-    //    json["5"] = passDepth;
-    //    json["6"] = plungeRate;
-    //    json["7"] = spindleSpeed;
-    //    json["8"] = stepover;
-    //    json["9"] = name;
-    //    json["10"] = note;
-    //    json["11"] = type;
 }
 
 bool Tool::isValid()
@@ -137,16 +115,21 @@ void ToolHolder::readTools()
     QFile loadFile(QStringLiteral("tools.dat"));
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open tools file.");
-        return;
+        //return;
+        loadFile.setFileName(QStringLiteral("../tools.dat"));
+        if (!loadFile.open(QIODevice::ReadOnly)) {
+            qWarning("Couldn't open tools file.");
+            return;
+        }
     }
-    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+
+    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
     QJsonArray toolArray = loadDoc.object()["tools"].toArray();
     for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
         tool.id = toolObject["id"].toInt();
-
         tools[tool.id] = tool;
     }
 }

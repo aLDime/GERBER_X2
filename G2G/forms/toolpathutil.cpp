@@ -5,7 +5,7 @@
 #include <QJsonDocument>
 
 ToolPathUtil::ToolPathUtil(const QString& name)
-    : m_name(name + ".json")
+    : m_name(name + ".dat")
 {
     readTools({ &tool, &tool2 });
 }
@@ -24,7 +24,7 @@ void ToolPathUtil::readTools(const QVector<Tool*>& tool) const
         return;
     }
 
-    QJsonDocument loadDoc(QJsonDocument::fromJson(file.readAll()));
+    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
     QJsonObject json = loadDoc.object();
     QJsonArray toolArray = json["tools"].toArray();
     for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
@@ -50,5 +50,5 @@ void ToolPathUtil::writeTools(const QVector<Tool*>& tool) const
     QJsonObject json;
     json["tools"] = toolArray;
     QJsonDocument saveDoc(json);
-    file.write(saveDoc.toJson());
+    file.write(saveDoc.toBinaryData());
 }

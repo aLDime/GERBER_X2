@@ -128,63 +128,81 @@ M17
 M30
 */
 
-struct State {
+class DrillFile;
+class ItemGroup;
 
-    void reset()
+///////////////////////////////////////////////////////
+/// \brief The Format struct
+///
+struct Format {
+    Format(DrillFile* file = nullptr)
+        : file(file)
     {
-        format.unitMode = Millimeters;
-        format.decimal = 4;
-        format.integer = 3;
-        gCode = G00;
-        mCode = M00;
-        tCode = 0;
-        currentToolDiameter = 0.0;
-        pos = QPointF();
-        path.clear();
-        line = 0;
     }
+    ZeroMode zeroMode = LeadingZeros;
+    UnitMode unitMode = Millimeters;
+    int decimal = 0;
+    int integer = 0;
+    QPointF offsetPos;
+    DrillFile* const file = nullptr;
+};
 
-    struct Format {
-        ZeroMode zeroMode = LeadingZeros;
-        UnitMode unitMode = Millimeters;
-        int decimal = 0;
-        int integer = 0;
-    } format;
+///////////////////////////////////////////////////////
+/// \brief The State struct
+///
+struct State {
+    double currentToolDiameter() const;
+    double parseNumber(QString Str);
+    void reset(Format* f);
+    void updatePos();
 
+    QString rawPos[2];
+    Format* format = nullptr;
     GCode gCode = G00;
     MCode mCode = M00;
     int tCode = 0;
-    double currentToolDiameter = 0.0;
     QPointF pos;
     QPolygonF path;
     int line = 0;
 };
 
-class DrillFile;
-class ItemGroup;
-
+///////////////////////////////////////////////////////
+/// \brief The Hole class
+///
 class Hole {
 public:
-    Hole(
-        const State& state,
-        DrillFile* gFile)
-        : state(state)
-        , gFile(gFile)
+    Hole(const State& state, DrillFile* file)
+        : file(file)
+        , state(state)
     {
     }
+    DrillFile* const file = nullptr;
     State state;
-    DrillFile* gFile = nullptr;
+    DrillItem* item = nullptr;
 };
 
+///////////////////////////////////////////////////////
+/// \brief The DrillFile class
+///
 class DrillFile : public AbstractFile, public QList<Hole> {
+    QMap<int, double> m_tools;
+    friend class DrillParser;
+    Format m_format;
+
 public:
-    DrillFile() {}
+    DrillFile()
+        : m_format(this)
+    {
+    }
     ~DrillFile() {}
-    //    QSharedPointer<ItemGroup> itemGroup;
-    QMap<int, double> m_toolDiameter;
-    //    QString fileName;
-    //Paths paths;
+
     FileType type() const override { return FileType::Drill; }
+
+    double tool(int t) const;
+    QMap<int, double> tools() const;
+
+    Format format() const;
+    void setFormat(const Format& value);
 
 protected:
     Paths merge() const override
@@ -194,33 +212,29 @@ protected:
         return m_mergedPaths;
     }
 };
+
+///////////////////////////////////////////////////////
+/// \brief The DrillParser class
+///
 class DrillParser : public QObject {
     Q_OBJECT
+
 public:
     explicit DrillParser(QObject* parent = nullptr);
     DrillFile* parseFile(const QString& fileName);
     bool isDrillFile(const QString& fileName);
-signals:
 
-public slots:
+signals:
 
 private:
     bool parseComment(const QString& line);
-
     bool parseGCode(const QString& line);
     bool parseMCode(const QString& line);
     bool parseTCode(const QString& line);
-
     bool parsePos(const QString& line);
-
     bool parseRepeat(const QString& line);
-
     bool parseFormat(const QString& line);
-
-    bool parseNumber(QString Str, double& val, int integer = 0, int decimal = 0);
-    ////////////
-    /// \brief The Format class
-    ///
+    bool parseNumber(QString Str, double& val);
 
     State m_state;
     DrillFile* m_file = nullptr;

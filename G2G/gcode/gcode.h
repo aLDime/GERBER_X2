@@ -27,8 +27,6 @@ public:
 
     GCodeType gtype() const;
 
-    G::Side side() const;
-    void setSide(const G::Side& side);
     FileType type() const override { return FileType::GCode; }
     Paths m_pocketPaths;
 
@@ -38,7 +36,6 @@ private:
     const Paths m_toolPaths;
     const Tool m_tool;
     double m_depth;
-    G::Side m_side = G::Top;
 
     enum GCode {
         G_null = -1,

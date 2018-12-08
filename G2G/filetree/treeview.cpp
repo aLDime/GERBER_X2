@@ -1,26 +1,14 @@
 #include "treeview.h"
-#include "abstractnode.h"
-#include "staticholders/fileholder.h"
+#include "excellondialog.h"
+#include "forms/drillform.h"
 #include "gerbernode.h"
-
-#include <QAbstractItemView>
-#include <QApplication>
-#include <QDebug>
-#include <QDragEnterEvent>
-#include <QDragLeaveEvent>
-#include <QDragMoveEvent>
-#include <QDropEvent>
+#include "staticholders/fileholder.h"
+#include <QContextMenuEvent>
 #include <QFileDialog>
 #include <QHeaderView>
 #include <QMenu>
-#include <QMessageBox>
+#include <QPainter>
 #include <QSettings>
-#include <drillforapertureform.h>
-#include <mainwindow.h>
-
-#include <gcode/gcode.h>
-
-#include "forms/drillform.h"
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)
@@ -33,7 +21,7 @@ TreeView::TreeView(QWidget* parent)
     connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
-    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::on_selectionChanged);
+    //    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::on_selectionChanged);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
 
@@ -85,11 +73,14 @@ void TreeView::updateIcons()
 
 void TreeView::on_doubleClicked(const QModelIndex& index)
 {
-    if (index.column() == 0 && index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex())) {
-        hideOther(index);
-    }
-    if (index.column() == 0 && index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex())) {
-        hideOther(index);
+    if (!index.column()) {
+        m_menuIndex = index;
+        if (index.parent() == m_model->index(NodeGerberFiles, 0, QModelIndex()))
+            hideOther();
+        if (index.parent() == m_model->index(NodeDrillFiles, 0, QModelIndex()))
+            hideOther();
+        if (index.parent() == m_model->index(NodeToolPath, 0, QModelIndex()))
+            hideOther();
     }
 }
 
@@ -113,96 +104,77 @@ void TreeView::on_selectionChanged(const QItemSelection& /*selected*/, const QIt
     //    }
 }
 
-void TreeView::hideOther(const QModelIndex& index)
+void TreeView::hideOther()
 {
-    const int rowCount = static_cast<AbstractNode*>(index.parent().internalPointer())->childCount();
+    const int rowCount = static_cast<AbstractNode*>(m_menuIndex.parent().internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
 
-        QModelIndex index2 = index.sibling(row, 0);
+        QModelIndex index2 = m_menuIndex.sibling(row, 0);
 
         AbstractNode* item = static_cast<AbstractNode*>(index2.internalPointer());
-        if (row == index.row())
+        if (row == m_menuIndex.row())
             item->setData(index2, Qt::Checked, Qt::CheckStateRole);
         else
             item->setData(index2, Qt::Unchecked, Qt::CheckStateRole);
     }
-    m_model->dataChanged(index.sibling(0, 0), index.sibling(rowCount, 0));
+    m_model->dataChanged(m_menuIndex.sibling(0, 0), m_menuIndex.sibling(rowCount, 0));
+}
+
+void TreeView::closeFile()
+{
+    m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
+    if (DrillForm::self && m_menuIndex.parent().row() == NodeDrillFiles)
+        DrillForm::self->updateFiles();
+}
+
+void TreeView::saveGcodeFile()
+{
+    QSettings settings;
+
+    QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
+        QString(settings.value("LastGCodeDir").toString()).append(m_menuIndex.data().toString()),
+        tr("GCode (*.tap)")));
+
+    if (name.isEmpty())
+        return;
+
+    settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
+    GCodeFile* gcp = reinterpret_cast<GCodeFile*>(m_menuIndex.data(Qt::UserRole).toULongLong());
+    gcp->save(name);
+}
+
+void TreeView::showExcellonDialog()
+{
+    //    ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt())).exec();
+    d = new ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt()));
+    connect(d, &ExcellonDialog::destroyed, [&] { d = nullptr; });
+    d->show();
 }
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
-    QModelIndex index = indexAt(event->pos());
-    if (index.parent().row() == NodeGerberFiles) {
-        QMenu menu(this);
-
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
-            m_model->removeRow(index.row(), index.parent());
-        });
-
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), [&] {
-            hideOther(index);
-        });
-
+    QMenu menu(this);
+    m_menuIndex = indexAt(event->pos());
+    switch (m_menuIndex.parent().row()) {
+    case NodeGerberFiles:
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
+        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        break;
+    case NodeDrillFiles:
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
+        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        menu.addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), this, &TreeView::showExcellonDialog)->setEnabled(!d);
+        break;
+    case NodeToolPath:
+        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
+        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
+        break;
+    default:
+        break;
+    }
+    if (!menu.actions().isEmpty()) {
+        m_menuIndex = indexAt(event->pos());
         menu.exec(mapToGlobal(event->pos()));
     }
-
-    if (index.parent().row() == NodeDrillFiles) {
-        QMenu menu(this);
-
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), [&] {
-            m_model->removeRow(index.row(), index.parent());
-        });
-
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), [&] {
-            hideOther(index);
-        });
-
-        menu.exec(mapToGlobal(event->pos()));
-    }
-
-    if (m_model->index(NodeToolPath, 0, QModelIndex()) == index.parent()) {
-        QMenu menu(this);
-
-        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), [&] {
-            m_model->removeRow(index.row(), index.parent());
-        });
-
-        menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), [&] {
-            QSettings settings;
-
-            QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-                QString(settings.value("LastGCodeDir").toString()).append(index.data().toString()),
-                tr("GCode (*.tap)")));
-
-            if (name.isEmpty())
-                return;
-
-            settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
-            GCodeFile* gcp = reinterpret_cast<GCodeFile*>(index.data(Qt::UserRole).toULongLong());
-            gcp->save(name);
-        });
-
-        menu.exec(mapToGlobal(event->pos()));
-    }
-}
-
-void TreeView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
-{
-    //    QModelIndexList sIndexes(selected.indexes());
-    //    QModelIndexList dIndexes(deselected.indexes());
-
-    //    if (!sIndexes.isEmpty() && sIndexes.first().parent().row() == NODE_FILES) {
-    //        GerberItem* item = static_cast<GerberItem*>(sIndexes.first().internalPointer());
-    //        if (item) {
-    //            int id = item->id();
-    //            qDebug() << id;
-    //        }
-    //        //GerberItem::gFiles[id]->itemGroup()->setZValue(id);
-    //    }
-    //    if (!dIndexes.isEmpty() && dIndexes.first().parent().row() == NODE_FILES) {
-    //        int id = static_cast<GerberItem*>(dIndexes.first().internalPointer())->id();
-    //        //qDebug() << id;
-    //        //GerberItem::gFiles[id]->itemGroup()->setZValue(-id);
-    //    }
-    QTreeView::selectionChanged(selected, deselected);
 }

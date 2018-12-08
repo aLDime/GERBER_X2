@@ -9,7 +9,7 @@ class File;
 
 class GerberItem : public GraphicsItem {
 public:
-    GerberItem(const Paths& m_paths, G::File* file);
+    GerberItem(const Paths& m_paths,  G::File *file);
     ~GerberItem();
     QRectF boundingRect() const override;
     QPainterPath shape() const override;

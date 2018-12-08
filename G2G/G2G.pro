@@ -6,16 +6,16 @@ TEMPLATE = app
 #QMAKE_CXXFLAGS += /std:c++17
 
 FORMS += \
+    aboutform.ui \
+    forms/drillform.ui \
+    forms/materialsetupform.ui \
+    forms/pocketform.ui \
+    forms/profileform.ui \
     mainwindow.ui \
     settingsdialog.ui \
     tooldatabase/tooledit.ui \
     tooldatabase/tooleditform.ui \
-    forms/materialsetupform.ui \
-    forms/drillform.ui \
-    forms/profileform.ui \
-    forms/pocketform.ui \
-    aboutform.ui \
-    aboutform.ui
+    excellondialog.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -80,7 +80,7 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    aboutform.h \
+    excellondialog.h
 
 
 SOURCES += \
@@ -118,7 +118,7 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    aboutform.cpp \
+    excellondialog.cpp
 
 
 

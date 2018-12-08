@@ -14,11 +14,16 @@ class FileHolder {
 public:
     FileHolder();
 
+    static AbstractFile* file(int id)
+    {
+        QMutexLocker locker(&m_mutex);
+        return m_files.value(id).data();
+    }
+
     template <typename T>
     static T* file(int id)
     {
         QMutexLocker locker(&m_mutex);
-        //AbstractFile* file = m_files.value(id).data();
         return static_cast<T*>(m_files.value(id).data());
     }
 

@@ -4,27 +4,21 @@
 #include <QStyleOptionGraphicsItem>
 #include <gerber.h>
 
+#include "gcode/drl.h"
+
 using namespace ClipperLib;
 
-DrillItem::DrillItem(double diameter, DrillFile* file)
-    : m_diameter(diameter)
-    , m_file(file)
+DrillItem::DrillItem(Hole* hole)
+    : m_hole(hole)
+    , m_diameter(hole->state.currentToolDiameter())
 {
-    //            IntPoint center(hole.state.pos.x() * uScale, hole.state.pos.y() * uScale);
-    //            double radius = hole.state.currentToolDiameter * uScale / 2.0;
-    //            Path poligon(G::STEPS_PER_CIRCLE);
-    //            for (int i = 0; i < G::STEPS_PER_CIRCLE; ++i) {
-    //                poligon[i] = IntPoint(
-    //                    (qCos(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.X,
-    //                    (qSin(i * M_2PI / G::STEPS_PER_CIRCLE) * radius) + center.Y);
-    //            }
-    //            if (Area(poligon) < 0)
-    //                ReversePath(poligon);
-    setCacheMode(DeviceCoordinateCache);
-    m_shape.addEllipse(QPointF(), diameter / 2, diameter / 2);
-    m_rect = m_shape.boundingRect();
-    setAcceptHoverEvents(true);
-    setFlag(ItemIsSelectable, true);
+    create();
+}
+
+DrillItem::DrillItem(double diameter)
+    : m_diameter(diameter)
+{
+    create();
 }
 
 QRectF DrillItem::boundingRect() const { return m_rect; }
@@ -65,7 +59,12 @@ void DrillItem::setDiameter(double diameter)
     update(m_rect);
 }
 
-const DrillFile* DrillItem::file() const { return m_file; }
+const DrillFile* DrillItem::file() const
+{
+    if (m_hole)
+        return m_hole->file;
+    return nullptr;
+}
 
 Paths DrillItem::paths() const
 {
@@ -83,4 +82,30 @@ Paths DrillItem::paths() const
         m_paths.append(poligon);
     }
     return m_paths;
+}
+
+void DrillItem::updateHole()
+{
+    if (!m_hole)
+        return;
+
+    State& state = m_hole->state;
+    setPos(state.pos + state.format->offsetPos);
+    setDiameter(state.currentToolDiameter());
+    setToolTip(QString("Tool %1, Ø%2mm").arg(state.tCode).arg(m_diameter));
+    update(m_rect);
+}
+
+void DrillItem::create()
+{
+    setAcceptHoverEvents(true);
+    setCacheMode(DeviceCoordinateCache);
+    setFlag(ItemIsSelectable, true);
+    if (m_hole) {
+        State& state = m_hole->state;
+        setPos(state.pos + state.format->offsetPos);
+        setToolTip(QString("Tool %1, Ø%2mm").arg(state.tCode).arg(state.currentToolDiameter()));
+    }
+    m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
+    m_rect = m_shape.boundingRect();
 }

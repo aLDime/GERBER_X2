@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
 
     QCoreApplication::setApplicationName("G2G");
     QCoreApplication::setOrganizationName("XrSoft");
-//    QCoreApplication::setApplicationVersion("0.2.3");
+    //    QCoreApplication::setApplicationVersion("0.2.3");
 
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());
@@ -45,6 +45,7 @@ int main(int argc, char* argv[])
 
     MainWindow* mainWin = new MainWindow;
     mainWin->show();
+    mainWin->setIconSize({ 24, 24 });
 
     for (const QString& file : parser.positionalArguments()) {
         mainWin->openFile(file);

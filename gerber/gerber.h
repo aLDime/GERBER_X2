@@ -73,10 +73,6 @@ enum Layer {
     Copper,
     Board,
 };
-enum Side {
-    Top,
-    Bottom
-};
 
 enum Miror {
     Vertical,
@@ -117,7 +113,7 @@ enum AttributeType {
     DeleteAttribute // TD
 };
 
-enum { StepsPerCircle = 36/*72*/ };
+enum { StepsPerCircle = 36 /*72*/ };
 
 enum PrimitiveType {
     Aperture,

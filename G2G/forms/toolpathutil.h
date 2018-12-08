@@ -14,11 +14,13 @@ class ToolPathUtil {
 public:
     ToolPathUtil(const QString& name);
     ~ToolPathUtil();
+
+protected:
     void readTools(const QVector<Tool*>& tool) const;
     void writeTools(const QVector<Tool*>& tool) const;
     virtual void create() = 0;
+    virtual void updateName() = 0;
 
-protected:
     Tool tool;
     Tool tool2;
     Direction direction = Climb;

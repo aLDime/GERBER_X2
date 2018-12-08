@@ -22,7 +22,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
         return name;
     case Qt::DecorationRole:
         return QIcon::fromTheme("folder");
-    case Qt::CheckStateRole:
+        //    case Qt::CheckStateRole:
         //        return checkState;
     default:
         return QVariant();
@@ -31,29 +31,17 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const
 
 Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const
 {
-    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
-}
-
-int FolderNode::childCount() const
-{
-    return childItems.size();
-}
-
-int FolderNode::columnCount() const
-{
-    return 1;
+    return Qt::ItemIsEnabled /*| Qt::ItemIsUserCheckable|*/;
 }
 
 bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     if (index.column())
         return false;
+
     switch (role) {
     case Qt::CheckStateRole:
         checkState = value.value<Qt::CheckState>();
-        //        for (G::File* f : GerberItem::gFiles) {
-        //            if()
-        //        }
         return true;
     default:
         return false;

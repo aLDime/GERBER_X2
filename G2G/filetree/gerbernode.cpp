@@ -10,9 +10,8 @@ using namespace G;
 GerberNode::GerberNode(File* file)
     : m_id(FileHolder::addFile(file))
 {
-    AbstractNode::files.append(file->shortFileName());
-    FileHolder::file<File>(m_id)->itemGroup()->addToTheScene();
-    FileHolder::file<File>(m_id)->itemGroup()->setZValue(-m_id);
+    FileHolder::file(m_id)->itemGroup()->addToTheScene();
+    FileHolder::file(m_id)->itemGroup()->setZValue(-m_id);
     MainWindow::self->closeAllAct->setEnabled(true);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
@@ -20,8 +19,8 @@ GerberNode::GerberNode(File* file)
     MainWindow::self->zero()->resetPos();
     MainWindow::self->home()->resetPos();
     Shtift::shtifts()[0]->resetPos();
-    MyGraphicsView::self->ZoomFit();
-    MyGraphicsView::self->Zoom100();
+    MyGraphicsView::self->zoomFit();
+    MyGraphicsView::self->zoom100();
 }
 
 GerberNode::~GerberNode()
@@ -35,6 +34,7 @@ GerberNode::~GerberNode()
         MainWindow::self->home()->resetPos();
         Shtift::shtifts()[0]->resetPos();
     }
+    disconnect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.start(1);
 }
 
@@ -45,7 +45,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         switch (role) {
         case Qt::CheckStateRole:
             checkState = value.value<Qt::CheckState>();
-            FileHolder::file<File>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
             return true;
         default:
             return false;
@@ -53,7 +53,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case 1:
         switch (role) {
         case Qt::EditRole:
-            FileHolder::file<File>(m_id)->side = static_cast<Side>(value.toBool());
+            FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -63,10 +63,6 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     }
     return false;
 }
-
-int GerberNode::columnCount() const { return 3; }
-
-int GerberNode::childCount() const { return 0; }
 
 Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 {
@@ -86,20 +82,20 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file<File>(m_id)->shortFileName();
+            return FileHolder::file(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file<File>(m_id)->fileName();
+            return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole: {
             QPixmap pixmap(16, 16);
-            QColor color = FileHolder::file<File>(m_id)->itemGroup()->brush().color();
+            QColor color = FileHolder::file(m_id)->itemGroup()->brush().color();
             color.setAlpha(255);
             pixmap.fill(color);
             return pixmap;
         }
         case Qt::UserRole:
-            return QVariant::fromValue(static_cast<void*>(FileHolder::file<File>(m_id)));
+            return QVariant::fromValue(static_cast<void*>(FileHolder::file(m_id)));
         default:
             return QVariant();
         }
@@ -107,9 +103,9 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file<File>(m_id)->side];
+            return QString("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
         case Qt::EditRole:
-            return static_cast<bool>(FileHolder::file<File>(m_id)->side);
+            return static_cast<bool>(FileHolder::file(m_id)->side());
         default:
             return QVariant();
         }
@@ -130,6 +126,6 @@ void GerberNode::repaint()
     int count = m_parentItem->childCount();
     int k = (count > 1) ? (200.0 / (count - 1)) * row() : 0;
     QColor color(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
-    FileHolder::file<File>(m_id)->itemGroup()->setBrush(color);
+    FileHolder::file(m_id)->itemGroup()->setBrush(color);
     MyScene::self->update();
 }

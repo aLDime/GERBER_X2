@@ -54,8 +54,6 @@ private:
 };
 
 class DrillModel : public QAbstractTableModel {
-
-private:
     typedef struct Row {
         Row(const QString& name, const QIcon& icon, int id)
             : name{ name, "" }
@@ -71,34 +69,12 @@ private:
     bool m_isAperture;
 
 public:
-    DrillModel(bool isAperture, QObject* parent = nullptr)
-        : QAbstractTableModel(parent)
-        , m_isAperture(isAperture)
-    {
-    }
-
+    DrillModel(bool isAperture, QObject* parent = nullptr);
     void appendRow(const QString& name, const QIcon& icon, int id);
-    void setToolId(int row, int id)
-    {
-        m_data[row].id[1] = id;
-        QModelIndex index(createIndex(row, 1));
-        dataChanged(index, index);
-    }
-    int toolId(int row)
-    {
-        return m_data[row].id[1];
-    }
-
-    void setApertureId(int row, int id)
-    {
-        m_data[row].id[0] = id;
-        QModelIndex index(createIndex(row, 0));
-        dataChanged(index, index);
-    }
-    int apertureId(int row)
-    {
-        return m_data[row].id[0];
-    }
+    void setToolId(int row, int id);
+    int toolId(int row);
+    void setApertureId(int row, int id);
+    int apertureId(int row);
 
     // QAbstractItemModel interface
 public:
@@ -106,6 +82,6 @@ public:
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
 };
 #endif // DRILLFORM_H

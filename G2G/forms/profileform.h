@@ -24,10 +24,10 @@ private slots:
 private:
     Ui::ProfileForm* ui;
 
-
     // ToolPathUtil interface
-public:
+protected:
     void create() override;
+    void updateName() override;
 };
 
 #endif // PROFILEFORM_H

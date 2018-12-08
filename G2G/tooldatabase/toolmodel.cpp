@@ -2,7 +2,6 @@
 #include "tooldatabase.h"
 #include "toolitem.h"
 
-
 #include <QApplication>
 #include <QDebug>
 #include <QFile>
@@ -312,7 +311,7 @@ void ToolModel::exportTools()
     }
     jsonObject["tree"] = treeArray;
     QJsonDocument saveDoc(jsonObject);
-    saveFile.write(saveDoc.toJson());
+    saveFile.write(saveDoc.toBinaryData());
 }
 
 void ToolModel::importTools()
@@ -322,10 +321,15 @@ void ToolModel::importTools()
 
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open tools file.");
-        return;
+        //        return;
+        loadFile.setFileName(QStringLiteral("../tools.dat"));
+        if (!loadFile.open(QIODevice::ReadOnly)) {
+            qWarning("Couldn't open tools file.");
+            return;
+        }
     }
 
-    QJsonDocument loadDoc(QJsonDocument::fromJson(loadFile.readAll()));
+    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
     //    rootItem->read(loadDoc.object());
     ToolHolder::readTools(loadDoc.object());
 

@@ -16,35 +16,40 @@ GcodeNode::~GcodeNode()
 
 bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    if (index.column())
-        return false;
-
-    switch (role) {
-    //        case Qt::DisplayRole:
-    //            return gerberFile->fileName;
-    //            return true;
-    case Qt::CheckStateRole:
-        checkState = value.value<Qt::CheckState>();
-        FileHolder::file<GCodeFile>(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
-        return true;
+    switch (index.column()) {
+    case 0:
+        switch (role) {
+        case Qt::CheckStateRole:
+            checkState = value.value<Qt::CheckState>();
+            FileHolder::file(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            return true;
+        default:
+            return false;
+        }
+    case 1:
+        switch (role) {
+        case Qt::EditRole:
+            FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            return true;
+        default:
+            return false;
+        }
     default:
         return false;
     }
+    return false;
 }
 
-int GcodeNode::columnCount() const
+Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
 {
-    return 2;
-}
-
-int GcodeNode::childCount() const
-{
-    return 0;
-}
-
-Qt::ItemFlags GcodeNode::flags(const QModelIndex&) const
-{
-    return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+    switch (index.column()) {
+    case 0:
+        return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+    case 1:
+        return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+    default:
+        return 0;
+    }
 }
 
 QVariant GcodeNode::data(const QModelIndex& index, int role) const
@@ -53,13 +58,13 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     case 0:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file<GCodeFile>(m_id)->shortFileName();
+            return FileHolder::file(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file<GCodeFile>(m_id)->fileName();
+            return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole:
-            switch (FileHolder::file<GCodeFile>(m_id)->type()) {
+            switch (FileHolder::file<GCodeFile>(m_id)->gtype()) {
             case Profile:
                 return QIcon::fromTheme("object-to-path");
             case Pocket:
@@ -70,7 +75,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
                 return QIcon::fromTheme("roll");
             }
         case Qt::UserRole:
-            return QVariant::fromValue(reinterpret_cast<quint64>(FileHolder::file<GCodeFile>(m_id)));
+            return QVariant::fromValue(reinterpret_cast<quint64>(FileHolder::file(m_id)));
         default:
             return QVariant();
         }
@@ -78,7 +83,9 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file<GCodeFile>(m_id)->side()];
+            return QString("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
+        case Qt::EditRole:
+            return static_cast<bool>(FileHolder::file(m_id)->side());
         default:
             return QVariant();
         }
