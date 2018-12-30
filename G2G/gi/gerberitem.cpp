@@ -13,7 +13,7 @@ GerberItem::GerberItem(const Paths& paths, G::File* file)
     for (Path path : this->m_paths) {
         if (path.size() && path.first() != path.last())
             path.append(path.first());
-        m_shape.addPolygon(PathToQPolygon(path));
+        m_shape.addPolygon(toQPolygon(path));
     }
     m_rect = m_shape.boundingRect();
     setAcceptHoverEvents(true);
@@ -73,3 +73,5 @@ int GerberItem::type() const { return GerberItemType; }
 Paths GerberItem::paths() const { return m_paths; }
 
 const G::File* GerberItem::file() const { return m_file; }
+
+

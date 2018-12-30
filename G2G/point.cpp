@@ -19,13 +19,23 @@ QRectF worckRect;
 
 void updateRect()
 {
-    Clipper clipper;
-    clipper.AddPaths(FileHolder::getPaths(), ptSubject, true);
-    IntRect r(clipper.GetBounds());
-    worckRect.setTopLeft(QPointF(r.left * dScale, r.top * dScale));
-    worckRect.setBottomRight(QPointF(r.right * dScale, r.bottom * dScale));
-    //    if (MyScene::self)
-    //        worckRect = MyScene::self->itemsBoundingRect();
+    //    Clipper clipper;
+    //    Paths paths(FileHolder::getSelectedPaths());
+    //    if (paths.isEmpty()) {
+    //        QMessageBox::information(nullptr, "", "There is no dedicated data to define boundaries.\nOld data will be used.");
+    //        return;
+    //    }
+    //    clipper.AddPaths(paths, ptSubject, true);
+    //    IntRect r(clipper.GetBounds());
+    //    worckRect.setTopLeft(QPointF(r.left * dScale, r.top * dScale));
+    //    worckRect.setBottomRight(QPointF(r.right * dScale, r.bottom * dScale));
+    //    //    if (MyScene::self)
+    QRectF rect(FileHolder::getSelectedBoundingRect());
+    if (rect.isEmpty()) {
+        QMessageBox::information(nullptr, "", "There is no dedicated data to define boundaries.\nOld data will be used.");
+        return;
+    }
+    worckRect = rect;
 }
 
 Point::Point(int type)
@@ -46,6 +56,19 @@ Point::Point(int type)
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
+
+    QSettings settings;
+    settings.beginGroup("Point" + QString::number(m_type));
+    setPos(settings.value("pos").toPoint());
+    setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
+}
+
+Point::~Point()
+{
+    QSettings settings;
+    settings.beginGroup("Point" + QString::number(m_type));
+    settings.setValue("pos", pos());
+    settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
 }
 
 QRectF Point::boundingRect() const
@@ -63,6 +86,8 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     QColor c(m_color);
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
+    if (!(flags() & QGraphicsItem::ItemIsMovable))
+        c.setAlpha(50);
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
@@ -117,6 +142,9 @@ void Point::updateMaterialSetupForm()
         MaterialSetup::self->setHomePos(pos());
     else
         MaterialSetup::self->setZeroPos(pos());
+    QSettings settings;
+    settings.beginGroup("Point" + QString::number(m_type));
+    settings.setValue("pos", pos());
 }
 
 void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
@@ -127,6 +155,8 @@ void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
 void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 {
+    if (!(flags() & QGraphicsItem::ItemIsMovable))
+        return;
     resetPos();
     updateMaterialSetupForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
@@ -143,7 +173,6 @@ Shtift::Shtift()
     : QGraphicsItem(nullptr)
 {
     setAcceptHoverEvents(true);
-    setFlags(QGraphicsItem::ItemIsMovable);
 
     if (m_shtifts.size() % 2) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
@@ -159,8 +188,11 @@ Shtift::Shtift()
     setZValue(std::numeric_limits<qreal>::max() - m_shtifts.size());
 
     QSettings settings;
-    settings.beginGroup("Shtift" + QString::number(m_shtifts.size()));
-    setPos(settings.value("pos").toPointF());
+    settings.beginGroup("Shtift");
+    if (!m_shtifts.size())
+        worckRect = settings.value("worckRect").toRect();
+    setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
+    setPos(settings.value("pos" + QString::number(m_shtifts.size())).toPointF());
 
     m_shtifts.append(this);
     MyScene::self->addItem(this);
@@ -169,8 +201,12 @@ Shtift::Shtift()
 Shtift::~Shtift()
 {
     QSettings settings;
-    settings.beginGroup("Shtift" + QString::number(m_shtifts.indexOf(this)));
-    settings.setValue("pos", pos());
+    settings.beginGroup("Shtift");
+    settings.setValue("pos" + QString::number(m_shtifts.indexOf(this)), pos());
+    if (!m_shtifts.indexOf(this)) {
+        settings.setValue("worckRect", worckRect);
+        settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
+    }
 }
 
 QRectF Shtift::boundingRect() const
@@ -189,6 +225,8 @@ void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     QColor c(255, 255, 0, 120);
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
+    if (!(flags() & QGraphicsItem::ItemIsMovable))
+        c.setAlpha(50);
 
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
@@ -264,6 +302,9 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
     }
     for (int i = 0; i < 4; ++i)
         m_shtifts[i]->setPos(p[i]);
+    QSettings settings;
+    settings.beginGroup("Shtift");
+    settings.setValue("pos" + QString::number(m_shtifts.indexOf(this)), pos());
 }
 
 void Shtift::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -276,7 +317,6 @@ void Shtift::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
 
 void Shtift::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
-    updateRect();
     for (int i = 0; i < 4; ++i)
         m_shtifts[i]->m_lastPos = m_shtifts[i]->pos();
     QGraphicsItem::mousePressEvent(event);
@@ -293,13 +333,17 @@ QVector<Shtift*> Shtift::shtifts() { return m_shtifts; }
 void Shtift::resetPos()
 {
     updateRect();
+    const double k = 3.0;
     QPointF p[]{
-        QPointF(worckRect.topLeft() + QPointF(-3, -3)),
-        QPointF(worckRect.topRight() + QPointF(+3, -3)),
-        QPointF(worckRect.bottomRight() + QPointF(+3, +3)),
-        QPointF(worckRect.bottomLeft() + QPointF(-3, +3)),
+        QPointF(worckRect.topLeft() + QPointF(-k, -k)),
+        QPointF(worckRect.topRight() + QPointF(+k, -k)),
+        QPointF(worckRect.bottomRight() + QPointF(+k, +k)),
+        QPointF(worckRect.bottomLeft() + QPointF(-k, +k)),
     };
 
     for (int i = 0; i < 4; ++i)
         m_shtifts[i]->setPos(p[i]);
+    QSettings settings;
+    settings.beginGroup("Shtift");
+    settings.setValue("pos" + QString::number(m_shtifts.indexOf(this)), pos());
 }

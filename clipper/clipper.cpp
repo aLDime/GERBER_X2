@@ -44,13 +44,14 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
+#include <gerber.h>
 #include <ostream>
 #include <stdexcept>
 #include <vector>
-enum { spc = 32 };
+
 namespace ClipperLib {
 
-static double const pi = 3.141592653589793238;
+static double const pi = 3.14159265358979323846;
 static double const two_pi = pi * 2;
 static double const def_arc_tolerance = 0.25;
 
@@ -3838,6 +3839,8 @@ void ClipperOffset::Execute(PolyTree& solution, double delta)
     }
 }
 //------------------------------------------------------------------------------
+#include "myclipper.h"
+
 void ClipperOffset::DoOffset(double delta)
 {
     m_destPolys.clear();
@@ -3871,7 +3874,14 @@ void ClipperOffset::DoOffset(double delta)
     double steps = pi / std::acos(1 - y / std::fabs(delta));
     if (steps > std::fabs(delta) * pi)
         steps = std::fabs(delta) * pi; //ie excessive precision check
-    steps = spc;
+
+    const double length = 0.5; // mm
+    const int destSteps = M_PI / asin((length * 0.5) / (delta * dScale));
+    int intSteps = G::MinStepsPerCircle;
+    while (intSteps < destSteps)
+        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
+
+    steps = intSteps;
     m_sin = std::sin(two_pi / steps);
     m_cos = std::cos(two_pi / steps);
     m_StepsPerRad = steps / two_pi;
@@ -4083,81 +4093,25 @@ auto angle(DoublePoint p)
 }
 void ClipperOffset::DoRound(int j, int k)
 {
-    if (0) {
 
-        const double g = 360 / spc;
-        static QVector<QPointF> arc;
-        static QVector<double> ang;
-        if (arc.isEmpty()) {
-            arc.reserve(spc);
-            ang.reserve(spc);
-            for (int i = 0; i < spc; ++i) {
-                arc.append(QPointF(cos(qDegreesToRadians(g) * i), sin(qDegreesToRadians(g) * i)));
-                ang.append(angle(arc[i]));
-            }
-        }
+    double a = std::atan2(m_sinA,
+        m_normals[k].X * m_normals[j].X + m_normals[k].Y * m_normals[j].Y);
+    int steps = std::max((int)Round(m_StepsPerRad * std::fabs(a)), 1);
 
-        //double a1 = qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X)) + 180;
-        //double a2 = ((int)qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X) / g)) * g + 180;
-        //qDebug() << "DoRound";
-        //        for (int i = 0; i < spc; ++i) {
-        //if (a2 > (int)a1)
-        //    a2 -= g;
-        //qDebug() << a2 << (int)qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X)) + 90;
-        //qDebug() << abs(a2 * i - ((int)qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X)))) << (int)qRadiansToDegrees(std::atan2(-m_normals[k].Y, m_normals[k].X));
-        //        }
+    m_srcPoly.reserve(m_srcPoly.size() + steps + 1);
 
-        double a = std::atan2(m_sinA,
-            m_normals[k].X * m_normals[j].X + m_normals[k].Y * m_normals[j].Y);
-
-        int steps = std::max((int)Round(m_StepsPerRad * std::fabs(a)), 1);
-
+    double X = m_normals[k].X, Y = m_normals[k].Y, X2;
+    for (int i = 0; i < steps; ++i) {
         m_destPoly.push_back(IntPoint(
-            Round(m_srcPoly[j].X + m_normals[k].X * m_delta),
-            Round(m_srcPoly[j].Y + m_normals[k].Y * m_delta)));
-
-        int start = 0;
-        double min = 10;
-        for (int i = 0; i < spc; ++i) {
-            min = angle(m_normals[k]);
-            if (ang[i] >= min && min >= ang[(i - 1) % spc]) {
-                start = i;
-                break;
-            }
-        }
-
-        for (int i = 0; i < steps; ++i) {
-            //if (i == steps - 1 && angle(m_normals[j]) < ang[start % spc])
-            //    break;
-            m_destPoly.push_back(IntPoint(
-                Round(m_srcPoly[j].X + arc[start % spc].x() * m_delta),
-                Round(m_srcPoly[j].Y + arc[start % spc].y() * m_delta)));
-            ++start;
-        }
-
-        m_destPoly.push_back(IntPoint(
-            Round(m_srcPoly[j].X + m_normals[j].X * m_delta),
-            Round(m_srcPoly[j].Y + m_normals[j].Y * m_delta)));
-    } else {
-        double a = std::atan2(m_sinA,
-            m_normals[k].X * m_normals[j].X + m_normals[k].Y * m_normals[j].Y);
-        int steps = std::max((int)Round(m_StepsPerRad * std::fabs(a)), 1);
-
-        m_srcPoly.reserve(m_srcPoly.size() + steps + 1);
-
-        double X = m_normals[k].X, Y = m_normals[k].Y, X2;
-        for (int i = 0; i < steps; ++i) {
-            m_destPoly.push_back(IntPoint(
-                Round(m_srcPoly[j].X + X * m_delta),
-                Round(m_srcPoly[j].Y + Y * m_delta)));
-            X2 = X;
-            X = X * m_cos - m_sin * Y;
-            Y = X2 * m_sin + Y * m_cos;
-        }
-        m_destPoly.push_back(IntPoint(
-            Round(m_srcPoly[j].X + m_normals[j].X * m_delta),
-            Round(m_srcPoly[j].Y + m_normals[j].Y * m_delta)));
+            Round(m_srcPoly[j].X + X * m_delta),
+            Round(m_srcPoly[j].Y + Y * m_delta)));
+        X2 = X;
+        X = X * m_cos - m_sin * Y;
+        Y = X2 * m_sin + Y * m_cos;
     }
+    m_destPoly.push_back(IntPoint(
+        Round(m_srcPoly[j].X + m_normals[j].X * m_delta),
+        Round(m_srcPoly[j].Y + m_normals[j].Y * m_delta)));
 }
 
 //------------------------------------------------------------------------------

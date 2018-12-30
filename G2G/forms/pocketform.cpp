@@ -140,20 +140,19 @@ void PocketForm::create()
         return;
     }
 
-    if (ui->chbxUseTwoTools->isChecked()) {
+    //    if (ui->chbxUseTwoTools->isChecked()) {
+    //        QVector<GCodeFile*> gcode = ToolPathCreator(wPaths).createPocket2({ tool, tool2 }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
 
-        QVector<GCodeFile*> gcode = ToolPathCreator(wPaths).createPocket2({ tool, tool2 }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
-
-    } else {
-        GCodeFile* gcode = ToolPathCreator(wPaths).createPocket(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
-        if (gcode == nullptr) {
-            QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the allocated region!"));
-            return;
-        }
-        gcode->setFileName(ui->leName->text());
-        gcode->setSide(boardSide);
-        FileModel::self->addGcode(gcode);
+    //    } else {
+    GCodeFile* gcode = ToolPathCreator(wPaths).createPocket(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
+    if (gcode == nullptr) {
+        QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
+        return;
     }
+    gcode->setFileName(ui->leName->text());
+    gcode->setSide(boardSide);
+    FileModel::self->addGcode(gcode);
+    //    }
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)

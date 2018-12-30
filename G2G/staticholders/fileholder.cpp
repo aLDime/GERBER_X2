@@ -33,12 +33,48 @@ Paths FileHolder::getPaths()
     QMutexLocker locker(&m_mutex);
     Paths paths;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        AbstractFile* item = sp.data();
-        if (item && item->itemGroup()->isVisible() && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
-            for (Paths& p : item->groupedPaths())
+        AbstractFile* file = sp.data();
+        if (file
+            && file->itemGroup()->isVisible()
+            && (file->type() == FileType::Gerber || file->type() == FileType::Drill))
+            for (Paths& p : file->groupedPaths())
                 paths.append(p);
     }
     return paths;
+}
+
+Paths FileHolder::getSelectedPaths()
+{
+    QMutexLocker locker(&m_mutex);
+    Paths paths;
+    for (const QSharedPointer<AbstractFile>& sp : m_files) {
+        AbstractFile* file = sp.data();
+        if (file
+            && file->itemGroup()->isVisible()
+            && (file->type() == FileType::Gerber || file->type() == FileType::Drill))
+            for (GraphicsItem* item : *file->itemGroup())
+                if (item->isSelected())
+                    paths.append(item->paths());
+    }
+    return paths;
+}
+
+QRectF FileHolder::getSelectedBoundingRect()
+{
+    QMutexLocker locker(&m_mutex);
+    QRectF rect;
+    for (const QSharedPointer<AbstractFile>& sp : m_files) {
+        AbstractFile* file = sp.data();
+        if (file && file->itemGroup()->isVisible())
+            for (GraphicsItem* item : *file->itemGroup())
+                if (item->isSelected()) {
+                    QRectF r(item->boundingRect());
+                    if (!item->pos().isNull())
+                        r.moveTo(item->pos());
+                    rect = rect.united(r);
+                }
+    }
+    return rect;
 }
 
 QString FileHolder::fileNames()

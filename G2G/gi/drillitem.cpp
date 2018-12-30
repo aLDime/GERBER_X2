@@ -2,6 +2,7 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <aperture.h>
 #include <gerber.h>
 
 #include "gcode/drl.h"
@@ -69,16 +70,8 @@ const DrillFile* DrillItem::file() const
 Paths DrillItem::paths() const
 {
     if (m_paths.isEmpty()) {
-        IntPoint center(pos().x() * uScale, pos().y() * uScale);
-        double radius = m_diameter * uScale / 2;
-        Path poligon(G::StepsPerCircle);
-        for (int i = 0; i < G::StepsPerCircle; ++i) {
-            poligon[i] = IntPoint(
-                (qCos(i * M_2PI / G::StepsPerCircle) * radius) + center.X,
-                (qSin(i * M_2PI / G::StepsPerCircle) * radius) + center.Y);
-        }
-        if (Area(poligon) > 0)
-            ReversePath(poligon);
+        Path poligon(G::AbstractAperture::circle(m_diameter * uScale, toIntPoint(pos())));
+        ReversePath(poligon);
         m_paths.append(poligon);
     }
     return m_paths;

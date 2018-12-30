@@ -85,7 +85,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             if (parseApertureMacros(gerberLine))
                 continue;
 
-            if (parseOperationDCode(gerberLine))
+            if (parseDCode(gerberLine))
                 continue;
 
             // Aperture definitions %ADD...
@@ -368,24 +368,24 @@ void Parser::addPath()
             file->append(GraphicObject(state, createLine(), file, gerbLines, path));
         break;
     }
-    clearStep();
+    resetStep();
 }
 
 void Parser::addFlash()
 {
     state.type = Aperture;
-    if (file->apertures.isEmpty() && file->apertures[state.aperture] == nullptr)
+    if (file->m_apertures.isEmpty() && file->m_apertures[state.aperture] == nullptr)
         return;
-    Paths paths(file->apertures[state.aperture]->draw(state));
-    if (file->apertures[state.aperture]->isDrilled())
-        paths.push_back(file->apertures[state.aperture]->drawDrill(state));
+    Paths paths(file->m_apertures[state.aperture]->draw(state));
+    if (file->m_apertures[state.aperture]->isDrilled())
+        paths.push_back(file->m_apertures[state.aperture]->drawDrill(state));
 
     if (sr.state == SrOpen)
         sr.acc.append(GraphicObject(state, paths, file, gerbLines));
     else
         file->append(GraphicObject(state, paths, file, gerbLines));
 
-    clearStep();
+    resetStep();
 }
 
 void Parser::reset(const QString& fileName)
@@ -403,7 +403,7 @@ void Parser::reset(const QString& fileName)
     sr.state = SrClose;
 }
 
-void Parser::clearStep()
+void Parser::resetStep()
 {
     gerbLines.clear();
     path.clear();
@@ -436,49 +436,26 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
 {
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
-    if (1) {
-        if (state.interpolation == ClockwiseCircular && stop >= start)
-            stop -= 2.0 * M_PI;
-        else if (state.interpolation == CounterclockwiseCircular && stop <= start)
-            stop += 2.0 * M_PI;
 
-        double angle = qAbs(stop - start);
-        double steps = qMax((int)ceil(angle / (2.0 * M_PI) * StepsPerCircle), 2);
-        double delta_angle = da_sign[state.interpolation] * angle * 1.0 / steps;
-        for (int i = 0; i < steps; i++) {
-            double theta = start + delta_angle * (i + 1);
-            points.push_back(IntPoint(center.X + radius * cos(theta), center.Y + radius * sin(theta)));
-        }
-    } else {
-        if (state.interpolation == ClockwiseCircular && stop >= start)
-            stop -= 2.0 * M_PI;
-        else if (state.interpolation == CounterclockwiseCircular && stop <= start)
-            stop += 2.0 * M_PI;
+    const double length = 0.5; // mm
+    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
+    int intSteps = MinStepsPerCircle;
+    while (intSteps < destSteps)
+        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
 
-        if (state.interpolation == ClockwiseCircular) {
-            double angle = (2.0 * M_PI);
-            while (start < angle || qFuzzyCompare(start, angle))
-                angle -= (2.0 * M_PI) / StepsPerCircle;
-            for (int i = 0; i < StepsPerCircle; i++) {
-                if (angle > stop || qFuzzyCompare(stop, angle))
-                    points.push_back(IntPoint(center.X + radius * cos(angle), center.Y + radius * sin(angle)));
-                else
-                    break;
-                angle -= (2.0 * M_PI) / StepsPerCircle;
-            }
-        } else if (state.interpolation == CounterclockwiseCircular) {
-            double angle = -(2.0 * M_PI);
-            while (start >= angle || qFuzzyCompare(start, angle))
-                angle += (2.0 * M_PI) / StepsPerCircle;
-            for (int i = 0; i < StepsPerCircle; i++) {
-                if (angle <= stop || qFuzzyCompare(stop, angle))
-                    points.push_back(IntPoint(center.X + radius * cos(angle), center.Y + radius * sin(angle)));
-                else
-                    break;
-                angle += (2.0 * M_PI) / StepsPerCircle;
-            }
-        }
+    if (state.interpolation == ClockwiseCircular && stop >= start)
+        stop -= 2.0 * M_PI;
+    else if (state.interpolation == CounterclockwiseCircular && stop <= start)
+        stop += 2.0 * M_PI;
+
+    double angle = qAbs(stop - start);
+    double steps = qMax((int)ceil(angle / (2.0 * M_PI) * intSteps), 2);
+    double delta_angle = da_sign[state.interpolation] * angle * 1.0 / steps;
+    for (int i = 0; i < steps; i++) {
+        double theta = start + delta_angle * (i + 1);
+        points.push_back(IntPoint(center.X + radius * cos(theta), center.Y + radius * sin(theta)));
     }
+
     return points;
 }
 
@@ -494,89 +471,62 @@ Paths Parser::createLine()
 {
     Paths solution;
     //Clipper clipper;
-    if (1) {
-        if (file->apertures[state.aperture]->type() == Rectangle) {
-            State tmpState(state);
-            tmpState.curPos = IntPoint();
-            Path pattern = file->apertures[state.aperture]->draw(tmpState)[0];
-            ReversePath(pattern);
-            for (int i = 0, end = path.size() - 1; i < end; ++i) {
-                int iv = 0;
-                int iw = 0;
-                const int nv = pattern.size();
-                const int nw = 2;
-                double va;
-                double wa;
-                Path A;
-                Path W({ path[i + 1], path[i] });
-                wa = Angle(W[(iw + 1) % nw], W[(iw) % nw]);
-                va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
-                while (va > wa) {
-                    ++iv;
-                    va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
-                }
-                qDebug() << iv;
-                while (A.size() < (nv + nw)) {
-                    A.append(IntPoint(pattern[iv % nv].X + W[iw % nw].X, pattern[iv % nv].Y + W[iw % nw].Y));
-                    va = Angle(pattern[(iv + 1) % nv], pattern[(iv) % nv]);
-                    wa = Angle(W[(iw + 1) % nw], W[(iw) % nw]);
-                    if (va < wa)
-                        ++iv;
-                    else if (va > wa)
-                        ++iw;
-                    else {
-                        ++iv;
-                        ++iw;
-                    }
-                    //                    if (va > wa)
-                    //                        ++iv;
-                    //                    else if (va < wa)
-                    //                        ++iw;
-                    //                    else {
-                    //                        ++iv;
-                    //                        ++iw;
-                    //                    }
-                }
-                solution.append(A);
+    if (file->m_apertures[state.aperture]->type() == Rectangle) {
+        State tmpState(state);
+        tmpState.curPos = IntPoint();
+        Path pattern = file->m_apertures[state.aperture]->draw(tmpState)[0];
+        ReversePath(pattern);
+        for (int i = 0, end = path.size() - 1; i < end; ++i) {
+            int vi = 0;
+            int wi = 0;
+            const int nv = pattern.size();
+            const int nw = 2;
+            Path A;
+            Path W({ path[i + 1], path[i] });
+            double wAngle = Angle(W[(wi + 1) % nw], W[(wi) % nw]);
+            double vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
+            while (vAngle > wAngle) {
+                ++vi;
+                vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
             }
-            SimplifyPolygons(solution);
-            //clipper.AddPaths(solution, ptSubject, true);
-            //clipper.Execute(ctUnion, solution, pftNonZero);
-            ReversePaths(solution);
-
-#ifdef DEPRECATED_IMAGE_POLARITY
-            if (state.imgPolarity == Negative)
-                ReversePaths(solution);
-#endif
-        } else if (file->apertures[state.aperture]->type() == Circle) {
-            //потровится ести нет апертуры!!!!!!!
-            double size = file->apertures[state.aperture]->size() * uScale * 0.5;
-            if (qFuzzyIsNull(size))
-                size = 1;
-            ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
-            offset.AddPath(path, jtRound, etOpenRound);
-            offset.Execute(solution, size);
-#ifdef DEPRECATED_IMAGE_POLARITY
-            if (state.imgPolarity == Negative)
-                ReversePaths(solution);
-
-#endif
-        } else {
-            throw "createLine() not support for other apertures!";
+            qDebug() << vi;
+            while (A.size() < (nv + nw)) {
+                A.append(IntPoint(pattern[vi % nv].X + W[wi % nw].X, pattern[vi % nv].Y + W[wi % nw].Y));
+                vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
+                wAngle = Angle(W[(wi + 1) % nw], W[(wi) % nw]);
+                if (vAngle < wAngle)
+                    ++vi;
+                else if (vAngle > wAngle)
+                    ++wi;
+                else {
+                    ++vi;
+                    ++wi;
+                }
+            }
+            solution.append(A);
         }
-    } else {
+        SimplifyPolygons(solution);
+        ReversePaths(solution);
+
+#ifdef DEPRECATED_IMAGE_POLARITY
+        if (state.imgPolarity == Negative)
+            ReversePaths(solution);
+#endif
+    } else if (file->m_apertures[state.aperture]->type() == Circle) {
         //потровится ести нет апертуры!!!!!!!
-        double size = file->apertures[state.aperture]->size() * uScale * 0.5;
+        double size = file->m_apertures[state.aperture]->size() * uScale * 0.5;
         if (qFuzzyIsNull(size))
             size = 1;
         ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
         offset.AddPath(path, jtRound, etOpenRound);
         offset.Execute(solution, size);
 #ifdef DEPRECATED_IMAGE_POLARITY
-        if (state.imgPolarity == Negative) {
+        if (state.imgPolarity == Negative)
             ReversePaths(solution);
-        }
+
 #endif
+    } else {
+        throw "createLine() not support for other apertures!";
     }
     return solution;
 }
@@ -606,6 +556,7 @@ bool Parser::parseAperture(const QString& gLine)
         int apid = match.cap(1).toInt();
         QString apType = match.cap(2);
         QString apParameters = match.cap(3);
+
         // Parse gerber aperture definition into dictionary of apertures.
         // The following kinds and their attributes are supported:
         // * Circular (C)*: size (float)
@@ -620,26 +571,26 @@ bool Parser::parseAperture(const QString& gLine)
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            file->apertures[apid] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, &file->format));
+            file->m_apertures[apid] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, &file->format));
 
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
+            file->m_apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
 
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
+            file->m_apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, &file->format)));
             break;
         case Polygon:
             if (paramList.length() > 2)
                 rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &file->format)));
+            file->m_apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &file->format)));
 
             break;
         case Macro:
@@ -648,7 +599,7 @@ bool Parser::parseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             }
-            file->apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApMacro(apType, apertureMacro[apType].split('*'), macroCoeff, &file->format)));
+            file->m_apertures.insert(apid, QSharedPointer<AbstractAperture>(new ApMacro(apType, apertureMacro[apType].split('*'), macroCoeff, &file->format)));
             break;
         }
         return true;
@@ -1159,7 +1110,7 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     return false;
 }
 
-bool Parser::parseOperationDCode(const QString& gLine)
+bool Parser::parseDCode(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^D0?([123])\\*$"));
     if (match.exactMatch(gLine)) {

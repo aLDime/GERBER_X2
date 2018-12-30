@@ -15,13 +15,14 @@ typedef QVector /*std::vector*/<Paths> Pathss;
 const long long uScale = 1000000;
 const double dScale = 1.0 / uScale;
 
-Path QPolygonToPath(const QPolygonF& p);
-Paths QPolygonsToPaths(const QVector<QPolygonF>& p);
+Path toPath(const QPolygonF& p);
+Paths toPaths(const QVector<QPolygonF>& p);
 
-QPolygonF PathToQPolygon(const Path& p);
-QVector<QPolygonF> PathsToQPolygons(const Paths& p);
+QPolygonF toQPolygon(const Path& p);
+QVector<QPolygonF> toQPolygons(const Paths& p);
 
-QPointF ToQPointF(const IntPoint& p);
+QPointF toQPointF(const IntPoint& p);
+IntPoint toIntPoint(const QPointF& p);
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);

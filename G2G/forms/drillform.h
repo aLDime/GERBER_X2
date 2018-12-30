@@ -27,6 +27,7 @@ public:
 
     void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>& value);
     void setHoles(const QMap<int, double>& value);
+    void setItems();
     void updateFiles();
 
 private slots:
@@ -41,47 +42,20 @@ private:
     void removeHoles(int apertureId);
     void pickUpTool(int apertureId, double diameter);
 
+    void on_selection_changed();
+
     DrillModel* model;
     Ui::DrillForm* ui;
 
-    bool m_isAperture = false;
+    int m_type ;
     QMap<int, QSharedPointer<G::AbstractAperture>> m_apertures;
     QMap<int, double> m_tools;
     QMap<int, QVector<QGraphicsPathItem*>> m_giaperture;
     QMap<int, QVector<DrillItem*>> m_gid;
 
+    QList<QGraphicsItem*> m_items;
+
     void clear();
 };
 
-class DrillModel : public QAbstractTableModel {
-    typedef struct Row {
-        Row(const QString& name, const QIcon& icon, int id)
-            : name{ name, "" }
-            , icon{ icon, QIcon() }
-            , id{ id, -1 }
-        {
-        }
-        QString name[2];
-        QIcon icon[2];
-        int id[2];
-    } Row;
-    QList<Row> m_data;
-    bool m_isAperture;
-
-public:
-    DrillModel(bool isAperture, QObject* parent = nullptr);
-    void appendRow(const QString& name, const QIcon& icon, int id);
-    void setToolId(int row, int id);
-    int toolId(int row);
-    void setApertureId(int row, int id);
-    int apertureId(int row);
-
-    // QAbstractItemModel interface
-public:
-    int rowCount(const QModelIndex& parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex& parent = QModelIndex()) const override;
-    QVariant data(const QModelIndex& index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override;
-};
 #endif // DRILLFORM_H

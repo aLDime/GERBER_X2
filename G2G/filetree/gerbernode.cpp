@@ -16,11 +16,7 @@ GerberNode::GerberNode(File* file)
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
-    MainWindow::self->zero()->resetPos();
-    MainWindow::self->home()->resetPos();
-    Shtift::shtifts()[0]->resetPos();
     MyGraphicsView::self->zoomFit();
-    MyGraphicsView::self->zoom100();
 }
 
 GerberNode::~GerberNode()
@@ -30,9 +26,6 @@ GerberNode::~GerberNode()
     if (MyScene::self) {
         MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
-        MainWindow::self->zero()->resetPos();
-        MainWindow::self->home()->resetPos();
-        Shtift::shtifts()[0]->resetPos();
     }
     disconnect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.start(1);

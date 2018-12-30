@@ -56,6 +56,10 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
     }
 }
 
+QColor cutColor(Qt::gray);
+QColor pathColor(Qt::black);
+QColor g0Color(Qt::red);
+
 GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
     : m_toolPaths(toolPaths)
     , m_pocketPaths(pocketPaths)
@@ -66,48 +70,25 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
 
     setItemGroup(new ItemGroup);
     GraphicsItem* item;
-    Path p;
+    Path g0path;
     Paths tmpPaths2(toolPaths);
-    Paths tmpPaths;
-    Pathss pathss;
-    Clipper clipper;
-    QVector<QPair<cInt, cInt>> range;
-
-    QColor cutColor(255, 255, 255);
-    QColor pathColor(Qt::black);
-    QColor g0Color(Qt::red);
 
     switch (type) {
     case Profile:
-        for (Path& path : tmpPaths2)
-            if (path.first() != path.last())
-                path.append(path.first());
-
-        for (const Path& path : tmpPaths2) {
-            item = new PathItem({ path });
-            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            itemGroup()->append(item);
-        }
-        p.reserve(toolPaths.size());
-        for (const Path& path : tmpPaths2) {
-            item = new PathItem({ path });
-            item->setPen(QPen(pathColor, 0.0));
-            itemGroup()->append(item);
-            p.append(path.first());
-        }
-        item = new PathItem({ p });
-        item->setPen(QPen(g0Color, 0.0));
-        itemGroup()->append(item);
-        itemGroup()->setBrush(Qt::NoBrush);
-        break;
+        qDebug() << "bad GCodeFile!";
+        return;
     case Pocket:
-        if (1) {
+        if (1) { //fast rendeer
+            Paths tmpPaths;
+            Pathss pathss;
+            Clipper clipper;
+            QVector<QPair<cInt, cInt>> range;
             item = new GerberItem(pocketPaths, nullptr);
             item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setBrush(cutColor);
             item->setAcceptHoverEvents(false);
             item->setFlag(QGraphicsItem::ItemIsSelectable, false);
-            p.reserve(toolPaths.size());
+            g0path.reserve(toolPaths.size());
             itemGroup()->append(item);
 
             clipper.Clear();
@@ -146,17 +127,90 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             }
 
             for (const Path& path : toolPaths)
-                p.append(path.first());
-            item = new PathItem({ p });
+                g0path.append(path.first());
+            item = new PathItem({ g0path });
+            item->setPen(QPen(g0Color, 0.0));
+            item->setBrush(Qt::NoBrush);
+            itemGroup()->append(item);
+        } else {
+            item = new GerberItem(pocketPaths, nullptr);
+            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setBrush(cutColor);
+            item->setAcceptHoverEvents(false);
+            item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+            itemGroup()->append(item);
+
+            g0path.reserve(toolPaths.size());
+
+            for (Path& path : tmpPaths2) {
+                if (path.first() != path.last())
+                    path.append(path.first());
+
+                item = new PathItem({ path });
+                item->setPen(QPen(pathColor, 0.0));
+
+                itemGroup()->append(item);
+
+                g0path.append(path.first());
+            }
+
+            item = new PathItem({ g0path });
             item->setPen(QPen(g0Color, 0.0));
             item->setBrush(Qt::NoBrush);
             itemGroup()->append(item);
         }
         break;
     case Drilling:
+        qDebug() << "bad GCodeFile!";
+        return;
+    default:
+        break;
+    }
+    itemGroup()->addToTheScene();
+}
+
+GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type)
+    : m_toolPaths(toolPaths)
+    , m_tool(tool)
+    , m_depth(depth)
+    , m_type(type)
+{
+
+    setItemGroup(new ItemGroup);
+    GraphicsItem* item;
+    Path g0path;
+    Paths tmpPaths2(toolPaths);
+
+    switch (type) {
+    case Profile:
+        for (Path& path : tmpPaths2)
+            if (path.first() != path.last())
+                path.append(path.first());
+
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            itemGroup()->append(item);
+        }
+        g0path.reserve(toolPaths.size());
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            item->setPen(QPen(pathColor, 0.0));
+            itemGroup()->append(item);
+            g0path.append(path.first());
+        }
+        item = new PathItem({ g0path });
+        item->setPen(QPen(g0Color, 0.0));
+        itemGroup()->append(item);
+        itemGroup()->setBrush(Qt::NoBrush);
+        break;
+    case Pocket:
+        qDebug() << "bad GCodeFile!";
+        return;
+    case Drilling:
         for (const IntPoint& point : toolPaths.first()) {
             item = new DrillItem(tool.diameter);
-            item->setPos(ToQPointF(point));
+            item->setPos(toQPointF(point));
             item->setPen(QPen(pathColor, 0.0));
             item->setBrush(cutColor);
             itemGroup()->append(item);
@@ -193,7 +247,7 @@ void GCodeFile::save(const QString& name)
 void GCodeFile::saveDrill()
 {
     statFile();
-    QPolygonF path(PathToQPolygon(m_toolPaths.first()));
+    QPolygonF path(toQPolygon(m_toolPaths.first()));
 
     double maxX = -std::numeric_limits<double>::max();
     double minX = +std::numeric_limits<double>::max();
@@ -230,7 +284,7 @@ void GCodeFile::saveDrill()
 void GCodeFile::saveProfilePocket()
 {
     statFile();
-    QVector<QPolygonF> paths(PathsToQPolygons(m_toolPaths));
+    QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
 
     double maxX = -std::numeric_limits<double>::max();
     double minX = +std::numeric_limits<double>::max();

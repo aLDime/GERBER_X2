@@ -124,7 +124,7 @@ void ProfileForm::create()
     GCodeFile* gcode = ToolPathCreator(wPaths).createProfile(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), side);
 
     if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("Еhe tool does not fit in the Working items!"));
+        QMessageBox::information(this, "!!!", tr("The tool does not fit in the Working items!"));
         return;
     }
 

@@ -43,6 +43,8 @@ public:
     static int size();
 
     static Paths getPaths();
+    static Paths getSelectedPaths();
+    static QRectF getSelectedBoundingRect();
     static QString fileNames();
 
     template <typename T>

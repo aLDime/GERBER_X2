@@ -12,6 +12,7 @@ class Point : public QGraphicsObject {
 
 public:
     Point(int type);
+    ~Point();
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

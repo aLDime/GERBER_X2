@@ -34,6 +34,8 @@ public:
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
 
+    static Path circle(double diametr, IntPoint center = IntPoint());
+
 protected:
     bool m_isFlashed = false;
     double m_drillDiam = 0.0;
@@ -43,10 +45,9 @@ protected:
     virtual void draw() = 0;
     const Format* m_format;
 
-    Path circle(double diametr, IntPoint center = IntPoint());
-    Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
     void rotate(Path& poligon, double angle, IntPoint center = IntPoint());
     void translate(Path& path, IntPoint pos);
+    Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
 };
 
 /////////////////////////////////////////////////////

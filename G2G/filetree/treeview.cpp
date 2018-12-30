@@ -67,8 +67,6 @@ void TreeView::updateIcons()
     int rowCount = static_cast<AbstractNode*>(index.internalPointer())->childCount();
     for (int r = 0; r < rowCount; ++r)
         update(m_model->index(r, 0, index));
-    if (DrillForm::self)
-        DrillForm::self->updateFiles();
 }
 
 void TreeView::on_doubleClicked(const QModelIndex& index)
@@ -123,7 +121,8 @@ void TreeView::hideOther()
 void TreeView::closeFile()
 {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
-    if (DrillForm::self && m_menuIndex.parent().row() == NodeDrillFiles)
+    if (DrillForm::self)
+        //&& (m_menuIndex.parent().row() == NodeGerberFiles || m_menuIndex.parent().row() == NodeDrillFiles))
         DrillForm::self->updateFiles();
 }
 
@@ -145,7 +144,6 @@ void TreeView::saveGcodeFile()
 
 void TreeView::showExcellonDialog()
 {
-    //    ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt())).exec();
     d = new ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(d, &ExcellonDialog::destroyed, [&] { d = nullptr; });
     d->show();
@@ -155,25 +153,26 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 {
     QMenu menu(this);
     m_menuIndex = indexAt(event->pos());
+    QAction* a = nullptr;
     switch (m_menuIndex.parent().row()) {
     case NodeGerberFiles:
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
+        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         break;
     case NodeDrillFiles:
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
+        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), this, &TreeView::showExcellonDialog)->setEnabled(!d);
         break;
     case NodeToolPath:
-        menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
+        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
         menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
         break;
     default:
         break;
     }
-    if (!menu.actions().isEmpty()) {
+    if (a) {
         m_menuIndex = indexAt(event->pos());
         menu.exec(mapToGlobal(event->pos()));
     }

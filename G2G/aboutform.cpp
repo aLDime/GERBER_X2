@@ -1,5 +1,6 @@
 #include "aboutform.h"
 #include "ui_aboutform.h"
+#include <QDesktopServices>
 
 AboutForm::AboutForm(QWidget* parent)
     : QDialog(parent)
@@ -11,8 +12,10 @@ AboutForm::AboutForm(QWidget* parent)
 #else
     QString str(QString(__TIMESTAMP__).append("<br/>MSC_VER: ") + QString::number(_MSC_VER));
 #endif
+    str.append("<br/>Application Version: " + qApp->applicationVersion());
     ui->lblAbout->setText(ui->lblAbout->text().arg(/*qApp->applicationVersion()*/ str));
     connect(ui->cmdOk_2, &QPushButton::clicked, this, &AboutForm::accept);
+    connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) { QDesktopServices::openUrl(link); });
 }
 
 AboutForm::~AboutForm()

@@ -27,7 +27,7 @@ private:
     void addFlash();
 
     void reset(const QString& fileName);
-    void clearStep();
+    void resetStep();
 
     IntPoint parsePosition(const QString& xyStr);
     Path arc(const IntPoint& center, double radius, double start, double stop);
@@ -72,7 +72,7 @@ private:
     bool parseImagePolarity(const QString& gLine);
     bool parseLevelPolarity(const QString& gLine);
     bool parseLineInterpolation(const QString& gLine);
-    bool parseOperationDCode(const QString& gLine);
+    bool parseDCode(const QString& gLine);
     bool parseToolAperture(const QString& gLine);
     bool parseUnitMode(const QString& gLine);
 };

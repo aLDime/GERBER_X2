@@ -13,9 +13,6 @@ DrillNode::DrillNode(DrillFile* file)
     MyGraphicsView::self->zoomFit();
     MyGraphicsView::self->zoom100();
     MainWindow::self->closeAllAct->setEnabled(true);
-    MainWindow::self->zero()->resetPos();
-    MainWindow::self->home()->resetPos();
-    Shtift::shtifts()[0]->resetPos();
 }
 
 DrillNode::~DrillNode()
@@ -25,9 +22,6 @@ DrillNode::~DrillNode()
     if (MyScene::self) {
         MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
-        MainWindow::self->zero()->resetPos();
-        MainWindow::self->home()->resetPos();
-        Shtift::shtifts()[0]->resetPos();
     }
 }
 

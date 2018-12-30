@@ -1,29 +1,22 @@
 #include "mainwindow.h"
 #include "aboutform.h"
-#include "drillforapertureform.h"
-#include "forms/drillform.h"
-#include "forms/materialsetupform.h"
-#include "forms/pocketform.h"
-#include "forms/profileform.h"
-#include "mainwindow.h"
 #include "settingsdialog.h"
-#include "staticholders/fileholder.h"
-#include "tooldatabase/tooldatabase.h"
-#include <QApplication>
-#include <QCloseEvent>
-#include <QDir>
-#include <QFileDialog>
-#include <QSettings>
-#include <QtWidgets>
-#include <filetree/gcodenode.h>
-#include <filetree/gerbernode.h>
-#include <limits>
-#include <myscene.h>
-#include <parser.h>
-#include <ui_drillform.h>
 
-//#include "qt_windows.h"
-//#include "Psapi.h"
+#include <QFileDialog>
+#include <QInputDialog>
+#include <QProgressDialog>
+#include <QToolBar>
+
+#include <parser.h>
+
+#include <forms/drillform.h>
+#include <forms/materialsetupform.h>
+#include <forms/pocketform.h>
+#include <forms/profileform.h>
+
+#include <tooldatabase/tooldatabase.h>
+
+#include <staticholders/fileholder.h>
 
 MainWindow* MainWindow::self = nullptr;
 
@@ -151,7 +144,7 @@ void MainWindow::open()
 
 void MainWindow::closeFiles()
 {
-    dockWidget->hide();
+    dockWidget->close();
     FileModel::self->closeAllFiles();
 }
 
@@ -212,6 +205,7 @@ void MainWindow::createActions()
         recentFileActs[i] = recentMenu->addAction(QString(), this, &MainWindow::openRecentFile);
         recentFileActs[i]->setVisible(false);
     }
+    recentMenu->addSeparator();
     recentFileActs[MaxRecentFiles] = recentMenu->addAction("Clear Recent Files", [=] {
         QSettings settings;
         writeRecentFiles({}, settings);
@@ -236,7 +230,8 @@ void MainWindow::createActions()
 
     //==================== serviceMenu ====================
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), this, &MainWindow::showSettingsDialog);
+    action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"),
+        this, &MainWindow::showSettingsDialog);
     action->setStatusTip(tr("Show the application's settings box"));
 
     //==================== helpMenu ====================
@@ -277,7 +272,8 @@ void MainWindow::createActions()
     //        for (QGraphicsItem* item : MyScene::self->items())
     //            if (item->isSelected() && item->type() != DrillItemType)
     //                list << item;
-    //        if (list.size() && QMessageBox::question(this, "", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
+    //        if (list.size() && QMessageBox::question(this,
+    //"", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
     //            for (QGraphicsItem* item : list)
     //                if (item->isSelected() && item->type() != DrillItemType)
     //                    delete item;
@@ -338,6 +334,33 @@ void MainWindow::createStatusBar()
     statusBar()->showMessage(tr("Ready"));
 }
 
+void MainWindow::createShtifts()
+{
+    ToolDatabase tdb(this, { Tool::Drill });
+    if (tdb.exec()) {
+        Tool tool(tdb.tool());
+        Path dst;
+
+        for (Shtift* item : Shtift::shtifts()) {
+            item->setFlag(QGraphicsItem::ItemIsMovable, false);
+            IntPoint point(item->pos().x() * uScale, item->pos().y() * uScale);
+            if (dst.contains(point))
+                continue;
+            dst.append(point);
+        }
+
+        QSettings settings;
+        double depth = QInputDialog::getDouble(this, "", "Set Depth", settings.value("Shtift/depth").toDouble(), 0, 100, 2);
+        if (depth == 0.0)
+            return;
+        settings.setValue("Shtift/depth", depth);
+
+        GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
+        gcode->setFileName("Shtift");
+        FileModel::self->addGcode(gcode);
+    }
+}
+
 void MainWindow::readSettings()
 {
     QSettings settings;
@@ -365,35 +388,31 @@ void MainWindow::writeSettings()
 
 void MainWindow::on_customContextMenuRequested(const QPoint& pos)
 {
-    if (dynamic_cast<Shtift*>(MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform()))) {
-        QMenu menu;
-        menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), [=] {
-            ToolDatabase tdb(this, { Tool::Drill });
-            if (tdb.exec()) {
-                Tool tool(tdb.tool());
-                Path dst;
+    QMenu menu;
+    QAction* a = nullptr;
+    QGraphicsItem* item = MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
 
-                for (Shtift* item : Shtift::shtifts()) {
-                    item->setFlag(QGraphicsItem::ItemIsMovable, false);
-                    IntPoint point(item->pos().x() * uScale, item->pos().y() * uScale);
-                    if (dst.contains(point))
-                        continue;
-                    dst.append(point);
-                }
+    if (!item)
+        return;
 
-                QSettings settings;
-                double depth = QInputDialog::getDouble(this, "", "Set Depth", settings.value("Shtift/depth").toDouble(), 0, 100, 2);
-                if (depth == 0.0)
-                    return;
-                settings.setValue("Shtift/depth", depth);
-
-                GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
-                gcode->setFileName("Shtift");
-                FileModel::self->addGcode(gcode);
-            }
+    if (item->type() == ShtiftType) {
+        a = menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), this, &MainWindow::createShtifts);
+        a = menu.addAction(tr("Fixed"));
+        a->setCheckable(true);
+        a->setChecked(!(Shtift::shtifts()[0]->flags() & QGraphicsItem::ItemIsMovable));
+        connect(a, &QAction::toggled, [](bool fl) {
+            for (Shtift* item : Shtift::shtifts())
+                item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
         });
-        menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 24)));
     }
+    if (dynamic_cast<Point*>(item)) {
+        a = menu.addAction(tr("Fixed"));
+        a->setCheckable(true);
+        a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
+        connect(a, &QAction::toggled, [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
+    }
+    if (a)
+        menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 24)));
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)
@@ -433,7 +452,9 @@ void MainWindow::openFile(const QString& fileName)
 
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr(""), tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+        QMessageBox::warning(this,
+            tr(""),
+            tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
     QFileInfo fi(fileName);

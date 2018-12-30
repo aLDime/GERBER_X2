@@ -63,6 +63,7 @@ private:
     void createActions();
     void createDockWidget(QWidget* dwContent, int type);
     void createStatusBar();
+    void createShtifts();
     void open();
     void setCurrentFile(const QString& fileName);
     void showSettingsDialog();

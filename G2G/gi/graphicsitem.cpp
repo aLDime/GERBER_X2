@@ -1,23 +1,14 @@
 #include "graphicsitem.h"
 #include "itemgroup.h"
-//#include "gerber.h"
-//#include "point.h"
-//#include <QApplication>
-//#include <QDebug>
-//#include <QGraphicsSceneMouseEvent>
-//#include <QPainter>
-//#include <QStyleOptionGraphicsItem>
-//#include <file.h>
-//#include <mainwindow.h>
-//#include <myscene.h>
-//using namespace ClipperLib;
 
 GraphicsItem::GraphicsItem()
     : m_pen(Qt::white)
     , m_brush(Qt::white)
 {
-    m_pen.setColor(Qt::white);
-    m_brush.setColor(Qt::white);
+    //    setAcceptDrops(false);
+    //    setAcceptedMouseButtons(false);
+    //    setAcceptHoverEvents(false);
+    //    setAcceptTouchEvents(false);
 }
 
 GraphicsItem::~GraphicsItem()
@@ -37,3 +28,5 @@ void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
 void GraphicsItem::setItemGroup(ItemGroup* itemGroup) { m_ig = itemGroup; }
 
 ItemGroup* GraphicsItem::parentItemGroup() const { return m_ig; }
+
+QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }

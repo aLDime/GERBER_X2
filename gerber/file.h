@@ -52,13 +52,14 @@ public:
     Miror miror = Vertical;
     FileType type() const override { return FileType::Gerber; }
 
-    QMap<int, QSharedPointer<AbstractAperture>> getApertures() const;
+    QMap<int, QSharedPointer<AbstractAperture>> apertures() const;
+    bool flashedApertures() const;
 
 protected:
     Paths merge() const override;
 
 private:
-    QMap<int, QSharedPointer<AbstractAperture>> apertures;
+    QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
 };
 
 Q_DECLARE_METATYPE(File)

@@ -28,7 +28,7 @@ public:
     virtual Paths paths() const = 0;
     void setItemGroup(ItemGroup* itemGroup);
     ItemGroup* parentItemGroup() const;
-
+    QPointF center() const;
 protected:
     QPen m_pen;
     QBrush m_brush;

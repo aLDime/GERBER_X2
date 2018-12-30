@@ -6,15 +6,13 @@ int AbstractNode::c = 0;
 
 AbstractNode::AbstractNode()
 {
-    qDebug() << "AbstractItem" << ++c << this << m_parentItem;
+    //qDebug() << "AbstractItem" << ++c << this;
 }
 
 AbstractNode::~AbstractNode()
 {
-    qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
-    //    if (childItems.size())
+    //qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
     childItems.clear();
-    //qDeleteAll(childItems);
 }
 
 int AbstractNode::row() const
@@ -23,7 +21,6 @@ int AbstractNode::row() const
         for (int i = 0, size = m_parentItem->childItems.size(); i < size; ++i)
             if (m_parentItem->childItems[i].data() == this)
                 return i;
-    //return m_parentItem->childItems.indexOf(const_cast<AbstractNode*>(this));
     return 0;
 }
 

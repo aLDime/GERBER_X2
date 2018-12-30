@@ -37,10 +37,12 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     QLabel* corner = new QLabel("mm", this);
     corner->setAlignment(Qt::AlignCenter);
     corner->setFixedSize(RulerBreadth, RulerBreadth);
+
     gridLayout->addWidget(corner, 0, 0);
     gridLayout->addWidget(hRuler, 0, 1);
     gridLayout->addWidget(vRuler, 1, 0);
     gridLayout->addWidget(viewport(), 1, 1);
+
     // finally set layout
     setLayout(gridLayout);
 

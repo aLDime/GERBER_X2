@@ -1,4 +1,5 @@
 #include "file.h"
+#include <QElapsedTimer>
 
 using namespace G;
 
@@ -15,11 +16,9 @@ Paths File::merge() const
 {
     Paths paths;
     Paths tmpPaths;
-    //    file = gerberFile;
     int i = 0, exp = -1;
-    Clipper clipper(ioStrictlySimple);
     while (i < size()) {
-        clipper.Clear();
+        Clipper clipper(ioStrictlySimple);
         clipper.AddPaths(paths, ptSubject, true);
         exp = at(i).state.imgPolarity;
         do {
@@ -28,18 +27,28 @@ Paths File::merge() const
             clipper.AddPaths(tmpPaths, ptClip, true);
         } while (i < size() && exp == at(i).state.imgPolarity);
 
-        if (at(i - 1).state.imgPolarity == G::Positive)
+        if (at(i - 1).state.imgPolarity == Positive)
             clipper.Execute(ctUnion, paths, pftPositive);
         else
             clipper.Execute(ctDifference, paths, pftNonZero);
     }
+    CleanPolygons(paths, 0.0009 * uScale);
     m_mergedPaths = paths;
     return m_mergedPaths;
 }
 
-QMap<int, QSharedPointer<AbstractAperture>> File::getApertures() const
+bool File::flashedApertures() const
 {
-    return apertures;
+    for (QSharedPointer<AbstractAperture> a : m_apertures) {
+        if (a.data()->isFlashed())
+            return true;
+    }
+    return false;
+}
+
+QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const
+{
+    return m_apertures;
 }
 
 //Pathss& File::groupedPaths(Group group, bool fl)

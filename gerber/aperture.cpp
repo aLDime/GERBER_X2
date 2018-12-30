@@ -61,17 +61,22 @@ Path AbstractAperture::drawDrill(const State& state)
 
 Path AbstractAperture::circle(double diametr, IntPoint center)
 {
-    double radius = diametr / 2.0;
-    Path poligon(StepsPerCircle);
-    for (int i = 0; i < StepsPerCircle; ++i) {
+    if (diametr == 0.0)
+        return Path();
+
+    const double radius = diametr / 2.0;
+    const double length = 0.5; // mm
+    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
+    int intSteps = MinStepsPerCircle;
+    while (intSteps < destSteps)
+        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
+
+    Path poligon(intSteps);
+    for (int i = 0; i < intSteps; ++i) {
         poligon[i] = IntPoint(
-            (qCos(qDegreesToRadians((double)i * 360.0 / StepsPerCircle)) * radius) + center.X,
-            (qSin(qDegreesToRadians((double)i * 360.0 / StepsPerCircle)) * radius) + center.Y);
+            (qCos(i * 2 * M_PI / intSteps) * radius) + center.X,
+            (qSin(i * 2 * M_PI / intSteps) * radius) + center.Y);
     }
-
-    if (Area(poligon) < 0)
-        ReversePath(poligon);
-
     return poligon;
 }
 

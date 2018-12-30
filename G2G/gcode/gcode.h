@@ -18,7 +18,8 @@ enum GCodeType {
 
 class GCodeFile : public AbstractFile {
 public:
-    GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
+    GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths );
+    GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type);
 
     Paths getPaths() const;
     void save(const QString& name = QString());

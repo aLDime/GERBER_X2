@@ -1,6 +1,6 @@
 #include "myclipper.h"
 
-Path QPolygonToPath(const QPolygonF& p)
+Path toPath(const QPolygonF& p)
 {
     Path path;
     for (const QPointF& pt : p)
@@ -8,15 +8,15 @@ Path QPolygonToPath(const QPolygonF& p)
     return path;
 }
 
-Paths QPolygonsToPaths(const QVector<QPolygonF>& p)
+Paths toPaths(const QVector<QPolygonF>& p)
 {
     Paths paths;
     for (const QPolygonF& pl : p)
-        paths.push_back(QPolygonToPath(pl));
+        paths.push_back(toPath(pl));
     return paths;
 }
 
-QPolygonF PathToQPolygon(const Path& p)
+QPolygonF toQPolygon(const Path& p)
 {
     QPolygonF polygon;
     for (const IntPoint& pt : p)
@@ -24,18 +24,17 @@ QPolygonF PathToQPolygon(const Path& p)
     return polygon;
 }
 
-QVector<QPolygonF> PathsToQPolygons(const Paths& p)
+QVector<QPolygonF> toQPolygons(const Paths& p)
 {
     QVector<QPolygonF> polygons;
     for (const Path& pl : p)
-        polygons.push_back(PathToQPolygon(pl));
+        polygons.push_back(toQPolygon(pl));
     return polygons;
 }
 
-QPointF ToQPointF(const IntPoint& p)
-{
-    return QPointF(p.X * dScale, p.Y * dScale);
-}
+QPointF toQPointF(const IntPoint& p) { return QPointF(p.X * dScale, p.Y * dScale); }
+
+IntPoint toIntPoint(const QPointF& p) { return IntPoint(p.x() * uScale, p.y() * uScale); }
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2)
 {
