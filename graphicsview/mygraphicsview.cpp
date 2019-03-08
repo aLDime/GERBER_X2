@@ -96,40 +96,45 @@ void MyGraphicsView::zoom100()
     scale(x, y);
     UpdateRuler();
 }
-
-//enum {
-//    DURATION = 300,
-//    INTERVAL = 30
-//};
+#ifdef ANIM
+enum {
+    DURATION = 300,
+    INTERVAL = 30
+};
+#endif
 
 void MyGraphicsView::zoomIn()
 {
     if (transform().m11() > 10000.0)
         return;
-
-    //    numScheduledScalings += 1;
-    //    QTimeLine* anim = new QTimeLine(DURATION, this);
-    //    anim->setUpdateInterval(INTERVAL);
-    //    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
-    //    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
-    //    anim->start();
+#ifdef ANIM
+    numScheduledScalings += 1;
+    QTimeLine* anim = new QTimeLine(DURATION, this);
+    anim->setUpdateInterval(INTERVAL);
+    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    anim->start();
+#else
     scale(zoomFactor, zoomFactor);
     UpdateRuler();
+#endif
 }
 
 void MyGraphicsView::zoomOut()
 {
     if (transform().m11() < 1.0)
         return;
-
-    //    numScheduledScalings -= 1;
-    //    QTimeLine* anim = new QTimeLine(DURATION, this);
-    //    anim->setUpdateInterval(INTERVAL);
-    //    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
-    //    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
-    //    anim->start();
+#ifdef ANIM
+    numScheduledScalings -= 1;
+    QTimeLine* anim = new QTimeLine(DURATION, this);
+    anim->setUpdateInterval(INTERVAL);
+    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    anim->start();
+#else
     scale(1.0 / zoomFactor, 1.0 / zoomFactor);
     UpdateRuler();
+#endif
 }
 
 void MyGraphicsView::wheelEvent(QWheelEvent* event)

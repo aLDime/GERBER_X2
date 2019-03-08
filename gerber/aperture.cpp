@@ -14,31 +14,33 @@ AbstractAperture::~AbstractAperture() {}
 
 Paths AbstractAperture::draw(const State& state)
 {
-    if (state.dCode == D03)
+    if (state.dCode() == D03)
         m_isFlashed = true;
     if (m_size == 0)
         draw();
 
     Paths tmpPpaths;
-    for (Path var : m_paths) {
-#ifdef DEPRECATED_IMAGE_POLARITY
-        if (state.imgPolarity == Negative)
-            ReversePath(var);
-#endif
-        if (/*state.*/ m_format->unitMode == Inches && type() == Macro) {
-            for (IntPoint& pt : var) {
+    tmpPpaths.reserve(m_paths.size());
+
+    for (Path path : m_paths) {
+        if (state.imgPolarity() == Negative)
+            ReversePath(path);
+        if (m_format->unitMode == Inches && type() == Macro)
+            for (IntPoint& pt : path) {
                 pt.X *= 25.4;
                 pt.Y *= 25.4;
             }
-        }
-        if (state.curPos.X != 0 || state.curPos.Y != 0)
-            translate(var, state.curPos);
-        tmpPpaths.push_back(var);
+
+        transform(path, state);
+
+        if (state.curPos().X != 0 || state.curPos().Y != 0)
+            translate(path, state.curPos());
+        tmpPpaths.push_back(path);
     }
     return tmpPpaths;
 }
 
-double AbstractAperture::size()
+double AbstractAperture::apertureSize()
 {
     if (m_size == 0)
         draw();
@@ -52,10 +54,10 @@ Path AbstractAperture::drawDrill(const State& state)
 
     Path drill = circle(m_drillDiam * uScale);
 
-    if (state.imgPolarity == Positive)
+    if (state.imgPolarity() == Positive)
         ReversePath(drill);
 
-    translate(drill, state.curPos);
+    translate(drill, state.curPos());
     return drill;
 }
 
@@ -101,12 +103,31 @@ void AbstractAperture::rotate(Path& poligon, double angle, IntPoint center)
 {
     bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
-        const double tmpAangle = angle - Angle(center, pt);
+        const double tmpAangle = qDegreesToRadians(angle - Angle(center, pt));
         const double length = Length(center, pt);
-        pt = IntPoint(
-            qCos(qDegreesToRadians(tmpAangle)) * length,
-            qSin(qDegreesToRadians(tmpAangle)) * length);
+        pt = IntPoint(qCos(tmpAangle) * length, qSin(tmpAangle) * length);
     }
+    if (fl != (Area(poligon) < 0))
+        ReversePath(poligon);
+}
+
+void AbstractAperture::transform(Path& poligon, const State& state)
+{
+
+    bool fl = Area(poligon) < 0;
+    for (IntPoint& pt : poligon) {
+
+        if (state.mirroring() & X_Mirroring)
+            pt.X = -pt.X;
+        if (state.mirroring() & Y_Mirroring)
+            pt.Y = -pt.Y;
+        if (state.rotating() != 0.0 || state.scaling() != 1.0) {
+            const double tmpAangle = qDegreesToRadians(state.rotating() - Angle(IntPoint(), pt));
+            const double length = Length(IntPoint(), pt) * state.scaling();
+            pt = IntPoint(qCos(tmpAangle) * length, qSin(tmpAangle) * length);
+        }
+    }
+
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
 }
@@ -121,7 +142,11 @@ void AbstractAperture::translate(Path& path, IntPoint pos)
     }
 }
 /////////////////////////////////////////////////////
-
+/// \brief ApCircle::ApCircle
+/// \param diam
+/// \param drillDiam
+/// \param format
+///
 ApCircle::ApCircle(double diam, double drillDiam, const Format* format)
     : AbstractAperture(format)
 {
@@ -140,7 +165,12 @@ void ApCircle::draw()
     m_size = m_diam;
 }
 /////////////////////////////////////////////////////
-
+/// \brief ApRectangle::ApRectangle
+/// \param width
+/// \param height
+/// \param drillDiam
+/// \param format
+///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const Format* format)
     : AbstractAperture(format)
 {
@@ -159,7 +189,12 @@ void ApRectangle::draw()
     m_size = qSqrt(m_width * m_width + m_height * m_height);
 }
 /////////////////////////////////////////////////////
-
+/// \brief ApObround::ApObround
+/// \param width
+/// \param height
+/// \param drillDiam
+/// \param format
+///
 ApObround::ApObround(double width, double height, double drillDiam, const Format* format)
     : AbstractAperture(format)
 {
@@ -195,7 +230,13 @@ void ApObround::draw()
     m_size = qMax(width_, height_);
 }
 /////////////////////////////////////////////////////
-
+/// \brief ApPolygon::ApPolygon
+/// \param diam
+/// \param nVertices
+/// \param rotation
+/// \param drillDiam
+/// \param format
+///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const Format* format)
     : AbstractAperture(format)
 {
@@ -228,7 +269,12 @@ void ApPolygon::draw()
     m_size = diam;
 }
 /////////////////////////////////////////////////////
-
+/// \brief ApMacro::ApMacro
+/// \param macro
+/// \param modifiers
+/// \param coefficients
+/// \param format
+///
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format)
     : AbstractAperture(format)
 {
@@ -553,4 +599,41 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
         rotate(polygon, mod[RotationAngle]);
 
     return polygon;
+}
+/////////////////////////////////////////////////////
+/// \brief ApBlock::ApBlock
+/// \param macro
+/// \param modifiers
+/// \param coefficients
+/// \param format
+///
+ApBlock::ApBlock(/*const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, */ const Format* format)
+    : AbstractAperture(format)
+{
+}
+
+QString ApBlock::name() { return QString("ApBlock"); }
+
+ApertureType ApBlock::type() const { return Block; }
+
+void ApBlock::draw()
+{
+    m_paths.clear();
+    Paths tmpPaths;
+    int i = 0, exp = -1;
+    while (i < size()) {
+        Clipper clipper(ioStrictlySimple);
+        clipper.AddPaths(m_paths, ptSubject, true);
+        exp = at(i).state.imgPolarity();
+        do {
+            tmpPaths = at(i++).paths;
+            clipper.AddPaths(tmpPaths, ptClip, true);
+        } while (i < size() && exp == at(i).state.imgPolarity());
+
+        if (at(i - 1).state.imgPolarity() == Positive)
+            clipper.Execute(ctUnion, m_paths, pftPositive);
+        else
+            clipper.Execute(ctDifference, m_paths, pftNonZero);
+    }
+    CleanPolygons(m_paths, 0.0009 * uScale);
 }

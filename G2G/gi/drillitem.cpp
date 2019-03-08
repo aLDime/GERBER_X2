@@ -28,18 +28,20 @@ QPainterPath DrillItem::shape() const { return m_shape; }
 
 void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (m_penColor)
+        m_pen.setColor(*m_penColor);
+    if (m_brushColor)
+        m_brush.setColor(*m_brushColor);
     painter->save();
-    // if (m_pen.width() == 0)
-    //painter->setRenderHint(QPainter::Antialiasing, false);
-    QColor cb(Qt::white);
+    QColor cb(m_brush.color());
     if (option->state & QStyle::State_Selected)
-        cb = QColor(Qt::black);
+        cb = cb.light(150);
 
     if (option->state & QStyle::State_MouseOver)
-        cb = QColor(Qt::red);
+        cb = cb.dark(150);
 
     painter->setBrush(cb);
-    painter->setPen(QPen(Qt::white, 0.0));
+    painter->setPen(m_pen);
     painter->drawPath(m_shape);
     painter->restore();
 }

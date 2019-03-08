@@ -1,8 +1,55 @@
 #include "settingsdialog.h"
+#include "colorselector.h"
 
 #include <QGLWidget>
 #include <QtWidgets>
 #include <mygraphicsview.h>
+
+const int gridColor = 100;
+
+const QColor defaultColor[Colors::Count]{
+    QColor(), //Background
+    QColor(255, 255, 0, 120), //Shtift
+    QColor(Qt::gray), //CutArea
+    QColor(gridColor, gridColor, gridColor, 50), //Grid1
+    QColor(gridColor, gridColor, gridColor, 100), //Grid5
+    QColor(gridColor, gridColor, gridColor, 200), //Grid10
+    QColor(), //Hole
+    QColor(0, 255, 0, 120), //Home
+    QColor(Qt::black), //ToolPath
+    QColor(255, 0, 0, 120), //Zero
+    QColor(Qt::red) //G0
+};
+
+const QString colorName[Colors::Count]{
+    "Background",
+    "Shtift",
+    "CutArea",
+    "Grid1",
+    "Grid5",
+    "Grid10",
+    "Hole",
+    "Home",
+    "ToolPath",
+    "Zero",
+    "G0",
+};
+
+QColor SettingsDialog::m_color[Colors::Count]{
+    QColor(), //Background
+    QColor(255, 255, 0, 120), //Shtift
+    QColor(Qt::gray), //CutArea
+    QColor(gridColor, gridColor, gridColor, 50), //Grid1
+    QColor(gridColor, gridColor, gridColor, 100), //Grid5
+    QColor(gridColor, gridColor, gridColor, 200), //Grid10
+    QColor(), //Hole
+    QColor(0, 255, 0, 120), //Home
+    QColor(Qt::black), //ToolPath
+    QColor(255, 0, 0, 120), //Zero
+    QColor(Qt::red) //G0
+};
+
+QRectF SettingsDialog::worckRect;
 
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
@@ -14,10 +61,14 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         listCategories->item(listCategories->count() - 1)->setData(Qt::UserRole, box->objectName());
     }
 
-    listCategories->item(0)->setSelected(true);
-    connect(scrollSettings->verticalScrollBar(), &QScrollBar::valueChanged, this, &SettingsDialog::onScrollBarValueChanged);
-    connect(listCategories, &QListWidget::currentRowChanged, this, &SettingsDialog::onListCategoriesCurrentRowChanged);
+    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
+        formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_color[i], defaultColor[i], gbxColor));
+        formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
+    }
 
+    listCategories->item(0)->setSelected(true);
+    //connect(scrollSettings->verticalScrollBar(), &QScrollBar::valueChanged, this, &SettingsDialog::onScrollBarValueChanged);
+    connect(listCategories, &QListWidget::currentRowChanged, this, &SettingsDialog::onListCategoriesCurrentRowChanged);
     readSettings();
 }
 
@@ -42,26 +93,33 @@ void SettingsDialog::onScrollBarValueChanged(int value)
     }
 }
 
-void SettingsDialog::onListCategoriesCurrentRowChanged(int currentRow)
+void SettingsDialog::onListCategoriesCurrentRowChanged(int /*currentRow*/)
 {
     // Scroll to selected groupbox
-    QGroupBox* box = this->findChild<QGroupBox*>(listCategories->item(currentRow)->data(Qt::UserRole).toString());
-    if (box) {
-        scrollSettings->ensureWidgetVisible(box);
-    }
+    //    QGroupBox* box = this->findChild<QGroupBox*>(listCategories->item(currentRow)->data(Qt::UserRole).toString());
+    //    if (box) {
+    //        scrollSettings->ensureWidgetVisible(box);
+    //    }
 }
 
 void SettingsDialog::readSettings()
 {
+    qDebug() << "SettingsDialog::readSettings";
     QSettings settings;
     settings.beginGroup("Viewer");
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
     chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
     settings.endGroup();
+    settings.beginGroup("Color");
+    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
+        m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
+    }
+    settings.endGroup();
 }
 
 void SettingsDialog::writeSettings()
 {
+    qDebug() << "SettingsDialog::writeSettings";
     QSettings settings;
     settings.beginGroup("Viewer");
     if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
@@ -75,6 +133,12 @@ void SettingsDialog::writeSettings()
         settings.setValue("Antialiasing", chbAntialiasing->isChecked());
     }
     settings.endGroup();
+
+    settings.beginGroup("Color");
+    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
+        settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
+    }
+    settings.endGroup();
 }
 
 void SettingsDialog::showEvent(QShowEvent* event)
@@ -85,7 +149,7 @@ void SettingsDialog::showEvent(QShowEvent* event)
 
 void SettingsDialog::reject()
 {
-    //qDebug() << "reject";
+    readSettings();
     QDialog::reject();
 }
 

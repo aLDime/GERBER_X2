@@ -4,6 +4,7 @@
 #include "file.h"
 #include "gerber.h"
 #include <QObject>
+#include <QStack>
 namespace G {
 class Parser : public QObject {
     Q_OBJECT
@@ -41,40 +42,53 @@ private:
 
     QMap<QString, QString> apertureMacro;
 
-    bool ab = false;
+    enum WorkingType {
+        Normal,
+        StepRepeat,
+        ApertureBlock,
+    };
+
+    QStack<QPair<WorkingType, int>> abSrId;
+
     Path path;
     State state;
     File* file;
     QList<QString> gerbLines;
+    int lineNum = 0;
 
-    struct
-    {
+    struct {
+        void reset()
+        {
+            x = 0;
+            y = 0;
+            i = 0.0;
+            j = 0.0;
+            acc.clear();
+        }
         int x = 0;
         int y = 0;
         double i = 0.0;
         double j = 0.0;
-        StepRepeat state = SrClose;
         QList<GraphicObject> acc;
     } sr;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
-
-    bool parseStepRepeat(const QString& gLine);
-    void closeStepRepeat();
-
     bool parseApertureMacros(const QString& gLine);
     bool parseAttributes(const QString& gLine);
     bool parseCircularInterpolation(const QString& gLine);
+    bool parseDCode(const QString& gLine);
     bool parseEndOfFile(const QString& gLine);
     bool parseFormat(const QString& gLine);
     bool parseGCode(const QString& gLine);
     bool parseImagePolarity(const QString& gLine);
-    bool parseLevelPolarity(const QString& gLine);
     bool parseLineInterpolation(const QString& gLine);
-    bool parseDCode(const QString& gLine);
-    bool parseToolAperture(const QString& gLine);
+    bool parseStepRepeat(const QString& gLine);
+    bool parseTransformations(const QString& gLine);
     bool parseUnitMode(const QString& gLine);
+    void closeStepRepeat();
+
+    ApBlock* apb(int id) { return static_cast<ApBlock*>(file->m_apertures[id].data()); }
 };
 }
 #endif // GERBERPARSER_H

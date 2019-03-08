@@ -30,7 +30,6 @@ public:
     };
 
 private:
-    QColor m_color;
     QRectF m_rect;
     QPainterPath m_path;
     QPainterPath m_shape;

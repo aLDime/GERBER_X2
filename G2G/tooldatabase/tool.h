@@ -9,7 +9,6 @@
 class Tool {
 public:
     Tool();
-    ~Tool();
 
     enum Type {
         Drill,
@@ -41,7 +40,7 @@ public:
     double oneTurnCut = 0.0;
     double passDepth = 0.0;
     double plungeRate = 0.0;
-    double spindleSpeed = 0.0;
+    int spindleSpeed = 0.0;
     double stepover = 0.0;
 
     int id = -1;

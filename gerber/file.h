@@ -3,36 +3,12 @@
 
 #include "aperture.h"
 #include "gerber.h"
+#include "graphicobject.h"
 
 #include <abstractfile.h>
 #include <gi/itemgroup.h>
 
 namespace G {
-
-class File;
-
-class GraphicObject {
-public:
-    GraphicObject(
-        const State& state,
-        const Paths& paths,
-        File* gFile,
-        const QStringList& /*gerberStrings*/ = QStringList(),
-        const Path& path = Path())
-        : state(state)
-        , paths(paths)
-        , gFile(gFile)
-        //        , gerberStrings(gerberStrings)
-        , path(path)
-    {
-    }
-
-    State state;
-    Paths paths;
-    File* gFile = nullptr;
-    //    QStringList gerberStrings;
-    Path path;
-};
 
 class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;

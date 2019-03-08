@@ -48,6 +48,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         case Qt::EditRole:
             FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
+
         default:
             return false;
         }
@@ -105,7 +106,6 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     default:
         break;
     }
-
     return QVariant();
 }
 

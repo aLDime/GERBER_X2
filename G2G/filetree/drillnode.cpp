@@ -72,6 +72,8 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
+    case 1:
+        return QVariant();
     default:
         break;
     }

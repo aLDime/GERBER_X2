@@ -3870,18 +3870,22 @@ void ClipperOffset::DoOffset(double delta)
         y = std::fabs(delta) * def_arc_tolerance;
     else
         y = ArcTolerance;
+
     //see offset_triginometry2.svg in the documentation folder ...
-    double steps = pi / std::acos(1 - y / std::fabs(delta));
-    if (steps > std::fabs(delta) * pi)
-        steps = std::fabs(delta) * pi; //ie excessive precision check
+    double steps = 0.0;
+    if (0) {
+        steps = pi / std::acos(1 - y / std::fabs(delta));
+        if (steps > std::fabs(delta) * pi)
+            steps = std::fabs(delta) * pi; //ie excessive precision check
+    } else {
+        const double length = 0.5; // mm
+        const int destSteps = static_cast<int>(M_PI / asin((length * 0.5) / (delta * dScale)));
+        int intSteps = G::MinStepsPerCircle;//32 aka 10 degres
+        while (intSteps < destSteps)
+            intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
+        steps = intSteps;
+    }
 
-    const double length = 0.5; // mm
-    const int destSteps = M_PI / asin((length * 0.5) / (delta * dScale));
-    int intSteps = G::MinStepsPerCircle;
-    while (intSteps < destSteps)
-        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
-
-    steps = intSteps;
     m_sin = std::sin(two_pi / steps);
     m_cos = std::cos(two_pi / steps);
     m_StepsPerRad = steps / two_pi;

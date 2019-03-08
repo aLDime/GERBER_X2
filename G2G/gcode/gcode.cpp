@@ -6,6 +6,7 @@
 #include <QTextStream>
 #include <gi/itemgroup.h>
 #include <mygraphicsview.h>
+#include <settingsdialog.h>
 
 ///////////////////////////////////////////////
 void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
@@ -29,7 +30,7 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
         range.append(qMakePair(rect.left, rect.right));
         pathss.append(paths);
     } else {
-        cInt c = k * 0.5;
+        cInt c = static_cast<cInt>(k * 0.5);
         Path outerLeft{
             IntPoint(rect.left - 1, top),
             IntPoint(rect.left + c + 1, top),
@@ -56,16 +57,13 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
     }
 }
 
-QColor cutColor(Qt::gray);
-QColor pathColor(Qt::black);
-QColor g0Color(Qt::red);
-
 GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
-    : m_toolPaths(toolPaths)
-    , m_pocketPaths(pocketPaths)
+    : m_pocketPaths(pocketPaths)
+    , m_type(type)
+    , m_toolPaths(toolPaths)
     , m_tool(tool)
     , m_depth(depth)
-    , m_type(type)
+
 {
 
     setItemGroup(new ItemGroup);
@@ -75,8 +73,31 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
 
     switch (type) {
     case Profile:
-        qDebug() << "bad GCodeFile!";
-        return;
+        for (Path& path : tmpPaths2)
+            if (path.first() != path.last())
+                path.append(path.first());
+
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setPenColor(SettingsDialog::color(Colors::CutArea));
+            itemGroup()->append(item);
+        }
+
+        g0path.reserve(toolPaths.size());
+        for (const Path& path : tmpPaths2) {
+            item = new PathItem({ path });
+            //item->setPen(QPen(Qt::black, 0.0));
+            item->setPenColor(SettingsDialog::color(Colors::ToolPath));
+            itemGroup()->append(item);
+            g0path.append(path.first());
+        }
+
+        item = new PathItem({ g0path });
+        //item->setPen(QPen(Qt::black, 0.0));
+        item->setPenColor(SettingsDialog::color(Colors::G0));
+        itemGroup()->append(item);
+        break;
     case Pocket:
         if (1) { //fast rendeer
             Paths tmpPaths;
@@ -84,8 +105,9 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             Clipper clipper;
             QVector<QPair<cInt, cInt>> range;
             item = new GerberItem(pocketPaths, nullptr);
-            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setBrush(cutColor);
+            item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setPenColor(SettingsDialog::color(Colors::CutArea));
+            item->setBrushColor(SettingsDialog::color(Colors::CutArea));
             item->setAcceptHoverEvents(false);
             item->setFlag(QGraphicsItem::ItemIsSelectable, false);
             g0path.reserve(toolPaths.size());
@@ -116,12 +138,13 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
                     clipper.AddPath(outer, ptClip, true);
                     clipper.Execute(ctIntersection, tmpPaths, /*pftNonZero*/ pftPositive);
                     item = new PathItem(tmpPaths);
-                    item->setPen(QPen(pathColor /*QColor::fromHsv(ci += 10, 255, 255)*/, 0.0));
+                    //item->setPen(QPen(Qt::black, 0.0));
+                    item->setPenColor(SettingsDialog::color(Colors::ToolPath));
                     item->setAcceptDrops(false);
-                    item->setAcceptedMouseButtons(false);
+                    item->setAcceptedMouseButtons(Qt::NoButton);
                     item->setAcceptHoverEvents(false);
                     item->setAcceptTouchEvents(false);
-                    //item->setActive(false);
+                    //item->setActive(false);\ g
                     itemGroup()->append(item);
                 }
             }
@@ -129,13 +152,14 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             for (const Path& path : toolPaths)
                 g0path.append(path.first());
             item = new PathItem({ g0path });
-            item->setPen(QPen(g0Color, 0.0));
-            item->setBrush(Qt::NoBrush);
+            //item->setPen(QPen(Qt::black, 0.0));
+            item->setPenColor(SettingsDialog::color(Colors::G0));
+            //item->setBrush(Qt::NoBrush);
             itemGroup()->append(item);
         } else {
             item = new GerberItem(pocketPaths, nullptr);
-            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setBrush(cutColor);
+            item->setPen(QPen(SettingsDialog::color(Colors::CutArea), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setBrush(SettingsDialog::color(Colors::CutArea));
             item->setAcceptHoverEvents(false);
             item->setFlag(QGraphicsItem::ItemIsSelectable, false);
             itemGroup()->append(item);
@@ -147,76 +171,31 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
                     path.append(path.first());
 
                 item = new PathItem({ path });
-                item->setPen(QPen(pathColor, 0.0));
-
+                //item->setPen(QPen(Qt::black, 0.0));
+                item->setPenColor(SettingsDialog::color(Colors::ToolPath));
                 itemGroup()->append(item);
-
                 g0path.append(path.first());
             }
 
             item = new PathItem({ g0path });
-            item->setPen(QPen(g0Color, 0.0));
-            item->setBrush(Qt::NoBrush);
+            //item->setPen(QPen(Qt::black, 0.0));
+            item->setPenColor(SettingsDialog::color(Colors::G0));
+            //item->setBrush(Qt::NoBrush);
             itemGroup()->append(item);
         }
         break;
-    case Drilling:
-        qDebug() << "bad GCodeFile!";
-        return;
-    default:
-        break;
-    }
-    itemGroup()->addToTheScene();
-}
-
-GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type)
-    : m_toolPaths(toolPaths)
-    , m_tool(tool)
-    , m_depth(depth)
-    , m_type(type)
-{
-
-    setItemGroup(new ItemGroup);
-    GraphicsItem* item;
-    Path g0path;
-    Paths tmpPaths2(toolPaths);
-
-    switch (type) {
-    case Profile:
-        for (Path& path : tmpPaths2)
-            if (path.first() != path.last())
-                path.append(path.first());
-
-        for (const Path& path : tmpPaths2) {
-            item = new PathItem({ path });
-            item->setPen(QPen(cutColor, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            itemGroup()->append(item);
-        }
-        g0path.reserve(toolPaths.size());
-        for (const Path& path : tmpPaths2) {
-            item = new PathItem({ path });
-            item->setPen(QPen(pathColor, 0.0));
-            itemGroup()->append(item);
-            g0path.append(path.first());
-        }
-        item = new PathItem({ g0path });
-        item->setPen(QPen(g0Color, 0.0));
-        itemGroup()->append(item);
-        itemGroup()->setBrush(Qt::NoBrush);
-        break;
-    case Pocket:
-        qDebug() << "bad GCodeFile!";
-        return;
     case Drilling:
         for (const IntPoint& point : toolPaths.first()) {
             item = new DrillItem(tool.diameter);
             item->setPos(toQPointF(point));
-            item->setPen(QPen(pathColor, 0.0));
-            item->setBrush(cutColor);
+            //item->setPen(QPen(Qt::black, 0.0));
+            item->setPenColor(SettingsDialog::color(Colors::ToolPath));
+            item->setBrushColor(SettingsDialog::color(Colors::CutArea));
             itemGroup()->append(item);
         }
         item = new PathItem(toolPaths);
-        item->setPen(QPen(g0Color, 0.0));
+        //item->setPen(QPen(Qt::black, 0.0));
+        item->setPenColor(SettingsDialog::color(Colors::G0));
         itemGroup()->append(item);
         break;
     default:
@@ -320,9 +299,9 @@ void GCodeFile::saveProfilePocket()
             bool fl = true;
             for (QPointF& point : path) {
                 QString str(g1());
-                if (lastPoint.x() != point.x())
+                if (!qFuzzyCompare(lastPoint.x(), point.x()))
                     str += x(point.x());
-                if (lastPoint.y() != point.y())
+                if (!qFuzzyCompare(lastPoint.y(), point.y()))
                     str += y(point.y());
                 if (fl) {
                     str += feed(m_tool.feedRate);
@@ -345,9 +324,9 @@ void GCodeFile::saveProfilePocket()
         bool fl = true;
         for (QPointF& point : path) {
             QString str(g1());
-            if (lastPoint.x() != point.x())
+            if (!qFuzzyCompare(lastPoint.x(), point.x()))
                 str += x(point.x());
-            if (lastPoint.y() != point.y())
+            if (!qFuzzyCompare(lastPoint.y(), point.y()))
                 str += y(point.y());
             if (fl) {
                 str += feed(m_tool.feedRate);

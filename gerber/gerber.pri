@@ -17,9 +17,15 @@ HEADERS += \
     $$PWD/gerber.h \
     $$PWD/mathparser.h \
     $$PWD/parser.h \
+    $$PWD/state.h \
+    $$PWD/format.h \
+    $$PWD/graphicobject.h
 
 SOURCES += \
     $$PWD/aperture.cpp \
     $$PWD/file.cpp \
     $$PWD/mathparser.cpp \
     $$PWD/parser.cpp \
+    $$PWD/state.cpp \
+    $$PWD/format.cpp \
+    $$PWD/graphicobject.cpp

@@ -36,6 +36,11 @@ QPainterPath GerberItem::shape() const { return m_shape; }
 
 void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (m_penColor)
+        m_pen.setColor(*m_penColor);
+    if (m_brushColor)
+        m_brush.setColor(*m_brushColor);
+
     if (MyScene::self && MyScene::self->drawPdf()) {
         painter->setBrush(m_brush.color());
         painter->setPen(Qt::NoPen);
@@ -73,5 +78,3 @@ int GerberItem::type() const { return GerberItemType; }
 Paths GerberItem::paths() const { return m_paths; }
 
 const G::File* GerberItem::file() const { return m_file; }
-
-

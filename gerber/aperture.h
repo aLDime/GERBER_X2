@@ -1,7 +1,10 @@
 #ifndef GERBERAPERTURE_H
 #define GERBERAPERTURE_H
 
+#include "aperture.h"
 #include "gerber.h"
+#include "graphicobject.h"
+#include "state.h"
 
 #include <QMap>
 #include <QtMath>
@@ -13,6 +16,7 @@ enum ApertureType {
     Obround,
     Polygon,
     Macro,
+    Block,
 };
 
 class AbstractAperture {
@@ -26,7 +30,7 @@ public:
     bool isFlashed() const { return m_isFlashed; }
 
     double drillDiameter() const { return m_drillDiam; }
-    double size();
+    double apertureSize();
 
     Path drawDrill(const State& state);
     Paths draw(const State& state);
@@ -35,6 +39,7 @@ public:
     virtual ApertureType type() const = 0;
 
     static Path circle(double diametr, IntPoint center = IntPoint());
+    static void translate(Path& path, IntPoint pos);
 
 protected:
     bool m_isFlashed = false;
@@ -46,7 +51,7 @@ protected:
     const Format* m_format;
 
     void rotate(Path& poligon, double angle, IntPoint center = IntPoint());
-    void translate(Path& path, IntPoint pos);
+    void transform(Path& poligon, const State& state);
     Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
 };
 
@@ -145,6 +150,31 @@ private:
     Path drawVectorLine(const QList<double>& mod);
     void drawMoire(const QList<double>& mod);
     void drawThermal(const QList<double>& mod);
+};
+/////////////////////////////////////////////////////
+/// \brief The ApBlock class
+///
+class ApBlock : public AbstractAperture, public QList<GraphicObject> {
+public:
+    ApBlock(const Format* format);
+    QString name() override;
+    ApertureType type() const override;
+
+protected:
+    void draw() override;
+
+private:
+    //    QList<QString> m_modifiers;
+    //    QMap<QString, double> m_coefficients;
+    //    QString m_macro;
+
+    //    Path drawCenterLine(const QList<double>& mod);
+    //    Path drawCircle(const QList<double>& mod);
+    //    Path drawOutlineCustomPolygon(const QList<double>& mod);
+    //    Path drawOutlineRegularPolygon(const QList<double>& mod);
+    //    Path drawVectorLine(const QList<double>& mod);
+    //    void drawMoire(const QList<double>& mod);
+    //    void drawThermal(const QList<double>& mod);
 };
 }
 #endif // GERBERAPERTURE_H

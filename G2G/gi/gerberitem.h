@@ -19,7 +19,6 @@ public:
     Paths paths() const override;
     const G::File* file() const;
 
-
 private:
     const G::File* m_file;
 };

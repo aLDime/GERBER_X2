@@ -9,6 +9,7 @@
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
+#include <settingsdialog.h>
 
 MyScene* MyScene::self = nullptr;
 
@@ -76,22 +77,21 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, Qt::black);
-    return;
+    painter->fillRect(rect,  SettingsDialog::color(Colors::Background));
 
-    if (itemsBoundingRect().width() == 0 || itemsBoundingRect().height() == 0)
-        return;
+    //    if (qFuzzyIsNull(itemsBoundingRect().width()) || qFuzzyIsNull(itemsBoundingRect().height()))
+    //        return;
 
-    painter->save();
+    //    painter->save();
 
-    //    if (GerberFileHolder::getDrawingType() == GerberFileHolder::RAW)
-    //        painter->setBrush(QColor(128, 128, 0));
-    //    else
-    painter->setBrush(Qt::NoBrush);
+    //    //    if (GerberFileHolder::getDrawingType() == GerberFileHolder::RAW)
+    //    //        painter->setBrush(QColor(128, 128, 0));
+    //    //    else
+    //    painter->setBrush(Qt::NoBrush);
 
-    painter->setPen(QPen(Qt::white, 0.0));
-    painter->drawRect(itemsBoundingRect() /*+ QMarginsF(2, 2, 2, 2)*/);
-    painter->restore();
+    //    painter->setPen(QPen(Qt::white, 0.0));
+    //    painter->drawRect(itemsBoundingRect() /*+ QMarginsF(2, 2, 2, 2)*/);
+    //    painter->restore();
 }
 
 void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
@@ -110,11 +110,10 @@ void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
     QMap<long, long> hGrid;
     QMap<long, long> vGrid;
 
-    const int с = 100;
     QVector<QColor> color{
-        QColor(с, с, с, 50),
-        QColor(с, с, с, 100),
-        QColor(с, с, с, 200)
+        SettingsDialog::color(Colors::Grid1), //QColor(с, с, с, 50),
+        SettingsDialog::color(Colors::Grid5), //QColor(с, с, с, 100),
+        SettingsDialog::color(Colors::Grid10), //QColor(с, с, с, 200)
     };
 
     const long k = 10000;

@@ -7,6 +7,8 @@
 #include <QGraphicsView>
 #include <QSettings>
 
+//#define ANIM
+
 class QDRuler;
 
 class MyGraphicsView : public QGraphicsView {
@@ -32,22 +34,30 @@ private:
     QPointF centerPoint;
     const double zoomFactor = 1.5;
 
-    //    void AnimFinished()
-    //    {
-    //        if (numScheduledScalings > 0) {
-    //            numScheduledScalings--;
-    //        } else {
-    //            numScheduledScalings++;
-    //        }
-    //        sender()->~QObject();
-    //        UpdateRuler();
-    //    }
-    //    void ScalingTime(qreal x)
-    //    {
-    //        qreal factor = 1.0 + qreal(numScheduledScalings) / 100 * x;
-    //        qDebug() << numScheduledScalings << x << transform().m11();
-    //        scale(factor, factor);
-    //    }
+#ifdef ANIM
+    void AnimFinished()
+    {
+        if (numScheduledScalings > 0)
+            numScheduledScalings--;
+        else
+            numScheduledScalings++;
+
+        sender()->~QObject();
+        UpdateRuler();
+    }
+    void ScalingTime(qreal x)
+    {
+        qreal factor = 1.0 + qreal(numScheduledScalings) / 100 * x;
+
+        if (numScheduledScalings < 0 && factor > 10000.0)
+            return;
+        if (numScheduledScalings > 0 && factor < 1.0)
+            return;
+
+        scale(factor, factor);
+    }
+#endif
+
     void UpdateRuler();
 
     // QWidget interface

@@ -157,16 +157,16 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
                 drillDiameter = apertureIt.value()->drillDiameter();
                 name += QString(", drill Ø%1mm").arg(drillDiameter);
             } else if (apertureIt.value()->type() == G::Circle) {
-                drillDiameter = apertureIt.value()->size();
+                drillDiameter = apertureIt.value()->apertureSize();
             }
 
             model->appendRow(name, drawApertureIcon(apertureIt.value().data()), apertureIt.key());
 
             const G::File* file = static_cast<G::File*>(ui->cbxFile->currentData().value<void*>());
             for (const G::GraphicObject& go : *file) {
-                if (go.state.dCode == G::D03 && go.state.aperture == apertureIt.key()) {
+                if (go.state.dCode() == G::D03 && go.state.aperture() == apertureIt.key()) {
                     G::State state(go.state);
-                    state.curPos = IntPoint();
+                    state.curPos() = IntPoint();
 
                     QPainterPath painterPath;
                     for (QPolygonF& polygon : toQPolygons(m_apertures[apertureIt.key()]->draw(state)))
@@ -176,7 +176,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
                     QGraphicsPathItem* item = new QGraphicsPathItem(painterPath);
 
                     setColor(item, Qt::darkGray);
-                    item->setPos(toQPointF(go.state.curPos));
+                    item->setPos(toQPointF(go.state.curPos()));
                     m_giaperture[apertureIt.key()].append(item);
                     MyScene::self->addItem(item);
                 }
@@ -321,7 +321,7 @@ void DrillForm::updateFiles()
 
 void DrillForm::on_cbxFile_currentIndexChanged(int index)
 {
-    if (ui->cbxFile->count() == ++index) {
+    if (ui->cbxFile->count() == index) {
         //? connect(MyScene::self, &MyScene::selectionChanged, this, &DrillForm::on_selection_changed);
         setItems();
     } else if (ui->cbxFile->count()) {

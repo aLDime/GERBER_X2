@@ -20,14 +20,14 @@ Paths File::merge() const
     while (i < size()) {
         Clipper clipper(ioStrictlySimple);
         clipper.AddPaths(paths, ptSubject, true);
-        exp = at(i).state.imgPolarity;
+        exp = at(i).state.imgPolarity();
         do {
             tmpPaths = at(i++).paths;
             SimplifyPolygons(tmpPaths, pftNonZero);
             clipper.AddPaths(tmpPaths, ptClip, true);
-        } while (i < size() && exp == at(i).state.imgPolarity);
+        } while (i < size() && exp == at(i).state.imgPolarity());
 
-        if (at(i - 1).state.imgPolarity == Positive)
+        if (at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ctUnion, paths, pftPositive);
         else
             clipper.Execute(ctDifference, paths, pftNonZero);

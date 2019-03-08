@@ -11,10 +11,6 @@ Tool::Tool()
 {
 }
 
-Tool::~Tool()
-{
-}
-
 double Tool::getDiameter(double depth) const
 {
     if (depth > 0.0 && angle > 0.0 && angle < 90.0) {
@@ -33,7 +29,7 @@ void Tool::read(const QJsonObject& json)
     oneTurnCut = json["oneTurnCut"].toDouble();
     passDepth = json["passDepth"].toDouble();
     plungeRate = json["plungeRate"].toDouble();
-    spindleSpeed = json["spindleSpeed"].toDouble();
+    spindleSpeed = json["spindleSpeed"].toInt();
     stepover = json["stepover"].toDouble();
     name = json["name"].toString();
     note = json["note"].toString();
@@ -89,11 +85,12 @@ QString Tool::errorStr()
     QString errorString;
     if (qFuzzyIsNull(diameter))
         errorString += "Tool diameter = 0!\n";
-    if (qFuzzyIsNull(passDepth))
+    if (qFuzzyIsNull(passDepth)) {
         if (type == Drill)
             errorString += "Pass = 0!\n";
         else
             errorString += "Depth = 0!\n";
+    }
     if (qFuzzyIsNull(feedRate))
         errorString += "Feed rate = 0\n";
     if (qFuzzyIsNull(plungeRate))

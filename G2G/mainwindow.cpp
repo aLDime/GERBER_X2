@@ -375,6 +375,8 @@ void MainWindow::readSettings()
     QString files = settings.value("files").toString();
     for (const QString& file : files.split('|', QString::SkipEmptyParts))
         openFile(file);
+    SettingsDialog().readSettings();
+    QTimer::singleShot(1000, Qt::CoarseTimer, [=] { SettingsDialog sd(this);  sd.exec(); graphicsView->update(); });
 }
 
 void MainWindow::writeSettings()

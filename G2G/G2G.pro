@@ -15,7 +15,8 @@ FORMS += \
     settingsdialog.ui \
     tooldatabase/tooledit.ui \
     tooldatabase/tooleditform.ui \
-    excellondialog.ui
+    excellondialog.ui \
+    colorselector.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -87,7 +88,9 @@ HEADERS += \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
     excellondialog.h \
-    forms/drillmodel.h
+    forms/drillmodel.h \
+    filetree/layerdelegate.h \
+    colorselector.h
 
 
 SOURCES += \
@@ -126,7 +129,9 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     excellondialog.cpp \
-    forms/drillmodel.cpp
+    forms/drillmodel.cpp \
+    filetree/layerdelegate.cpp \
+    colorselector.cpp
 
 
 

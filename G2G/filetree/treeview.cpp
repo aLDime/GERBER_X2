@@ -2,6 +2,7 @@
 #include "excellondialog.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
+#include "layerdelegate.h"
 #include "staticholders/fileholder.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
@@ -48,8 +49,13 @@ TreeView::TreeView(QWidget* parent)
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
-    header()->setSectionResizeMode(QHeaderView::ResizeToContents);
-    header()->setSectionResizeMode(1, QHeaderView::Stretch);
+
+    header()->setSectionResizeMode(QHeaderView::Stretch);
+    header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, "Bottom").width() * 2);
+    header()->setStretchLastSection(false);
+
+    setItemDelegateForColumn(1, new LayerDelegate(this));
 }
 
 TreeView::~TreeView()

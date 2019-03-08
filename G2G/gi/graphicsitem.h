@@ -16,6 +16,7 @@ enum {
     PointZeroType,
     ShtiftType,
 };
+
 class ItemGroup;
 class GraphicsItem : public QGraphicsItem {
 public:
@@ -29,9 +30,15 @@ public:
     void setItemGroup(ItemGroup* itemGroup);
     ItemGroup* parentItemGroup() const;
     QPointF center() const;
+
+    void setPenColor(QColor& penColor);
+    void setBrushColor(QColor& brushColor);
+
 protected:
     QPen m_pen;
     QBrush m_brush;
+    QColor* m_penColor = nullptr;
+    QColor* m_brushColor = nullptr;
 
     QPainterPath m_shape;
     mutable Paths m_paths;

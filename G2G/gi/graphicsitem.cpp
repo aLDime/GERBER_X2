@@ -2,7 +2,7 @@
 #include "itemgroup.h"
 
 GraphicsItem::GraphicsItem()
-    : m_pen(Qt::white)
+    : m_pen(QPen(Qt::white, 0.0))
     , m_brush(Qt::white)
 {
     //    setAcceptDrops(false);
@@ -30,3 +30,7 @@ void GraphicsItem::setItemGroup(ItemGroup* itemGroup) { m_ig = itemGroup; }
 ItemGroup* GraphicsItem::parentItemGroup() const { return m_ig; }
 
 QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }
+
+void GraphicsItem::setPenColor(QColor& penColor) { m_penColor = &penColor; }
+
+void GraphicsItem::setBrushColor(QColor& brushColor) { m_brushColor = &brushColor; }

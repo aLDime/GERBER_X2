@@ -2,11 +2,9 @@
 #define GERBER_H
 
 #include "../clipper/myclipper.h"
-
 #include <QObject>
 
 #define DEPRECATED
-#define DEPRECATED_IMAGE_POLARITY
 
 using namespace ClipperLib;
 namespace G {
@@ -24,10 +22,7 @@ enum UnitMode {
 
 enum ImagePolarity {
     Positive,
-#ifdef DEPRECATED_IMAGE_POLARITY
     Negative,
-#endif
-
 };
 
 enum CoordinateValuesNotation {
@@ -46,11 +41,6 @@ enum InterpolationMode {
 enum RegionMode {
     Off,
     On
-};
-
-enum StepRepeat {
-    SrClose,
-    SrOpen
 };
 
 enum QuadrantMode {
@@ -77,6 +67,13 @@ enum Layer {
 enum Miror {
     Vertical,
     Horizontal
+};
+
+enum Mirroring {
+    NoMirroring,
+    X_Mirroring,
+    Y_Mirroring,
+    XY_Mirroring,
 };
 
 enum GCode {
@@ -119,53 +116,6 @@ enum PrimitiveType {
     Aperture,
     Line,
     Region,
-};
-
-struct Format {
-    UnitMode unitMode = Millimeters;
-
-    // Warning: Trailing zero omission is deprecated
-    ZeroOmissionMode zeroOmisMode = OmitLeadingZeros;
-
-    // Warning: Currently the only allowed notation is absolute notation.
-    // The incremental notation is deprecated.
-    CoordinateValuesNotation coordValueNotation = AbsoluteNotation;
-
-    // Warning: Using less than 4 decimal places is deprecated.
-    int xInteger = 3;
-    int xDecimal = 4;
-    int yInteger = 3;
-    int yDecimal = 4;
-};
-
-struct State {
-    void reset(Format* f)
-    {
-        format = f;
-        dCode = D02;
-        gCode = G01;
-        imgPolarity = Positive;
-        interpolation = Linear;
-        type = Aperture;
-        quadrant = Undef;
-        region = Off;
-        aperture = 0;
-        lastAperture = 0;
-        lineNum = 0;
-        curPos = IntPoint();
-    }
-    Format* format = nullptr;
-    DCode dCode = D02;
-    GCode gCode = G01;
-    ImagePolarity imgPolarity = Positive;
-    InterpolationMode interpolation = Linear;
-    PrimitiveType type = Aperture;
-    QuadrantMode quadrant = Undef;
-    RegionMode region = Off;
-    int aperture = 0;
-    int lastAperture = 0;
-    int lineNum = 0;
-    IntPoint curPos;
 };
 }
 
