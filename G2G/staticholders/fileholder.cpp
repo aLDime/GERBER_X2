@@ -61,6 +61,37 @@ Paths FileHolder::getSelectedPaths()
 
 QRectF FileHolder::getSelectedBoundingRect()
 {
+    //    QMutexLocker locker(&m_mutex);
+    //    IntRect r{
+    //        std::numeric_limits<cInt>::max(),
+    //        std::numeric_limits<cInt>::max(),
+    //        std::numeric_limits<cInt>::min(),
+    //        std::numeric_limits<cInt>::min()
+    //    };
+    //    for (const QSharedPointer<AbstractFile>& sp : m_files) {
+    //        AbstractFile* file = sp.data();
+    //        if (file && file->itemGroup()->isVisible()) {
+    //            for (GraphicsItem* item : *file->itemGroup()) {
+    //                if (item->isSelected()) {
+    //                    for (const Path& path : item->paths()) {
+    //                        for (const IntPoint& pt : path) {
+    //                            if (r.left > pt.X)
+    //                                r.left = pt.X;
+    //                            if (r.right < pt.X)
+    //                                r.right = pt.X;
+    //                            if (r.top > pt.Y)
+    //                                r.top = pt.Y;
+    //                            if (r.bottom < pt.Y)
+    //                                r.bottom = pt.Y;
+    //                        }
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
+    //    QRectF rect(QPoint(r.left * dScale, r.top * dScale), QPoint(r.right * dScale, r.bottom * dScale));
+    //    qDebug() << rect.topLeft() << rect.bottomRight();
+    //    return rect;
     QMutexLocker locker(&m_mutex);
     QRectF rect;
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
