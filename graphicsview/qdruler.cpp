@@ -75,8 +75,8 @@ void QDRuler::SetRulerZoom(const qreal rulerZoom_)
 
 void QDRuler::SetCursorPos(const QPoint cursorPos_)
 {
-    cursorPos = this->mapFromGlobal(cursorPos_);
-    cursorPos += QPoint(RulerBreadth, RulerBreadth);
+    cursorPos = cursorPos_; //this->mapFromGlobal(cursorPos_);
+    //cursorPos += QPoint(RulerBreadth, RulerBreadth);
     update();
 }
 
@@ -169,13 +169,11 @@ void QDRuler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, qreal scaleMe
     if (origin >= rulerStartMark && origin <= rulerEndMark) {
         DrawFromOriginTo(painter, rulerRect, origin, rulerEndMark, 0, scaleMeter, startPositoin);
         DrawFromOriginTo(painter, rulerRect, origin, rulerStartMark, 0, -scaleMeter, startPositoin);
-    }
-    else if (origin < rulerStartMark) {
+    } else if (origin < rulerStartMark) {
         int tickNo = int((rulerStartMark - origin) / scaleMeter);
         DrawFromOriginTo(painter, rulerRect, origin + scaleMeter * tickNo,
             rulerEndMark, tickNo, scaleMeter, startPositoin);
-    }
-    else if (origin > rulerEndMark) {
+    } else if (origin > rulerEndMark) {
         int tickNo = int((origin - rulerEndMark) / scaleMeter);
         DrawFromOriginTo(painter, rulerRect, origin - scaleMeter * tickNo,
             rulerStartMark, tickNo, -scaleMeter, startPositoin);
@@ -186,10 +184,14 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
 {
     bool isHorzRuler = (Horizontal == rulerType);
     for (qreal current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
+        //        qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
+        //        qreal y1 = isHorzRuler ? rulerRect.top() + startPosition : current;
+        //        qreal x2 = isHorzRuler ? current : rulerRect.right();
+        //        qreal y2 = isHorzRuler ? rulerRect.bottom() : current;
         qreal x1 = isHorzRuler ? current : rulerRect.left() + startPosition;
-        qreal y1 = isHorzRuler ? rulerRect.top() + startPosition : current;
+        qreal y1 = isHorzRuler ? rulerRect.top() : current;
         qreal x2 = isHorzRuler ? current : rulerRect.right();
-        qreal y2 = isHorzRuler ? rulerRect.bottom() : current;
+        qreal y2 = isHorzRuler ? rulerRect.bottom() - startPosition : current;
         painter->setPen(meterPen); // zero width pen is cosmetic pen
         painter->drawLine(QLineF(x1, y1, x2, y2));
         if (drawText) {
@@ -208,11 +210,10 @@ void QDRuler::DrawFromOriginTo(QPainter* painter, QRectF rulerRect, qreal startM
             QRectF textRect(QFontMetricsF(font()).boundingRect(number));
             textRect.setWidth(textRect.width() + 1);
             if (isHorzRuler) {
-                painter->translate(x1 + 3, textRect.height());
+                painter->translate(x1 + 3, textRect.height() + 6);
                 painter->drawText(textRect, number);
-            }
-            else {
-                painter->translate(textRect.height(), y1 - 3);
+            } else {
+                painter->translate(textRect.height() - 3, y1 - 3);
                 painter->rotate(-90);
                 painter->drawText(textRect, number);
             }
@@ -230,8 +231,7 @@ void QDRuler::DrawMousePosTick(QPainter* painter)
         starPt.setY(this->rect().top());
         endPt.setX(starPt.x());
         endPt.setY(this->rect().bottom());
-    }
-    else {
+    } else {
         starPt.setX(this->rect().left());
         endPt.setX(this->rect().right());
         endPt.setY(starPt.y());

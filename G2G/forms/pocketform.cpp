@@ -117,22 +117,32 @@ void PocketForm::create()
     }
 
     Paths wPaths;
-    Side boardSide = Side(-1);
+    Side boardSide = NullSide;
+
+    G::File const* file = nullptr;
+
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (boardSide == Side(-1))
-                boardSide = gi->file()->side();
-            if (boardSide != gi->file()->side()) {
-                QMessageBox::warning(this, "", "Working items from different sides!");
+            //            if (boardSide == NullSide) {
+            if (!file)
+                file = gi->file();
+            if (file != gi->file()) {
+                QMessageBox::warning(this, "", "Working items from different files!");
                 return;
             }
+            boardSide = gi->file()->side();
+            //            }
+            //            if (boardSide != gi->file()->side()) {
+            //                QMessageBox::warning(this, "", "Working items from different sides!");
+            //                return;
+            //            }
         }
         if (item->type() == GerberItemType || item->type() == DrillItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (boardSide == Side(-1))
+    if (boardSide == NullSide)
         boardSide = Top;
 
     if (wPaths.isEmpty()) {

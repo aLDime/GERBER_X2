@@ -1,5 +1,6 @@
 #include "profileform.h"
 #include "materialsetupform.h"
+#include "normalizeraw.h"
 #include "ui_profileform.h"
 
 #include "filetree/filemodel.h"
@@ -97,20 +98,39 @@ void ProfileForm::create()
     }
 
     Paths wPaths;
+    Paths wrPaths;
     Side boardSide = NullSide;
+
+    G::File const* file = nullptr;
 
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            if (boardSide == NullSide)
-                boardSide = gi->file()->side();
-            if (boardSide != gi->file()->side()) {
-                QMessageBox::warning(this, "", "Working items from different sides!");
+            //            if (boardSide == NullSide) {
+            if (!file)
+                file = gi->file();
+            if (file != gi->file()) {
+                QMessageBox::warning(this, "", "Working items from different files!");
                 return;
             }
+            boardSide = gi->file()->side();
+            //            }
+            //            if (boardSide != gi->file()->side()) {
+            //                QMessageBox::warning(this, "", "Working items from different sides!");
+            //                return;
+            //            }
         }
         if (item->type() == GerberItemType || item->type() == DrillItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        if (item->type() == RawItemType)
+            wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
+    }
+
+    if (!wrPaths.isEmpty()) {
+        if (side == On)
+            wPaths = wrPaths;
+        else
+            wPaths = NormalizeRaw(wrPaths).paths();
     }
 
     if (boardSide == NullSide)

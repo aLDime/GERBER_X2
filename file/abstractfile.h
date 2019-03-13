@@ -29,7 +29,7 @@ public:
     QString fileName() const;
     void setFileName(const QString& fileName);
 
-    ItemGroup* itemGroup() const;
+    virtual ItemGroup* itemGroup() const;
     void setItemGroup(ItemGroup* itemGroup);
 
     Paths mergedPaths() const;
@@ -49,6 +49,9 @@ public:
     Side side() const;
     void setSide(Side side);
 
+    QColor color() const;
+    void setColor(const QColor& color);
+
 protected:
     virtual Paths merge() const = 0;
 
@@ -59,6 +62,7 @@ protected:
     Pathss m_groupedPaths;
 
     Side m_side = Top;
+    QColor m_color;
 
 private:
     void grouping(PolyNode* node, Pathss* pathss, Group group);

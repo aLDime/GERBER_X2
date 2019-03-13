@@ -1,17 +1,23 @@
 #include "abstractnode.h"
 
+#include "staticholders/fileholder.h"
 #include <QDebug>
-
-int AbstractNode::c = 0;
+#include <mainwindow.h>
 
 AbstractNode::AbstractNode()
 {
-    //qDebug() << "AbstractItem" << ++c << this;
+    if (MainWindow::self) {
+        MainWindow::self->closeAllAct->setEnabled(true);
+        MainWindow::self->exportPdfAct->setEnabled(true);
+    }
 }
 
 AbstractNode::~AbstractNode()
 {
-    //qDebug() << "~AbstractItem" << c-- << this << m_parentItem;
+    if (MainWindow::self) {
+        MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
+        MainWindow::self->exportPdfAct->setEnabled(FileHolder::isEmpty());
+    }
     childItems.clear();
 }
 

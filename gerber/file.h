@@ -5,6 +5,7 @@
 #include "gerber.h"
 #include "graphicobject.h"
 
+#include <QDebug>
 #include <abstractfile.h>
 #include <gi/itemgroup.h>
 
@@ -22,6 +23,11 @@ public:
         CutoffGroup,
     };
 
+    enum ItemsType {
+        Normal,
+        Raw,
+    };
+
     Format format;
 
     Layer layer = Copper;
@@ -31,11 +37,21 @@ public:
     QMap<int, QSharedPointer<AbstractAperture>> apertures() const;
     bool flashedApertures() const;
 
+    ItemGroup* itemGroup() const override;
+
+    void setItemType(ItemsType type);
+    ItemsType itemsType() const;
+
+    void setRawItemGroup(ItemGroup* itemGroup);
+    ItemGroup* rawItemGroup() const;
+
 protected:
     Paths merge() const override;
 
 private:
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
+    ItemsType m_itemsType = Normal;
+    QSharedPointer<ItemGroup> m_rawItemGroup;
 };
 
 Q_DECLARE_METATYPE(File)

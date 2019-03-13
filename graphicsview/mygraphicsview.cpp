@@ -23,28 +23,38 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     ////////////////////////////////////
 
     // add two rulers on top and left.
-    setViewportMargins(RulerBreadth, RulerBreadth, 0, 0);
+    setViewportMargins(RulerBreadth, 0, 0, RulerBreadth);
 
     // add grid layout
-    QGridLayout* gridLayout = new QGridLayout();
+    QGridLayout* gridLayout = new QGridLayout(this);
     gridLayout->setSpacing(0);
     gridLayout->setMargin(0);
 
     // create rulers
     hRuler = new QDRuler(QDRuler::Horizontal, this);
     vRuler = new QDRuler(QDRuler::Vertical, this);
+    hRuler->SetMouseTrack(true);
+    vRuler->SetMouseTrack(true);
+
     // add items to grid layout
-    QLabel* corner = new QLabel("mm", this);
+    QLabel* corner = new QLabel("<html><head/><body><p><span style=\" color:#ffffff;\">mm</span></p></body></html>", this);
     corner->setAlignment(Qt::AlignCenter);
     corner->setFixedSize(RulerBreadth, RulerBreadth);
 
-    gridLayout->addWidget(corner, 0, 0);
-    gridLayout->addWidget(hRuler, 0, 1);
-    gridLayout->addWidget(vRuler, 1, 0);
-    gridLayout->addWidget(viewport(), 1, 1);
+    gridLayout->addWidget(corner, 1, 0);
+    gridLayout->addWidget(hRuler, 1, 1);
+    gridLayout->addWidget(vRuler, 0, 0);
+    gridLayout->addWidget(viewport(), 0, 1);
 
+    //    gridLayout->addWidget(vRuler, 0, 0);
+    //    gridLayout->addWidget(viewport(), 0, 1);
+    //    gridLayout->addWidget(corner, 1, 0);
+    //    gridLayout->addWidget(hRuler, 1, 1);
+    //    gridLayout->addWidget(horizontalScrollBar(), 2, 0, 2, 0);
+    //    gridLayout->addWidget(verticalScrollBar(), 0, 2, 0, 2);
     // finally set layout
-    setLayout(gridLayout);
+    //setLayout(gridLayout);
+    qDebug() << children(); //layout();
 
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &MyGraphicsView::UpdateRuler);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &MyGraphicsView::UpdateRuler);
@@ -59,6 +69,7 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     viewport()->setObjectName("viewport");
     settings.endGroup();
     setScene(new MyScene(this));
+    setStyleSheet("QGraphicsView { background: black }");
     self = this;
 }
 
@@ -191,6 +202,7 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
 
 void MyGraphicsView::UpdateRuler()
 {
+    layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
     updateSceneRect(QRectF()); //actualize mapFromScene
     QPoint p = mapFromScene(QPointF());
     vRuler->SetOrigin(p.y());
@@ -272,5 +284,7 @@ void MyGraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
 
 void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
+    vRuler->SetCursorPos(event->pos());
+    hRuler->SetCursorPos(event->pos());
     QGraphicsView::mouseMoveEvent(event);
 }

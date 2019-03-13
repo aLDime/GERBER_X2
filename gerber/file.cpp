@@ -3,14 +3,9 @@
 
 using namespace G;
 
-File::File(const QString& fileName)
-{
-    m_fileName = fileName;
-}
+File::File(const QString& fileName) { m_fileName = fileName; }
 
-File::~File()
-{
-}
+File::~File() {}
 
 Paths File::merge() const
 {
@@ -37,6 +32,12 @@ Paths File::merge() const
     return m_mergedPaths;
 }
 
+File::ItemsType File::itemsType() const { return m_itemsType; }
+
+void File::setRawItemGroup(ItemGroup* itemGroup) { m_rawItemGroup = QSharedPointer<ItemGroup>(itemGroup); }
+
+ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
+
 bool File::flashedApertures() const
 {
     for (QSharedPointer<AbstractAperture> a : m_apertures) {
@@ -46,10 +47,39 @@ bool File::flashedApertures() const
     return false;
 }
 
-QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const
+ItemGroup* File::itemGroup() const
 {
-    return m_apertures;
+    if (m_itemsType == Normal)
+        return m_itemGroup.data();
+    else
+        return m_rawItemGroup.data();
 }
+
+void File::setItemType(File::ItemsType type)
+{
+    bool visible;
+    if (m_itemsType == Normal)
+        visible = m_itemGroup.data()->isVisible();
+    else
+        visible = m_rawItemGroup.data()->isVisible();
+
+    m_itemsType = type; // !!!
+
+    if (m_itemsType == Normal && visible) {
+        m_itemGroup.data()->setVisible(visible);
+        m_rawItemGroup.data()->setVisible(false);
+    } else {
+        m_itemGroup.data()->setVisible(false);
+        m_rawItemGroup.data()->setVisible(visible);
+    }
+
+    //    if (m_type == Normal)
+    //        return m_itemGroup;
+    //    else
+    //        return m_rawItemGroup.data();
+}
+
+QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const { return m_apertures; }
 
 //Pathss& File::groupedPaths(Group group, bool fl)
 //{

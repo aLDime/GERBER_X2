@@ -77,7 +77,7 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect,  SettingsDialog::color(Colors::Background));
+    painter->fillRect(rect, SettingsDialog::color(Colors::Background));
 
     //    if (qFuzzyIsNull(itemsBoundingRect().width()) || qFuzzyIsNull(itemsBoundingRect().height()))
     //        return;
@@ -110,7 +110,7 @@ void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
     QMap<long, long> hGrid;
     QMap<long, long> vGrid;
 
-    QVector<QColor> color{
+    const QColor color[3]{
         SettingsDialog::color(Colors::Grid1), //QColor(с, с, с, 50),
         SettingsDialog::color(Colors::Grid5), //QColor(с, с, с, 100),
         SettingsDialog::color(Colors::Grid10), //QColor(с, с, с, 200)
@@ -149,7 +149,7 @@ void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
 
-    painter->setPen(QPen(QColor(255, 0, 0, 255), 0.0 /*1.0 / scale*/));
+    painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
     painter->drawLine(QLineF(0.5 / scale, rect.top(), 0.5 / scale, rect.bottom()));
     painter->drawLine(QLineF(rect.left(), -0.5 / scale, rect.right(), -0.5 / scale));
     painter->restore();

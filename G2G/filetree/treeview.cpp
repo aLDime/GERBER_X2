@@ -6,6 +6,7 @@
 #include "staticholders/fileholder.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
+#include <QGraphicsScene>
 #include <QHeaderView>
 #include <QMenu>
 #include <QPainter>
@@ -112,9 +113,7 @@ void TreeView::hideOther()
 {
     const int rowCount = static_cast<AbstractNode*>(m_menuIndex.parent().internalPointer())->childCount();
     for (int row = 0; row < rowCount; ++row) {
-
         QModelIndex index2 = m_menuIndex.sibling(row, 0);
-
         AbstractNode* item = static_cast<AbstractNode*>(index2.internalPointer());
         if (row == m_menuIndex.row())
             item->setData(index2, Qt::Checked, Qt::CheckStateRole);
@@ -135,7 +134,6 @@ void TreeView::closeFile()
 void TreeView::saveGcodeFile()
 {
     QSettings settings;
-
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         QString(settings.value("LastGCodeDir").toString()).append(m_menuIndex.data().toString()),
         tr("GCode (*.tap)")));
@@ -161,10 +159,17 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     m_menuIndex = indexAt(event->pos());
     QAction* a = nullptr;
     switch (m_menuIndex.parent().row()) {
-    case NodeGerberFiles:
-        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
+    case NodeGerberFiles: {
+        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        break;
+        G::File* file = FileHolder::file<G::File>(m_menuIndex.data(Qt::UserRole).toInt());
+        a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
+            if (file)
+                file->setItemType(static_cast<G::File::ItemsType>(checked));
+        });
+        a->setCheckable(true);
+        a->setChecked(file->itemsType());
+    } break;
     case NodeDrillFiles:
         a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);

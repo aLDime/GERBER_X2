@@ -79,6 +79,10 @@ Side AbstractFile::side() const { return m_side; }
 
 void AbstractFile::setSide(Side side) { m_side = side; }
 
+QColor AbstractFile::color() const { return m_color; }
+
+void AbstractFile::setColor(const QColor& color) { m_color = color; }
+
 void AbstractFile::grouping(PolyNode* node, Pathss* pathss, AbstractFile::Group group)
 {
     Path path;

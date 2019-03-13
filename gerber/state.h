@@ -8,6 +8,7 @@
 
 using namespace ClipperLib;
 namespace G {
+
 class State {
 public:
     void reset(Format* f)
@@ -28,126 +29,45 @@ public:
         m_rotating = 0.0;
     }
 
-    inline Format* format() const
-    {
-        return m_format;
-    }
-    inline void setFormat(Format* format)
-    {
-        m_format = format;
-    }
+    inline Format* format() const { return m_format; }
+    inline void setFormat(Format* format) { m_format = format; }
 
-    inline DCode dCode() const
-    {
-        return m_dCode;
-    }
-    inline void setDCode(const DCode& dCode)
-    {
-        m_dCode = dCode;
-    }
+    inline DCode dCode() const { return m_dCode; }
+    inline void setDCode(const DCode& dCode) { m_dCode = dCode; }
 
-    inline GCode gCode() const
-    {
-        return m_gCode;
-    }
-    inline void setGCode(const GCode& gCode)
-    {
-        m_gCode = gCode;
-    }
+    inline GCode gCode() const { return m_gCode; }
+    inline void setGCode(const GCode& gCode) { m_gCode = gCode; }
 
-    inline ImagePolarity imgPolarity() const
-    {
-        return m_imgPolarity;
-    }
-    inline void setImgPolarity(const ImagePolarity& imgPolarity)
-    {
-        m_imgPolarity = imgPolarity;
-    }
+    inline ImagePolarity imgPolarity() const { return m_imgPolarity; }
+    inline void setImgPolarity(const ImagePolarity& imgPolarity) { m_imgPolarity = imgPolarity; }
 
-    inline InterpolationMode interpolation() const
-    {
-        return m_interpolation;
-    }
-    inline void setInterpolation(const InterpolationMode& interpolation)
-    {
-        m_interpolation = interpolation;
-    }
+    inline InterpolationMode interpolation() const { return m_interpolation; }
+    inline void setInterpolation(const InterpolationMode& interpolation) { m_interpolation = interpolation; }
 
-    inline PrimitiveType type() const
-    {
-        return m_type;
-    }
-    inline void setType(const PrimitiveType& type)
-    {
-        m_type = type;
-    }
+    inline PrimitiveType type() const { return m_type; }
+    inline void setType(const PrimitiveType& type) { m_type = type; }
 
-    inline QuadrantMode quadrant() const
-    {
-        return m_quadrant;
-    }
-    inline void setQuadrant(const QuadrantMode& quadrant)
-    {
-        m_quadrant = quadrant;
-    }
+    inline QuadrantMode quadrant() const { return m_quadrant; }
+    inline void setQuadrant(const QuadrantMode& quadrant) { m_quadrant = quadrant; }
 
-    inline RegionMode region() const
-    {
-        return m_region;
-    }
-    inline void setRegion(const RegionMode& region)
-    {
-        m_region = region;
-    }
+    inline RegionMode region() const { return m_region; }
+    inline void setRegion(const RegionMode& region) { m_region = region; }
 
-    inline int aperture() const
-    {
-        return m_aperture;
-    }
-    inline void setAperture(int aperture)
-    {
-        m_aperture = aperture;
-    }
+    inline int aperture() const { return m_aperture; }
+    inline void setAperture(int aperture) { m_aperture = aperture; }
 
-    inline IntPoint& curPos()
-    {
-        return m_curPos;
-    }
-    inline IntPoint curPos() const
-    {
-        return m_curPos;
-    }
-    inline void setCurPos(const IntPoint& curPos)
-    {
-        m_curPos = curPos;
-    }
+    inline IntPoint& curPos() { return m_curPos; }
+    inline IntPoint curPos() const { return m_curPos; }
+    inline void setCurPos(const IntPoint& curPos) { m_curPos = curPos; }
 
-    inline Mirroring mirroring() const
-    {
-        return m_mirroring;
-    }
-    inline void setMirroring(const Mirroring& mirroring)
-    {
-        m_mirroring = mirroring;
-    }
+    inline Mirroring mirroring() const { return m_mirroring; }
+    inline void setMirroring(const Mirroring& mirroring) { m_mirroring = mirroring; }
 
-    inline double scaling() const
-    {
-        return m_scaling;
-    }
-    inline void setScaling(double scaling)
-    {
-        m_scaling = scaling;
-    }
+    inline double scaling() const { return m_scaling; }
+    inline void setScaling(double scaling) { m_scaling = scaling; }
 
-    inline double rotating() const
-    {
-        return m_rotating;
-    }
-    inline void setRotating(double rotating)
-    {
-        m_rotating = rotating;
-    }
+    inline double rotating() const { return m_rotating; }
+    inline void setRotating(double rotating) { m_rotating = rotating; }
 
 private:
     Format* m_format = nullptr;

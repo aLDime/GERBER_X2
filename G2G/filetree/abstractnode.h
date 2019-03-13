@@ -8,7 +8,6 @@
 class AbstractNode {
     AbstractNode(const AbstractNode&) = delete;
     AbstractNode& operator=(const AbstractNode&) = delete;
-    static int c;
 
 public:
     AbstractNode();

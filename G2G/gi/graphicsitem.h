@@ -11,7 +11,7 @@ enum {
     GerberItemType = QGraphicsItem::UserType + 1,
     DrillItemType,
     PathItemType,
-    RAW_ITEM_Type,
+    RawItemType,
     PointHomeType,
     PointZeroType,
     ShtiftType,

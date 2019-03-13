@@ -22,7 +22,8 @@ public:
 
     void openFile(const QString& fileName);
 
-    QAction* closeAllAct;
+    QAction* closeAllAct = nullptr;
+    QAction* exportPdfAct = nullptr;
     static MainWindow* self;
 
     Point* zero() const;

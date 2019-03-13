@@ -189,10 +189,11 @@ void MainWindow::createActions()
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), MyScene::self, &MyScene::RenderPdf);
-    fileToolBar->addAction(action);
-    action->setShortcuts(QKeySequence::Save);
-    action->setStatusTip(tr("Export to PDF file"));
+    exportPdfAct = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), MyScene::self, &MyScene::RenderPdf);
+    fileToolBar->addAction(exportPdfAct);
+    exportPdfAct->setShortcuts(QKeySequence::Save);
+    exportPdfAct->setStatusTip(tr("Export to PDF file"));
+    exportPdfAct->setEnabled(false);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -217,12 +218,11 @@ void MainWindow::createActions()
 
     setRecentFilesVisible(MainWindow::hasRecentFiles());
 
-    action = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close all"), this, &MainWindow::closeFiles);
-    fileToolBar->addAction(action);
-    action->setShortcuts(QKeySequence::Close);
-    action->setStatusTip(tr("Close all files"));
-    action->setEnabled(false);
-    closeAllAct = action;
+    closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close all"), this, &MainWindow::closeFiles);
+    fileToolBar->addAction(closeAllAct);
+    closeAllAct->setShortcuts(QKeySequence::Close);
+    closeAllAct->setStatusTip(tr("Close all files"));
+    closeAllAct->setEnabled(false);
 
     action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);
@@ -376,7 +376,8 @@ void MainWindow::readSettings()
     for (const QString& file : files.split('|', QString::SkipEmptyParts))
         openFile(file);
     SettingsDialog().readSettings();
-    QTimer::singleShot(1000, Qt::CoarseTimer, [=] { SettingsDialog sd(this);  sd.exec(); graphicsView->update(); });
+
+    //QTimer::singleShot(1000, Qt::CoarseTimer, [=] { SettingsDialog sd(this);  sd.exec(); graphicsView->update(); });
 }
 
 void MainWindow::writeSettings()

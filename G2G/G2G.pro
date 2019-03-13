@@ -90,7 +90,8 @@ HEADERS += \
     excellondialog.h \
     forms/drillmodel.h \
     filetree/layerdelegate.h \
-    colorselector.h
+    colorselector.h \
+    forms/normalizeraw.h
 
 
 SOURCES += \
@@ -131,7 +132,8 @@ SOURCES += \
     excellondialog.cpp \
     forms/drillmodel.cpp \
     filetree/layerdelegate.cpp \
-    colorselector.cpp
+    colorselector.cpp \
+    forms/normalizeraw.cpp
 
 
 

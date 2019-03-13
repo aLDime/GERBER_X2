@@ -14,7 +14,7 @@ public:
     void parseLines(const QString& gerberLines, const QString& fileName);
 
 signals:
-    void fileReady(File* file);
+    void fileReady(File* m_file);
     void fileProgress(const QString& fileName, int max, int value);
     void fileError(const QString& fileName, const QString& error);
 
@@ -37,10 +37,10 @@ private:
     Paths createLine();
     Paths createPolygon();
 
-    ClipperLib::Clipper clipper;
-    ClipperLib::ClipperOffset offset;
+    ClipperLib::Clipper m_clipper;
+    ClipperLib::ClipperOffset m_offset;
 
-    QMap<QString, QString> apertureMacro;
+    QMap<QString, QString> m_apertureMacro;
 
     enum WorkingType {
         Normal,
@@ -48,13 +48,13 @@ private:
         ApertureBlock,
     };
 
-    QStack<QPair<WorkingType, int>> abSrId;
+    QStack<QPair<WorkingType, int>> m_abSrIdStack;
 
-    Path path;
-    State state;
-    File* file;
-    QList<QString> gerbLines;
-    int lineNum = 0;
+    Path m_path;
+    State m_state;
+    File* m_file;
+    QList<QString> m_gerbLines;
+    int m_lineNum = 0;
 
     struct {
         void reset()
@@ -63,14 +63,14 @@ private:
             y = 0;
             i = 0.0;
             j = 0.0;
-            acc.clear();
+            storage.clear();
         }
         int x = 0;
         int y = 0;
         double i = 0.0;
         double j = 0.0;
-        QList<GraphicObject> acc;
-    } sr;
+        QList<GraphicObject> storage;
+    } stepRepeat;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -88,7 +88,7 @@ private:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    ApBlock* apb(int id) { return static_cast<ApBlock*>(file->m_apertures[id].data()); }
+    ApBlock* apb(int id) { return static_cast<ApBlock*>(m_file->m_apertures[id].data()); }
 };
 }
 #endif // GERBERPARSER_H

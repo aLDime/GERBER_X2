@@ -12,7 +12,9 @@ GerberNode::GerberNode(File* file)
 {
     FileHolder::file(m_id)->itemGroup()->addToTheScene();
     FileHolder::file(m_id)->itemGroup()->setZValue(-m_id);
-    MainWindow::self->closeAllAct->setEnabled(true);
+    FileHolder::file<G::File>(m_id)->rawItemGroup()->addToTheScene();
+    FileHolder::file<G::File>(m_id)->rawItemGroup()->setZValue(-m_id);
+    //MainWindow::self->closeAllAct->setEnabled(true);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
@@ -22,7 +24,7 @@ GerberNode::GerberNode(File* file)
 GerberNode::~GerberNode()
 {
     FileHolder::deleteFile(m_id);
-    MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
+    //MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     if (MyScene::self) {
         MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
         MyScene::self->update();
@@ -82,14 +84,21 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return checkState;
         case Qt::DecorationRole: {
-            QPixmap pixmap(16, 16);
-            QColor color = FileHolder::file(m_id)->itemGroup()->brush().color();
+            QColor color(FileHolder::file(m_id)->color());
             color.setAlpha(255);
+            QPixmap pixmap(16, 16);
             pixmap.fill(color);
+            if (FileHolder::file<G::File>(m_id)->itemsType() == G::File::Raw) {
+                QFont f;
+                f.setBold(true);
+                QPainter p(&pixmap);
+                p.setFont(f);
+                p.drawText(QRect(0, 0, 16, 16), Qt::AlignCenter, "R");
+            }
             return pixmap;
         }
         case Qt::UserRole:
-            return QVariant::fromValue(static_cast<void*>(FileHolder::file(m_id)));
+            return m_id;
         default:
             return QVariant();
         }
@@ -100,6 +109,8 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
             return QString("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
         case Qt::EditRole:
             return static_cast<bool>(FileHolder::file(m_id)->side());
+        case Qt::UserRole:
+            return m_id;
         default:
             return QVariant();
         }
@@ -118,7 +129,8 @@ void GerberNode::repaint()
 {
     int count = m_parentItem->childCount();
     int k = (count > 1) ? (200.0 / (count - 1)) * row() : 0;
-    QColor color(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
-    FileHolder::file(m_id)->itemGroup()->setBrush(color);
+    FileHolder::file(m_id)->setColor(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
+    FileHolder::file(m_id)->itemGroup()->setBrush(FileHolder::file(m_id)->color());
+    FileHolder::file<G::File>(m_id)->rawItemGroup()->setPen(QPen(FileHolder::file(m_id)->color(), 0.0));
     MyScene::self->update();
 }
