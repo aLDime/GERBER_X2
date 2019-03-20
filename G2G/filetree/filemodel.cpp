@@ -18,6 +18,7 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode("Gerber Files"));
     rootItem->append(new FolderNode("Excellon"));
     rootItem->append(new FolderNode("Tool Paths"));
+    rootItem->append(new FolderNode("Special"));
 }
 
 FileModel::~FileModel()

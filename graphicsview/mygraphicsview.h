@@ -24,7 +24,8 @@ public:
     static MyGraphicsView* self;
 
 signals:
-    void fileDroped(const QString& file);
+    void fileDroped(const QString&);
+    void mouseMove(const QPointF&);
 
 private:
     double zoom = 100;

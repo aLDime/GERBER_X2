@@ -6,6 +6,8 @@
 #include <QFile>
 #include <QSettings>
 #include <algorithm>
+#include <gi/bridgeitem.h>
+#include <myscene.h>
 
 void fixBegin(Path& path)
 {
@@ -123,7 +125,6 @@ GCodeFile* ToolPathCreator::createPocket(const Tool& tool, bool convent, double 
             sortedPathss.clear();
         }
     } else {
-
     }
 
     if (m_returnPaths.size() == 0)
@@ -159,7 +160,7 @@ QVector<GCodeFile*> ToolPathCreator::createPocket2(const QVector<Tool>& /*tool*/
 GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)
 {
 
-    double toolDiameter = tool.getDiameter(depth);
+    const double toolDiameter = tool.getDiameter(depth);
 
     if (side == On) {
         // execute offset
@@ -170,9 +171,9 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
         double dOffset;
         // calc offset
         if (side == Outer)
-            dOffset = +toolDiameter * (uScale / 2.0);
+            dOffset = +toolDiameter * uScale * 0.5;
         else
-            dOffset = -toolDiameter * (uScale / 2.0);
+            dOffset = -toolDiameter * uScale * 0.5;
 
         // execute offset
         ClipperOffset offset;
@@ -193,6 +194,48 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
 
     for (Path& path : m_returnPaths)
         fixBegin(path);
+
+    for (Path& path : m_returnPaths)
+        if (path.first() != path.last())
+            path.append(path.first());
+
+    ////////////////////////////////////
+    QVector<BridgeItem*> brItems;
+    for (QGraphicsItem* item : MyScene::self->items()) {
+        if (item->type() == BridgeType) {
+            brItems.append(static_cast<BridgeItem*>(item));
+        }
+    }
+
+    if (brItems.size()) {
+        Paths paths(m_returnPaths);
+        m_returnPaths.clear();
+        for (int i = 0; i < paths.size(); ++i) {
+            for (BridgeItem* bi : brItems) {
+                if (side != On) {
+                    qDebug() << "angle" << bi->angle();
+                    IntPoint pt(toIntPoint(bi->pos()));
+                    IntPoint pt1(qCos(qDegreesToRadians(bi->angle())) * +toolDiameter * uScale * 0.5, qSin(qDegreesToRadians(bi->angle())) * +toolDiameter * uScale * 0.5);
+                    IntPoint pt2(qCos(qDegreesToRadians(bi->angle())) * -toolDiameter * uScale * 0.5, qSin(qDegreesToRadians(bi->angle())) * -toolDiameter * uScale * 0.5);
+                    pt1.X += pt.X;
+                    pt1.Y += pt.Y;
+                    pt2.X += pt.X;
+                    pt2.Y += pt.Y;
+                    if (PointOnPolygon(pt1, paths[i])) {
+                        qDebug("PointOnPolygon 111");
+                    } else if (PointOnPolygon(pt2, paths[i])) {
+                        qDebug("PointOnPolygon 222");
+                    } else {
+                        m_returnPaths.append(paths[i]);
+                    }
+                } else if (PointOnPolygon(toIntPoint(bi->pos()), paths[i])) {
+                    qDebug("PointOnPolygon 333");
+                } else {
+                    m_returnPaths.append(paths[i]);
+                }
+            }
+        }
+    }
 
     return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
 }

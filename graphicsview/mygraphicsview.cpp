@@ -286,5 +286,6 @@ void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
+    mouseMove(mapToScene(event->pos()));
     QGraphicsView::mouseMoveEvent(event);
 }

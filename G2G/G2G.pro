@@ -2,6 +2,7 @@ QT += core gui opengl widgets
 
 TARGET = Getber2Gcode
 TEMPLATE = app
+DEFINES += G2G
 
 #QMAKE_CXXFLAGS += /std:c++17
 
@@ -16,7 +17,8 @@ FORMS += \
     tooldatabase/tooledit.ui \
     tooldatabase/tooleditform.ui \
     excellondialog.ui \
-    colorselector.ui
+    colorselector.ui \
+    tooldatabase/tooleditdialog.ui
 
 RESOURCES += \
     res/resources.qrc \
@@ -91,7 +93,10 @@ HEADERS += \
     forms/drillmodel.h \
     filetree/layerdelegate.h \
     colorselector.h \
-    forms/normalizeraw.h
+    forms/normalizeraw.h \
+    tooldatabase/tooleditdialog.h \
+    gi/bridgeitem.h \
+    gi/boarditem.h
 
 
 SOURCES += \
@@ -133,7 +138,10 @@ SOURCES += \
     forms/drillmodel.cpp \
     filetree/layerdelegate.cpp \
     colorselector.cpp \
-    forms/normalizeraw.cpp
+    forms/normalizeraw.cpp \
+    tooldatabase/tooleditdialog.cpp \
+    gi/bridgeitem.cpp \
+    gi/boarditem.cpp
 
 
 

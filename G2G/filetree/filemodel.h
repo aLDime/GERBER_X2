@@ -14,6 +14,7 @@ enum RootNodes {
     NodeGerberFiles,
     NodeDrillFiles,
     NodeToolPath,
+    NodeSpecial,
 };
 
 class FileModel : public QAbstractItemModel {

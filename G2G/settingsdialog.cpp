@@ -104,7 +104,6 @@ void SettingsDialog::onListCategoriesCurrentRowChanged(int /*currentRow*/)
 
 void SettingsDialog::readSettings()
 {
-    qDebug() << "SettingsDialog::readSettings";
     QSettings settings;
     settings.beginGroup("Viewer");
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
@@ -119,7 +118,6 @@ void SettingsDialog::readSettings()
 
 void SettingsDialog::writeSettings()
 {
-    qDebug() << "SettingsDialog::writeSettings";
     QSettings settings;
     settings.beginGroup("Viewer");
     if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {

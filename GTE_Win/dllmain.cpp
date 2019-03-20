@@ -14,7 +14,7 @@ HINSTANCE g_hInst = NULL;
 long g_cDllRef = 0;
 QApplication* app;
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/)
 {
     int c = 0;
     switch (dwReason) {

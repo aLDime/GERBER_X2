@@ -281,8 +281,10 @@ void ToolEditForm::on_pbApply_clicked()
             flicker(ui->dsbxStepoverPercent);
         case Tool::Group:
         default:
-            if (!m_item)
+            if (!m_item) {
+                ui->pbApply->setStyleSheet("");
                 break;
+            }
             m_item->tool() = m_tool;
             m_item->setName(m_tool.name);
             m_item->setNote(m_tool.note);
@@ -291,6 +293,18 @@ void ToolEditForm::on_pbApply_clicked()
             break;
         }
     }
+}
+
+Tool ToolEditForm::tool() const
+{
+    return m_tool;
+}
+
+void ToolEditForm::setDialog() const
+{
+    //m_dialog = false;
+    ui->cbxToolType->setEnabled(m_dialog);
+    ui->lblPixmap->setVisible(m_dialog);
 }
 
 void ToolEditForm::setTool(const Tool& tool)

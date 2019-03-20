@@ -9,8 +9,11 @@
 
 #include "tooldatabase/tooldatabase.h"
 #include <QMessageBox>
+#include <gi/bridgeitem.h>
 #include <myclipper.h>
+#include <mygraphicsview.h>
 #include <myscene.h>
+#include <tooldatabase/tooleditdialog.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
     : QWidget(parent)
@@ -54,12 +57,42 @@ ProfileForm::ProfileForm(QWidget* parent)
     connect(ui->rbOn, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
 
+    QSettings settings;
+    settings.beginGroup("ProfileForm");
+    if (settings.value("rbClimb").toBool())
+        ui->rbClimb->setChecked(true);
+    if (settings.value("rbConventional").toBool())
+        ui->rbConventional->setChecked(true);
+    if (settings.value("rbInside").toBool())
+        ui->rbInside->setChecked(true);
+    if (settings.value("rbOn").toBool())
+        ui->rbOn->setChecked(true);
+    if (settings.value("rbOutside").toBool())
+        ui->rbOutside->setChecked(true);
+    ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
+    settings.endGroup();
+
     rb_clicked();
 }
 
 ProfileForm::~ProfileForm()
 {
     qDebug("~PocketForm()");
+
+    QSettings settings;
+    settings.beginGroup("ProfileForm");
+    settings.setValue("rbClimb", ui->rbClimb->isChecked());
+    settings.setValue("rbConventional", ui->rbConventional->isChecked());
+    settings.setValue("rbInside", ui->rbInside->isChecked());
+    settings.setValue("rbOn", ui->rbOn->isChecked());
+    settings.setValue("rbOutside", ui->rbOutside->isChecked());
+    settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
+    settings.endGroup();
+
+    for (QGraphicsItem* item : MyScene::self->items()) {
+        if (item->type() == BridgeType)
+            delete item;
+    }
     delete ui;
 }
 
@@ -75,6 +108,13 @@ void ProfileForm::on_pbSelect_clicked()
 
 void ProfileForm::on_pbEdit_clicked()
 {
+    ToolEditDialog d;
+    d.toolEdit->setTool(tool);
+    if (d.exec()) {
+        tool = d.toolEdit->tool();
+        ui->lblToolName->setText(tool.name);
+        updateName();
+    }
 }
 
 void ProfileForm::on_pbCreate_clicked()
@@ -157,4 +197,19 @@ void ProfileForm::updateName()
 {
     static const QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
     ui->leName->setText(name[side] + " (" + tool.name + ")");
+}
+
+void ProfileForm::on_pbAddBridge_clicked()
+{
+    static BridgeItem* item = nullptr;
+    if (item) {
+        if (item->ok())
+            disconnect(MyGraphicsView::self, &MyGraphicsView::mouseMove, item, &BridgeItem::setNewPos);
+        else
+            delete item;
+    }
+
+    item = new BridgeItem(ui->dsbxBridgeLenght->value(), item);
+    MyGraphicsView::self->scene()->addItem(item);
+    connect(MyGraphicsView::self, &MyGraphicsView::mouseMove, item, &BridgeItem::setNewPos);
 }

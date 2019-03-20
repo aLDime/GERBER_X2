@@ -21,6 +21,8 @@ public:
 
     void setItem(ToolItem* item);
     void setTool(const Tool& tool);
+    Tool tool() const;
+    void setDialog() const;
 
 signals:
     void itemChanged(ToolItem* item);
@@ -44,6 +46,7 @@ private:
     ToolItem* m_item = nullptr;
     Tool m_tool;
     double m_feed = 1.0;
+    bool m_dialog = true;
 
     void updateName();
     void setRed();

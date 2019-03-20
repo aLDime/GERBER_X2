@@ -21,6 +21,8 @@ private slots:
     void on_pbCreate_clicked();
     void on_pbClose_clicked();
 
+    void on_pbAddBridge_clicked();
+
 private:
     Ui::ProfileForm* ui;
 

@@ -5,7 +5,9 @@
 #include "gerber.h"
 #include <QObject>
 #include <QStack>
+
 namespace G {
+
 class Parser : public QObject {
     Q_OBJECT
 public:
@@ -53,7 +55,8 @@ private:
     Path m_path;
     State m_state;
     File* m_file;
-    QList<QString> m_gerbLines;
+    QString m_currentGerbLine;
+
     int m_lineNum = 0;
 
     struct {
@@ -70,7 +73,7 @@ private:
         double i = 0.0;
         double j = 0.0;
         QList<GraphicObject> storage;
-    } stepRepeat;
+    } m_stepRepeat;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -88,7 +91,7 @@ private:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    ApBlock* apb(int id) { return static_cast<ApBlock*>(m_file->m_apertures[id].data()); }
+    /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(m_file->m_apertures[id].data()); }
 };
 }
 #endif // GERBERPARSER_H

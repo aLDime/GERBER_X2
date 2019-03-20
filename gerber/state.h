@@ -33,25 +33,25 @@ public:
     inline void setFormat(Format* format) { m_format = format; }
 
     inline DCode dCode() const { return m_dCode; }
-    inline void setDCode(const DCode& dCode) { m_dCode = dCode; }
+    inline void setDCode(DCode dCode) { m_dCode = dCode; }
 
     inline GCode gCode() const { return m_gCode; }
-    inline void setGCode(const GCode& gCode) { m_gCode = gCode; }
+    inline void setGCode(GCode gCode) { m_gCode = gCode; }
 
     inline ImagePolarity imgPolarity() const { return m_imgPolarity; }
-    inline void setImgPolarity(const ImagePolarity& imgPolarity) { m_imgPolarity = imgPolarity; }
+    inline void setImgPolarity(ImagePolarity imgPolarity) { m_imgPolarity = imgPolarity; }
 
     inline InterpolationMode interpolation() const { return m_interpolation; }
-    inline void setInterpolation(const InterpolationMode& interpolation) { m_interpolation = interpolation; }
+    inline void setInterpolation(InterpolationMode interpolation) { m_interpolation = interpolation; }
 
     inline PrimitiveType type() const { return m_type; }
-    inline void setType(const PrimitiveType& type) { m_type = type; }
+    inline void setType(PrimitiveType type) { m_type = type; }
 
     inline QuadrantMode quadrant() const { return m_quadrant; }
-    inline void setQuadrant(const QuadrantMode& quadrant) { m_quadrant = quadrant; }
+    inline void setQuadrant(QuadrantMode quadrant) { m_quadrant = quadrant; }
 
     inline RegionMode region() const { return m_region; }
-    inline void setRegion(const RegionMode& region) { m_region = region; }
+    inline void setRegion(RegionMode region) { m_region = region; }
 
     inline int aperture() const { return m_aperture; }
     inline void setAperture(int aperture) { m_aperture = aperture; }
@@ -61,7 +61,7 @@ public:
     inline void setCurPos(const IntPoint& curPos) { m_curPos = curPos; }
 
     inline Mirroring mirroring() const { return m_mirroring; }
-    inline void setMirroring(const Mirroring& mirroring) { m_mirroring = mirroring; }
+    inline void setMirroring(Mirroring mirroring) { m_mirroring = mirroring; }
 
     inline double scaling() const { return m_scaling; }
     inline void setScaling(double scaling) { m_scaling = scaling; }

@@ -57,7 +57,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
 
     m_lineNum = 0;
     for (const QString& gerberLine : m_file->lines()) {
-        m_gerbLines.push_back(gerberLine);
+        m_currentGerbLine = gerberLine;
         ++m_lineNum;
         if (!(m_lineNum % 1000))
             emit fileProgress(m_file->shortFileName(), 0, m_lineNum);
@@ -160,7 +160,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     }
     emit fileProgress(m_file->shortFileName(), 1, 1);
 
-    m_gerbLines.clear();
+    m_currentGerbLine.clear();
     m_apertureMacro.clear();
     m_path.clear();
     mutex.unlock();
@@ -359,11 +359,9 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal)
 void Parser::addPath()
 {
     if (m_path.size() < 2) {
-        m_path.clear();
-        m_path.push_back(m_state.curPos());
+        resetStep();
         return;
     }
-
     switch (m_state.region()) {
     case On:
         m_state.setType(Region);
@@ -372,10 +370,10 @@ void Parser::addPath()
             m_file->append(GraphicObject(m_state, createPolygon(), m_file, m_path));
             break;
         case StepRepeat:
-            stepRepeat.storage.append(GraphicObject(m_state, createPolygon(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_state, createPolygon(), m_file, m_path));
             break;
         case ApertureBlock:
-            apb(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createPolygon(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createPolygon(), m_file, m_path));
             break;
         }
         break;
@@ -386,10 +384,10 @@ void Parser::addPath()
             m_file->append(GraphicObject(m_state, createLine(), m_file, m_path));
             break;
         case StepRepeat:
-            stepRepeat.storage.append(GraphicObject(m_state, createLine(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_state, createLine(), m_file, m_path));
             break;
         case ApertureBlock:
-            apb(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createLine(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createLine(), m_file, m_path));
             break;
         }
         break;
@@ -399,24 +397,26 @@ void Parser::addPath()
 
 void Parser::addFlash()
 {
-
     m_state.setType(Aperture);
 
-    if (m_file->m_apertures.isEmpty() && m_file->m_apertures[m_state.aperture()] == nullptr)
+    if (!m_file->m_apertures.contains(m_state.aperture()) && m_file->m_apertures[m_state.aperture()].data() == nullptr)
         throw QString("Aperture %1 not found!").arg(m_state.aperture());
 
     Paths paths(m_file->m_apertures[m_state.aperture()]->draw(m_state));
-    if (m_file->m_apertures[m_state.aperture()]->isDrilled())
-        paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
+
+    ////////////////////////////////// Draw Drill //////////////////////////////////
+    // if (m_file->m_apertures[m_state.aperture()]->isDrilled())
+    //      paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
 
     switch (m_abSrIdStack.top().first) {
     case Normal:
         m_file->append(GraphicObject(m_state, paths, m_file));
+        break;
     case StepRepeat:
-        stepRepeat.storage.append(GraphicObject(m_state, paths, m_file));
+        m_stepRepeat.storage.append(GraphicObject(m_state, paths, m_file));
         break;
     case ApertureBlock:
-        apb(m_abSrIdStack.top().second)->append(GraphicObject(m_state, paths, m_file));
+        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, paths, m_file));
         break;
     }
     resetStep();
@@ -424,7 +424,7 @@ void Parser::addFlash()
 
 void Parser::reset(const QString& fileName)
 {
-    m_gerbLines.clear();
+    m_currentGerbLine.clear();
     m_apertureMacro.clear();
     m_path.clear();
     m_file = new File(fileName);
@@ -432,12 +432,12 @@ void Parser::reset(const QString& fileName)
 
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ Normal, 0 });
-    stepRepeat.reset();
+    m_stepRepeat.reset();
 }
 
 void Parser::resetStep()
 {
-    m_gerbLines.clear();
+    m_currentGerbLine.clear();
     m_path.clear();
     m_path.push_back(m_state.curPos());
 }
@@ -456,10 +456,10 @@ IntPoint Parser::parsePosition(const QString& xyStr)
         }
     }
     if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0) {
-        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_gerbLines.last());
+        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0) {
-        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_gerbLines.last());
+        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     return m_state.curPos();
 }
@@ -541,7 +541,6 @@ Paths Parser::createLine()
         }
         SimplifyPolygons(solution);
         ReversePaths(solution);
-
         if (m_state.imgPolarity() == Negative)
             ReversePaths(solution);
     } else { //if (file->m_apertures[state.aperture]->type() == Circle) {        //РїРѕС‚СЂРѕРІРёС‚СЃСЏ РµСЃС‚Рё РЅРµС‚ Р°РїРµСЂС‚СѓСЂС‹!!!!!!!
@@ -560,17 +559,14 @@ Paths Parser::createLine()
 
 Paths Parser::createPolygon()
 {
-    Paths paths;
-    double area = Area(m_path);
-    if (area > 0.0) {
+    if (Area(m_path) > 0.0) {
         if (m_state.imgPolarity() == Negative)
             ReversePath(m_path);
     } else {
         if (m_state.imgPolarity() == Positive)
             ReversePath(m_path);
     }
-    paths.push_back(m_path);
-    return paths;
+    return { m_path };
 }
 
 bool Parser::parseAperture(const QString& gLine)
@@ -597,13 +593,11 @@ bool Parser::parseAperture(const QString& gLine)
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
             m_file->m_apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, &m_file->format));
-
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
             m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, &m_file->format)));
-
             break;
         case Obround:
             if (paramList.size() > 2)
@@ -616,7 +610,6 @@ bool Parser::parseAperture(const QString& gLine)
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
             m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &m_file->format)));
-
             break;
         case Macro:
         default:
@@ -699,16 +692,16 @@ bool Parser::parseStepRepeat(const QString& gLine)
     if (match.exactMatch(gLine)) {
         if (m_abSrIdStack.top().first == StepRepeat)
             closeStepRepeat();
-        stepRepeat.reset();
-        stepRepeat.x = match.cap(1).toInt();
-        stepRepeat.y = match.cap(2).toInt();
-        stepRepeat.i = match.cap(3).toDouble() * uScale;
-        stepRepeat.j = match.cap(4).toDouble() * uScale;
+        m_stepRepeat.reset();
+        m_stepRepeat.x = match.cap(1).toInt();
+        m_stepRepeat.y = match.cap(2).toInt();
+        m_stepRepeat.i = match.cap(3).toDouble() * uScale;
+        m_stepRepeat.j = match.cap(4).toDouble() * uScale;
         if (m_state.format()->unitMode == Inches) {
-            stepRepeat.i *= 25.4;
-            stepRepeat.j *= 25.4;
+            m_stepRepeat.i *= 25.4;
+            m_stepRepeat.j *= 25.4;
         }
-        if (stepRepeat.x > 1 || stepRepeat.y > 1)
+        if (m_stepRepeat.x > 1 || m_stepRepeat.y > 1)
             m_abSrIdStack.push({ StepRepeat, 0 });
         return true;
     }
@@ -723,18 +716,18 @@ bool Parser::parseStepRepeat(const QString& gLine)
 
 void Parser::closeStepRepeat()
 {
-    qDebug() << "sr" << stepRepeat.x << stepRepeat.y;
-    for (int y = 0; y < stepRepeat.y; ++y) {
-        for (int x = 0; x < stepRepeat.x; ++x) {
-            for (GraphicObject go : stepRepeat.storage) {
+    qDebug() << "sr" << m_stepRepeat.x << m_stepRepeat.y;
+    for (int y = 0; y < m_stepRepeat.y; ++y) {
+        for (int x = 0; x < m_stepRepeat.x; ++x) {
+            for (GraphicObject go : m_stepRepeat.storage) {
                 for (Path& path : go.paths) {
-                    AbstractAperture::translate(path, IntPoint(stepRepeat.i * x, stepRepeat.j * y));
+                    AbstractAperture::translate(path, IntPoint(m_stepRepeat.i * x, m_stepRepeat.j * y));
                 }
                 m_file->append(go);
             }
         }
     }
-    stepRepeat.reset();
+    m_stepRepeat.reset();
     m_abSrIdStack.pop();
 }
 
@@ -948,12 +941,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
 bool Parser::parseEndOfFile(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^M[0]?[0123]\\*"));
-    if (match.exactMatch(gLine)) {
-        addPath();
-        return true;
-    }
     static const QRegExp match2(QStringLiteral("^D0?2M0?[02]\\*"));
-    if (match2.exactMatch(gLine)) {
+    if (match.exactMatch(gLine) || match2.exactMatch(gLine)) {
         addPath();
         return true;
     }
@@ -1111,13 +1100,13 @@ bool Parser::parseLineInterpolation(const QString& gLine)
         if (!match.cap(2).isEmpty())
             m_state.setDCode(static_cast<DCode>(match.cap(2).toInt()));
         switch (/*match.cap(2).isEmpty() ? */ m_state.dCode() /*: match.cap(2).toInt()*/) {
-        case D01: //РїРµСЂРµРјРµС‰РµРЅРёРµ РІ СѓРєР°Р·Р°РЅРЅСѓСЋ С‚РѕС‡РєСѓ x-y СЃ РѕС‚РєСЂС‹С‚С‹Рј Р·Р°С‚РІРѕСЂРѕРј Р·Р°СЃРІРµС‚РєРё
+        case D01: //перемещение в указанную точку x-y с открытым затвором засветки
             m_path.push_back(m_state.curPos());
             break;
-        case D02: //РїРµСЂРµРјРµС‰РµРЅРёРµ РІ СѓРєР°Р·Р°РЅРЅСѓСЋ С‚РѕС‡РєСѓ x-y СЃ Р·Р°РєСЂС‹С‚С‹Рј Р·Р°С‚РІРѕСЂРѕРј Р·Р°СЃРІРµС‚РєРё
+        case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();
             break;
-        case D03: //РїРµСЂРµРјРµС‰РµРЅРёРµ РІ СѓРєР°Р·Р°РЅРЅСѓСЋ С‚РѕС‡РєСѓ x-y СЃ Р·Р°РєСЂС‹С‚С‹Рј Р·Р°С‚РІРѕСЂРѕРј Р·Р°СЃРІРµС‚РєРё Рё РІСЃРїС‹С€РєР°
+        case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             addPath();
             addFlash();
             break;

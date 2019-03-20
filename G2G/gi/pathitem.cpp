@@ -16,7 +16,7 @@ PathItem::PathItem(const Paths& paths)
 
 QRectF PathItem::boundingRect() const { return m_rect; }
 
-void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
+void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
 
     if (m_penColor)

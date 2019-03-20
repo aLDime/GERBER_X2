@@ -15,6 +15,7 @@ enum {
     PointHomeType,
     PointZeroType,
     ShtiftType,
+    BridgeType
 };
 
 class ItemGroup;

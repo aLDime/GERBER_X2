@@ -4,6 +4,9 @@ TARGET = GerberThumbnailExtension
 TEMPLATE = lib
 
 CONFIG(release, debug|release):DEFINES += NDEBUG
+include(../clipper/clipper.pri)
+include(../gerber/gerber.pri)
+#include(../file/file.pri)
 
 DEFINES += _WIN32 WIN32 NDEBUG _WINDOWS _USRDLL CPPSHELLEXTTHUMBNAILHANDLER_EXPORTS _WINDLL _UNICODE UNICODE
 
@@ -39,25 +42,37 @@ HEADERS += \
     Reg.h \
     gerberthumbnailprovider.h \
     gerberthumbnailprovider.h \
-    ../G2G/clipper/clipper.hpp \
-    ../G2G/clipper/myclipper.h \
-    ../G2G/gerber/gerber.h \
-    ../G2G/gerber/gerberaperture.h \
-    ../G2G/gerber/gerberparser.h \
-    ../G2G/gerber/mathparser.h \
-    ../G2G/toolpathcreator.h
+#    ../G2G/clipper/clipper.hpp \
+#    ../G2G/clipper/myclipper.h \
+#    ../G2G/gerber/gerber.h \
+#    ../G2G/gerber/gerberaperture.h \
+#    ../G2G/gerber/gerberparser.h \
+#    ../G2G/gerber/mathparser.h \
+#    ../G2G/toolpathcreator.h
+    ../G2G/gi/drillitem.h \
+    ../G2G/gi/gerberitem.h \
+    ../G2G/gi/graphicsitem.h \
+    ../G2G/gi/itemgroup.h \
+    ../G2G/gi/pathitem.h \
+    ../G2G/gi/rawitem.h
 
 SOURCES += \
     ClassFactory.cpp \
     dllmain.cpp \
     Reg.cpp \
     gerberthumbnailprovider.cpp \
-    ../G2G/clipper/clipper.cpp \
-    ../G2G/clipper/myclipper.cpp \
-    ../G2G/gerber/gerberaperture.cpp \
-    ../G2G/gerber/gerberparser.cpp \
-    ../G2G/gerber/mathparser.cpp \
-    ../G2G/toolpathcreator.cpp
+#    ../G2G/clipper/clipper.cpp \
+#    ../G2G/clipper/myclipper.cpp \
+#    ../G2G/gerber/gerberaperture.cpp \
+#    ../G2G/gerber/gerberparser.cpp \
+#    ../G2G/gerber/mathparser.cpp \
+#    ../G2G/toolpathcreator.cpp
+    ../G2G/gi/drillitem.cpp \
+    ../G2G/gi/gerberitem.cpp \
+    ../G2G/gi/graphicsitem.cpp \
+    ../G2G/gi/itemgroup.cpp \
+    ../G2G/gi/pathitem.cpp \
+    ../G2G/gi/rawitem.cpp
 
 #########################################
 

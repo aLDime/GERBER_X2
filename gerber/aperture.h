@@ -38,8 +38,10 @@ public:
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
 
-    static Path circle(double diametr, IntPoint center = IntPoint());
-    static void translate(Path& path, IntPoint pos);
+    static Path circle(double diametr, const IntPoint& center = IntPoint());
+    static Path rectangle(double m_width, double m_height, const IntPoint& center = IntPoint());
+    static void rotate(Path& poligon, double angle, const IntPoint& center = IntPoint());
+    static void translate(Path& path, const IntPoint& pos);
 
 protected:
     bool m_isFlashed = false;
@@ -50,9 +52,7 @@ protected:
     virtual void draw() = 0;
     const Format* m_format;
 
-    void rotate(Path& poligon, double angle, IntPoint center = IntPoint());
     void transform(Path& poligon, const State& state);
-    Path rectangle(double m_width, double m_height, IntPoint center = IntPoint());
 };
 
 /////////////////////////////////////////////////////
@@ -162,19 +162,6 @@ public:
 
 protected:
     void draw() override;
-
-private:
-    //    QList<QString> m_modifiers;
-    //    QMap<QString, double> m_coefficients;
-    //    QString m_macro;
-
-    //    Path drawCenterLine(const QList<double>& mod);
-    //    Path drawCircle(const QList<double>& mod);
-    //    Path drawOutlineCustomPolygon(const QList<double>& mod);
-    //    Path drawOutlineRegularPolygon(const QList<double>& mod);
-    //    Path drawVectorLine(const QList<double>& mod);
-    //    void drawMoire(const QList<double>& mod);
-    //    void drawThermal(const QList<double>& mod);
 };
 }
 #endif // GERBERAPERTURE_H

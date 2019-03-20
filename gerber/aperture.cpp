@@ -19,10 +19,9 @@ Paths AbstractAperture::draw(const State& state)
     if (m_size == 0)
         draw();
 
-    Paths tmpPpaths;
-    tmpPpaths.reserve(m_paths.size());
+    Paths tmpPpaths(m_paths);
 
-    for (Path path : m_paths) {
+    for (Path& path : tmpPpaths) {
         if (state.imgPolarity() == Negative)
             ReversePath(path);
         if (m_format->unitMode == Inches && type() == Macro)
@@ -33,10 +32,27 @@ Paths AbstractAperture::draw(const State& state)
 
         transform(path, state);
 
-        if (state.curPos().X != 0 || state.curPos().Y != 0)
-            translate(path, state.curPos());
-        tmpPpaths.push_back(path);
+        //if (state.curPos().X != 0 || state.curPos().Y != 0)
+        translate(path, state.curPos());
     }
+    //    Paths tmpPpaths;
+    //    tmpPpaths.reserve(m_paths.size());
+
+    //    for (Path path : m_paths) {
+    //        if (state.imgPolarity() == Negative)
+    //            ReversePath(path);
+    //        if (m_format->unitMode == Inches && type() == Macro)
+    //            for (IntPoint& pt : path) {
+    //                pt.X *= 25.4;
+    //                pt.Y *= 25.4;
+    //            }
+
+    //        transform(path, state);
+
+    //        if (state.curPos().X != 0 || state.curPos().Y != 0)
+    //            translate(path, state.curPos());
+    //        tmpPpaths.push_back(path);
+    //    }
     return tmpPpaths;
 }
 
@@ -61,7 +77,7 @@ Path AbstractAperture::drawDrill(const State& state)
     return drill;
 }
 
-Path AbstractAperture::circle(double diametr, IntPoint center)
+Path AbstractAperture::circle(double diametr, const IntPoint& center)
 {
     if (diametr == 0.0)
         return Path();
@@ -82,7 +98,7 @@ Path AbstractAperture::circle(double diametr, IntPoint center)
     return poligon;
 }
 
-Path AbstractAperture::rectangle(double width, double height, IntPoint center)
+Path AbstractAperture::rectangle(double width, double height, const IntPoint& center)
 {
 
     const double halfWidth = width * 0.5;
@@ -99,7 +115,7 @@ Path AbstractAperture::rectangle(double width, double height, IntPoint center)
     return poligon;
 }
 
-void AbstractAperture::rotate(Path& poligon, double angle, IntPoint center)
+void AbstractAperture::rotate(Path& poligon, double angle, const IntPoint& center)
 {
     bool fl = Area(poligon) < 0;
     for (IntPoint& pt : poligon) {
@@ -132,7 +148,7 @@ void AbstractAperture::transform(Path& poligon, const State& state)
         ReversePath(poligon);
 }
 
-void AbstractAperture::translate(Path& path, IntPoint pos)
+void AbstractAperture::translate(Path& path, const IntPoint& pos)
 {
     if (pos.X == 0 && pos.Y == 0)
         return;
@@ -607,33 +623,33 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
 /// \param coefficients
 /// \param format
 ///
-ApBlock::ApBlock(/*const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, */ const Format* format)
+ApBlock::ApBlock(const Format* format)
     : AbstractAperture(format)
 {
 }
 
-QString ApBlock::name() { return QString("ApBlock"); }
+QString ApBlock::name() { return QString("BLOCK"); }
 
 ApertureType ApBlock::type() const { return Block; }
 
 void ApBlock::draw()
 {
     m_paths.clear();
-    Paths tmpPaths;
-    int i = 0, exp = -1;
+    int i = 0;
     while (i < size()) {
-        Clipper clipper(ioStrictlySimple);
+        Clipper clipper; //(ioStrictlySimple);
         clipper.AddPaths(m_paths, ptSubject, true);
-        exp = at(i).state.imgPolarity();
+        const int exp = at(i).state.imgPolarity();
         do {
-            tmpPaths = at(i++).paths;
-            clipper.AddPaths(tmpPaths, ptClip, true);
+            m_paths.append(at(i).paths);
+            clipper.AddPaths(at(i++).paths, ptClip, true);
         } while (i < size() && exp == at(i).state.imgPolarity());
-
         if (at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ctUnion, m_paths, pftPositive);
         else
             clipper.Execute(ctDifference, m_paths, pftNonZero);
     }
-    CleanPolygons(m_paths, 0.0009 * uScale);
+    m_size = 1;
+    qDebug() << m_paths.size();
+    //CleanPolygons(m_paths, 0.0009 * uScale);
 }

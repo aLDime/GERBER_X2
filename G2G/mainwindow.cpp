@@ -18,6 +18,8 @@
 
 #include <staticholders/fileholder.h>
 
+#include <gi/bridgeitem.h>
+
 MainWindow* MainWindow::self = nullptr;
 
 MainWindow::MainWindow(QWidget* parent)
@@ -321,7 +323,8 @@ void MainWindow::createActions()
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), Material); });
+    //QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), Material); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {
         ToolDatabase tdb(this, {});

@@ -69,13 +69,14 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     setItemGroup(new ItemGroup);
     GraphicsItem* item;
     Path g0path;
+    Paths g0path1;
     Paths tmpPaths2(toolPaths);
 
     switch (type) {
     case Profile:
-        for (Path& path : tmpPaths2)
-            if (path.first() != path.last())
-                path.append(path.first());
+        //                for (Path& path : tmpPaths2)
+        //                    if (path.first() != path.last())
+        //                        path.append(path.first());
 
         for (const Path& path : tmpPaths2) {
             item = new PathItem({ path });
@@ -84,16 +85,26 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             itemGroup()->append(item);
         }
 
-        g0path.reserve(toolPaths.size());
-        for (const Path& path : tmpPaths2) {
-            item = new PathItem({ path });
+        g0path.reserve(toolPaths.size() * 2);
+        for (int i = 0; i < tmpPaths2.size(); ++i) {
+            item = new PathItem({ tmpPaths2[i] });
             //item->setPen(QPen(Qt::black, 0.0));
             item->setPenColor(SettingsDialog::color(Colors::ToolPath));
             itemGroup()->append(item);
-            g0path.append(path.first());
+            if (i < tmpPaths2.size() - 1) {
+                g0path1.append({ tmpPaths2[i].last(), tmpPaths2[i + 1].first() });
+            }
         }
 
-        item = new PathItem({ g0path });
+        //        for (const Path& path : tmpPaths2) {
+        //            item = new PathItem({ path });
+        //            //item->setPen(QPen(Qt::black, 0.0));
+        //            item->setPenColor(SettingsDialog::color(Colors::ToolPath));
+        //            itemGroup()->append(item);
+        //            g0path.append(path.first());
+        //        }
+
+        item = new PathItem(g0path1);
         //item->setPen(QPen(Qt::black, 0.0));
         item->setPenColor(SettingsDialog::color(Colors::G0));
         itemGroup()->append(item);
