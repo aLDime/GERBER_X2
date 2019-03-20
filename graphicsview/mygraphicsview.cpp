@@ -92,6 +92,23 @@ void MyGraphicsView::zoomFit()
     UpdateRuler();
 }
 
+void MyGraphicsView::zoomToSelected()
+{
+    QRectF rect;
+    for (const QGraphicsItem* item : scene()->selectedItems()) {
+        if (item->type() == DrillItemType)
+            continue;
+        if (rect.isEmpty())
+            rect = item->boundingRect();
+        else
+            rect = rect.united(item->boundingRect());
+    }
+    if (rect.isEmpty())
+        return;
+    fitInView(rect, Qt::KeepAspectRatio);
+    zoomOut();
+}
+
 void MyGraphicsView::zoom100()
 {
     double x = 1.0, y = 1.0;

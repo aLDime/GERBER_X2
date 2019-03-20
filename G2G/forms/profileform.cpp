@@ -72,6 +72,8 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
     settings.endGroup();
 
+    m_size = tool.getDiameter(ui->dsbxDepth->value());
+
     rb_clicked();
 }
 
@@ -103,6 +105,9 @@ void ProfileForm::on_pbSelect_clicked()
         tool = tdb.tool();
         ui->lblToolName->setText(tool.name);
         updateName();
+
+        m_size = tool.getDiameter(ui->dsbxDepth->value());
+        updateBridge();
     }
 }
 
@@ -209,7 +214,27 @@ void ProfileForm::on_pbAddBridge_clicked()
             delete item;
     }
 
-    item = new BridgeItem(ui->dsbxBridgeLenght->value(), item);
+    item = new BridgeItem(m_lenght, item, m_size);
     MyGraphicsView::self->scene()->addItem(item);
     connect(MyGraphicsView::self, &MyGraphicsView::mouseMove, item, &BridgeItem::setNewPos);
+}
+
+void ProfileForm::on_dsbxBridgeLenght_valueChanged(double arg1)
+{
+    m_lenght = arg1;
+    updateBridge();
+}
+
+void ProfileForm::on_dsbxDepth_valueChanged(double arg1)
+{
+    m_size = tool.getDiameter(arg1);
+    updateBridge();
+}
+
+void ProfileForm::updateBridge()
+{
+    for (QGraphicsItem* item : MyScene::self->items()) {
+        if (item->type() == BridgeType)
+            static_cast<BridgeItem*>(item)->update();
+    }
 }

@@ -14,8 +14,8 @@ RawItem::RawItem(const Path& path, G::File* file)
 
     Paths tmpPpath;
     ClipperOffset offset;
-    offset.AddPath(path, jtSquare, etOpenSquare);
-    offset.Execute(tmpPpath, 0.1 * uScale);
+    offset.AddPath(path, jtSquare, etOpenButt);
+    offset.Execute(tmpPpath, 0.01 * uScale);
     for (const Path& path : tmpPpath)
         m_shape.addPolygon(toQPolygon(path));
 

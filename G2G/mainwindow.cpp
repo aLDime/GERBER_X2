@@ -268,7 +268,7 @@ void MainWindow::createActions()
                 item->setSelected(true);
     });
     action->setShortcut(QKeySequence::SelectAll);
-
+    action = s->addAction(/*QIcon::fromTheme("edit-select-all"),*/ tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
     //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     //        QList<QGraphicsItem*> list;
     //        for (QGraphicsItem* item : MyScene::self->items())
@@ -418,7 +418,7 @@ void MainWindow::on_customContextMenuRequested(const QPoint& pos)
         connect(a, &QAction::toggled, [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
     }
     if (a)
-        menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 24)));
+        menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value)

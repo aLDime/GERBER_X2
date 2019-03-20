@@ -405,8 +405,8 @@ void Parser::addFlash()
     Paths paths(m_file->m_apertures[m_state.aperture()]->draw(m_state));
 
     ////////////////////////////////// Draw Drill //////////////////////////////////
-    // if (m_file->m_apertures[m_state.aperture()]->isDrilled())
-    //      paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
+     if (m_file->m_apertures[m_state.aperture()]->isDrilled())
+          paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
 
     switch (m_abSrIdStack.top().first) {
     case Normal:

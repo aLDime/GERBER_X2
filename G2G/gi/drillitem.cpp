@@ -34,8 +34,10 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
         m_brush.setColor(*m_brushColor);
     painter->save();
     QColor cb(m_brush.color());
-    if (option->state & QStyle::State_Selected)
+    if (option->state & QStyle::State_Selected) {
         cb = cb.light(150);
+        cb = Qt::magenta;
+    }
 
     if (option->state & QStyle::State_MouseOver)
         cb = cb.dark(150);

@@ -19,6 +19,7 @@ public:
     void setScene(QGraphicsScene* Scene);
     void zoom100();
     void zoomFit();
+    void zoomToSelected();
     void zoomIn();
     void zoomOut();
     static MyGraphicsView* self;

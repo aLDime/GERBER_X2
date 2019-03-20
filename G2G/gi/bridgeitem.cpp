@@ -9,9 +9,10 @@
 #include <mygraphicsview.h>
 #include <myscene.h>
 
-BridgeItem::BridgeItem(double lenght, BridgeItem*& ptr)
+BridgeItem::BridgeItem(double& lenght, BridgeItem*& ptr, double& size)
     : m_ptr(ptr)
     , m_lenght(lenght)
+    , m_size(size)
 {
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
@@ -27,6 +28,15 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
     painter->setBrush(scene()->collidingItems(this).isEmpty() ? Qt::red : Qt::green);
     painter->setPen(Qt::NoPen);
     painter->drawPath(m_path);
+    painter->setBrush(Qt::magenta);
+
+    QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
+    l.setAngle(m_angle + 90);
+    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+    l.setAngle(m_angle - 90);
+    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+
+
 }
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
@@ -112,6 +122,13 @@ QPointF BridgeItem::calculate(const QPointF& pos)
 double BridgeItem::angle() const
 {
     return m_angle;
+}
+
+void BridgeItem::update()
+{
+    m_path = QPainterPath();
+    m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
+    QGraphicsItem::update();
 }
 
 double BridgeItem::lenght() const
