@@ -323,7 +323,6 @@ void MainWindow::createActions()
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    //QTimer::singleShot(10, [=] { createDockWidget(new MaterialSetup(), Material); });
     QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {

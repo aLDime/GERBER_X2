@@ -174,8 +174,9 @@ void ProfileForm::create()
     if (!wrPaths.isEmpty()) {
         if (side == On)
             wPaths = wrPaths;
-        else
+        else {
             wPaths = NormalizeRaw(wrPaths).paths();
+        }
     }
 
     if (boardSide == NullSide)

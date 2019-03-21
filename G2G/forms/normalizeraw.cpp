@@ -35,7 +35,7 @@ Paths NormalizeRaw::paths() /*const*/
             qDebug() << "i" << i << "size" << m_paths.size();
         }
 
-        if (Area(path) < 0)
+        if (!Orientation(path))
             ReversePath(path);
         paths.append(path);
         qDebug() << "paths.size" << paths.size();
@@ -45,15 +45,16 @@ Paths NormalizeRaw::paths() /*const*/
     clipper.AddPaths(paths, ptSubject, true);
     //clipper.StrictlySimple(true);
     IntRect r(clipper.GetBounds());
-    int k = uScale * 1;
+    int k = uScale * 10;
     Path outer = {
         IntPoint(r.left - k, r.bottom + k),
         IntPoint(r.right + k, r.bottom + k),
         IntPoint(r.right + k, r.top - k),
         IntPoint(r.left - k, r.top - k)
     };
-    ReversePath(outer);
+    //ReversePath(outer);
     clipper.AddPath(outer, ptClip, true);
+    //clipper.Execute(ctUnion, paths, pftNonZero);
     clipper.Execute(ctXor, paths, pftEvenOdd);
     paths.takeFirst();
     qDebug() << paths.size();

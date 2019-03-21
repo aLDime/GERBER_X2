@@ -6,6 +6,7 @@
 #include <QFile>
 #include <QSettings>
 #include <algorithm>
+#include <aperture.h>
 #include <gi/bridgeitem.h>
 #include <myscene.h>
 
@@ -45,7 +46,7 @@ Paths sortByStratDistance(Paths src)
             }
         }
         dst.append(src.takeAt(s));
-        p1 = dst.last().first();
+        p1 = dst.last().last();
     }
     return dst;
 }
@@ -199,33 +200,80 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
         if (path.first() != path.last())
             path.append(path.first());
 
-    ////////////////////////////////////
+    //////////////// find Bridges ////////////////////
     QVector<BridgeItem*> brItems;
     for (QGraphicsItem* item : MyScene::self->items()) {
         if (item->type() == BridgeType) {
             brItems.append(static_cast<BridgeItem*>(item));
         }
     }
+    //////////////// create Bridges ////////////////////
 
     if (brItems.size()) {
         Paths paths(m_returnPaths);
         m_returnPaths.clear();
         for (int i = 0; i < paths.size(); ++i) {
+            Path& path = paths[i];
+            QList<BridgeItem*> biStack;
             for (BridgeItem* bi : brItems) {
-                if (side != On) {
-                    qDebug() << "angle" << bi->angle();
-                    if (PointOnPolygon(bi->getPoint(1), paths[i])) {
-                        qDebug("PointOnPolygon 111");
-                    } else if (PointOnPolygon(bi->getPoint(2), paths[i])) {
-                        qDebug("PointOnPolygon 222");
-                    } else {
-                        m_returnPaths.append(paths[i]);
+                //                if (PointOnPolygon(bi->getPoint(side), path)) {
+                //                    biStack.append(bi);
+                //                }
+                if (!side) {
+                    if (PointOnPolygon(bi->getPoint(On), path)) {
+                        qDebug() << "side" << side;
+                        biStack.append(bi);
                     }
-                } else if (PointOnPolygon(bi->getPoint(0), paths[i])) {
-                    qDebug("PointOnPolygon 333");
                 } else {
-                    m_returnPaths.append(paths[i]);
+                    if (PointOnPolygon(bi->getPoint(Outer), path) || PointOnPolygon(bi->getPoint(Inner), path)) {
+                        qDebug() << "side" << side;
+                        biStack.append(bi);
+                    }
                 }
+            }
+            if (biStack.isEmpty()) {
+                m_returnPaths.append(path);
+            } else {
+                Paths tmpPaths;
+
+                ClipperOffset offset;
+                offset.AddPath(path, jtMiter, etClosedLine);
+                offset.Execute(tmpPaths, +toolDiameter * uScale * 0.1);
+
+                Clipper clipper;
+                clipper.AddPaths(tmpPaths, ptSubject, true);
+                for (BridgeItem* bi : brItems) {
+                    clipper.AddPath(G::AbstractAperture::circle((bi->lenght() + toolDiameter) * uScale, bi->getPoint(side)), ptClip, true);
+                }
+                clipper.Execute(ctIntersection, tmpPaths, pftPositive);
+
+                PolyTree polytree;
+
+                clipper.Clear();
+                clipper.AddPath(path, ptSubject, false);
+                clipper.AddPaths(tmpPaths, ptClip, true);
+                clipper.Execute(ctDifference, polytree, pftNonZero);
+
+                PolyTreeToPaths(polytree, tmpPaths);
+
+                for (int i = 0; i < tmpPaths.size(); ++i) {
+                    for (int j = 0; j < tmpPaths.size(); ++j) {
+                        if (tmpPaths[i].last() == tmpPaths[j].first()) {
+                            tmpPaths[i].append(tmpPaths[j]);
+                            tmpPaths.remove(j);
+                            i = 0;
+                            break;
+                        }
+                        if (tmpPaths[i].first() == tmpPaths[j].last()) {
+                            tmpPaths[j].append(tmpPaths[i]);
+                            tmpPaths.remove(i);
+                            i = 0;
+                            break;
+                        }
+                    }
+                }
+
+                m_returnPaths.append(tmpPaths);
             }
         }
     }

@@ -63,7 +63,6 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     , m_toolPaths(toolPaths)
     , m_tool(tool)
     , m_depth(depth)
-
 {
 
     setItemGroup(new ItemGroup);
@@ -110,7 +109,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
         itemGroup()->append(item);
         break;
     case Pocket:
-        if (1) { //fast rendeer
+        if (0) { //fast rendeer
             Paths tmpPaths;
             Pathss pathss;
             Clipper clipper;

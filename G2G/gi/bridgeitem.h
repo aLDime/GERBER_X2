@@ -24,6 +24,7 @@ public:
     bool ok() const;
     double lenght() const;
     double angle() const;
+
     void update();
 
     IntPoint getPoint(int side);

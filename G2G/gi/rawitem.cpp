@@ -51,9 +51,13 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     }
     if (option->state & QStyle::State_MouseOver) {
         //color = color.dark(110);
-        color.setAlpha(255);
-        pen.setColor(color);
+        //color.setAlpha(100);
+        //pen.setColor(color);
         pen.setWidthF(2.0 / MyGraphicsView::self->matrix().m11());
+        pen.setStyle(Qt::CustomDashLine);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setDashPattern({ 2.0, 2.0 });
+        //        pen.setDashOffset(t++ % 10);
     }
 
     if (pen.widthF() == 0)

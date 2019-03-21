@@ -10,9 +10,9 @@
 using namespace ClipperLib;
 
 enum SideOfMilling {
+    On,
     Outer,
     Inner,
-    On,
 };
 
 enum Grouping {
@@ -24,7 +24,7 @@ class ToolPathCreator {
 public:
     ToolPathCreator(const Paths& value);
 
-    GCodeFile* createPocket(const Tool &tool, bool convent, double depth, bool side, int steps);
+    GCodeFile* createPocket(const Tool& tool, bool convent, double depth, bool side, int steps);
 
     QVector<GCodeFile*> createPocket2(const QVector<Tool>& tool, bool convent, double depth, bool side, int steps);
 

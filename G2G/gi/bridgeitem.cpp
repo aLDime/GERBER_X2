@@ -5,6 +5,7 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
+#include <gcode/toolpathcreator.h>
 #include <limits>
 #include <mygraphicsview.h>
 #include <myscene.h>
@@ -25,22 +26,22 @@ QRectF BridgeItem::boundingRect() const
 
 void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
-    painter->setBrush(scene()->collidingItems(this).isEmpty() ? Qt::red : Qt::green);
+    painter->setBrush(/*scene()->collidingItems(this).isEmpty()*/ !m_ok ? Qt::red : Qt::green);
     painter->setPen(Qt::NoPen);
     painter->drawPath(m_path);
     painter->setBrush(Qt::magenta);
 
-    QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
-    l.setAngle(m_angle + 90);
-    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
-    l.setAngle(m_angle - 90);
-    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+    //    QLineF l(0, 0, m_lenght / 2 + m_size / 2, 0);
+    //    l.setAngle(m_angle + 90);
+    //    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
+    //    l.setAngle(m_angle - 90);
+    //    painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
 
-    QLineF l2(0, 0, m_size / 2, 0);
-    l2.setAngle(m_angle);
-    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
-    l2.setAngle(m_angle + 180);
-    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+    //    QLineF l2(0, 0, m_size / 2, 0);
+    //    l2.setAngle(m_angle);
+    //    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+    //    l2.setAngle(m_angle + 180);
+    //    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
 }
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
@@ -105,7 +106,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                             pt = line.p2();
                             m_angle = line.normalVector().angle();
                         }
-                    } else if (l1.length() < l) {
+                    } /*else if (l1.length() < l) {
                         l = l1.length();
                         pt = toQPointF(path[i]);
                         m_angle = l3.normalVector().angle();
@@ -121,13 +122,13 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                             m_angle = m_angle + (lastAngle - m_angle) / 2;
                         else
                             m_angle = m_angle + (m_angle - lastAngle) / 2;
-                    }
+                    }*/
                     lastAngle = l3.normalVector().angle();
                 }
             }
         }
     }
-    if (l < m_lenght) {
+    if (l < m_lenght / 2) {
         m_ok = true;
         return pt;
     }
@@ -152,13 +153,13 @@ IntPoint BridgeItem::getPoint(int side)
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
     switch (side) {
-    case 0:
+    case On:
         return toIntPoint(pos());
-    case 1:
-        l2.setAngle(m_angle);
-        return toIntPoint(l2.p2());
-    case 2:
+    case Outer:
         l2.setAngle(m_angle + 180);
+        return toIntPoint(l2.p2());
+    case Inner:
+        l2.setAngle(m_angle);
         return toIntPoint(l2.p2());
     }
     return IntPoint();

@@ -4472,7 +4472,7 @@ void ClosedPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
 }
 //------------------------------------------------------------------------------
 
-void OpenPathsFromPolyTree(PolyTree& polytree, Paths& paths)
+void OpenPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
 {
     paths.resize(0);
     paths.reserve(polytree.Total());

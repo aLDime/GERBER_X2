@@ -1,7 +1,7 @@
 #include "treeview.h"
+#include "abstractnode.h"
 #include "excellondialog.h"
 #include "forms/drillform.h"
-#include "gcodenode.h"
 #include "gerbernode.h"
 #include "layerdelegate.h"
 #include "staticholders/fileholder.h"
@@ -186,10 +186,10 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         break;
     }
 
-    if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath) {
+    if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
         a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [=] {
             if (QMessageBox::question(this, "", "Really?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-                m_model->removeRows(0, static_cast<GcodeNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+                m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
         });
     }
 
