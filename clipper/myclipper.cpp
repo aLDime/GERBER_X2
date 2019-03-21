@@ -78,8 +78,13 @@ bool PointOnPolygon(const IntPoint& pt, const Path& path)
         } else if (l2 < k) {
             return true;
         } else if (l1 < l3 && l2 < l3) {
+            //            double A = ip.Y - ipNext.Y;
+            //            double B = ip.X - ipNext.X;
+            //            double C = ip.Y * ipNext.X - ipNext.Y * ip.X;
+            //            double h = (A * pt.X + B * pt.Y + C) / sqrt(A * A + B * B);
             const double p = (l1 + l2 + l3) * 0.5;
             const double h = (2 / l3) * sqrt(p * (p - l1) * (p - l2) * (p - l3));
+            qDebug() << "h" << h;
             if (h < k) {
                 return true;
             }

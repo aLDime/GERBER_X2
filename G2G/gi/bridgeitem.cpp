@@ -36,7 +36,11 @@ void BridgeItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opti
     l.setAngle(m_angle - 90);
     painter->drawEllipse(l.p2(), m_size / 2, m_size / 2);
 
-
+    QLineF l2(0, 0, m_size / 2, 0);
+    l2.setAngle(m_angle);
+    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
+    l2.setAngle(m_angle + 180);
+    painter->drawEllipse(l2.p2(), m_size / 2, m_size / 2);
 }
 
 void BridgeItem::setNewPos(const QPointF& pos) { setPos(pos); }
@@ -78,6 +82,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
 
     QPointF pt;
     double l = std::numeric_limits<double>::max();
+    double lastAngle = 0.0;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && (gi->type() == DrillItemType || gi->type() == GerberItemType || gi->type() == RawItemType)) {
@@ -88,6 +93,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                     const QLineF l1(pos, toQPointF(path[i]));
                     const QLineF l2(pos, toQPointF(path[(i + 1) % s]));
                     const QLineF l3(toQPointF(path[(i + 1) % s]), toQPointF(path[i]));
+                    if (lastAngle == 0.0)
+                        lastAngle = l3.normalVector().angle();
                     const double p = (l1.length() + l2.length() + l3.length()) / 2;
                     if (l1.length() < l3.length() && l2.length() < l3.length()) {
                         const double h = (2 / l3.length()) * sqrt(p * (p - l1.length()) * (p - l2.length()) * (p - l3.length()));
@@ -102,11 +109,20 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                         l = l1.length();
                         pt = toQPointF(path[i]);
                         m_angle = l3.normalVector().angle();
+                        if (m_angle < lastAngle)
+                            m_angle = m_angle + (m_angle - lastAngle) / 2;
+                        else
+                            m_angle = m_angle + (lastAngle - m_angle) / 2;
                     } else if (l2.length() < l) {
                         l = l2.length();
                         pt = toQPointF(path[(i + 1) % s]);
                         m_angle = l3.normalVector().angle();
+                        if (m_angle < lastAngle)
+                            m_angle = m_angle + (lastAngle - m_angle) / 2;
+                        else
+                            m_angle = m_angle + (m_angle - lastAngle) / 2;
                     }
+                    lastAngle = l3.normalVector().angle();
                 }
             }
         }
@@ -129,6 +145,23 @@ void BridgeItem::update()
     m_path = QPainterPath();
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     QGraphicsItem::update();
+}
+
+IntPoint BridgeItem::getPoint(int side)
+{
+    QLineF l2(0, 0, m_size / 2, 0);
+    l2.translate(pos());
+    switch (side) {
+    case 0:
+        return toIntPoint(pos());
+    case 1:
+        l2.setAngle(m_angle);
+        return toIntPoint(l2.p2());
+    case 2:
+        l2.setAngle(m_angle + 180);
+        return toIntPoint(l2.p2());
+    }
+    return IntPoint();
 }
 
 double BridgeItem::lenght() const

@@ -49,20 +49,20 @@
 //use_deprecated: Enables temporary support for the obsolete functions
 //#define use_deprecated
 
-#include <vector>
+#include <cstdlib>
+#include <cstring>
+#include <functional>
 #include <list>
+#include <ostream>
+#include <queue>
 #include <set>
 #include <stdexcept>
-#include <cstring>
-#include <cstdlib>
-#include <ostream>
-#include <functional>
-#include <queue>
+#include <vector>
 
-#include <QVector>
-#include <QPolygonF>
-#include <qmath.h>
 #include <QDebug>
+#include <QPolygonF>
+#include <QVector>
+#include <qmath.h>
 namespace ClipperLib {
 
 enum ClipType { ctIntersection,
@@ -274,6 +274,7 @@ public:
     IntRect GetBounds();
     bool PreserveCollinear() { return m_PreserveCollinear; }
     void PreserveCollinear(bool value) { m_PreserveCollinear = value; }
+
 protected:
     void DisposeLocalMinimaList();
     TEdge* AddBoundsToLML(TEdge* e, bool IsClosed);
@@ -442,6 +443,7 @@ public:
     }
     virtual ~clipperException() throw() {}
     virtual const char* what() const throw() { return m_descr.c_str(); }
+
 private:
     std::string m_descr;
 };

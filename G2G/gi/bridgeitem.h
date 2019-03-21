@@ -26,6 +26,8 @@ public:
     double angle() const;
     void update();
 
+    IntPoint getPoint(int side);
+
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;

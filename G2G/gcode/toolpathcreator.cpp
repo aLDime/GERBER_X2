@@ -214,21 +214,14 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
             for (BridgeItem* bi : brItems) {
                 if (side != On) {
                     qDebug() << "angle" << bi->angle();
-                    IntPoint pt(toIntPoint(bi->pos()));
-                    IntPoint pt1(qCos(qDegreesToRadians(bi->angle())) * +toolDiameter * uScale * 0.5, qSin(qDegreesToRadians(bi->angle())) * +toolDiameter * uScale * 0.5);
-                    IntPoint pt2(qCos(qDegreesToRadians(bi->angle())) * -toolDiameter * uScale * 0.5, qSin(qDegreesToRadians(bi->angle())) * -toolDiameter * uScale * 0.5);
-                    pt1.X += pt.X;
-                    pt1.Y += pt.Y;
-                    pt2.X += pt.X;
-                    pt2.Y += pt.Y;
-                    if (PointOnPolygon(pt1, paths[i])) {
+                    if (PointOnPolygon(bi->getPoint(1), paths[i])) {
                         qDebug("PointOnPolygon 111");
-                    } else if (PointOnPolygon(pt2, paths[i])) {
+                    } else if (PointOnPolygon(bi->getPoint(2), paths[i])) {
                         qDebug("PointOnPolygon 222");
                     } else {
                         m_returnPaths.append(paths[i]);
                     }
-                } else if (PointOnPolygon(toIntPoint(bi->pos()), paths[i])) {
+                } else if (PointOnPolygon(bi->getPoint(0), paths[i])) {
                     qDebug("PointOnPolygon 333");
                 } else {
                     m_returnPaths.append(paths[i]);

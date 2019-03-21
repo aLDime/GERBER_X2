@@ -1,6 +1,7 @@
 #include "treeview.h"
 #include "excellondialog.h"
 #include "forms/drillform.h"
+#include "gcodenode.h"
 #include "gerbernode.h"
 #include "layerdelegate.h"
 #include "staticholders/fileholder.h"
@@ -158,6 +159,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     QMenu menu(this);
     m_menuIndex = indexAt(event->pos());
     QAction* a = nullptr;
+
     switch (m_menuIndex.parent().row()) {
     case NodeGerberFiles: {
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
@@ -183,6 +185,14 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     default:
         break;
     }
+
+    if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath) {
+        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [=] {
+            if (QMessageBox::question(this, "", "Really?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+                m_model->removeRows(0, static_cast<GcodeNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
+        });
+    }
+
     if (a) {
         m_menuIndex = indexAt(event->pos());
         menu.exec(mapToGlobal(event->pos()));

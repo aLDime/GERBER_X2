@@ -154,16 +154,15 @@ Qt::ItemFlags FileModel::flags(const QModelIndex& index) const
 
 bool FileModel::removeRows(int row, int count, const QModelIndex& parent)
 {
-    //return false;
     AbstractNode* item = nullptr;
     if (parent.isValid())
         item = static_cast<AbstractNode*>(parent.internalPointer());
     else
-        item = rootItem;
+        return false;
 
     beginRemoveRows(parent, row, row + count - 1);
-    for (int r = row; r < row + count; ++r)
-        item->remove(r);
+    while (count--)
+        item->remove(row);
     endRemoveRows();
     resetInternalData();
     return true;
