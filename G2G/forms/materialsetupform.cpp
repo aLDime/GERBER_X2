@@ -5,7 +5,7 @@
 #include <QSettings>
 #include <QTimer>
 #include <mainwindow.h>
-#include <myscene.h>
+#include <scene.h>
 
 MaterialSetup* MaterialSetup::self = nullptr;
 

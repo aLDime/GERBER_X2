@@ -18,16 +18,16 @@ GerberNode::GerberNode(File* file)
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
-    MyGraphicsView::self->zoomFit();
+    GraphicsView::self->zoomFit();
 }
 
 GerberNode::~GerberNode()
 {
     FileHolder::deleteFile(m_id);
     //MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
-    if (MyScene::self) {
-        MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
-        MyScene::self->update();
+    if (Scene::self) {
+        Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
+        Scene::self->update();
     }
     disconnect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.start(1);
@@ -132,5 +132,5 @@ void GerberNode::repaint()
     FileHolder::file(m_id)->setColor(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
     FileHolder::file(m_id)->itemGroup()->setBrush(FileHolder::file(m_id)->color());
     FileHolder::file<G::File>(m_id)->rawItemGroup()->setPen(QPen(FileHolder::file(m_id)->color(), 0.0));
-    MyScene::self->update();
+    Scene::self->update();
 }

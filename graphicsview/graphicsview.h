@@ -1,7 +1,7 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "mygraphicsview.h"
+#include "graphicsview.h"
 
 #include <QGraphicsItem>
 #include <QGraphicsView>
@@ -11,18 +11,18 @@
 
 class QDRuler;
 
-class MyGraphicsView : public QGraphicsView {
+class GraphicsView : public QGraphicsView {
     Q_OBJECT
 public:
-    explicit MyGraphicsView(QWidget* parent = 0);
-    ~MyGraphicsView();
+    explicit GraphicsView(QWidget* parent = 0);
+    ~GraphicsView();
     void setScene(QGraphicsScene* Scene);
     void zoom100();
     void zoomFit();
     void zoomToSelected();
     void zoomIn();
     void zoomOut();
-    static MyGraphicsView* self;
+    static GraphicsView* self;
 
 signals:
     void fileDroped(const QString&);

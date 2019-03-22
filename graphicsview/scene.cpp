@@ -1,5 +1,5 @@
-#include "myscene.h"
-#include "mygraphicsview.h"
+#include "scene.h"
+#include "graphicsview.h"
 #include <QDebug>
 #include <QElapsedTimer>
 #include <QFileDialog>
@@ -11,21 +11,21 @@
 #include <QtMath>
 #include <settingsdialog.h>
 
-MyScene* MyScene::self = nullptr;
+Scene* Scene::self = nullptr;
 
-MyScene::MyScene(QObject* parent)
+Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
     , m_drawPdf(false)
 {
     self = this;
 }
 
-MyScene::~MyScene()
+Scene::~Scene()
 {
     self = nullptr;
 }
 
-void MyScene::RenderPdf()
+void Scene::RenderPdf()
 {
     QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), "File", tr("File(*.pdf)"));
     if (curFile.isEmpty())
@@ -59,7 +59,7 @@ void MyScene::RenderPdf()
     m_drawPdf = false;
 }
 
-QRectF MyScene::itemsBoundingRect()
+QRectF Scene::itemsBoundingRect()
 {
     m_drawPdf = true;
     QRectF rect(QGraphicsScene::itemsBoundingRect());
@@ -67,12 +67,12 @@ QRectF MyScene::itemsBoundingRect()
     return rect;
 }
 
-bool MyScene::drawPdf() const
+bool Scene::drawPdf() const
 {
     return m_drawPdf;
 }
 
-void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
+void Scene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     if (m_drawPdf)
         return;
@@ -94,7 +94,7 @@ void MyScene::drawBackground(QPainter* painter, const QRectF& rect)
     //    painter->restore();
 }
 
-void MyScene::drawForeground(QPainter* painter, const QRectF& rect)
+void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 {
 
     if (m_drawPdf)

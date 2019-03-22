@@ -1,7 +1,7 @@
 #ifndef POINT_H
 #define POINT_H
 
-#include "myscene.h"
+#include "scene.h"
 
 #include <QBrush>
 #include <QGraphicsItem>

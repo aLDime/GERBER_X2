@@ -1,7 +1,7 @@
-#include "mygraphicsview.h"
+#include "graphicsview.h"
 #include "edid.h"
-#include "mygraphicsview.h"
-#include "myscene.h"
+#include "graphicsview.h"
+#include "scene.h"
 #include "qdruler.h"
 #include <QGLWidget>
 #include <QSettings>
@@ -10,9 +10,9 @@
 #include <QtWidgets>
 #include <mainwindow.h>
 
-MyGraphicsView* MyGraphicsView::self = nullptr;
+GraphicsView* GraphicsView::self = nullptr;
 
-MyGraphicsView::MyGraphicsView(QWidget* parent)
+GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
     setCacheMode(CacheBackground);
@@ -56,8 +56,8 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     //setLayout(gridLayout);
     qDebug() << children(); //layout();
 
-    connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &MyGraphicsView::UpdateRuler);
-    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &MyGraphicsView::UpdateRuler);
+    connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
+    connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
 
     scale(1.0, -1.0); //flip vertical
     zoom100();
@@ -68,23 +68,23 @@ MyGraphicsView::MyGraphicsView(QWidget* parent)
     setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
-    setScene(new MyScene(this));
+    setScene(new Scene(this));
     setStyleSheet("QGraphicsView { background: black }");
     self = this;
 }
 
-MyGraphicsView::~MyGraphicsView()
+GraphicsView::~GraphicsView()
 {
     self = nullptr;
 }
 
-void MyGraphicsView::setScene(QGraphicsScene* Scene)
+void GraphicsView::setScene(QGraphicsScene* Scene)
 {
     QGraphicsView::setScene(Scene);
     UpdateRuler();
 }
 
-void MyGraphicsView::zoomFit()
+void GraphicsView::zoomFit()
 {
     scene()->setSceneRect(scene()->itemsBoundingRect());
     fitInView(scene()->sceneRect(), Qt::KeepAspectRatio);
@@ -92,7 +92,7 @@ void MyGraphicsView::zoomFit()
     UpdateRuler();
 }
 
-void MyGraphicsView::zoomToSelected()
+void GraphicsView::zoomToSelected()
 {
     QRectF rect;
     for (const QGraphicsItem* item : scene()->selectedItems()) {
@@ -109,7 +109,7 @@ void MyGraphicsView::zoomToSelected()
     zoomOut();
 }
 
-void MyGraphicsView::zoom100()
+void GraphicsView::zoom100()
 {
     double x = 1.0, y = 1.0;
     if (0) {
@@ -131,7 +131,7 @@ enum {
 };
 #endif
 
-void MyGraphicsView::zoomIn()
+void GraphicsView::zoomIn()
 {
     if (transform().m11() > 10000.0)
         return;
@@ -148,7 +148,7 @@ void MyGraphicsView::zoomIn()
 #endif
 }
 
-void MyGraphicsView::zoomOut()
+void GraphicsView::zoomOut()
 {
     if (transform().m11() < 1.0)
         return;
@@ -165,7 +165,7 @@ void MyGraphicsView::zoomOut()
 #endif
 }
 
-void MyGraphicsView::wheelEvent(QWheelEvent* event)
+void GraphicsView::wheelEvent(QWheelEvent* event)
 {
     if (1)
         switch (event->modifiers()) {
@@ -217,7 +217,7 @@ void MyGraphicsView::wheelEvent(QWheelEvent* event)
     event->accept();
 }
 
-void MyGraphicsView::UpdateRuler()
+void GraphicsView::UpdateRuler()
 {
     layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
     updateSceneRect(QRectF()); //actualize mapFromScene
@@ -228,7 +228,7 @@ void MyGraphicsView::UpdateRuler()
     hRuler->SetRulerZoom(qAbs(transform().m11() * 0.1));
 }
 
-void MyGraphicsView::dragEnterEvent(QDragEnterEvent* event)
+void GraphicsView::dragEnterEvent(QDragEnterEvent* event)
 {
     if (event->mimeData()->hasUrls()) {
         event->acceptProposedAction();
@@ -237,25 +237,25 @@ void MyGraphicsView::dragEnterEvent(QDragEnterEvent* event)
     event->ignore();
 }
 
-void MyGraphicsView::dropEvent(QDropEvent* event)
+void GraphicsView::dropEvent(QDropEvent* event)
 {
     for (QUrl& var : event->mimeData()->urls())
         emit fileDroped(var.path().remove(0, 1));
     event->acceptProposedAction();
 }
 
-void MyGraphicsView::dragMoveEvent(QDragMoveEvent* event)
+void GraphicsView::dragMoveEvent(QDragMoveEvent* event)
 {
     event->acceptProposedAction();
 }
 
-void MyGraphicsView::resizeEvent(QResizeEvent* event)
+void GraphicsView::resizeEvent(QResizeEvent* event)
 {
     QGraphicsView::resizeEvent(event);
     UpdateRuler();
 }
 
-void MyGraphicsView::mousePressEvent(QMouseEvent* event)
+void GraphicsView::mousePressEvent(QMouseEvent* event)
 {
     if (event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
@@ -276,7 +276,7 @@ void MyGraphicsView::mousePressEvent(QMouseEvent* event)
     }
 }
 
-void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
+void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
 {
     if (event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
@@ -294,12 +294,12 @@ void MyGraphicsView::mouseReleaseEvent(QMouseEvent* event)
     }
 }
 
-void MyGraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
+void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
 {
     QGraphicsView::mouseDoubleClickEvent(event);
 }
 
-void MyGraphicsView::mouseMoveEvent(QMouseEvent* event)
+void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());

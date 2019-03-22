@@ -37,8 +37,8 @@ MainWindow::MainWindow(QWidget* parent)
     new Shtift();
     new Shtift();
 
-    MyScene::self->addItem(m_zeroPoint);
-    MyScene::self->addItem(m_homePoint);
+    Scene::self->addItem(m_zeroPoint);
+    Scene::self->addItem(m_homePoint);
 
     init();
 
@@ -51,9 +51,9 @@ MainWindow::MainWindow(QWidget* parent)
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     gerberThread.start(QThread::HighestPriority);
 
-    connect(graphicsView, &MyGraphicsView::fileDroped, this, &MainWindow::openFile);
+    connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::openFile);
     graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(graphicsView, &MyGraphicsView::customContextMenuRequested, this, &MainWindow::on_customContextMenuRequested);
+    connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::on_customContextMenuRequested);
 
     if (0) {
         QPainterPath painterPath;
@@ -68,7 +68,7 @@ MainWindow::MainWindow(QWidget* parent)
         pathItem->setPen(Qt::NoPen);
         QTransform tr = QTransform::fromScale(2, -2);
         pathItem->setTransform(tr);
-        MyScene::self->addItem(pathItem);
+        Scene::self->addItem(pathItem);
     }
 
     QLatin1String styleSheet("QGroupBox, .QFrame {"
@@ -191,7 +191,7 @@ void MainWindow::createActions()
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
-    exportPdfAct = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), MyScene::self, &MyScene::RenderPdf);
+    exportPdfAct = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
     fileToolBar->addAction(exportPdfAct);
     exportPdfAct->setShortcuts(QKeySequence::Save);
     exportPdfAct->setStatusTip(tr("Export to PDF file"));
@@ -263,7 +263,7 @@ void MainWindow::createActions()
     s->setObjectName(QStringLiteral("s"));
     s->setMovable(false);
     action = s->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), [=]() {
-        for (QGraphicsItem* item : MyScene::self->items())
+        for (QGraphicsItem* item : Scene::self->items())
             if (item->isVisible())
                 item->setSelected(true);
     });
@@ -395,7 +395,7 @@ void MainWindow::on_customContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
     QAction* a = nullptr;
-    QGraphicsItem* item = MyScene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
+    QGraphicsItem* item = Scene::self->itemAt(graphicsView->mapToScene(pos), graphicsView->transform());
 
     if (!item)
         return;

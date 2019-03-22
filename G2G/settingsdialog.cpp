@@ -3,7 +3,7 @@
 
 #include <QGLWidget>
 #include <QtWidgets>
-#include <mygraphicsview.h>
+#include <graphicsview.h>
 
 const int gridColor = 100;
 
@@ -121,13 +121,13 @@ void SettingsDialog::writeSettings()
     QSettings settings;
     settings.beginGroup("Viewer");
     if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
-        MyGraphicsView::self->setViewport(chbOpenGl->isChecked() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
-        MyGraphicsView::self->viewport()->setObjectName("viewport");
-        MyGraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
+        GraphicsView::self->setViewport(chbOpenGl->isChecked() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+        GraphicsView::self->viewport()->setObjectName("viewport");
+        GraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
         settings.setValue("OpenGl", chbOpenGl->isChecked());
     }
     if (settings.value("Antialiasing").toBool() != chbAntialiasing->isChecked()) {
-        MyGraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
+        GraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
         settings.setValue("Antialiasing", chbAntialiasing->isChecked());
     }
     settings.endGroup();

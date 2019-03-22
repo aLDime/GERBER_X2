@@ -6,7 +6,7 @@
 #include <QPainter>
 #include <QTimer>
 #include <file.h>
-#include <myscene.h>
+#include <scene.h>
 
 #include "filetree/filemodel.h"
 
@@ -178,7 +178,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
                     setColor(item, Qt::darkGray);
                     item->setPos(toQPointF(go.state.curPos()));
                     m_giaperture[apertureIt.key()].append(item);
-                    MyScene::self->addItem(item);
+                    Scene::self->addItem(item);
                 }
             }
 
@@ -222,7 +222,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
                 item->setZValue(FileHolder::size());
 
                 m_giaperture[apertureIt.key()].append(item);
-                MyScene::self->addItem(item);
+                Scene::self->addItem(item);
             }
         }
 
@@ -265,7 +265,7 @@ void DrillForm::setItems()
         item->setZValue(FileHolder::size());
 
         m_giaperture[id].append(item);
-        MyScene::self->addItem(item);
+        Scene::self->addItem(item);
     }
 
     delete ui->tableView->model();
@@ -304,7 +304,7 @@ void DrillForm::updateFiles()
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 
-    m_items = MyScene::self->selectedItems();
+    m_items = Scene::self->selectedItems();
 
     if (!m_items.isEmpty()) {
         ui->cbxFile->addItem("Selected");
@@ -444,7 +444,7 @@ void DrillForm::createHoles(int apertureId, double diameter)
             item->setZValue(itemA->zValue());
             item->setPos(itemA->pos());
             m_gid[apertureId].append(item);
-            MyScene::self->addItem(item);
+            Scene::self->addItem(item);
         }
     }
 }

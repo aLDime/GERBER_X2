@@ -5,7 +5,7 @@
 #include <QPainter>
 #include <QTextStream>
 #include <gi/itemgroup.h>
-#include <mygraphicsview.h>
+#include <graphicsview.h>
 #include <settingsdialog.h>
 
 ///////////////////////////////////////////////

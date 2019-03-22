@@ -7,8 +7,8 @@
 #include <QPainter>
 #include <gcode/toolpathcreator.h>
 #include <limits>
-#include <mygraphicsview.h>
-#include <myscene.h>
+#include <graphicsview.h>
+#include <scene.h>
 
 BridgeItem::BridgeItem(double& lenght, BridgeItem*& ptr, double& size)
     : m_ptr(ptr)
@@ -71,7 +71,7 @@ void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     if (!m_ok)
         deleteLater();
-    disconnect(MyGraphicsView::self, &MyGraphicsView::mouseMove, this, &BridgeItem::setNewPos);
+    disconnect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
 

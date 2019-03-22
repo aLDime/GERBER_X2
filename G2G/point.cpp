@@ -60,14 +60,14 @@ Point::~Point()
 
 QRectF Point::boundingRect() const
 {
-    if (MyScene::self && MyScene::self->m_drawPdf)
+    if (Scene::self && Scene::self->m_drawPdf)
         return QRectF();
     return m_rect;
 }
 
 void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (MyScene::self && MyScene::self->m_drawPdf)
+    if (Scene::self && Scene::self->m_drawPdf)
         return;
 
     QColor c(m_type == Home ? SettingsDialog::color(Colors::Home) : SettingsDialog ::color(Colors::Zero));
@@ -86,7 +86,7 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
 
 QPainterPath Point::shape() const
 {
-    if (MyScene::self && MyScene::self->m_drawPdf)
+    if (Scene::self && Scene::self->m_drawPdf)
         return QPainterPath();
 
     return m_shape;
@@ -182,7 +182,7 @@ Shtift::Shtift()
     setPos(settings.value("pos" + QString::number(m_shtifts.size())).toPointF());
 
     m_shtifts.append(this);
-    MyScene::self->addItem(this);
+    Scene::self->addItem(this);
 }
 
 Shtift::~Shtift()
@@ -198,7 +198,7 @@ Shtift::~Shtift()
 
 QRectF Shtift::boundingRect() const
 {
-    if (MyScene::self != nullptr && MyScene::self->m_drawPdf)
+    if (Scene::self != nullptr && Scene::self->m_drawPdf)
         return QRectF();
 
     return m_rect;
@@ -206,7 +206,7 @@ QRectF Shtift::boundingRect() const
 
 void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
-    if (MyScene::self && MyScene::self->m_drawPdf)
+    if (Scene::self && Scene::self->m_drawPdf)
         return;
 
     QColor c(SettingsDialog::color(Colors::Shtift));
@@ -225,7 +225,7 @@ void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
 QPainterPath Shtift::shape() const
 {
-    if (MyScene::self && MyScene::self->m_drawPdf)
+    if (Scene::self && Scene::self->m_drawPdf)
         return QPainterPath();
     return m_shape;
 }

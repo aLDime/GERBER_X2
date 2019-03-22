@@ -8,7 +8,7 @@
 #include <algorithm>
 #include <aperture.h>
 #include <gi/bridgeitem.h>
-#include <myscene.h>
+#include <scene.h>
 
 void fixBegin(Path& path)
 {
@@ -202,7 +202,7 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
 
     //////////////// find Bridges ////////////////////
     QVector<BridgeItem*> brItems;
-    for (QGraphicsItem* item : MyScene::self->items()) {
+    for (QGraphicsItem* item : Scene::self->items()) {
         if (item->type() == BridgeType) {
             brItems.append(static_cast<BridgeItem*>(item));
         }

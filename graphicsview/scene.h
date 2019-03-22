@@ -4,16 +4,16 @@
 #include <QGraphicsItem>
 #include <QGraphicsScene>
 
-class MyScene : public QGraphicsScene {
+class Scene : public QGraphicsScene {
     friend class Point;
     friend class Shtift;
 
 public:
-    explicit MyScene(QObject* parent);
-    ~MyScene();
+    explicit Scene(QObject* parent);
+    ~Scene();
     void RenderPdf();
 
-    static MyScene* self;
+    static Scene* self;
     QRectF itemsBoundingRect();
 
     bool drawPdf() const;

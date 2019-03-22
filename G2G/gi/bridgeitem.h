@@ -4,7 +4,7 @@
 #include "graphicsitem.h"
 #include <QObject>
 
-class MyGraphicsView;
+class GraphicsView;
 
 class BridgeItem : public QObject, public GraphicsItem {
     Q_OBJECT

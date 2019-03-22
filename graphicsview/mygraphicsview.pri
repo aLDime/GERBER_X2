@@ -14,13 +14,13 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/colorsettings.h \
     $$PWD/edid.h \
-    $$PWD/mygraphicsview.h \
-    $$PWD/myscene.h \
     $$PWD/qdruler.h \
+    $$PWD/graphicsview.h \
+    $$PWD/scene.h
 
 SOURCES += \
     $$PWD/colorsettings.cpp \
     $$PWD/edid.cpp \
-    $$PWD/mygraphicsview.cpp \
-    $$PWD/myscene.cpp \
     $$PWD/qdruler.cpp \
+    $$PWD/graphicsview.cpp \
+    $$PWD/scene.cpp

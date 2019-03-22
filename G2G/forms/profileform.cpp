@@ -11,8 +11,8 @@
 #include <QMessageBox>
 #include <gi/bridgeitem.h>
 #include <myclipper.h>
-#include <mygraphicsview.h>
-#include <myscene.h>
+#include <graphicsview.h>
+#include <scene.h>
 #include <tooldatabase/tooleditdialog.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
@@ -91,7 +91,7 @@ ProfileForm::~ProfileForm()
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
     settings.endGroup();
 
-    for (QGraphicsItem* item : MyScene::self->items()) {
+    for (QGraphicsItem* item : Scene::self->items()) {
         if (item->type() == BridgeType)
             delete item;
     }
@@ -135,7 +135,7 @@ void ProfileForm::on_pbClose_clicked()
 
 void ProfileForm::create()
 {
-    MyScene* scene = MyScene::self;
+    Scene* scene = Scene::self;
 
     if (!tool.isValid()) {
         QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());
@@ -210,14 +210,14 @@ void ProfileForm::on_pbAddBridge_clicked()
     static BridgeItem* item = nullptr;
     if (item) {
         if (item->ok())
-            disconnect(MyGraphicsView::self, &MyGraphicsView::mouseMove, item, &BridgeItem::setNewPos);
+            disconnect(GraphicsView::self, &GraphicsView::mouseMove, item, &BridgeItem::setNewPos);
         else
             delete item;
     }
 
     item = new BridgeItem(m_lenght, item, m_size);
-    MyGraphicsView::self->scene()->addItem(item);
-    connect(MyGraphicsView::self, &MyGraphicsView::mouseMove, item, &BridgeItem::setNewPos);
+    GraphicsView::self->scene()->addItem(item);
+    connect(GraphicsView::self, &GraphicsView::mouseMove, item, &BridgeItem::setNewPos);
 }
 
 void ProfileForm::on_dsbxBridgeLenght_valueChanged(double arg1)
@@ -234,7 +234,7 @@ void ProfileForm::on_dsbxDepth_valueChanged(double arg1)
 
 void ProfileForm::updateBridge()
 {
-    for (QGraphicsItem* item : MyScene::self->items()) {
+    for (QGraphicsItem* item : Scene::self->items()) {
         if (item->type() == BridgeType)
             static_cast<BridgeItem*>(item)->update();
     }

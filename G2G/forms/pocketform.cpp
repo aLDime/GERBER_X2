@@ -9,7 +9,7 @@
 #include <QDockWidget>
 #include <QMessageBox>
 #include <myclipper.h>
-#include <myscene.h>
+#include <scene.h>
 
 enum {
     Offset,
@@ -104,7 +104,7 @@ void PocketForm::on_pbClose_clicked()
 
 void PocketForm::create()
 {
-    MyScene* scene = MyScene::self;
+    Scene* scene = Scene::self;
 
     if (!tool.isValid()) {
         QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());

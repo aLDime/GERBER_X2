@@ -2,7 +2,7 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <mygraphicsview.h>
+#include <graphicsview.h>
 
 PathItem::PathItem(const Paths& paths)
 {
@@ -26,7 +26,7 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
 
     if (m_pen.widthF() == 0) {
         QPen pen(m_pen);
-        pen.setWidthF(1.5 / MyGraphicsView::self->matrix().m11());
+        pen.setWidthF(1.5 / GraphicsView::self->matrix().m11());
         painter->setPen(pen);
     } else
         painter->setPen(m_pen);

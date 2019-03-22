@@ -5,7 +5,7 @@
 ItemGroup::~ItemGroup()
 {
     //qDebug("~ItemGroup()");
-    if (MyScene::self)
+    if (Scene::self)
         qDeleteAll(*this);
 }
 
@@ -26,9 +26,9 @@ void ItemGroup::setVisible(const bool visible)
 
 void ItemGroup::addToTheScene()
 {
-    if (MyScene::self)
+    if (Scene::self)
         for (QGraphicsItem* item : *this)
-            MyScene::self->addItem(item);
+            Scene::self->addItem(item);
 }
 
 void ItemGroup::setBrush(const QBrush& brush)
