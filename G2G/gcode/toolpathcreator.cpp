@@ -158,7 +158,7 @@ QVector<GCodeFile*> ToolPathCreator::createPocket2(const QVector<Tool>& /*tool*/
     return gcf;
 }
 
-GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side)
+GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double depth, const SideOfMilling side)
 {
 
     const double toolDiameter = tool.getDiameter(depth);
@@ -216,20 +216,20 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
             Path& path = paths[i];
             QList<BridgeItem*> biStack;
             for (BridgeItem* bi : brItems) {
-                //                if (PointOnPolygon(bi->getPoint(side), path)) {
-                //                    biStack.append(bi);
-                //                }
-                if (!side) {
-                    if (PointOnPolygon(bi->getPoint(On), path)) {
-                        qDebug() << "side" << side;
-                        biStack.append(bi);
-                    }
-                } else {
-                    if (PointOnPolygon(bi->getPoint(Outer), path) || PointOnPolygon(bi->getPoint(Inner), path)) {
-                        qDebug() << "side" << side;
-                        biStack.append(bi);
-                    }
+                if (PointOnPolygon(bi->getPoint(side), path)) {
+                    biStack.append(bi);
                 }
+                //                if (!side) {
+                //                    if (PointOnPolygon(bi->getPoint(On), path)) {
+                //                        qDebug() << "side" << side;
+                //                        biStack.append(bi);
+                //                    }
+                //                } else {
+                //                    if (PointOnPolygon(bi->getPoint(Outer), path) || PointOnPolygon(bi->getPoint(Inner), path)) {
+                //                        qDebug() << "side" << side;
+                //                        biStack.append(bi);
+                //                    }
+                //                }
             }
             if (biStack.isEmpty()) {
                 m_returnPaths.append(path);
@@ -243,10 +243,14 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, bool convent, double
                 Clipper clipper;
                 clipper.AddPaths(tmpPaths, ptSubject, true);
                 for (BridgeItem* bi : brItems) {
-                    clipper.AddPath(G::AbstractAperture::circle((bi->lenght() + toolDiameter) * uScale, bi->getPoint(side)), ptClip, true);
+                    clipper.AddPath(CirclePath((bi->lenght() + toolDiameter) * uScale, bi->getPoint(side)), ptClip, true);
                 }
                 clipper.Execute(ctIntersection, tmpPaths, pftPositive);
-
+                //                /////////
+                //                m_returnPaths.append(path);
+                //                m_returnPaths.append(tmpPaths);
+                //                return new GCodeFile(m_returnPaths, tool, depth, Profile);
+                //                ////////////
                 PolyTree polytree;
 
                 clipper.Clear();

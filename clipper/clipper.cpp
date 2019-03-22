@@ -3879,8 +3879,8 @@ void ClipperOffset::DoOffset(double delta)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
         const double length = 0.5; // mm
-        const int destSteps = static_cast<int>(M_PI / asin((length * 0.5) / (delta * dScale)));
-        int intSteps = G::MinStepsPerCircle;//32 aka 10 degres
+        const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (delta * dScale)));
+        int intSteps = MinStepsPerCircle;//32 aka 10 degres
         while (intSteps < destSteps)
             intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
         steps = intSteps;

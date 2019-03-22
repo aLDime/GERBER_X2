@@ -5,8 +5,14 @@
 #include <QPolygonF>
 
 #ifndef M_2PI
-#define M_2PI 6.28318530717958647692528676655900576
+#define M_2PI (6.28318530717958647692528676655900576)
 #endif
+
+#ifndef M_PI
+#define M_PI (3.1415926535897932384626433832795)
+#endif
+
+enum { MinStepsPerCircle = 36 /*72*/ };
 
 using namespace ClipperLib;
 
@@ -32,5 +38,10 @@ bool PointOnPolygon(const IntPoint& pt, const Path& path);
 //{
 //    return IntPoint(int((qint64(pt1.X) + pt2.X) / 2), int((qint64(pt1.Y) + pt2.Y) / 2));
 //}
+
+Path CirclePath(double diametr, const IntPoint& center = IntPoint());
+Path RectanglePath(double width, double height, const IntPoint& center = IntPoint());
+void RotatePath(Path& poligon, double angle, const IntPoint& center = IntPoint());
+void TranslatePath(Path& path, const IntPoint& pos);
 
 #endif // MYCLIPPER_H

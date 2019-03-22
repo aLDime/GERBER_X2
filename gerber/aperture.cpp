@@ -33,7 +33,7 @@ Paths AbstractAperture::draw(const State& state)
         transform(path, state);
 
         //if (state.curPos().X != 0 || state.curPos().Y != 0)
-        translate(path, state.curPos());
+        TranslatePath(path, state.curPos());
     }
     //    Paths tmpPpaths;
     //    tmpPpaths.reserve(m_paths.size());
@@ -68,64 +68,20 @@ Path AbstractAperture::drawDrill(const State& state)
     if (qFuzzyIsNull(m_drillDiam))
         return Path();
 
-    Path drill = circle(m_drillDiam * uScale);
+    Path drill = CirclePath(m_drillDiam * uScale);
 
     if (state.imgPolarity() == Positive)
         ReversePath(drill);
 
-    translate(drill, state.curPos());
+    TranslatePath(drill, state.curPos());
     return drill;
 }
 
-Path AbstractAperture::circle(double diametr, const IntPoint& center)
-{
-    if (diametr == 0.0)
-        return Path();
 
-    const double radius = diametr / 2.0;
-    const double length = 0.5; // mm
-    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
-    int intSteps = MinStepsPerCircle;
-    while (intSteps < destSteps)
-        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
 
-    Path poligon(intSteps);
-    for (int i = 0; i < intSteps; ++i) {
-        poligon[i] = IntPoint(
-            (qCos(i * 2 * M_PI / intSteps) * radius) + center.X,
-            (qSin(i * 2 * M_PI / intSteps) * radius) + center.Y);
-    }
-    return poligon;
-}
 
-Path AbstractAperture::rectangle(double width, double height, const IntPoint& center)
-{
 
-    const double halfWidth = width * 0.5;
-    const double halfHeight = height * 0.5;
-    Path poligon{
-        IntPoint(-halfWidth + center.X, +halfHeight + center.Y),
-        IntPoint(-halfWidth + center.X, -halfHeight + center.Y),
-        IntPoint(+halfWidth + center.X, -halfHeight + center.Y),
-        IntPoint(+halfWidth + center.X, +halfHeight + center.Y),
-    };
-    if (Area(poligon) < 0.0)
-        ReversePath(poligon);
 
-    return poligon;
-}
-
-void AbstractAperture::rotate(Path& poligon, double angle, const IntPoint& center)
-{
-    bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
-        const double tmpAangle = qDegreesToRadians(angle - Angle(center, pt));
-        const double length = Length(center, pt);
-        pt = IntPoint(qCos(tmpAangle) * length, qSin(tmpAangle) * length);
-    }
-    if (fl != (Area(poligon) < 0))
-        ReversePath(poligon);
-}
 
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
@@ -148,15 +104,7 @@ void AbstractAperture::transform(Path& poligon, const State& state)
         ReversePath(poligon);
 }
 
-void AbstractAperture::translate(Path& path, const IntPoint& pos)
-{
-    if (pos.X == 0 && pos.Y == 0)
-        return;
-    for (Path::size_type i = 0, size = path.size(); i < size; ++i) {
-        path[i].X += pos.X;
-        path[i].Y += pos.Y;
-    }
-}
+
 /////////////////////////////////////////////////////
 /// \brief ApCircle::ApCircle
 /// \param diam
@@ -177,7 +125,7 @@ ApertureType ApCircle::type() const { return Circle; }
 
 void ApCircle::draw()
 {
-    m_paths.push_back(circle(m_diam * uScale));
+    m_paths.push_back(CirclePath(m_diam * uScale));
     m_size = m_diam;
 }
 /////////////////////////////////////////////////////
@@ -201,7 +149,7 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 
 void ApRectangle::draw()
 {
-    m_paths.push_back(rectangle(m_width * uScale, m_height * uScale));
+    m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
     m_size = qSqrt(m_width * m_width + m_height * m_height);
 }
 /////////////////////////////////////////////////////
@@ -230,16 +178,16 @@ void ApObround::draw()
     cInt height_ = m_height * uScale;
     cInt width_ = m_width * uScale;
     if (qFuzzyCompare(width_ + 1.0, height_ + 1.0)) {
-        m_paths.push_back(circle(width_));
+        m_paths.push_back(CirclePath(width_));
     } else {
         if (width_ > height_) {
-            clipper.AddPath(circle(height_, IntPoint(-(width_ - height_) / 2, 0)), ptClip, true);
-            clipper.AddPath(circle(height_, IntPoint((width_ - height_) / 2, 0)), ptClip, true);
-            clipper.AddPath(rectangle(width_ - height_, height_), ptClip, true);
+            clipper.AddPath(CirclePath(height_, IntPoint(-(width_ - height_) / 2, 0)), ptClip, true);
+            clipper.AddPath(CirclePath(height_, IntPoint((width_ - height_) / 2, 0)), ptClip, true);
+            clipper.AddPath(RectanglePath(width_ - height_, height_), ptClip, true);
         } else if (width_ < height_) {
-            clipper.AddPath(circle(width_, IntPoint(0, -(height_ - width_) / 2)), ptClip, true);
-            clipper.AddPath(circle(width_, IntPoint(0, (height_ - width_) / 2)), ptClip, true);
-            clipper.AddPath(rectangle(width_, height_ - width_), ptClip, true);
+            clipper.AddPath(CirclePath(width_, IntPoint(0, -(height_ - width_) / 2)), ptClip, true);
+            clipper.AddPath(CirclePath(width_, IntPoint(0, (height_ - width_) / 2)), ptClip, true);
+            clipper.AddPath(RectanglePath(width_, height_ - width_), ptClip, true);
         }
         clipper.Execute(ctUnion, m_paths, pftNonZero, pftNonZero);
     }
@@ -279,7 +227,7 @@ void ApPolygon::draw()
         poligon.push_back(IntPoint(qCos(qDegreesToRadians(step * i)) * diam / 2.0, qSin(qDegreesToRadians(step * i)) * diam / 2.0));
     }
     if (m_rotation > 0.1) {
-        rotate(poligon, m_rotation);
+        RotatePath(poligon, m_rotation);
     }
     m_paths.push_back(poligon);
     m_size = diam;
@@ -436,10 +384,10 @@ Path ApMacro::drawCenterLine(const QList<double>& mod)
     };
 
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
-    Path polygon = rectangle(mod[Width] * uScale, mod[Height] * uScale, center);
+    Path polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        rotate(polygon, mod[RotationAngle]);
+        RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
 }
@@ -455,10 +403,10 @@ Path ApMacro::drawCircle(const QList<double>& mod)
 
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
 
-    Path polygon = circle(mod[Diameter] * uScale, center);
+    Path polygon = CirclePath(mod[Diameter] * uScale, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        rotate(polygon, mod[RotationAngle]);
+        RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
 }
@@ -487,23 +435,23 @@ void ApMacro::drawMoire(const QList<double>& mod)
 
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
     for (int num = 0; num < mod[NumberOfRings]; ++num) {
-        clipper.AddPath(circle(diameter), ptClip, true);
+        clipper.AddPath(CirclePath(diameter), ptClip, true);
         diameter -= thickness * 2;
-        Path polygon = circle(diameter);
+        Path polygon = CirclePath(diameter);
         ReversePath(polygon);
         clipper.AddPath(polygon, ptClip, true);
         diameter -= gap * 2;
     }
-    clipper.AddPath(rectangle(cl, ct), ptClip, true);
-    clipper.AddPath(rectangle(ct, cl), ptClip, true);
+    clipper.AddPath(RectanglePath(cl, ct), ptClip, true);
+    clipper.AddPath(RectanglePath(ct, cl), ptClip, true);
     clipper.Execute(ctUnion, m_paths, pftPositive, pftPositive);
 
     for (Path& path : m_paths)
-        translate(path, center);
+        TranslatePath(path, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
         for (Path& path : m_paths)
-            rotate(path, mod[RotationAngle]);
+            RotatePath(path, mod[RotationAngle]);
     }
 }
 
@@ -521,7 +469,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod)
         polygon.push_back(IntPoint(mod[X + j * 2] * uScale, mod[Y + j * 2] * uScale));
 
     if (mod.size() > (num * 2 + 3) && mod.last() > 0)
-        rotate(polygon, mod.last());
+        RotatePath(polygon, mod.last());
 
     return polygon;
 }
@@ -549,9 +497,9 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod)
             qSin(qDegreesToRadians(j * 360.0 / num)) * diameter));
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        rotate(polygon, mod[RotationAngle]);
+        RotatePath(polygon, mod[RotationAngle]);
 
-    translate(polygon, center);
+    TranslatePath(polygon, center);
 
     return polygon;
 }
@@ -576,18 +524,18 @@ void ApMacro::drawThermal(const QList<double>& mod)
 
     IntPoint center(mod[CenterX] * uScale, mod[CenterY] * uScale);
     Clipper clipper;
-    clipper.AddPath(circle(outer), ptSubject, true);
-    clipper.AddPath(circle(inner), ptClip, true);
-    clipper.AddPath(rectangle(gap, outer), ptClip, true);
-    clipper.AddPath(rectangle(outer, gap), ptClip, true);
+    clipper.AddPath(CirclePath(outer), ptSubject, true);
+    clipper.AddPath(CirclePath(inner), ptClip, true);
+    clipper.AddPath(RectanglePath(gap, outer), ptClip, true);
+    clipper.AddPath(RectanglePath(outer, gap), ptClip, true);
     clipper.Execute(ctDifference, m_paths, pftNonZero, pftNonZero);
 
     for (Path& path : m_paths)
-        translate(path, center);
+        TranslatePath(path, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
         for (Path& path : m_paths)
-            rotate(path, mod[RotationAngle]);
+            RotatePath(path, mod[RotationAngle]);
     }
 }
 
@@ -606,13 +554,13 @@ Path ApMacro::drawVectorLine(const QList<double>& mod)
     IntPoint end(mod[EndX] * uScale, mod[EndY] * uScale);
     IntPoint center(0.5 * start.X + 0.5 * end.X, 0.5 * start.Y + 0.5 * end.Y);
 
-    Path polygon = rectangle(Length(start, end), mod[Width] * uScale);
+    Path polygon = RectanglePath(Length(start, end), mod[Width] * uScale);
     double angle = Angle(start, end);
-    rotate(polygon, angle);
-    translate(polygon, center);
+    RotatePath(polygon, angle);
+    TranslatePath(polygon, center);
 
     if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        rotate(polygon, mod[RotationAngle]);
+        RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
 }

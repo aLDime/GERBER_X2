@@ -155,7 +155,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
                 m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
         }
         m_file->rawItemGroup()->setVisible(false);
-        //m_file->setItemType(File::Raw);/////////////////////////////////////////////////
+        //m_file->setItemType(File::Raw);/////////////////////////////////////////////////xr
         emit fileReady(m_file);
     }
     emit fileProgress(m_file->shortFileName(), 1, 1);
@@ -279,7 +279,7 @@ QList<QString> Parser::format(QString data)
                 gerberLinesAppend(state, line);
                 continue;
             case Data:
-                qWarning() << "Хрен его знает:" << line;
+                qWarning() << "РҐСЂРµРЅ РµРіРѕ Р·РЅР°РµС‚:" << line;
                 continue;
             }
         }
@@ -543,7 +543,7 @@ Paths Parser::createLine()
         ReversePaths(solution);
         if (m_state.imgPolarity() == Negative)
             ReversePaths(solution);
-    } else { //if (file->m_apertures[state.aperture]->type() == Circle) {        //потровится ести нет апертуры!!!!!!!
+    } else { //if (file->m_apertures[state.aperture]->type() == Circle) {        //РїРѕС‚СЂРѕРІРёС‚СЃСЏ РµСЃС‚Рё РЅРµС‚ Р°РїРµСЂС‚СѓСЂС‹!!!!!!!
         double size = m_file->m_apertures[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             size = 1;
@@ -721,7 +721,7 @@ void Parser::closeStepRepeat()
         for (int x = 0; x < m_stepRepeat.x; ++x) {
             for (GraphicObject go : m_stepRepeat.storage) {
                 for (Path& path : go.paths) {
-                    AbstractAperture::translate(path, IntPoint(m_stepRepeat.i * x, m_stepRepeat.j * y));
+                    TranslatePath(path, IntPoint(m_stepRepeat.i * x, m_stepRepeat.j * y));
                 }
                 m_file->append(go);
             }
@@ -873,8 +873,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         case Multi: //G75
             radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             start = atan2(-j, -i); // Start angle
-            // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
-            // Это должно привести к образованию дуги в 360 градусов.
+            // Р§РёСЃР»РµРЅРЅС‹Рµ РѕС€РёР±РєРё РјРѕРіСѓС‚ РїРѕРјРµС€Р°С‚СЊ, start == stop, РїРѕСЌС‚РѕРјСѓ РјС‹ РїСЂРѕРІРµСЂСЏРµРј Р·Р°Р±Р»Р°РіРѕРІСЂРµРјРµРЅРЅРѕ.
+            // Р­С‚Рѕ РґРѕР»Р¶РЅРѕ РїСЂРёРІРµСЃС‚Рё Рє РѕР±СЂР°Р·РѕРІР°РЅРёСЋ РґСѓРіРё РІ 360 РіСЂР°РґСѓСЃРѕРІ.
             if (m_state.curPos() == IntPoint(x, y)) {
                 stop = start;
             } else {
@@ -882,8 +882,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             }
             arcPolygon = arc(centerPos[0], radius1, start, stop);
             //arcPolygon = Arc2(currentPos, IntPoint(x, y), center);
-            // Последняя точка в вычисленной дуге может иметь числовые ошибки.
-            // Точной конечной точкой является указанная (x, y). Заменить.
+            // РџРѕСЃР»РµРґРЅСЏСЏ С‚РѕС‡РєР° РІ РІС‹С‡РёСЃР»РµРЅРЅРѕР№ РґСѓРіРµ РјРѕР¶РµС‚ РёРјРµС‚СЊ С‡РёСЃР»РѕРІС‹Рµ РѕС€РёР±РєРё.
+            // РўРѕС‡РЅРѕР№ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРѕР№ СЏРІР»СЏРµС‚СЃСЏ СѓРєР°Р·Р°РЅРЅР°СЏ (x, y). Р—Р°РјРµРЅРёС‚СЊ.
             m_state.curPos() = IntPoint(x, y);
             if (arcPolygon.size())
                 arcPolygon[arcPolygon.size() - 1] = m_state.curPos();
@@ -894,15 +894,15 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             for (int c = 0; c < 4; ++c) {
                 radius1 = sqrt(i * i + j * j);
                 radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
-                // Убеждаемся, что радиус начала совпадает с радиусом конца.
+                // РЈР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ СЂР°РґРёСѓСЃ РЅР°С‡Р°Р»Р° СЃРѕРІРїР°РґР°РµС‚ СЃ СЂР°РґРёСѓСЃРѕРј РєРѕРЅС†Р°.
                 if (qAbs(radius2 - radius1) > (1e-4 * uScale)) {
-                    // Недействительный центр.
+                    // РќРµРґРµР№СЃС‚РІРёС‚РµР»СЊРЅС‹Р№ С†РµРЅС‚СЂ.
                     continue;
                 }
                 // Correct i and j and return true; as with multi-quadrant.
                 i = centerPos[c].X - m_state.curPos().X;
                 j = centerPos[c].Y - m_state.curPos().Y;
-                // Углы
+                // РЈРіР»С‹
                 start = atan2(-j, -i);
                 stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
                 angle = arcAngle(start, stop);
@@ -982,19 +982,19 @@ bool Parser::parseFormat(const QString& gLine)
 
         int intVal = m_state.format()->xInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->xDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yInteger;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         intVal = m_state.format()->yDecimal;
         if (intVal < 0 || intVal > 8) {
-            throw "Modifiers '" + gLine + "' XY is out of bounds 0≤N≤7";
+            throw "Modifiers '" + gLine + "' XY is out of bounds 0в‰¤Nв‰¤7";
         }
         return true;
     }
@@ -1100,13 +1100,13 @@ bool Parser::parseLineInterpolation(const QString& gLine)
         if (!match.cap(2).isEmpty())
             m_state.setDCode(static_cast<DCode>(match.cap(2).toInt()));
         switch (/*match.cap(2).isEmpty() ? */ m_state.dCode() /*: match.cap(2).toInt()*/) {
-        case D01: //����������� � ��������� ����� x-y � �������� �������� ��������
+        case D01: //перемещение в указанную точку x-y с открытым затвором засветки
             m_path.push_back(m_state.curPos());
             break;
-        case D02: //����������� � ��������� ����� x-y � �������� �������� ��������
+        case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();
             break;
-        case D03: //����������� � ��������� ����� x-y � �������� �������� �������� � �������
+        case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             addPath();
             addFlash();
             break;

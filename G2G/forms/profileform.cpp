@@ -10,8 +10,8 @@
 #include "tooldatabase/tooldatabase.h"
 #include <QMessageBox>
 #include <gi/bridgeitem.h>
-#include <myclipper.h>
 #include <graphicsview.h>
+#include <myclipper.h>
 #include <scene.h>
 #include <tooldatabase/tooleditdialog.h>
 
@@ -151,19 +151,25 @@ void ProfileForm::create()
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            //            if (boardSide == NullSide) {
-            if (!file)
+            if (!file) {
                 file = gi->file();
+                boardSide = gi->file()->side();
+            }
             if (file != gi->file()) {
                 QMessageBox::warning(this, "", "Working items from different files!");
                 return;
             }
-            boardSide = gi->file()->side();
-            //            }
-            //            if (boardSide != gi->file()->side()) {
-            //                QMessageBox::warning(this, "", "Working items from different sides!");
-            //                return;
-            //            }
+        }
+        if (item->type() == RawItemType) {
+            RawItem* gi = static_cast<RawItem*>(item);
+            if (!file) {
+                file = gi->file();
+                boardSide = gi->file()->side();
+            }
+            if (file != gi->file()) {
+                QMessageBox::warning(this, "", "Working items from different files!");
+                return;
+            }
         }
         if (item->type() == GerberItemType || item->type() == DrillItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());

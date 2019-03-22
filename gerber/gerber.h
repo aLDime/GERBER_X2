@@ -110,7 +110,7 @@ enum AttributeType {
     DeleteAttribute // TD
 };
 
-enum { MinStepsPerCircle = 36 /*72*/ };
+
 
 enum PrimitiveType {
     Aperture,

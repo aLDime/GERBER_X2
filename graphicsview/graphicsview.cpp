@@ -1,8 +1,7 @@
 #include "graphicsview.h"
 #include "edid.h"
-#include "graphicsview.h"
-#include "scene.h"
 #include "qdruler.h"
+#include "scene.h"
 #include <QGLWidget>
 #include <QSettings>
 #include <QTimer>

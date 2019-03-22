@@ -1,5 +1,6 @@
 #include "myclipper.h"
 #include <QElapsedTimer>
+#include <qmath.h>
 
 Path toPath(const QPolygonF& p)
 {
@@ -65,31 +66,90 @@ bool PointOnPolygon(const IntPoint& pt, const Path& path)
     int cnt = path.size();
     if (cnt < 3)
         return 0;
-    IntPoint ip = path[0];
-
+    IntPoint pt1 = path[0];
     for (int i = 1; i <= cnt; ++i) {
-        IntPoint ipNext(i == cnt ? path[0] : path[i]);
-        const double k = 100;
-        const double l1 = Length(pt, ip);
-        const double l2 = Length(pt, ipNext);
-        const double l3 = Length(ip, ipNext);
+        IntPoint pt2(i == cnt ? path[0] : path[i]);
+        const int k = 100;
+        const double l1 = Length(pt, pt1);
+        const double l2 = Length(pt, pt2);
+        const double l3 = Length(pt1, pt2);
         if (l1 < k) {
             return true;
         } else if (l2 < k) {
             return true;
         } else if (l1 < l3 && l2 < l3) {
-            //            double A = ip.Y - ipNext.Y;
-            //            double B = ip.X - ipNext.X;
-            //            double C = ip.Y * ipNext.X - ipNext.Y * ip.X;
-            //            double h = (A * pt.X + B * pt.Y + C) / sqrt(A * A + B * B);
+            //            const double A = pt1.Y - pt2.Y;
+            //            const double B = pt1.X - pt2.X;
+            //            const double C = pt1.Y * pt2.X - pt2.Y * pt1.X;
+            //            const int h = abs((A * pt.X + B * pt.Y + C) / sqrt(A * A + B * B));
             const double p = (l1 + l2 + l3) * 0.5;
-            const double h = (2 / l3) * sqrt(p * (p - l1) * (p - l2) * (p - l3));
-            qDebug() << "h" << h;
+            const int h = (2 / l3) * sqrt(p * (p - l1) * (p - l2) * (p - l3));
+            qDebug() << "Length" << h;
             if (h < k) {
                 return true;
             }
         }
-        ip = ipNext;
+        pt1 = pt2;
     }
     return false;
+}
+
+Path CirclePath(double diametr, const IntPoint& center)
+{
+    if (diametr == 0.0)
+        return Path();
+
+    const double radius = diametr / 2.0;
+    const double length = 0.5; // mm
+    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
+    int intSteps = MinStepsPerCircle;
+    while (intSteps < destSteps)
+        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
+
+    Path poligon(intSteps);
+    for (int i = 0; i < intSteps; ++i) {
+        poligon[i] = IntPoint(
+            (cos(i * 2 * M_PI / intSteps) * radius) + center.X,
+            (sin(i * 2 * M_PI / intSteps) * radius) + center.Y);
+    }
+    return poligon;
+}
+
+Path RectanglePath(double width, double height, const IntPoint& center)
+{
+
+    const double halfWidth = width * 0.5;
+    const double halfHeight = height * 0.5;
+    Path poligon{
+        IntPoint(-halfWidth + center.X, +halfHeight + center.Y),
+        IntPoint(-halfWidth + center.X, -halfHeight + center.Y),
+        IntPoint(+halfWidth + center.X, -halfHeight + center.Y),
+        IntPoint(+halfWidth + center.X, +halfHeight + center.Y),
+    };
+    if (Area(poligon) < 0.0)
+        ReversePath(poligon);
+
+    return poligon;
+}
+
+void RotatePath(Path& poligon, double angle, const IntPoint& center)
+{
+    bool fl = Area(poligon) < 0;
+    for (IntPoint& pt : poligon) {
+        const double tmpAangle = qDegreesToRadians(angle - Angle(center, pt));
+        const double length = Length(center, pt);
+        pt = IntPoint(cos(tmpAangle) * length, sin(tmpAangle) * length);
+    }
+    if (fl != (Area(poligon) < 0))
+        ReversePath(poligon);
+}
+
+void TranslatePath(Path& path, const IntPoint& pos)
+{
+    if (pos.X == 0 && pos.Y == 0)
+        return;
+    for (Path::size_type i = 0, size = path.size(); i < size; ++i) {
+        path[i].X += pos.X;
+        path[i].Y += pos.Y;
+    }
 }

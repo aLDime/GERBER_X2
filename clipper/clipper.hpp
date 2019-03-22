@@ -60,9 +60,8 @@
 #include <vector>
 
 #include <QDebug>
-#include <QPolygonF>
 #include <QVector>
-#include <qmath.h>
+
 namespace ClipperLib {
 
 enum ClipType { ctIntersection,

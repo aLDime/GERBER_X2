@@ -12,14 +12,12 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/colorsettings.h \
     $$PWD/edid.h \
     $$PWD/qdruler.h \
     $$PWD/graphicsview.h \
     $$PWD/scene.h
 
 SOURCES += \
-    $$PWD/colorsettings.cpp \
     $$PWD/edid.cpp \
     $$PWD/qdruler.cpp \
     $$PWD/graphicsview.cpp \

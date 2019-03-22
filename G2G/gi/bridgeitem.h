@@ -27,7 +27,7 @@ public:
 
     void update();
 
-    IntPoint getPoint(int side);
+    IntPoint getPoint(const int side) const;
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;

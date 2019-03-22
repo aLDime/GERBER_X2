@@ -6,8 +6,8 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <gcode/toolpathcreator.h>
-#include <limits>
 #include <graphicsview.h>
+#include <limits>
 #include <scene.h>
 
 BridgeItem::BridgeItem(double& lenght, BridgeItem*& ptr, double& size)
@@ -84,6 +84,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     QPointF pt;
     double l = std::numeric_limits<double>::max();
     double lastAngle = 0.0;
+    const Path* pPath = nullptr;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && (gi->type() == DrillItemType || gi->type() == GerberItemType || gi->type() == RawItemType)) {
@@ -104,6 +105,7 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                             QLineF line(toQPointF(path[i]), toQPointF(path[(i + 1) % s]));
                             line.setLength(sqrt(l1.length() * l1.length() - h * h));
                             pt = line.p2();
+                            pPath = &path;
                             m_angle = line.normalVector().angle();
                         }
                     } /*else if (l1.length() < l) {
@@ -129,6 +131,8 @@ QPointF BridgeItem::calculate(const QPointF& pos)
         }
     }
     if (l < m_lenght / 2) {
+        if (pPath && Orientation(*pPath))
+            m_angle += 180.0;
         m_ok = true;
         return pt;
     }
@@ -148,18 +152,21 @@ void BridgeItem::update()
     QGraphicsItem::update();
 }
 
-IntPoint BridgeItem::getPoint(int side)
+IntPoint BridgeItem::getPoint(const int side) const
 {
     QLineF l2(0, 0, m_size / 2, 0);
     l2.translate(pos());
     switch (side) {
     case On:
+        qDebug() << side << m_size << pos();
         return toIntPoint(pos());
     case Outer:
         l2.setAngle(m_angle + 180);
+        qDebug() << side << m_size << l2.p2();
         return toIntPoint(l2.p2());
     case Inner:
         l2.setAngle(m_angle);
+        qDebug() << side << m_size << l2.p2();
         return toIntPoint(l2.p2());
     }
     return IntPoint();

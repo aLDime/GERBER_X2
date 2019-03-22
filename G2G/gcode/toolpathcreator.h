@@ -28,7 +28,7 @@ public:
 
     QVector<GCodeFile*> createPocket2(const QVector<Tool>& tool, bool convent, double depth, bool side, int steps);
 
-    GCodeFile* createProfile(const Tool& tool, bool convent, double depth, SideOfMilling side);
+    GCodeFile* createProfile(const Tool& tool, bool convent, double depth, const SideOfMilling side);
 
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
 

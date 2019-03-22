@@ -38,10 +38,7 @@ public:
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
 
-    static Path circle(double diametr, const IntPoint& center = IntPoint());
-    static Path rectangle(double m_width, double m_height, const IntPoint& center = IntPoint());
-    static void rotate(Path& poligon, double angle, const IntPoint& center = IntPoint());
-    static void translate(Path& path, const IntPoint& pos);
+
 
 protected:
     bool m_isFlashed = false;

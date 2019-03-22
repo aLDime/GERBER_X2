@@ -74,7 +74,7 @@ const DrillFile* DrillItem::file() const
 Paths DrillItem::paths() const
 {
     if (m_paths.isEmpty()) {
-        Path poligon(G::AbstractAperture::circle(m_diameter * uScale, toIntPoint(pos())));
+        Path poligon(CirclePath(m_diameter * uScale, toIntPoint(pos())));
         ReversePath(poligon);
         m_paths.append(poligon);
     }
