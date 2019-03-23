@@ -58,6 +58,13 @@ PocketForm::PocketForm(QWidget* parent)
     connect(ui->rbOffset, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
 
+    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect->setIcon(QIcon::fromTheme("tools-wizard"));
+    ui->pbEdit_2->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect_2->setIcon(QIcon::fromTheme("tools-wizard"));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+
     rb_clicked();
 
     ui->sbxSteps->setSuffix(" - Infinity");

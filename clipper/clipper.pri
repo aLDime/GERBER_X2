@@ -14,7 +14,9 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/clipper.hpp \
     $$PWD/myclipper.h \
+    $$PWD/line.h
 
 SOURCES += \
     $$PWD/clipper.cpp \
     $$PWD/myclipper.cpp \
+    $$PWD/line.cpp

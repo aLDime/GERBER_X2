@@ -22,7 +22,7 @@ public:
     void setItem(ToolItem* item);
     void setTool(const Tool& tool);
     Tool tool() const;
-    void setDialog() const;
+    void setDialog() /*const*/;
 
 signals:
     void itemChanged(ToolItem* item);
@@ -50,6 +50,7 @@ private:
 
     void updateName();
     void setRed();
+    void setRedReset();
     void flicker(QDoubleSpinBox* dsbx);
     void setVisibleWidgets(bool visible);
 };

@@ -1,5 +1,6 @@
 #include "myclipper.h"
 #include <QElapsedTimer>
+#include <QLineF>
 #include <qmath.h>
 
 Path toPath(const QPolygonF& p)
@@ -60,38 +61,18 @@ double Length(const IntPoint& pt1, const IntPoint& pt2)
     return sqrt(x * x + y * y);
 }
 
-bool PointOnPolygon(const IntPoint& pt, const Path& path)
+static inline bool qt_is_finite(double d)
 {
-    //returns 0 if false, +1 if true, -1 if pt ON polygon boundary
-    int cnt = path.size();
-    if (cnt < 3)
-        return 0;
-    IntPoint pt1 = path[0];
-    for (int i = 1; i <= cnt; ++i) {
-        IntPoint pt2(i == cnt ? path[0] : path[i]);
-        const int k = 100;
-        const double l1 = Length(pt, pt1);
-        const double l2 = Length(pt, pt2);
-        const double l3 = Length(pt1, pt2);
-        if (l1 < k) {
-            return true;
-        } else if (l2 < k) {
-            return true;
-        } else if (l1 < l3 && l2 < l3) {
-            //            const double A = pt1.Y - pt2.Y;
-            //            const double B = pt1.X - pt2.X;
-            //            const double C = pt1.Y * pt2.X - pt2.Y * pt1.X;
-            //            const int h = abs((A * pt.X + B * pt.Y + C) / sqrt(A * A + B * B));
-            const double p = (l1 + l2 + l3) * 0.5;
-            const int h = (2 / l3) * sqrt(p * (p - l1) * (p - l2) * (p - l3));
-            qDebug() << "Length" << h;
-            if (h < k) {
-                return true;
-            }
-        }
-        pt1 = pt2;
+    uchar* ch = (uchar*)&d;
+#ifdef QT_ARMFPA
+    return (ch[3] & 0x7f) != 0x7f || (ch[2] & 0xf0) != 0xf0;
+#else
+    if (QSysInfo::ByteOrder == QSysInfo::BigEndian) {
+        return (ch[0] & 0x7f) != 0x7f || (ch[1] & 0xf0) != 0xf0;
+    } else {
+        return (ch[7] & 0x7f) != 0x7f || (ch[6] & 0xf0) != 0xf0;
     }
-    return false;
+#endif
 }
 
 Path CirclePath(double diametr, const IntPoint& center)

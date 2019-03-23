@@ -34,7 +34,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     //ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
 
     setVisibleWidgets(false);
-    ui->pbApply->setStyleSheet("");
+    setRedReset();
 }
 
 ToolEditForm::~ToolEditForm()
@@ -61,13 +61,21 @@ void ToolEditForm::setItem(ToolItem* item)
         ui->teNote->setText(m_item->note());
         setVisibleWidgets(false);
     }
-    ui->pbApply->setStyleSheet("");
+    setRedReset();
+    parentWidget()->setWindowModified(false);
 }
 
 void ToolEditForm::setRed()
 {
     if (m_item)
-        ui->pbApply->setStyleSheet("QPushButton { background-color: #80FF0000;}");
+        ui->pbApply->setEnabled(true);
+    parentWidget()->setWindowModified(true);
+}
+
+void ToolEditForm::setRedReset()
+{
+    ui->pbApply->setEnabled(false);
+    parentWidget()->setWindowModified(false);
 }
 
 void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
@@ -88,7 +96,8 @@ void ToolEditForm::setVisibleWidgets(bool visible)
     ui->groupBox_2->setVisible(visible);
     ui->groupBox_3->setVisible(visible);
     ui->groupBox_4->setVisible(visible);
-    ui->lblPixmap->setVisible(visible);
+    if (ui->lblPixmap)
+        ui->lblPixmap->setVisible(visible);
     ui->lblToolType->setVisible(visible);
     ui->lblUnits->setVisible(visible);
 }
@@ -112,12 +121,14 @@ void ToolEditForm::on_cbxFeedSpeeds_currentIndexChanged(int index)
     default:
         break;
     }
-    QString str(ui->pbApply->styleSheet());
+    bool fl1 = parentWidget()->isWindowModified();
+    bool fl2 = ui->pbApply->isEnabled();
     ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / feed) * m_feed);
     ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / feed) * m_feed);
     ui->dsbxFeedRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
     ui->dsbxPlungeRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
-    ui->pbApply->setStyleSheet(str);
+    parentWidget()->setWindowModified(fl1);
+    ui->pbApply->setEnabled(fl2);
 }
 
 void ToolEditForm::on_cbxToolType_currentIndexChanged(int index)
@@ -131,16 +142,19 @@ void ToolEditForm::on_cbxToolType_currentIndexChanged(int index)
         ui->dsbxFeedRate->setEnabled(false);
         ui->dsbxStepover->setEnabled(false);
         ui->dsbxStepoverPercent->setEnabled(false);
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
+        if (ui->lblPixmap)
+            ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
         ui->label_3->setText("Pass");
         break;
     case Tool::EndMill:
         ui->dsbxAngle->setEnabled(false);
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
+        if (ui->lblPixmap)
+            ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
         ui->label_3->setText("Depth");
         break;
     case Tool::Engraving:
-        ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
+        if (ui->lblPixmap)
+            ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
         ui->label_3->setText("Depth");
         break;
     }
@@ -247,7 +261,8 @@ void ToolEditForm::on_pbApply_clicked()
         m_item->setName(m_tool.name);
         m_item->setNote(m_tool.note);
         emit itemChanged(m_item);
-        ui->pbApply->setStyleSheet("");
+        setRedReset();
+
     } else {
         switch (m_tool.type) {
         case Tool::Drill:
@@ -282,14 +297,14 @@ void ToolEditForm::on_pbApply_clicked()
         case Tool::Group:
         default:
             if (!m_item) {
-                ui->pbApply->setStyleSheet("");
+                setRedReset();
                 break;
             }
             m_item->tool() = m_tool;
             m_item->setName(m_tool.name);
             m_item->setNote(m_tool.note);
             emit itemChanged(m_item);
-            ui->pbApply->setStyleSheet("");
+            setRedReset();
             break;
         }
     }
@@ -300,11 +315,12 @@ Tool ToolEditForm::tool() const
     return m_tool;
 }
 
-void ToolEditForm::setDialog() const
+void ToolEditForm::setDialog()
 {
-    //m_dialog = false;
+    m_dialog = false;
     ui->cbxToolType->setEnabled(m_dialog);
-    ui->lblPixmap->setVisible(m_dialog);
+    delete ui->lblPixmap;
+    ui->lblPixmap = nullptr;
 }
 
 void ToolEditForm::setTool(const Tool& tool)

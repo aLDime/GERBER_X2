@@ -53,7 +53,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     //    gridLayout->addWidget(verticalScrollBar(), 0, 2, 0, 2);
     // finally set layout
     //setLayout(gridLayout);
-    qDebug() << children(); //layout();
+
 
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);

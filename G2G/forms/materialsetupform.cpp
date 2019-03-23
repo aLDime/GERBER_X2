@@ -24,28 +24,26 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
     self = this;
     ui->setupUi(this);
 
-    auto dsbxValueChanged = static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged);
-
-    connect(ui->dsbxClearence, dsbxValueChanged, [=](double value) {
+    connect(ui->dsbxClearence, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
 
-    connect(ui->dsbxPlunge, dsbxValueChanged, [=](double value) {
+    connect(ui->dsbxPlunge, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value > ui->dsbxClearence->value())
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, dsbxValueChanged, MainWindow::self->home(), &Point::setPosX);
-    connect(ui->dsbxHomeY, dsbxValueChanged, MainWindow::self->home(), &Point::setPosY);
-    connect(ui->dsbxZeroX, dsbxValueChanged, MainWindow::self->zero(), &Point::setPosX);
-    connect(ui->dsbxZeroY, dsbxValueChanged, MainWindow::self->zero(), &Point::setPosY);
+    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->home(), &Point::setPosX);
+    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->home(), &Point::setPosY);
+    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->zero(), &Point::setPosX);
+    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->zero(), &Point::setPosY);
 
-    connect(ui->dsbxSafeZ, dsbxValueChanged, [=](double value) {
+    connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
         ui->dsbxSafeZ->setValue(value);
         ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxClearence->value())

@@ -17,14 +17,14 @@ Paths NormalizeRaw::paths() /*const*/
             const IntPoint& pt2 = m_paths[i].first();
             const IntPoint& pt3 = m_paths[i].last();
             if (Length(pt1, pt2) < ks) {
-                qDebug("first");
+                //qDebug("first");
                 while (m_paths[i].size())
                     path.append(m_paths[i].takeFirst());
                 m_paths.remove(i);
                 i = 0;
                 //continue;
             } else if (Length(pt1, pt3) < ks) {
-                qDebug("last");
+                //qDebug("last");
                 while (m_paths[i].size())
                     path.append(m_paths[i].takeLast());
                 m_paths.remove(i);
@@ -32,13 +32,13 @@ Paths NormalizeRaw::paths() /*const*/
                 //continue;
             } else
                 ++i;
-            qDebug() << "i" << i << "size" << m_paths.size();
+            //qDebug() << "i" << i << "size" << m_paths.size();
         }
 
         if (!Orientation(path))
             ReversePath(path);
         paths.append(path);
-        qDebug() << "paths.size" << paths.size();
+        //qDebug() << "paths.size" << paths.size();
     } while (m_paths.size());
 
     Clipper clipper;
@@ -57,6 +57,6 @@ Paths NormalizeRaw::paths() /*const*/
     //clipper.Execute(ctUnion, paths, pftNonZero);
     clipper.Execute(ctXor, paths, pftEvenOdd);
     paths.takeFirst();
-    qDebug() << paths.size();
+    //qDebug() << paths.size();
     return paths;
 }

@@ -9,6 +9,7 @@
 
 #include "tooldatabase/tooldatabase.h"
 #include <QMessageBox>
+#include <QPicture>
 #include <gi/bridgeitem.h>
 #include <graphicsview.h>
 #include <myclipper.h>
@@ -19,27 +20,19 @@ ProfileForm::ProfileForm(QWidget* parent)
     : QWidget(parent)
     , ToolPathUtil("ProfileForm")
     , ui(new Ui::ProfileForm)
+
 {
     ui->setupUi(this);
     ui->lblToolName->setText(tool.name);
     ui->dsbxDepth->setValue(MaterialSetup::thickness);
 
     auto rb_clicked = [&] {
-        QStringList list = {
-            ":/toolpath/outside_climb.png",
-            ":/toolpath/inside_climb.png",
-            ":/toolpath/on_climb.png",
-            ":/toolpath/outside_conventional.png",
-            ":/toolpath/inside_conventional.png",
-            ":/toolpath/on_conventional.png"
-        };
-
+        if (ui->rbOn->isChecked())
+            side = On;
         if (ui->rbOutside->isChecked())
             side = Outer;
-        else if (ui->rbInside->isChecked())
+        if (ui->rbInside->isChecked())
             side = Inner;
-        else if (ui->rbOn->isChecked())
-            side = On;
 
         updateName();
 
@@ -48,7 +41,7 @@ ProfileForm::ProfileForm(QWidget* parent)
         else if (ui->rbConventional->isChecked())
             direction = Conventional;
 
-        ui->lblPixmap->setPixmap(QPixmap(list[side + direction * 3]));
+        updatePixmap();
     };
 
     connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
@@ -72,7 +65,13 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
     settings.endGroup();
 
-    m_size = tool.getDiameter(ui->dsbxDepth->value());
+    // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
+
+    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+    ui->pbSelect->setIcon(QIcon::fromTheme("tools-wizard"));
+    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
+    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
     rb_clicked();
 }
@@ -105,9 +104,6 @@ void ProfileForm::on_pbSelect_clicked()
         tool = tdb.tool();
         ui->lblToolName->setText(tool.name);
         updateName();
-
-        m_size = tool.getDiameter(ui->dsbxDepth->value());
-        updateBridge();
     }
 }
 
@@ -209,39 +205,63 @@ void ProfileForm::updateName()
 {
     static const QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
     ui->leName->setText(name[side] + " (" + tool.name + ")");
+    updateBridge();
+}
+
+void ProfileForm::resizeEvent(QResizeEvent* event)
+{
+    updatePixmap();
+    QWidget::resizeEvent(event);
+}
+
+void ProfileForm::showEvent(QShowEvent* event)
+{
+    updatePixmap();
+    QWidget::showEvent(event);
 }
 
 void ProfileForm::on_pbAddBridge_clicked()
 {
     static BridgeItem* item = nullptr;
     if (item) {
-        if (item->ok())
-            disconnect(GraphicsView::self, &GraphicsView::mouseMove, item, &BridgeItem::setNewPos);
-        else
+        if (!item->ok())
             delete item;
     }
-
-    item = new BridgeItem(m_lenght, item, m_size);
+    item = new BridgeItem(m_lenght, m_size, item);
     GraphicsView::self->scene()->addItem(item);
-    connect(GraphicsView::self, &GraphicsView::mouseMove, item, &BridgeItem::setNewPos);
 }
 
-void ProfileForm::on_dsbxBridgeLenght_valueChanged(double arg1)
+void ProfileForm::on_dsbxBridgeLenght_valueChanged(double /*arg1*/)
 {
-    m_lenght = arg1;
     updateBridge();
 }
 
-void ProfileForm::on_dsbxDepth_valueChanged(double arg1)
+void ProfileForm::on_dsbxDepth_valueChanged(double /*arg1*/)
 {
-    m_size = tool.getDiameter(arg1);
     updateBridge();
 }
 
 void ProfileForm::updateBridge()
 {
+    m_lenght = ui->dsbxBridgeLenght->value();
+    m_size = tool.getDiameter(ui->dsbxDepth->value());
     for (QGraphicsItem* item : Scene::self->items()) {
         if (item->type() == BridgeType)
             static_cast<BridgeItem*>(item)->update();
     }
+}
+
+void ProfileForm::updatePixmap()
+{
+    static const QStringList pixmapList{
+        ":/toolpath/prof_on_climb.svg",
+        ":/toolpath/prof_out_climb.svg",
+        ":/toolpath/prof_in_climb.svg",
+        ":/toolpath/prof_on_conv.svg",
+        ":/toolpath/prof_out_conv.svg",
+        ":/toolpath/prof_in_conv.svg",
+
+    };
+    int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
+    ui->lblPixmap->setPixmap(QIcon(pixmapList[side + direction * 3]).pixmap(QSize(size, size)));
 }

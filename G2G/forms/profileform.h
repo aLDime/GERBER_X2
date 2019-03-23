@@ -29,11 +29,17 @@ private:
     double m_size = 0.0;
     double m_lenght = 0.0;
     void updateBridge();
+    void updatePixmap();
 
     // ToolPathUtil interface
 protected:
     void create() override;
     void updateName() override;
+
+    // QWidget interface
+protected:
+    virtual void resizeEvent(QResizeEvent* event) override;
+    virtual void showEvent(QShowEvent* event) override;
 };
 
 #endif // PROFILEFORM_H

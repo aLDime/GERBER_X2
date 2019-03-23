@@ -257,6 +257,8 @@ void MainWindow::createActions()
     action->setShortcut(QKeySequence::ZoomIn);
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
     action->setShortcut(QKeySequence::ZoomOut);
+    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
+    action = zoomToolBar->addAction(QIcon::fromTheme("edit-select-all"), tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
 
     //==================== Selection / Delete selected ====================
     QToolBar* s = addToolBar(tr("Selection"));
@@ -268,7 +270,6 @@ void MainWindow::createActions()
                 item->setSelected(true);
     });
     action->setShortcut(QKeySequence::SelectAll);
-    action = s->addAction(/*QIcon::fromTheme("edit-select-all"),*/ tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
     //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     //        QList<QGraphicsItem*> list;
     //        for (QGraphicsItem* item : MyScene::self->items())

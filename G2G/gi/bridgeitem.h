@@ -9,7 +9,7 @@ class GraphicsView;
 class BridgeItem : public QObject, public GraphicsItem {
     Q_OBJECT
 public:
-    explicit BridgeItem(double& lenght, BridgeItem*& ptr, double& size);
+    explicit BridgeItem(double& lenght, double& size, BridgeItem*& ptr);
     ~BridgeItem() { m_ptr = nullptr; }
 
     QRectF boundingRect() const override;
@@ -28,6 +28,7 @@ public:
     void update();
 
     IntPoint getPoint(const int side) const;
+    QLineF getPath() const;
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -44,6 +45,7 @@ private:
     double& m_lenght;
     double& m_size;
     double m_angle = 0.0;
+    QPointF m_lastPos;
 };
 
 #endif // BRIDGEITEM_H
