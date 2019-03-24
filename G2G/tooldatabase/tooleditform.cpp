@@ -67,8 +67,8 @@ void ToolEditForm::setItem(ToolItem* item)
 
 void ToolEditForm::setRed()
 {
-    if (m_item)
-        ui->pbApply->setEnabled(true);
+    //if (m_item)
+    ui->pbApply->setEnabled(true);
     parentWidget()->setWindowModified(true);
 }
 

@@ -10,6 +10,7 @@
 #include <QMessageBox>
 #include <myclipper.h>
 #include <scene.h>
+#include <tooldatabase/tooleditdialog.h>
 
 enum {
     Offset,
@@ -94,9 +95,27 @@ void PocketForm::on_pbSelect_2_clicked()
     }
 }
 
-void PocketForm::on_pbEdit_clicked() {}
+void PocketForm::on_pbEdit_clicked()
+{
+    ToolEditDialog d;
+    d.toolEdit->setTool(tool);
+    if (d.exec()) {
+        tool = d.toolEdit->tool();
+        ui->lblToolName->setText(tool.name);
+        updateName();
+    }
+}
 
-void PocketForm::on_pbEdit_2_clicked() {}
+void PocketForm::on_pbEdit_2_clicked()
+{
+    ToolEditDialog d;
+    d.toolEdit->setTool(tool2);
+    if (d.exec()) {
+        tool2 = d.toolEdit->tool();
+        ui->lblToolName_2->setText(tool2.name);
+        updateName();
+    }
+}
 
 void PocketForm::on_pbCreate_clicked()
 {

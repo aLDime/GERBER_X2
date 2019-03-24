@@ -58,12 +58,12 @@ QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value
 void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_lastPos = pos();
-    if (m_ok) {
-        //        m_ptr = new BridgeItem(m_lenght, m_size, m_ptr);
-        //        scene()->addItem(m_ptr);
-    } else {
-        deleteLater();
-    }
+    //    if (m_ok) {
+    //        //        m_ptr = new BridgeItem(m_lenght, m_size, m_ptr);
+    //        //        scene()->addItem(m_ptr);
+    //    } else {
+    //        deleteLater();
+    //    }
     disconnect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
