@@ -34,21 +34,14 @@ ProfileForm::ProfileForm(QWidget* parent)
         if (ui->rbInside->isChecked())
             side = Inner;
 
-        updateName();
-
         if (ui->rbClimb->isChecked())
             direction = Climb;
         else if (ui->rbConventional->isChecked())
             direction = Conventional;
 
+        updateName();
         updatePixmap();
     };
-
-    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOn, &QRadioButton::clicked, rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
 
     QSettings settings;
     settings.beginGroup("ProfileForm");
@@ -74,6 +67,11 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
 
     rb_clicked();
+    connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbOn, &QRadioButton::clicked, rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
 }
 
 ProfileForm::~ProfileForm()
@@ -254,13 +252,12 @@ void ProfileForm::updateBridge()
 void ProfileForm::updatePixmap()
 {
     static const QStringList pixmapList{
-        ":/toolpath/prof_on_climb.svg",
-        ":/toolpath/prof_out_climb.svg",
-        ":/toolpath/prof_in_climb.svg",
-        ":/toolpath/prof_on_conv.svg",
-        ":/toolpath/prof_out_conv.svg",
-        ":/toolpath/prof_in_conv.svg",
-
+        QStringLiteral(":/toolpath/prof_on_climb.svg"),
+        QStringLiteral(":/toolpath/prof_out_climb.svg"),
+        QStringLiteral(":/toolpath/prof_in_climb.svg"),
+        QStringLiteral(":/toolpath/prof_on_conv.svg"),
+        QStringLiteral(":/toolpath/prof_out_conv.svg"),
+        QStringLiteral(":/toolpath/prof_in_conv.svg"),
     };
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon(pixmapList[side + direction * 3]).pixmap(QSize(size, size)));

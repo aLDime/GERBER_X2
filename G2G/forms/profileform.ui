@@ -271,7 +271,7 @@ Depth:</string>
            <string/>
           </property>
           <property name="pixmap">
-           <pixmap resource="../res/resources.qrc">:/toolpath/outside_climb.png</pixmap>
+           <pixmap>:/toolpath/outside_climb.png</pixmap>
           </property>
           <property name="alignment">
            <set>Qt::AlignCenter</set>
@@ -398,8 +398,6 @@ Depth:</string>
    </item>
   </layout>
  </widget>
- <resources>
-  <include location="../res/resources.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

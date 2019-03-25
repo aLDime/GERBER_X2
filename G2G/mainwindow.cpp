@@ -324,7 +324,7 @@ void MainWindow::createActions()
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Pocket]->trigger(); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {
         ToolDatabase tdb(this, {});

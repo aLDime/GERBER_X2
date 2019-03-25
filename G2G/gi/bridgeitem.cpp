@@ -58,12 +58,6 @@ QVariant BridgeItem::itemChange(GraphicsItemChange change, const QVariant& value
 void BridgeItem::mousePressEvent(QGraphicsSceneMouseEvent* event)
 {
     m_lastPos = pos();
-    //    if (m_ok) {
-    //        //        m_ptr = new BridgeItem(m_lenght, m_size, m_ptr);
-    //        //        scene()->addItem(m_ptr);
-    //    } else {
-    //        deleteLater();
-    //    }
     disconnect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     QGraphicsItem::mousePressEvent(event);
 }
@@ -77,7 +71,6 @@ QPointF BridgeItem::calculate(const QPointF& pos)
     QPointF pt;
     double l = std::numeric_limits<double>::max();
     double lastAngle = 0.0;
-    const Path* pPath = nullptr;
     for (QGraphicsItem* item : col) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         if (gi && (gi->type() == DrillItemType || gi->type() == GerberItemType || gi->type() == RawItemType)) {
@@ -103,7 +96,6 @@ QPointF BridgeItem::calculate(const QPointF& pos)
                             QLineF line(toQPointF(path[i]), toQPointF(path[(i + 1) % s]));
                             line.setLength(sqrt(l1.length() * l1.length() - h * h));
                             pt = line.p2();
-                            pPath = &path;
                             m_angle = line.normalVector().angle();
                         }
                     }
@@ -113,8 +105,6 @@ QPointF BridgeItem::calculate(const QPointF& pos)
         }
     }
     if (l < m_lenght / 2) {
-        if (pPath && Orientation(*pPath))
-            m_angle += 180.0;
         m_ok = true;
         return pt;
     }
@@ -171,12 +161,6 @@ bool BridgeItem::ok() const
 QPainterPath BridgeItem::shape() const
 {
     return m_path;
-}
-
-void BridgeItem::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
-{
-    //setPos(calculate(mapToScene(event->pos())));
-    QGraphicsItem::mouseMoveEvent(event);
 }
 
 void BridgeItem::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* /*event*/)

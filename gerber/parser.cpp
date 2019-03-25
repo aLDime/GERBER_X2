@@ -59,7 +59,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     for (const QString& gerberLine : m_file->lines()) {
         m_currentGerbLine = gerberLine;
         ++m_lineNum;
-        if (!(m_lineNum % 1000))
+        if (!(m_lineNum % 100))
             emit fileProgress(m_file->shortFileName(), 0, m_lineNum);
         try {
             //qWarning() << gerberLine;
@@ -149,13 +149,20 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         for (const Paths& paths : m_file->groupedPaths()) {
             m_file->itemGroup()->append(new GerberItem(paths, m_file));
         }
+
         m_file->setRawItemGroup(new ItemGroup);
+        QVector<QPair<IntPoint, double>> dd;
         for (const GraphicObject& go : *m_file) {
-            if (go.path.size() > 1)
-                m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
+            if (go.path.size() > 1) { // skip empty
+                QPair<IntPoint, double> p = { go.path.first(), Area(go.path) };
+                if (!dd.contains(p)) { // skip dublicates
+                    dd.append(p);
+                    m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
+                }
+            }
         }
         m_file->rawItemGroup()->setVisible(false);
-        //m_file->setItemType(File::Raw);/////////////////////////////////////////////////xr
+
         emit fileReady(m_file);
     }
     emit fileProgress(m_file->shortFileName(), 1, 1);
@@ -405,8 +412,8 @@ void Parser::addFlash()
     Paths paths(m_file->m_apertures[m_state.aperture()]->draw(m_state));
 
     ////////////////////////////////// Draw Drill //////////////////////////////////
-     if (m_file->m_apertures[m_state.aperture()]->isDrilled())
-          paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
+    if (m_file->m_apertures[m_state.aperture()]->isDrilled())
+        paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
 
     switch (m_abSrIdStack.top().first) {
     case Normal:

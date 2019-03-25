@@ -25,19 +25,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="22.627417"
-     inkscape:cx="39.92768"
-     inkscape:cy="26.42098"
+     inkscape:zoom="11.313709"
+     inkscape:cx="14.830051"
+     inkscape:cy="32.369567"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="px"
      showguides="true"
-     inkscape:window-width="2717"
-     inkscape:window-height="2122"
-     inkscape:window-x="1107"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1857"
+     inkscape:window-height="1058"
+     inkscape:window-x="55"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid10" />
@@ -63,137 +63,103 @@
        id="rect14"
        width="11.90625"
        height="11.906258"
-       x="3.96875"
-       y="-293.03119"
+       x="-15.875"
+       y="281.12497"
        style="stroke-width:0.26169172"
-       transform="scale(1,-1)" />
+       transform="scale(-1,1)" />
     <rect
        id="rect16"
        width="11.377084"
        height="11.377095"
-       x="4.2333331"
-       y="-292.7666"
+       x="-15.610416"
+       y="281.38956"
        style="fill:#ffffff;stroke-width:0.26155958"
-       transform="scale(1,-1)" />
+       transform="scale(-1,1)" />
     <circle
        style="fill:#000000;stroke-width:0.26458335"
        id="path18"
-       cx="4.1010418"
-       cy="-287.07806"
+       cx="-15.742708"
+       cy="287.07809"
        r="1.984375"
-       transform="scale(1,-1)" />
+       transform="scale(-1,1)" />
     <circle
        style="fill:#ffeeaa;stroke-width:0.26458335"
        id="path20"
-       cx="4.1010418"
-       cy="-287.07806"
+       cx="-15.742708"
+       cy="287.07809"
        r="1.7197917"
-       transform="scale(1,-1)" />
+       transform="scale(-1,1)" />
     <circle
        style="fill:#000000;stroke-width:0.26458335"
        id="path22"
-       cx="9.921875"
-       cy="-292.89896"
+       cx="-9.921875"
+       cy="281.2572"
        r="1.984375"
-       transform="scale(1,-1)" />
+       transform="scale(-1,1)" />
     <circle
        style="fill:#ffcc00;stroke-width:0.26458335"
        id="path24"
-       cx="9.921875"
-       cy="-292.89896"
+       cx="-9.921875"
+       cy="281.2572"
        r="1.7197917"
-       transform="scale(1,-1)" />
-    <rect
-       style="fill:#ff0000;stroke-width:0.11034004"
-       id="rect26"
-       width="0.26458335"
-       height="1.0583557"
-       x="3.96875"
-       y="-288.00415"
-       transform="scale(1,-1)" />
-    <rect
-       style="fill:#ff0000;stroke-width:0.1103389"
-       id="rect28"
-       width="1.0583338"
-       height="0.26458335"
-       x="8.9958334"
-       y="-293.03128"
-       transform="scale(1,-1)" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.35448605"
-       id="rect4552"
-       width="2.8496206"
-       height="0.26458335"
-       x="7.9789386"
-       y="-297.05267"
-       transform="matrix(0.92848608,-0.3713672,0,-1,0,0)" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.35448977"
-       id="rect4554"
-       width="2.8496807"
-       height="0.26458335"
-       x="7.9791059"
-       y="-289.00934"
-       transform="matrix(0.92846661,0.37141588,0,-1,0,0)" />
+       transform="scale(-1,1)" />
+    <path
+       style="fill:#ff0000;stroke-width:0.4170332"
+       d="M 59 34 L 59 36.087891 A 1.5000001 1.5000001 0 0 0 58 37.5 A 1.5000001 1.5000001 0 0 0 59.5 39 A 1.5000001 1.5000001 0 0 0 61 37.5 A 1.5000001 1.5000001 0 0 0 60 36.087891 L 60 34 L 59 34 z "
+       transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
+       id="rect26" />
+    <path
+       style="fill:#ff0000;stroke-width:0.4170289"
+       d="M 47 11 L 38.511719 14.394531 A 1.5000001 1.5000001 0 0 0 37.5 14 A 1.5000001 1.5000001 0 0 0 36 15.5 A 1.5000001 1.5000001 0 0 0 37.5 17 A 1.5000001 1.5000001 0 0 0 38.511719 16.605469 L 47 20 L 47 19 L 39.5 16 L 41 16 L 41 15 L 39.5 15 L 47 12 L 47 11 z "
+       transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
+       id="rect28" />
     <rect
        style="fill:#ff0000;stroke-width:0.11034004"
        id="rect26-6"
        width="0.26458335"
        height="1.0583557"
-       x="3.9687498"
-       y="-289.59164"
-       transform="scale(1,-1)" />
+       x="-15.875"
+       y="284.56451"
+       transform="scale(-1,1)" />
     <rect
        style="fill:#ff0000;stroke-width:0.11034004"
        id="rect26-6-4"
        width="0.26458335"
        height="1.0583557"
-       x="3.9687502"
-       y="-291.17914"
-       transform="scale(1,-1)" />
+       x="-15.875"
+       y="282.97702"
+       transform="scale(-1,1)" />
     <rect
        style="fill:#ff0000;stroke-width:0.12336435"
        id="rect26-6-4-2"
        width="0.26458335"
        height="1.3229541"
-       x="3.9687498"
-       y="-293.03122"
-       transform="scale(1,-1)" />
+       x="-15.875"
+       y="281.12494"
+       transform="scale(-1,1)" />
     <rect
        style="fill:#ff0000;stroke-width:0.1103389"
        id="rect28-7"
        width="1.0583338"
        height="0.26458335"
-       x="7.4083333"
-       y="-293.03122"
-       transform="scale(1,-1)" />
+       x="-12.435417"
+       y="281.12494"
+       transform="scale(-1,1)" />
     <rect
        style="fill:#ff0000;stroke-width:0.1103389"
        id="rect28-7-2"
        width="1.0583338"
        height="0.26458335"
-       x="5.8208327"
-       y="-293.03122"
-       transform="scale(1,-1)" />
+       x="-14.022918"
+       y="281.12494"
+       transform="scale(-1,1)" />
     <rect
        style="fill:#ff0000;stroke-width:0.12336262"
        id="rect28-7-2-2"
        width="1.3229167"
        height="0.26458335"
-       x="3.96875"
-       y="-293.03122"
-       transform="scale(1,-1)" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
-       id="path5791"
-       cx="4.1010418"
-       cy="287.07809"
-       r="0.39687502" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
-       id="path5793"
-       cx="9.921875"
-       cy="292.89893"
-       r="0.39687502" />
+       x="-15.875"
+       y="281.12494"
+       transform="scale(-1,1)" />
   </g>
 </svg>

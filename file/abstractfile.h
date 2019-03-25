@@ -42,8 +42,6 @@ public:
         CutoffGroup,
     };
 
-    Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
-
     virtual FileType type() const = 0;
 
     Side side() const;
@@ -63,9 +61,6 @@ protected:
 
     Side m_side = Top;
     QColor m_color;
-
-private:
-    void grouping(PolyNode* node, Pathss* pathss, Group group);
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)

@@ -38,6 +38,29 @@ void File::setRawItemGroup(ItemGroup* itemGroup) { m_rawItemGroup = QSharedPoint
 
 ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
 
+Pathss& File::groupedPaths(File::Group group, bool fl)
+{
+    if (m_groupedPaths.isEmpty()) {
+        PolyTree polyTree;
+        Clipper clipper;
+        clipper.AddPaths(mergedPaths(), ptSubject, true);
+        IntRect r(clipper.GetBounds());
+        int k = /*uScale*/ 1;
+        Path outer = {
+            IntPoint(r.left - k, r.bottom + k),
+            IntPoint(r.right + k, r.bottom + k),
+            IntPoint(r.right + k, r.top - k),
+            IntPoint(r.left - k, r.top - k)
+        };
+        if (fl)
+            ReversePath(outer);
+        clipper.AddPath(outer, ptSubject, true);
+        clipper.Execute(ctUnion, polyTree, pftNonZero);
+        grouping(polyTree.GetFirst(), &m_groupedPaths, group);
+    }
+    return m_groupedPaths;
+}
+
 bool File::flashedApertures() const
 {
     for (QSharedPointer<AbstractAperture> a : m_apertures) {

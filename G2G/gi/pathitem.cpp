@@ -35,37 +35,26 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     painter->drawPath(m_shape);
 
     ////////////////////////////////////////////////////// for debug cut direction
-
-    //    if (m_pen.widthF() == 0) {
-    //        painter->setPen(QPen(Qt::green, 0.0));
-    //        for (Path m_path : m_paths) {
-    //            //                QLineF line(toQPointF(m_path[0]), toQPointF(m_path[1]));
-    //            //                double length = 50 / MyGraphicsView::self->matrix().m11();
-    //            //                double angle = line.angle();
-    //            //                line.setLength(length);
-    //            //                painter->drawLine(line);
-    //            //                line.setAngle(angle + 10);
-    //            //                painter->drawLine(line);
-    //            //                line.setAngle(angle - 10);
-    //            //                painter->drawLine(line);
-    //            for (int i = 0; i < m_path.size() - 1; ++i) {
-    //                QLineF line(toQPointF(m_path[i]), toQPointF(m_path[i + 1]));
-
-    //                double length = 50 / MyGraphicsView::self->matrix().m11();
-    //                double angle = line.angle();
-
-    //                line.setLength(length);
-    //                //                    painter->drawLine(line);
-
-    //                line.setAngle(angle + 10);
-    //                painter->drawLine(line);
-
-    //                line.setAngle(angle - 10);
-    //                painter->drawLine(line);
-    //            }
-    //        }
-    //    }
-    //}
+#ifdef QT_DEBUG
+    if (m_pen.widthF() == 0) {
+        for (Path path : m_paths) {
+            for (int i = 0; i < path.size() - 1; ++i) {
+                QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
+                double length = 50 / GraphicsView::self->matrix().m11();
+                if (line.length() < length && i)
+                    continue;
+                if (length > 1)
+                    length = 1;
+                const double angle = line.angle();
+                line.setLength(length);
+                line.setAngle(angle + 10);
+                painter->drawLine(line);
+                line.setAngle(angle - 10);
+                painter->drawLine(line);
+            }
+        }
+    }
+#endif
 }
 
 int PathItem::type() const { return PathItemType; }

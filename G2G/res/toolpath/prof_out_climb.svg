@@ -26,18 +26,18 @@
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
      inkscape:zoom="22.627417"
-     inkscape:cx="28.269157"
+     inkscape:cx="20.314206"
      inkscape:cy="56.491201"
      inkscape:document-units="px"
      inkscape:current-layer="layer1"
      showgrid="true"
      units="px"
      showguides="false"
-     inkscape:window-width="2717"
-     inkscape:window-height="2122"
-     inkscape:window-x="1107"
-     inkscape:window-y="0"
-     inkscape:window-maximized="0">
+     inkscape:window-width="1857"
+     inkscape:window-height="1058"
+     inkscape:window-x="55"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
     <inkscape:grid
        type="xygrid"
        id="grid10" />
@@ -99,36 +99,8 @@
        r="1.7197917" />
     <path
        style="fill:#ff0000;stroke-width:1"
-       d="M 15 7 L 15 7.0019531 A 8.0000003 8.0000003 0 0 0 9.3085938 9.3789062 A 8.0000003 8.0000003 0 0 0 7.0058594 15 L 7 15 L 7 38 L 8 38 L 8 15.089844 L 8.0039062 15.085938 A 6.9999998 6.9999998 0 0 1 10.191406 9.9121094 A 6.9999998 6.9999998 0 0 1 14.994141 8.0078125 L 15.001953 8 L 38 8 L 38 7 L 15 7 z "
+       d="M 28 3 L 28 4 L 35.5 7 L 15 7 L 15 7.0019531 A 8.0000003 8.0000003 0 0 0 9.3085938 9.3789062 A 8.0000003 8.0000003 0 0 0 7.0058594 15 L 7 15 L 7 36.087891 A 1.5000001 1.5000001 0 0 0 6 37.5 A 1.5000001 1.5000001 0 0 0 7.5 39 A 1.5000001 1.5000001 0 0 0 9 37.5 A 1.5000001 1.5000001 0 0 0 8 36.087891 L 8 15.089844 L 8.0039062 15.085938 A 6.9999998 6.9999998 0 0 1 10.191406 9.9121094 A 6.9999998 6.9999998 0 0 1 14.994141 8.0078125 L 15.001953 8 L 35.5 8 L 28 11 L 28 12 L 36.488281 8.6054688 A 1.5000001 1.5000001 0 0 0 37.5 9 A 1.5000001 1.5000001 0 0 0 39 7.5 A 1.5000001 1.5000001 0 0 0 37.5 6 A 1.5000001 1.5000001 0 0 0 36.488281 6.3945312 L 28 3 z "
        transform="matrix(0.26458334,0,0,0.26458334,0,277.15623)"
        id="rect26" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.35448778"
-       id="rect4552"
-       width="2.8496485"
-       height="0.26458335"
-       x="7.9790168"
-       y="274.98666"
-       transform="matrix(0.928477,0.3713899,0,1,0,0)" />
-    <rect
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.35448804"
-       id="rect4554"
-       width="2.8496528"
-       height="0.26458335"
-       x="7.9790282"
-       y="283.03"
-       transform="matrix(0.92847569,-0.37139318,0,1,0,0)" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
-       id="path5123"
-       cx="1.984375"
-       cy="287.07809"
-       r="0.39687502" />
-    <circle
-       style="fill:#ff0000;fill-opacity:1;stroke:none;stroke-width:0.26458335"
-       id="path5125"
-       cx="9.921875"
-       cy="279.14059"
-       r="0.39687502" />
   </g>
 </svg>

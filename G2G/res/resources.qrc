@@ -1,9 +1,5 @@
 <RCC>
     <qresource prefix="/">
-        <file>toolpath/offset_climb.png</file>
-        <file>toolpath/offset_conventional.png</file>
-        <file>toolpath/raster_climb.png</file>
-        <file>toolpath/raster_conventional.png</file>
         <file>tool/drill.png</file>
         <file>tool/endmill.png</file>
         <file>tool/engraving.png</file>
@@ -14,5 +10,9 @@
         <file>toolpath/prof_on_conv.svg</file>
         <file>toolpath/prof_out_climb.svg</file>
         <file>toolpath/prof_out_conv.svg</file>
+        <file>toolpath/pock_offs_climb.svg</file>
+        <file>toolpath/pock_offs_conv.svg</file>
+        <file>toolpath/pock_rast_climb.svg</file>
+        <file>toolpath/pock_rast_conv.svg</file>
     </qresource>
 </RCC>

@@ -3,8 +3,8 @@
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <file.h>
-#include <myclipper.h>
 #include <graphicsview.h>
+#include <myclipper.h>
 
 RawItem::RawItem(const Path& path, G::File* file)
     : m_file(file)

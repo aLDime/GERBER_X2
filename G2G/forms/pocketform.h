@@ -34,11 +34,17 @@ private:
 
     int direction = 0;
     int type = 0;
+    void updatePixmap();
 
     // ToolPathUtil interface
 protected:
     void create() override;
     void updateName() override;
+
+    // QWidget interface
+protected:
+    void resizeEvent(QResizeEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 };
 
 #endif // POCKETFORM_H
