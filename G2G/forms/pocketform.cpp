@@ -201,7 +201,7 @@ void PocketForm::create()
     //        QVector<GCodeFile*> gcode = ToolPathCreator(wPaths).createPocket2({ tool, tool2 }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
 
     //    } else {
-    GCodeFile* gcode = ToolPathCreator(wPaths).createPocket(tool, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value(), ui->checkBox->isChecked());
+    GCodeFile* gcode = ToolPathCreator(wPaths, ui->rbConventional->isChecked()).createPocket(tool, ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value(), ui->checkBox->isChecked());
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
         return;

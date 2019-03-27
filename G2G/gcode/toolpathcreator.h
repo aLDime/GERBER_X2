@@ -22,10 +22,10 @@ enum Grouping {
 
 class ToolPathCreator {
 public:
-    ToolPathCreator(const Paths& value);
-    GCodeFile* createPocket(const Tool& tool, const bool convent, const double depth, const bool side, const int steps, const bool ex);
-    QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, bool convent, double depth, bool side, int steps);
-    GCodeFile* createProfile(const Tool& tool, bool convent, double depth, const SideOfMilling side);
+    ToolPathCreator(const Paths& value, const bool convent);
+    GCodeFile* createPocket(const Tool& tool, const double depth, const bool side, const int steps, const bool ex);
+    QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, double depth, bool side, int steps);
+    GCodeFile* createProfile(const Tool& tool, double depth, const SideOfMilling side);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
 
 private:
@@ -33,6 +33,13 @@ private:
     Paths m_returnPaths;
     Pathss m_groupedPaths;
     void grouping(PolyNode* node, Pathss* pathss, Grouping group);
+
+    void DoOffset(const Paths& paths, Pathss& pathss);
+
+    double m_toolDiameter = 0.0;
+    double m_dOffset = 0.0;
+    double m_stepOver = 0.0;
+    const bool m_convent;
 };
 
 #endif // TOOLPATHCREATOR_H

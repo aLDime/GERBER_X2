@@ -12,12 +12,16 @@ PathItem::PathItem(const Paths& paths)
 
     const double k = m_pen.widthF() / 2;
     m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
+#ifdef QT_DEBUG
+    //setAcceptHoverEvents(true);
+#endif
 }
 
 QRectF PathItem::boundingRect() const { return m_rect; }
 
-void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
+void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    Q_UNUSED(option)
 
     if (m_penColor)
         m_pen.setColor(*m_penColor);
@@ -30,7 +34,16 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
         painter->setPen(pen);
     } else
         painter->setPen(m_pen);
-
+#ifdef QT_DEBUG
+    if (option->state & QStyle::State_MouseOver) {
+        QPen pen(m_pen);
+        pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
+        pen.setStyle(Qt::CustomDashLine);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setDashPattern({ 2.0, 2.0 });
+        painter->setPen(pen);
+    }
+#endif
     painter->setBrush(QBrush(Qt::NoBrush));
     painter->drawPath(m_shape);
 
@@ -39,18 +52,26 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     if (m_pen.widthF() == 0) {
         for (Path path : m_paths) {
             for (int i = 0; i < path.size() - 1; ++i) {
-                QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
-                double length = 50 / GraphicsView::self->matrix().m11();
+                QLineF line(toQPointF(path[i + 1]), toQPointF(path[i]));
+                double length = 20 / GraphicsView::self->matrix().m11();
                 if (line.length() < length && i)
                     continue;
-                if (length > 1)
-                    length = 1;
+                if (length > 0.5)
+                    length = 0.5;
                 const double angle = line.angle();
                 line.setLength(length);
                 line.setAngle(angle + 10);
                 painter->drawLine(line);
                 line.setAngle(angle - 10);
                 painter->drawLine(line);
+                //                QFont font("Courier");
+                //                font.setPointSizeF(1);
+                //                painter->save();
+                //                painter->scale(length - 10, length - 10);
+                //                painter->translate(toQPointF(path[i]));
+                //                painter->setFont(font);
+                //                painter->drawText(toQPointF(path[i]), QString::number(i));
+                //                painter->restore();
             }
         }
     }
