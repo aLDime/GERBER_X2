@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
+#include <gi/ruler.h>
 #include <mainwindow.h>
 
 GraphicsView* GraphicsView::self = nullptr;
@@ -54,7 +55,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     // finally set layout
     //setLayout(gridLayout);
 
-
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
 
@@ -69,6 +69,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     settings.endGroup();
     setScene(new Scene(this));
     setStyleSheet("QGraphicsView { background: black }");
+
     self = this;
 }
 
@@ -268,6 +269,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         setInteractive(false);
+        scene()->addItem(new Ruler(mapToScene(event->pos())));
         QGraphicsView::mousePressEvent(event);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
@@ -288,6 +290,8 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
+        if (Ruler::self)
+            delete Ruler::self;
     } else {
         QGraphicsView::mouseReleaseEvent(event);
     }
@@ -303,5 +307,8 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     mouseMove(mapToScene(event->pos()));
+    if (event->buttons() == Qt::RightButton && Ruler::self) {
+        Ruler::self->setPoint2(mapToScene(event->pos()));
+    }
     QGraphicsView::mouseMoveEvent(event);
 }

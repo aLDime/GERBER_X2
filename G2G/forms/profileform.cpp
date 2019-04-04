@@ -201,7 +201,7 @@ void ProfileForm::create()
 
 void ProfileForm::updateName()
 {
-    static const QStringList name = { "Profile Outside", "Profile Inside", "Profile On" };
+    static const QStringList name = { "Profile On", "Profile Outside", "Profile Inside" };
     ui->leName->setText(name[side] + " (" + tool.name + ")");
     updateBridge();
 }

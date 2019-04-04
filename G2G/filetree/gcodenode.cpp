@@ -45,8 +45,12 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     switch (index.column()) {
     case 0:
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
-    case 1:
-        return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+    case 1: {
+        if (FileHolder::file(m_id)->shortFileName().contains(".tap"))
+            return Qt::ItemNeverHasChildren;
+        else
+            return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+    }
     default:
         return 0;
     }
@@ -57,8 +61,12 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
     switch (index.column()) {
     case 0:
         switch (role) {
-        case Qt::DisplayRole:
-            return FileHolder::file(m_id)->shortFileName();
+        case Qt::DisplayRole: {
+            if (FileHolder::file(m_id)->shortFileName().contains(".tap"))
+                return FileHolder::file(m_id)->shortFileName();
+            else
+                return FileHolder::file(m_id)->shortFileName() + QStringList({ "(Top)", "(Bot)" })[FileHolder::file(m_id)->side()];
+        }
         case Qt::ToolTipRole:
             return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
@@ -83,7 +91,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
+            return QStringList({ "Top", "Bottom" })[FileHolder::file(m_id)->side()];
         case Qt::EditRole:
             return static_cast<bool>(FileHolder::file(m_id)->side());
         default:

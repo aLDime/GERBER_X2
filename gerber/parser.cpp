@@ -59,7 +59,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     for (const QString& gerberLine : m_file->lines()) {
         m_currentGerbLine = gerberLine;
         ++m_lineNum;
-        if (!(m_lineNum % 100))
+        if (!(m_lineNum % 1000))
             emit fileProgress(m_file->shortFileName(), 0, m_lineNum);
         try {
             //qWarning() << gerberLine;

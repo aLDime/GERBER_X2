@@ -57,6 +57,13 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
     }
 }
 
+QDebug operator<<(QDebug debug, const IntPoint& p)
+{
+    //QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
+    return debug;
+}
+
 GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
     : m_pocketPaths(pocketPaths)
     , m_type(type)
@@ -64,7 +71,6 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     , m_tool(tool)
     , m_depth(depth)
 {
-
     setItemGroup(new ItemGroup);
     GraphicsItem* item;
     Path g0path;
@@ -73,7 +79,9 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
 
     switch (type) {
     case Profile:
+
         for (const Path& path : tmpPaths2) {
+            qDebug() << path;
             item = new PathItem({ path });
             item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColor(SettingsDialog::color(Colors::CutArea));
@@ -220,8 +228,8 @@ void GCodeFile::saveDrill()
     statFile();
     QPolygonF path(toQPolygon(m_toolPaths.first()));
 
-    double maxX = -std::numeric_limits<double>::max();
-    double minX = +std::numeric_limits<double>::max();
+    double maxX = SettingsDialog::worckRect().right(); //-std::numeric_limits<double>::max();
+    double minX = SettingsDialog::worckRect().left(); //+std::numeric_limits<double>::max();
 
     for (QPointF& point : path)
         point -= MaterialSetup::zeroPos;
@@ -257,23 +265,35 @@ void GCodeFile::saveProfilePocket()
     statFile();
     QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
 
-    double maxX = -std::numeric_limits<double>::max();
-    double minX = +std::numeric_limits<double>::max();
+    double maxX = SettingsDialog::worckRect().right();
+    maxX = -std::numeric_limits<double>::max();
+    double minX = SettingsDialog::worckRect().left();
+    minX = +std::numeric_limits<double>::max();
 
     for (QPolygonF& path : paths) {
         for (QPointF& point : path) {
+            for (QPointF& point : path) {
+                if (maxX < point.x())
+                    maxX = point.x();
+                if (minX > point.x())
+                    minX = point.x();
+            }
             point -= MaterialSetup::zeroPos;
-            if (m_side && maxX < point.x())
-                maxX = point.x();
-            if (m_side && minX > point.x())
-                minX = point.x();
         }
     }
+
     if (m_side) {
+        //const double k = minX + SettingsDialog::worckRect().width() / 2;
         const double k = minX + maxX;
         for (QPolygonF& path : paths) {
+            std::reverse(path.begin(), path.end());
             for (QPointF& point : path) {
                 point.rx() = -point.x() + k;
+
+                //                if (point.x() > k)
+                //                    point.rx() = k - (point.x() - k);
+                //                else if (point.x() < k)
+                //                    point.rx() = k + (k - point.x());
             }
         }
     }
@@ -282,7 +302,7 @@ void GCodeFile::saveProfilePocket()
 
     for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
         for (QPolygonF& path : paths) {
-            QPointF point(path.last());
+            QPointF point(path.first());
 
             startPath(point);
 
@@ -307,7 +327,7 @@ void GCodeFile::saveProfilePocket()
     }
 
     for (QPolygonF& path : paths) {
-        QPointF point(path.last());
+        QPointF point(path.first());
 
         startPath(point);
 
@@ -368,8 +388,9 @@ void GCodeFile::endFile()
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
 
     sl.append("M30");
-    QString str(m_fileName);
-    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
+    QFile file(m_fileName);
+    //    QString str(m_fileName);
+    //    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (QString& s : sl)

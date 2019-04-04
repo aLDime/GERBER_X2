@@ -2,6 +2,7 @@
 #define MYCLIPPER_H
 
 #include "clipper.hpp"
+#include <QDebug>
 #include <QPolygonF>
 
 #ifndef M_2PI

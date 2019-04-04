@@ -22,8 +22,6 @@ public:
 
     Paths getPaths() const;
     void save(const QString& name = QString());
-    void saveDrill();
-    void saveProfilePocket();
 
     GCodeType gtype() const;
 
@@ -31,6 +29,9 @@ public:
     Paths m_pocketPaths;
 
 private:
+    void saveDrill();
+    void saveProfilePocket();
+
     const GCodeType m_type;
 
     const Paths m_toolPaths;
@@ -44,6 +45,7 @@ private:
         G02 = 2,
         G03 = 3,
     };
+
     GCode m_gCode = G_null;
     inline QString g0()
     {

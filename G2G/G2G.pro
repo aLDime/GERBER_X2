@@ -96,7 +96,8 @@ HEADERS += \
     forms/normalizeraw.h \
     tooldatabase/tooleditdialog.h \
     gi/bridgeitem.h \
-    gi/boarditem.h
+    gi/boarditem.h \
+    gi/ruler.h
 
 
 SOURCES += \
@@ -141,7 +142,8 @@ SOURCES += \
     forms/normalizeraw.cpp \
     tooldatabase/tooleditdialog.cpp \
     gi/bridgeitem.cpp \
-    gi/boarditem.cpp
+    gi/boarditem.cpp \
+    gi/ruler.cpp
 
 
 

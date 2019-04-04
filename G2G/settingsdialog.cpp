@@ -49,7 +49,7 @@ QColor SettingsDialog::m_color[Colors::Count]{
     QColor(Qt::red) //G0
 };
 
-QRectF SettingsDialog::worckRect;
+QRectF SettingsDialog::m_worckRect;
 
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
@@ -102,12 +102,23 @@ void SettingsDialog::onListCategoriesCurrentRowChanged(int /*currentRow*/)
     //    }
 }
 
+QRectF SettingsDialog::worckRect()
+{
+    return m_worckRect;
+}
+
+void SettingsDialog::setWorckRect(const QRectF& value)
+{
+    m_worckRect = value;
+}
+
 void SettingsDialog::readSettings()
 {
     QSettings settings;
     settings.beginGroup("Viewer");
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
     chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
+    m_worckRect = settings.value("worckRect").toRectF();
     settings.endGroup();
     settings.beginGroup("Color");
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
@@ -130,6 +141,7 @@ void SettingsDialog::writeSettings()
         GraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
         settings.setValue("Antialiasing", chbAntialiasing->isChecked());
     }
+    settings.setValue("worckRect", m_worckRect);
     settings.endGroup();
 
     settings.beginGroup("Color");

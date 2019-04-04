@@ -134,3 +134,4 @@ void TranslatePath(Path& path, const IntPoint& pos)
         path[i].Y += pos.Y;
     }
 }
+

@@ -24,7 +24,7 @@ void updateRect()
         QMessageBox::information(nullptr, "", "There is no dedicated data to define boundaries.\nOld data will be used.");
         return;
     }
-    SettingsDialog::worckRect = rect;
+    SettingsDialog::setWorckRect(rect);
 }
 
 Point::Point(int type)
@@ -96,9 +96,9 @@ void Point::resetPos()
 {
     updateRect();
     if (m_type == Home)
-        setPos(SettingsDialog::worckRect.bottomRight());
+        setPos(SettingsDialog::worckRect().bottomRight());
     else
-        setPos(SettingsDialog::worckRect.topLeft());
+        setPos(SettingsDialog::worckRect().topLeft());
 }
 
 void Point::setPos(const QPointF& pos)
@@ -176,8 +176,7 @@ Shtift::Shtift()
 
     QSettings settings;
     settings.beginGroup("Shtift");
-    if (!m_shtifts.size())
-        SettingsDialog::worckRect = settings.value(" SettingsDialog::worckRect").toRect();
+    //if (!m_shtifts.size()) SettingsDialog().readSettings();
     setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
     setPos(settings.value("pos" + QString::number(m_shtifts.size())).toPointF());
 
@@ -191,7 +190,7 @@ Shtift::~Shtift()
     settings.beginGroup("Shtift");
     settings.setValue("pos" + QString::number(m_shtifts.indexOf(this)), pos());
     if (!m_shtifts.indexOf(this)) {
-        settings.setValue("worckRect", SettingsDialog::worckRect);
+        SettingsDialog().writeSettings();
         settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
     }
 }
@@ -243,10 +242,10 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 
     switch (m_shtifts.indexOf(this)) {
     case 0:
-        if (p[0].x() > SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5)
-            p[0].rx() = SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5;
-        if (p[0].y() > SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5)
-            p[0].ry() = SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5;
+        if (p[0].x() > SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5)
+            p[0].rx() = SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5;
+        if (p[0].y() > SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5)
+            p[0].ry() = SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5;
         p[2] = m_shtifts[2]->m_lastPos - (p[0] - m_lastPos);
         p[1].rx() = p[2].x();
         p[1].ry() = p[0].y();
@@ -254,10 +253,10 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         p[3].ry() = p[2].y();
         break;
     case 1:
-        if (p[1].x() < SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5)
-            p[1].rx() = SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5;
-        if (p[1].y() > SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5)
-            p[1].ry() = SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5;
+        if (p[1].x() < SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5)
+            p[1].rx() = SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5;
+        if (p[1].y() > SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5)
+            p[1].ry() = SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5;
         p[3] = m_shtifts[3]->m_lastPos - (p[1] - m_lastPos);
         p[0].rx() = p[3].x();
         p[0].ry() = p[1].y();
@@ -265,10 +264,10 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         p[2].ry() = p[3].y();
         break;
     case 2:
-        if (p[2].x() < SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5)
-            p[2].rx() = SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5;
-        if (p[2].y() < SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5)
-            p[2].ry() = SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5;
+        if (p[2].x() < SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5)
+            p[2].rx() = SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5;
+        if (p[2].y() < SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5)
+            p[2].ry() = SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5;
         p[0] = m_shtifts[0]->m_lastPos - (p[2] - m_lastPos);
         p[1].rx() = p[2].x();
         p[1].ry() = p[0].y();
@@ -276,10 +275,10 @@ void Shtift::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
         p[3].ry() = p[2].y();
         break;
     case 3:
-        if (p[3].x() > SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5)
-            p[3].rx() = SettingsDialog::worckRect.left() + SettingsDialog::worckRect.width() * 0.5;
-        if (p[3].y() < SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5)
-            p[3].ry() = SettingsDialog::worckRect.top() + SettingsDialog::worckRect.height() * 0.5;
+        if (p[3].x() > SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5)
+            p[3].rx() = SettingsDialog::worckRect().left() + SettingsDialog::worckRect().width() * 0.5;
+        if (p[3].y() < SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5)
+            p[3].ry() = SettingsDialog::worckRect().top() + SettingsDialog::worckRect().height() * 0.5;
         p[1] = m_shtifts[1]->m_lastPos - (p[3] - m_lastPos);
         p[0].rx() = p[3].x();
         p[0].ry() = p[1].y();
@@ -322,10 +321,10 @@ void Shtift::resetPos()
     updateRect();
     const double k = 3.0;
     QPointF p[]{
-        QPointF(SettingsDialog::worckRect.topLeft() + QPointF(-k, -k)),
-        QPointF(SettingsDialog::worckRect.topRight() + QPointF(+k, -k)),
-        QPointF(SettingsDialog::worckRect.bottomRight() + QPointF(+k, +k)),
-        QPointF(SettingsDialog::worckRect.bottomLeft() + QPointF(-k, +k)),
+        QPointF(SettingsDialog::worckRect().topLeft() + QPointF(-k, -k)),
+        QPointF(SettingsDialog::worckRect().topRight() + QPointF(+k, -k)),
+        QPointF(SettingsDialog::worckRect().bottomRight() + QPointF(+k, +k)),
+        QPointF(SettingsDialog::worckRect().bottomLeft() + QPointF(-k, +k)),
     };
 
     for (int i = 0; i < 4; ++i)
