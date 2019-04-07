@@ -11,7 +11,7 @@ Ruler::Ruler(const QPointF& point)
     : m_pt1(point)
     , m_pt2(point)
 {
-    //setCacheMode(QGraphicsItem::DeviceCoordinateCache);
+    m_font.setPixelSize(16);
     self = this;
 }
 
@@ -58,9 +58,7 @@ void Ruler::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
     line.setAngle(angle - 10);
     painter->drawLine(line);
 
-    QFont font;
-    font.setPixelSize(15);
-    painter->setFont(font);
+    painter->setFont(m_font);
     painter->translate(m_pt2);
     painter->scale(k, -k);
     painter->drawText(m_textRect, Qt::AlignLeft, m_text);
@@ -78,14 +76,10 @@ void Ruler::setPoint2(const QPointF& point2)
     const double width = m_pt1.x() > m_pt2.x() ? m_pt1.x() - m_pt2.x() : m_pt2.x() - m_pt1.x();
     const double height = m_pt1.y() > m_pt2.y() ? m_pt1.y() - m_pt2.y() : m_pt2.y() - m_pt1.y();
     const double length = line.length();
-    m_text = "    width = " + QString::number(width) + " mm\n";
-    m_text.append("    height = " + QString::number(height) + " mm\n");
-    m_text.append("    length = " + QString::number(length) + " mm");
-
-    QFont font;
-    font.setPixelSize(15);
-    m_textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, m_text);
-
+    m_text = "    ∆X = " + QString::number(width) + " mm\n";
+    m_text.append("    ∆Y = " + QString::number(height) + " mm\n");
+    m_text.append("    Length = " + QString::number(length) + " mm");
+    m_textRect = QFontMetricsF(m_font).boundingRect(QRectF(), Qt::AlignLeft, m_text);
     update();
 }
 

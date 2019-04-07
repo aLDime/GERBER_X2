@@ -6,6 +6,7 @@
 #include <QTextStream>
 #include <gi/itemgroup.h>
 #include <graphicsview.h>
+#include <point.h>
 #include <settingsdialog.h>
 
 ///////////////////////////////////////////////
@@ -228,24 +229,16 @@ void GCodeFile::saveDrill()
     statFile();
     QPolygonF path(toQPolygon(m_toolPaths.first()));
 
-    double maxX = SettingsDialog::worckRect().right(); //-std::numeric_limits<double>::max();
-    double minX = SettingsDialog::worckRect().left(); //+std::numeric_limits<double>::max();
-
-    for (QPointF& point : path)
-        point -= MaterialSetup::zeroPos;
+    const double k = Shtift::min() + Shtift::max();
 
     if (m_side) {
-        for (QPointF& point : path) {
-            if (maxX < point.x())
-                maxX = point.x();
-            if (minX > point.x())
-                minX = point.x();
-        }
-        const double k = minX + maxX;
         for (QPointF& point : path) {
             point.rx() = -point.x() + k;
         }
     }
+
+    for (QPointF& point : path)
+        point -= MaterialSetup::zeroPos;
 
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size();
@@ -265,36 +258,19 @@ void GCodeFile::saveProfilePocket()
     statFile();
     QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
 
-    double maxX = SettingsDialog::worckRect().right();
-    maxX = -std::numeric_limits<double>::max();
-    double minX = SettingsDialog::worckRect().left();
-    minX = +std::numeric_limits<double>::max();
-
-    for (QPolygonF& path : paths) {
-        for (QPointF& point : path) {
-            for (QPointF& point : path) {
-                if (maxX < point.x())
-                    maxX = point.x();
-                if (minX > point.x())
-                    minX = point.x();
-            }
-            point -= MaterialSetup::zeroPos;
-        }
-    }
+    const double k = Shtift::min() + Shtift::max();
 
     if (m_side) {
-        //const double k = minX + SettingsDialog::worckRect().width() / 2;
-        const double k = minX + maxX;
         for (QPolygonF& path : paths) {
             std::reverse(path.begin(), path.end());
             for (QPointF& point : path) {
                 point.rx() = -point.x() + k;
-
-                //                if (point.x() > k)
-                //                    point.rx() = k - (point.x() - k);
-                //                else if (point.x() < k)
-                //                    point.rx() = k + (k - point.x());
             }
+        }
+    }
+    for (QPolygonF& path : paths) {
+        for (QPointF& point : path) {
+            point -= MaterialSetup::zeroPos;
         }
     }
 
@@ -373,7 +349,7 @@ void GCodeFile::statFile()
 {
     sl.clear();
     sl.append("G21 G17 G90"); //G17 XY plane
-    sl.append(g0() + z(MaterialSetup::z)); //HomeZ
+    sl.append(g0() + z(MaterialSetup::safeZ)); //HomeZ
 
     //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
@@ -382,7 +358,7 @@ void GCodeFile::statFile()
 
 void GCodeFile::endFile()
 {
-    sl.append(g0() + z(MaterialSetup::z)); //HomeZ
+    sl.append(g0() + z(MaterialSetup::safeZ)); //HomeZ
 
     QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY

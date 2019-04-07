@@ -257,7 +257,6 @@ void MainWindow::createActions()
     action->setShortcut(QKeySequence::ZoomIn);
     action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
     action->setShortcut(QKeySequence::ZoomOut);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
     action = zoomToolBar->addAction(QIcon::fromTheme("edit-select-all"), tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
 
     //==================== Selection / Delete selected ====================
@@ -324,7 +323,7 @@ void MainWindow::createActions()
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
-    QTimer::singleShot(10, [=] { toolpathActionList[Pocket]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 
     toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {
         ToolDatabase tdb(this, {});

@@ -1,6 +1,7 @@
 #ifndef RULER_H
 #define RULER_H
 
+#include <QFont>
 #include <QGraphicsItem>
 
 class Ruler : public QGraphicsItem {
@@ -22,6 +23,7 @@ private:
     QPointF m_pt2;
     QString m_text;
     QRectF m_textRect;
+    QFont m_font;
 };
 
 #endif // RULER_H

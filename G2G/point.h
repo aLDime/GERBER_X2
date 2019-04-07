@@ -25,6 +25,7 @@ public:
     void setPosY(double y);
 
     enum {
+        Null = -1,
         Zero,
         Home
     };
@@ -33,7 +34,7 @@ private:
     QRectF m_rect;
     QPainterPath m_path;
     QPainterPath m_shape;
-    int m_type;
+    int m_type = Null;
     void updateMaterialSetupForm();
 
 protected:
@@ -51,6 +52,8 @@ public:
     QPainterPath shape() const override;
     int type() const override;
     static QVector<Shtift*> shtifts();
+    static double min() { return qMin(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
+    static double max() { return qMax(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
     void resetPos();
 
 private:

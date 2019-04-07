@@ -9,47 +9,45 @@
 #include <algorithm>
 #include <aperture.h>
 #include <gi/bridgeitem.h>
+#include <limits>
 #include <scene.h>
 
 void fixBegin(Path& path)
 {
-    IntPoint p = path.first();
-    int s = 0;
+    IntPoint pt(path.first());
+    int rotate = 0;
     for (int i = 1, end = path.size(); i < end; ++i) {
-        if (p.Y >= path[i].Y) {
-            p.Y = path[i].Y;
-            s = i;
-            if (p.X > path[i].X) {
-                p.X = path[i].X;
-                s = i;
+        if (pt.Y >= path[i].Y) {
+            pt.Y = path[i].Y;
+            rotate = i;
+            if (pt.X > path[i].X) {
+                pt.X = path[i].X;
+                rotate = i;
             }
         }
     }
-    if (s)
-        std::rotate(path.begin(), path.begin() + s, path.end());
+    if (rotate)
+        std::rotate(path.begin(), path.begin() + rotate, path.end());
 }
 
-Paths sortByStratDistance(Paths src)
+Paths& sortByStratDistance(Paths& src)
 {
-    Paths dst;
-    dst.reserve(src.size());
-    IntPoint p1(MaterialSetup::homePos.x() * uScale, MaterialSetup::homePos.y() * uScale);
-    while (src.size()) {
-        int s = 0;
-        IntPoint p2;
-        double l1 = Length(p1, p2);
-        for (int i = 0; i < src.size(); ++i) {
-            p2 = src[i].first();
-            double l2 = Length(p1, p2);
-            if (l1 > l2) {
-                l1 = l2;
-                s = i;
+    IntPoint startPt(toIntPoint(MaterialSetup::homePos + MaterialSetup::zeroPos));
+    for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+        int swapIdx = firstIdx;
+        double destLen = std::numeric_limits<double>::max();
+        for (int secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double length = Length(startPt, src[secondIdx].first());
+            if (destLen > length) {
+                destLen = length;
+                swapIdx = secondIdx;
             }
         }
-        dst.append(src.takeAt(s));
-        p1 = dst.last().last();
+        startPt = src[swapIdx].last();
+        if (swapIdx != firstIdx)
+            std::swap(src[firstIdx], src[swapIdx]);
     }
-    return dst;
+    return src;
 }
 
 bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
@@ -308,7 +306,6 @@ GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, c
 
         std::reverse(m_returnPaths.begin(), m_returnPaths.end());
     }
-
     return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Pocket, fillPaths);
 }
 
@@ -320,12 +317,11 @@ QPair<GCodeFile*, GCodeFile*> ToolPathCreator::createPocket2(const QPair<Tool, T
 
 GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const SideOfMilling side)
 {
-
     m_toolDiameter = tool.getDiameter(depth);
-
+    // execute offset
     if (side == On) {
-        // execute offset
         m_returnPaths = m_workingPaths;
+        // fix direction
         if (!m_convent)
             ReversePaths(m_returnPaths);
     } else {
@@ -340,7 +336,6 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
         ClipperOffset offset;
         for (Paths& paths : groupedPaths(CopperPaths))
             offset.AddPaths(paths, jtRound, etClosedPolygon);
-
         offset.Execute(m_returnPaths, dOffset);
 
         if (m_returnPaths.size() == 0)
@@ -353,12 +348,11 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
             ReversePaths(m_returnPaths);
     }
 
-    for (Path& path : m_returnPaths)
+    for (Path& path : m_returnPaths) {
         fixBegin(path);
-
-    for (Path& path : m_returnPaths)
         if (path.first() != path.last())
             path.append(path.first());
+    }
 
     // find Bridges
     QVector<BridgeItem*> bridgeItems;
@@ -419,7 +413,7 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
                         }
                     }
                 }
-                if (!Orientation(m_returnPaths[index]))
+                if (Orientation(m_returnPaths[index]))
                     ReversePaths(tmpPaths);
                 --size;
                 m_returnPaths.remove(index--);

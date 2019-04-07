@@ -19,7 +19,7 @@ public:
 
     static QPointF homePos;
     static QPointF zeroPos;
-    static double z;
+    static double safeZ;
     static double thickness;
     static double clearence;
     static double plunge;
