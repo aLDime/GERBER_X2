@@ -34,6 +34,9 @@ private:
     Pathss m_groupedPaths;
     void grouping(PolyNode* node, Pathss* pathss, Grouping group);
 
+    Path& fixPath(PolyNode* node);
+    void grouping2(PolyNode* node, Paths* paths, bool fl = false);
+
     void DoOffset(const Paths& paths, Pathss& pathss);
 
     double m_toolDiameter = 0.0;

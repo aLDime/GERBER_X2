@@ -64,14 +64,19 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
                 painter->drawLine(line);
                 line.setAngle(angle - 10);
                 painter->drawLine(line);
-                //                QFont font("Courier");
-                //                font.setPointSizeF(1);
-                //                painter->save();
-                //                painter->scale(length - 10, length - 10);
-                //                painter->translate(toQPointF(path[i]));
-                //                painter->setFont(font);
-                //                painter->drawText(toQPointF(path[i]), QString::number(i));
-                //                painter->restore();
+
+                if (0) {
+                    painter->save();
+                    const QString text = "   " + QString::number(i);
+                    const QRectF textRect = QFontMetricsF(painter->font()).boundingRect(QRectF(), Qt::AlignLeft, text);
+                    const double k = 1.0 / GraphicsView ::self->matrix().m11();
+                    painter->translate(toQPointF(path[i]));
+                    painter->scale(k, -k);
+                    //painter->setBrush(QColor(127, 127, 127, 255));
+                    //painter->drawRect(textRect);
+                    painter->drawText(textRect, Qt::AlignLeft, text);
+                    painter->restore();
+                }
             }
         }
     }

@@ -327,7 +327,6 @@ void ToolEditForm::setTool(const Tool& tool)
 {
     ui->dsbxAngle->setValue(tool.angle);
     ui->dsbxDiameter->setValue(tool.diameter);
-    ui->dsbxOneTurnCut->setValue(tool.oneTurnCut);
     ui->dsbxPassDepth->setValue(tool.passDepth);
     ui->dsbxSpindleSpeed->setValue(tool.spindleSpeed);
     ui->dsbxStepover->setValue(tool.stepover);

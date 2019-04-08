@@ -4,6 +4,8 @@
 #include "tooltreeview.h"
 #include "ui_tooledit.h"
 
+#include <QMessageBox>
+
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)
     , ui(new Ui::ToolEdit)
@@ -32,9 +34,14 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [=](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+
         if ((item->isTool() && m_types.contains(item->tool().type))) {
-            setTool(item->tool());
-            accept();
+            if (item->tool().isValid()) {
+                setTool(item->tool());
+                accept();
+            } else {
+                QMessageBox ::information(this, "Invalid tool", item->tool().errorStr());
+            }
         }
     });
 }
