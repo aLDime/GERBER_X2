@@ -21,7 +21,7 @@ Paths File::merge() const
             tmpPaths = at(i++).paths;
             SimplifyPolygons(tmpPaths, pftNonZero);
             clipper.AddPaths(tmpPaths, ptClip, true);
-        } while (i < size() && exp == at(i).state.imgPolarity() && ++k < 20);
+        } while (i < size() && exp == at(i).state.imgPolarity() && ++k < 100);
 
         if (at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ctUnion, paths, pftPositive);
