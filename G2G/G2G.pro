@@ -93,7 +93,6 @@ HEADERS += \
     forms/drillmodel.h \
     filetree/layerdelegate.h \
     colorselector.h \
-    forms/normalizeraw.h \
     tooldatabase/tooleditdialog.h \
     gi/bridgeitem.h \
     gi/boarditem.h \
@@ -139,7 +138,6 @@ SOURCES += \
     forms/drillmodel.cpp \
     filetree/layerdelegate.cpp \
     colorselector.cpp \
-    forms/normalizeraw.cpp \
     tooldatabase/tooleditdialog.cpp \
     gi/bridgeitem.cpp \
     gi/boarditem.cpp \

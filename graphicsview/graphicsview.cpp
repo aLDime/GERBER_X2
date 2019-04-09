@@ -7,6 +7,7 @@
 #include <QTimer>
 #include <QTransform>
 #include <QtWidgets>
+#include <gi/bridgeitem.h>
 #include <gi/ruler.h>
 #include <mainwindow.h>
 
@@ -266,6 +267,11 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if (event->button() == Qt::RightButton) {
+        { // удаление мостика
+            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
+            if (item && item->type() == BridgeType && !static_cast<BridgeItem*>(item)->ok())
+                delete item;
+        }
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         setInteractive(false);

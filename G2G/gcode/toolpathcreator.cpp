@@ -89,13 +89,25 @@ bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
     }
     return false;
 }
-
+////////////////////////////////////////////////////////////////
+/// \brief ToolPathCreator::ToolPathCreator
+/// \param value
+/// \param convent
+///
 ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent)
     : m_workingPaths(value)
     , m_convent(convent)
 {
 }
-
+////////////////////////////////////////////////////////////////
+/// \brief ToolPathCreator::createPocket
+/// \param tool
+/// \param depth
+/// \param side
+/// \param steps
+/// \param ex
+/// \return
+///
 GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, const bool side, const int steps, const bool ex)
 {
     m_toolDiameter = tool.getDiameter(depth) * uScale;
@@ -240,44 +252,61 @@ QPair<GCodeFile*, GCodeFile*> ToolPathCreator::createPocket2(const QPair<Tool, T
     QPair<GCodeFile*, GCodeFile*> gcf;
     return gcf;
 }
-
+////////////////////////////////////////////////////////////////
+/// \brief ToolPathCreator::createProfile
+/// \param tool
+/// \param depth
+/// \param side
+/// \return
+///
 GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const SideOfMilling side)
 {
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset
     if (side == On) {
         m_returnPaths = m_workingPaths;
+
+        for (Path& path : m_returnPaths)
+            path.append(path.first());
+
         // fix direction
-        if (!m_convent)
+        if (m_convent)
             ReversePaths(m_returnPaths);
+
+        if (m_workingRawPaths.size())
+            m_returnPaths.append(m_workingRawPaths);
+
     } else {
-        double dOffset;
         // calc offset
-        if (side == Outer)
-            dOffset = +m_toolDiameter * uScale * 0.5;
-        else
-            dOffset = -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
         // execute offset
-        ClipperOffset offset;
-        for (Paths& paths : groupedPaths(CopperPaths))
-            offset.AddPaths(paths, jtRound, etClosedPolygon);
-        offset.Execute(m_returnPaths, dOffset);
+        {
+            ClipperOffset offset;
+            for (Paths& paths : groupedPaths(CopperPaths))
+                offset.AddPaths(paths, jtRound, etClosedPolygon);
+            offset.Execute(m_returnPaths, dOffset);
+        }
+        {
+            ClipperOffset offset;
+            offset.AddPaths(m_workingRawPaths, jtRound, etOpenRound);
+            offset.Execute(m_workingRawPaths, dOffset);
+        }
+
+        if (m_workingRawPaths.size())
+            m_returnPaths.append(m_workingRawPaths);
+
+        // fix direction
+        if (side == Outer && !m_convent)
+            ReversePaths(m_returnPaths);
+        else if (side == Inner && m_convent)
+            ReversePaths(m_returnPaths);
+
+        for (Path& path : m_returnPaths)
+            path.append(path.first());
 
         if (m_returnPaths.size() == 0)
             return nullptr;
-
-        // fix direction
-        if (side == Outer && m_convent)
-            ReversePaths(m_returnPaths);
-        else if (side == Inner && !m_convent)
-            ReversePaths(m_returnPaths);
-    }
-
-    for (Path& path : m_returnPaths) {
-        fixBegin(path);
-        if (path.first() != path.last())
-            path.append(path.first());
     }
 
     // find Bridges
@@ -370,6 +399,66 @@ Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
     clipper.Execute(ctUnion, polyTree, pftNonZero);
     grouping(polyTree.GetFirst(), &m_groupedPaths, group);
     return m_groupedPaths;
+}
+////////////////////////////////////////////////////////////////
+/// \brief ToolPathCreator::addRawPaths
+/// \param paths
+///
+void ToolPathCreator::addRawPaths(Paths rawPaths)
+{
+    qDebug() << rawPaths.size();
+
+    const double glueLen = 0.1 * uScale;
+    Paths paths;
+
+    do {
+        Path path = rawPaths.takeFirst();
+        for (int i = 0; i < rawPaths.size();) {
+            const IntPoint& pt1 = path.last();
+            const IntPoint& pt2 = rawPaths[i].first();
+            const IntPoint& pt3 = rawPaths[i].last();
+            if (Length(pt1, pt2) < glueLen) {
+                path.append(rawPaths.takeAt(i));
+                i = 0;
+            } else if (Length(pt1, pt3) < glueLen) {
+                ReversePath(rawPaths[i]);
+                path.append(rawPaths.takeAt(i));
+                i = 0;
+            } else
+                ++i;
+        }
+        paths.append(path);
+    } while (rawPaths.size());
+
+    Clipper clipper;
+
+    for (Path path : paths) {
+        if (path.first() == path.last())
+            clipper.AddPath(path, ptSubject, true);
+        else
+            m_workingRawPaths.append(path);
+    }
+
+    //clipper.AddPaths(paths, ptSubject, true);
+    IntRect r(clipper.GetBounds());
+    int k = uScale * 10;
+    Path outer = {
+        IntPoint(r.left - k, r.bottom + k),
+        IntPoint(r.right + k, r.bottom + k),
+        IntPoint(r.right + k, r.top - k),
+        IntPoint(r.left - k, r.top - k)
+    };
+
+    clipper.AddPath(outer, ptClip, true);
+    clipper.Execute(ctXor, paths, pftEvenOdd);
+    paths.takeFirst();
+    qDebug() << paths.size();
+    m_workingPaths.append(paths);
+}
+
+void ToolPathCreator::addPaths(const Paths& paths)
+{
+    m_workingPaths.append(paths);
 }
 
 void ToolPathCreator::grouping(PolyNode* node, Pathss* pathss, Grouping group)

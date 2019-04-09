@@ -58,9 +58,12 @@ bool Tool::isValid()
         fl = false;
     if (qFuzzyIsNull(passDepth))
         fl = false;
-    if (qFuzzyIsNull(feedRate))
-        if (type != Drill)
+    if (type != Drill) {
+        if (qFuzzyIsNull(feedRate))
             fl = false;
+        if (qFuzzyIsNull(stepover))
+            fl = false;
+    }
     if (qFuzzyIsNull(plungeRate))
         fl = false;
     return fl;
@@ -93,6 +96,8 @@ QString Tool::errorStr()
     }
     if (qFuzzyIsNull(feedRate))
         errorString += "Feed rate = 0\n";
+    if (qFuzzyIsNull(stepover))
+        errorString += "Stepover = 0\n";
     if (qFuzzyIsNull(plungeRate))
         errorString += "Plunge rate = 0!\n";
     return errorString;

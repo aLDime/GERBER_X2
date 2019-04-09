@@ -4,6 +4,7 @@
 #include <QIcon>
 #include <QJsonObject>
 #include <QMap>
+#include <QMessageBox>
 #include <QObject>
 
 class Tool {
@@ -52,6 +53,7 @@ public:
     bool isValid();
     QIcon icon();
     QString errorStr();
+    void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, "No valid tool...!!!", errorStr()); }
 };
 
 class ToolHolder {

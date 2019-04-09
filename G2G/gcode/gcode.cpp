@@ -82,7 +82,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     case Profile:
 
         for (const Path& path : tmpPaths2) {
-            qDebug() << path;
+            //qDebug() << path;
             item = new PathItem({ path });
             item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColor(SettingsDialog::color(Colors::CutArea));

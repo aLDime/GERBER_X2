@@ -154,12 +154,12 @@ void PocketForm::create()
     Scene* scene = Scene::self;
 
     if (!tool.isValid()) {
-        QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());
+        tool.errorMessageBox(this);
         return;
     }
 
     if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
-        QMessageBox::warning(this, "No valid tool...!!!", tool2.errorStr());
+        tool2.errorMessageBox(this);
         return;
     }
 
@@ -193,7 +193,7 @@ void PocketForm::create()
         boardSide = Top;
 
     if (wPaths.isEmpty()) {
-        QMessageBox::warning(this, "!!!", tr("No selected..."));
+        QMessageBox::warning(this, "!!!", tr("No selected items for working..."));
         return;
     }
 

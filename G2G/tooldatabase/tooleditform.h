@@ -38,6 +38,7 @@ private slots:
     void calculate(int index, double value);
     void valueChanged(double value);
 
+public slots:
     void on_pbApply_clicked();
 
 private:

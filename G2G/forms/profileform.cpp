@@ -1,6 +1,5 @@
 #include "profileform.h"
 #include "materialsetupform.h"
-#include "normalizeraw.h"
 #include "ui_profileform.h"
 
 #include "filetree/filemodel.h"
@@ -132,13 +131,13 @@ void ProfileForm::create()
     Scene* scene = Scene::self;
 
     if (!tool.isValid()) {
-        QMessageBox::warning(this, "No valid tool...!!!", tool.errorStr());
+        tool.errorMessageBox(this);
         return;
     }
 
     Paths wPaths;
     Paths wrPaths;
-    Side boardSide = NullSide;
+    Side boardSide = Top;
 
     G::File const* file = nullptr;
 
@@ -171,23 +170,21 @@ void ProfileForm::create()
             wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (!wrPaths.isEmpty()) {
-        if (side == On)
-            wPaths = wrPaths;
-        else {
-            wPaths = NormalizeRaw(wrPaths).paths();
-        }
-    }
-
-    if (boardSide == NullSide)
-        boardSide = Top;
-
-    if (wPaths.isEmpty()) {
-        QMessageBox::warning(this, "!!!", tr("No selected..."));
+    if (wrPaths.isEmpty() && wPaths.isEmpty()) {
+        QMessageBox::warning(this, "!!!", tr("No selected items for working..."));
         return;
     }
 
-    GCodeFile* gcode = ToolPathCreator(wPaths, ui->rbConventional->isChecked()).createProfile(tool, ui->dsbxDepth->value(), side);
+    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked());
+
+    if (!wrPaths.isEmpty()) {
+        //        if (side == On)
+        //            tpc.addPaths(wrPaths);
+        //        else
+        tpc.addRawPaths(wrPaths);
+    }
+
+    GCodeFile* gcode = tpc.createProfile(tool, ui->dsbxDepth->value(), side);
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("The tool does not fit in the Working items!"));

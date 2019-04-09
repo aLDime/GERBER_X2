@@ -262,7 +262,6 @@ void ToolEditForm::on_pbApply_clicked()
         m_item->setNote(m_tool.note);
         emit itemChanged(m_item);
         setRedReset();
-
     } else {
         switch (m_tool.type) {
         case Tool::Drill:
@@ -325,6 +324,7 @@ void ToolEditForm::setDialog()
 
 void ToolEditForm::setTool(const Tool& tool)
 {
+    m_tool = tool;
     ui->dsbxAngle->setValue(tool.angle);
     ui->dsbxDiameter->setValue(tool.diameter);
     ui->dsbxPassDepth->setValue(tool.passDepth);
@@ -337,8 +337,6 @@ void ToolEditForm::setTool(const Tool& tool)
 
     ui->dsbxFeedRate->setValue(tool.feedRate * m_feed);
     ui->dsbxPlungeRate->setValue(tool.plungeRate * m_feed);
-
-    m_tool = tool;
     setVisibleWidgets(true);
 }
 
