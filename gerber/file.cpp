@@ -16,11 +16,12 @@ Paths File::merge() const
         Clipper clipper(ioStrictlySimple);
         clipper.AddPaths(paths, ptSubject, true);
         exp = at(i).state.imgPolarity();
+        int k = 0;
         do {
             tmpPaths = at(i++).paths;
             SimplifyPolygons(tmpPaths, pftNonZero);
             clipper.AddPaths(tmpPaths, ptClip, true);
-        } while (i < size() && exp == at(i).state.imgPolarity());
+        } while (i < size() && exp == at(i).state.imgPolarity() && ++k < 20);
 
         if (at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ctUnion, paths, pftPositive);

@@ -96,6 +96,8 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
+    delete m_zeroPoint;
+    delete m_homePoint;
     gerberThread.quit();
     gerberThread.wait();
     self = nullptr;

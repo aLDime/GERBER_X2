@@ -123,6 +123,10 @@ GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, c
         } else
             groupedPaths(CopperPaths);
 
+        if (side)
+            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+                m_groupedPaths.removeFirst();
+
         for (Paths paths : m_groupedPaths) {
             Paths tmpPaths;
             ClipperOffset offset(uScale, uScale / 1000);
@@ -180,6 +184,10 @@ GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, c
             groupedPaths(CutoffPaths, m_toolDiameter + 5);
         } else
             groupedPaths(CopperPaths);
+
+        if (side)
+            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+                m_groupedPaths.removeFirst();
 
         for (Paths paths : m_groupedPaths) {
             ClipperOffset offset(uScale, uScale / 1000);
