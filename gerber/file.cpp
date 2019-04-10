@@ -1,35 +1,161 @@
 #include "file.h"
 #include <QElapsedTimer>
+#include <QSemaphore>
+#include <QThread>
 
 using namespace G;
 
+class Union : public QThread {
+    //    Q_OBJECT
+public:
+    Union(QSemaphore* semaphore, const Paths& paths)
+        : m_semaphore(semaphore)
+        , m_paths(paths)
+    {
+    }
+    virtual ~Union() {}
+
+    // QThread interface
+    Paths& paths();
+
+protected:
+    void run() override
+    {
+        //qDebug("run()");
+        Clipper clipper(ioStrictlySimple);
+        clipper.AddPaths(m_paths, ptClip, true);
+        clipper.Execute(ctUnion, m_paths, pftPositive);
+        m_semaphore->release();
+        //qDebug("exit()");
+        exit(0);
+    }
+
+private:
+    Paths m_paths;
+    QSemaphore* m_semaphore = nullptr;
+};
+
 File::File(const QString& fileName) { m_fileName = fileName; }
 
-File::~File() {}
+template <typename T>
+void addData(QByteArray& dataArray, const T& data)
+{
+    dataArray.append(reinterpret_cast<const char*>(&data), sizeof(T));
+}
+
+File::~File()
+{
+    return;
+    qDebug() << "~File()" << shortFileName();
+    QByteArray data;
+    QFile file(m_fileName.append(".g2"));
+    if (file.open(QFile::WriteOnly)) {
+
+        auto appendSize = [&](int size) {
+            data.append(reinterpret_cast<const char*>(&size), sizeof(int));
+        };
+        addData(data, format);
+        addData(data, layer);
+        addData(data, miror);
+        addData(data, m_itemsType);
+
+        appendSize(m_fileName.size());
+        data.append(m_fileName.toLocal8Bit());
+
+        data.append(reinterpret_cast<char*>(&m_side), sizeof(Side));
+
+        appendSize(m_color.name(QColor::HexArgb).size());
+        data.append(m_color.name(QColor::HexArgb));
+
+        appendSize(m_lines.size());
+        for (const QString& line : m_lines) {
+            appendSize(line.size());
+            data.append(line.toLocal8Bit());
+        }
+
+        appendSize(m_mergedPaths.size());
+        for (const Path& path : m_mergedPaths) {
+            int size = path.size();
+            appendSize(size);
+            data.append(reinterpret_cast<const char*>(path.data()), size * sizeof(IntPoint));
+        }
+
+        appendSize(m_groupedPaths.size());
+        for (const Paths& paths : m_groupedPaths) {
+            appendSize(paths.size());
+            for (const Path& path : paths) {
+                int size = path.size();
+                appendSize(size);
+                data.append(reinterpret_cast<const char*>(path.data()), size * sizeof(IntPoint));
+            }
+        }
+        file.write(data);
+    }
+}
 
 Paths File::merge() const
 {
-    Paths paths;
+    qDebug() << "merge()" << size();
+
+    QElapsedTimer t;
+    t.start();
+    m_mergedPaths.clear();
     Paths tmpPaths;
     int i = 0, exp = -1;
     while (i < size()) {
-        Clipper clipper(ioStrictlySimple);
-        clipper.AddPaths(paths, ptSubject, true);
+        Clipper clipper; //(ioStrictlySimple);
+        clipper.AddPaths(m_mergedPaths, ptSubject, true);
         exp = at(i).state.imgPolarity();
-        int k = 0;
+
+        Paths workingPaths;
+
         do {
             tmpPaths = at(i++).paths;
-            SimplifyPolygons(tmpPaths, pftNonZero);
-            clipper.AddPaths(tmpPaths, ptClip, true);
-        } while (i < size() && exp == at(i).state.imgPolarity() && ++k < 100);
+            //SimplifyPolygons(tmpPaths, pftNonZero);
+            workingPaths.append(tmpPaths);
+        } while (i < size() && exp == at(i).state.imgPolarity());
 
-        if (at(i - 1).state.imgPolarity() == Positive)
-            clipper.Execute(ctUnion, paths, pftPositive);
-        else
-            clipper.Execute(ctDifference, paths, pftNonZero);
+        if (at(i - 1).state.imgPolarity() == Positive) {
+            if (0) {
+                QSemaphore semaphore;
+                const int threadCount = QThread::idealThreadCount();
+                QVector<Union*> unionThreads;
+                //                for (int i = 0; i < threadCount; ++i) {
+                //                    unionThreads.append(new Union(&semaphore, {}));
+                //                }
+                //                int i = 0;
+                //                while (workingPaths.size()) {
+                //                    for (int j = 0; j < 500 && workingPaths.size(); ++j) {
+                //                        unionThreads[i]->paths().append(workingPaths.takeLast());
+                //                    }
+                //                    (++i == 4) ? i = 0 : i = i;
+                //                }
+                for (int i = 0, j = workingPaths.size() / threadCount; i < threadCount; ++i) {
+                    if (i == threadCount - 1)
+                        unionThreads.append(new Union(&semaphore, workingPaths.mid(i * j)));
+                    else
+                        unionThreads.append(new Union(&semaphore, workingPaths.mid(i * j, j)));
+                    unionThreads.last()->start();
+                    //                    unionThreads[i]->start();
+                }
+                if (semaphore.tryAcquire(threadCount, 3600000)) {
+                    for (Union* unionThread : unionThreads) {
+                        clipper.AddPaths(unionThread->paths(), ptClip, true);
+                    }
+                    clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
+                }
+                qDeleteAll(unionThreads);
+            } else {
+                clipper.AddPaths(workingPaths, ptClip, true);
+                clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
+            }
+        } else {
+            clipper.AddPaths(workingPaths, ptClip, true);
+            clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
+        }
     }
-    CleanPolygons(paths, 0.0009 * uScale);
-    m_mergedPaths = paths;
+    CleanPolygons(m_mergedPaths, 0.0009 * uScale);
+    qDebug() << shortFileName() << t.elapsed();
     return m_mergedPaths;
 }
 
@@ -41,6 +167,7 @@ ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
+
     if (m_groupedPaths.isEmpty()) {
         PolyTree polyTree;
         Clipper clipper;
@@ -161,3 +288,8 @@ QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const { return m_a
 //        break;
 //    }
 //}
+
+Paths& Union::paths()
+{
+    return m_paths;
+}

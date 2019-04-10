@@ -135,9 +135,7 @@ DrillForm::DrillForm(QWidget* parent)
 
 DrillForm::~DrillForm()
 {
-    qDebug("~DrillForm()");
     self = nullptr;
-    //    if (MyScene::self)
     clear();
     delete ui;
 }
@@ -290,7 +288,7 @@ void DrillForm::updateFiles()
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
-            QColor color(file->itemGroup()->brush().color());
+            QColor color(file->color());
             color.setAlpha(255);
             pixmap.fill(color);
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon(pixmap), Qt::DecorationRole);

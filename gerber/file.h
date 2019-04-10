@@ -29,22 +29,16 @@ public:
     };
 
     Format format;
-
     Layer layer = Copper;
     Miror miror = Vertical;
     FileType type() const override { return FileType::Gerber; }
-
     QMap<int, QSharedPointer<AbstractAperture>> apertures() const;
     bool flashedApertures() const;
-
     ItemGroup* itemGroup() const override;
-
     void setItemType(ItemsType type);
     ItemsType itemsType() const;
-
     void setRawItemGroup(ItemGroup* itemGroup);
     ItemGroup* rawItemGroup() const;
-
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
 
 protected:

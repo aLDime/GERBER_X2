@@ -162,7 +162,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             }
         }
         m_file->rawItemGroup()->setVisible(false);
-
         emit fileReady(m_file);
     }
     emit fileProgress(m_file->shortFileName(), 1, 1);
@@ -286,7 +285,7 @@ QList<QString> Parser::format(QString data)
                 gerberLinesAppend(state, line);
                 continue;
             case Data:
-                qWarning() << "РҐСЂРµРЅ РµРіРѕ Р·РЅР°РµС‚:" << line;
+                //qWarning() << "Хрен его знает:" << line;
                 continue;
             }
         }
@@ -880,8 +879,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         case Multi: //G75
             radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             start = atan2(-j, -i); // Start angle
-            // Р§РёСЃР»РµРЅРЅС‹Рµ РѕС€РёР±РєРё РјРѕРіСѓС‚ РїРѕРјРµС€Р°С‚СЊ, start == stop, РїРѕСЌС‚РѕРјСѓ РјС‹ РїСЂРѕРІРµСЂСЏРµРј Р·Р°Р±Р»Р°РіРѕРІСЂРµРјРµРЅРЅРѕ.
-            // Р­С‚Рѕ РґРѕР»Р¶РЅРѕ РїСЂРёРІРµСЃС‚Рё Рє РѕР±СЂР°Р·РѕРІР°РЅРёСЋ РґСѓРіРё РІ 360 РіСЂР°РґСѓСЃРѕРІ.
+            // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
+            // �­то должно привести к образованию дуги в 360 градусов.
             if (m_state.curPos() == IntPoint(x, y)) {
                 stop = start;
             } else {
@@ -889,8 +888,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             }
             arcPolygon = arc(centerPos[0], radius1, start, stop);
             //arcPolygon = Arc2(currentPos, IntPoint(x, y), center);
-            // РџРѕСЃР»РµРґРЅСЏСЏ С‚РѕС‡РєР° РІ РІС‹С‡РёСЃР»РµРЅРЅРѕР№ РґСѓРіРµ РјРѕР¶РµС‚ РёРјРµС‚СЊ С‡РёСЃР»РѕРІС‹Рµ РѕС€РёР±РєРё.
-            // РўРѕС‡РЅРѕР№ РєРѕРЅРµС‡РЅРѕР№ С‚РѕС‡РєРѕР№ СЏРІР»СЏРµС‚СЃСЏ СѓРєР°Р·Р°РЅРЅР°СЏ (x, y). Р—Р°РјРµРЅРёС‚СЊ.
+            // Последняя точка в вычисленной дуге может иметь числовые ошибки.
+            // Точной конечной точкой является указанная (x, y). Заменить.
             m_state.curPos() = IntPoint(x, y);
             if (arcPolygon.size())
                 arcPolygon[arcPolygon.size() - 1] = m_state.curPos();
@@ -901,9 +900,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             for (int c = 0; c < 4; ++c) {
                 radius1 = sqrt(i * i + j * j);
                 radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
-                // РЈР±РµР¶РґР°РµРјСЃСЏ, С‡С‚Рѕ СЂР°РґРёСѓСЃ РЅР°С‡Р°Р»Р° СЃРѕРІРїР°РґР°РµС‚ СЃ СЂР°РґРёСѓСЃРѕРј РєРѕРЅС†Р°.
+                // Убеждаемся, что радиус начала совпадает с радиусом конца.
                 if (qAbs(radius2 - radius1) > (1e-4 * uScale)) {
-                    // РќРµРґРµР№СЃС‚РІРёС‚РµР»СЊРЅС‹Р№ С†РµРЅС‚СЂ.
+                    // Недействительный центр.
                     continue;
                 }
                 // Correct i and j and return true; as with multi-quadrant.

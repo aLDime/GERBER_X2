@@ -125,15 +125,22 @@ void Point::setPosY(double y)
 
 void Point::updateMaterialSetupForm()
 {
-    if (m_type == Home && MaterialSetup::self) {
-        MaterialSetup::self->setHomePos(pos());
-    } else if (m_type == Zero && MaterialSetup::self) {
-        MaterialSetup::self->setZeroPos(pos());
+    if (MaterialSetup::self) {
+        if (m_type == Home)
+            MaterialSetup::self->setHomePos(pos());
+        else if (m_type == Zero)
+            MaterialSetup::self->setZeroPos(pos());
+
     } else {
-        QSettings settings;
-        settings.beginGroup("Point" + QString::number(m_type));
-        settings.setValue("pos", pos());
+        if (m_type == Home)
+            MaterialSetup::self->homePos = pos();
+        else if (m_type == Zero)
+            MaterialSetup::self->zeroPos = pos();
     }
+
+    QSettings settings;
+    settings.beginGroup("Point" + QString::number(m_type));
+    settings.setValue("pos", pos());
 }
 
 void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
