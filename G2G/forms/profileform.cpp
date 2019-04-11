@@ -110,6 +110,7 @@ void ProfileForm::on_pbEdit_clicked()
     d.toolEdit->setTool(tool);
     if (d.exec()) {
         tool = d.toolEdit->tool();
+        tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
     }

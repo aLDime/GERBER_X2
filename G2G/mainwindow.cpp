@@ -1,24 +1,18 @@
 #include "mainwindow.h"
 #include "aboutform.h"
 #include "settingsdialog.h"
-
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QToolBar>
-
-#include <parser.h>
-
+#include <filetree/fileholder.h>
 #include <forms/drillform.h>
 #include <forms/materialsetupform.h>
 #include <forms/pocketform.h>
 #include <forms/profileform.h>
-
-#include <tooldatabase/tooldatabase.h>
-
-#include <staticholders/fileholder.h>
-
 #include <gi/bridgeitem.h>
+#include <parser.h>
+#include <tooldatabase/tooldatabase.h>
 
 MainWindow* MainWindow::self = nullptr;
 
@@ -146,6 +140,30 @@ void MainWindow::open()
     }
 }
 
+void MainWindow::saveSelectedToolpaths()
+{
+    bool isEmpty = true;
+    for (GCodeFile* file : FileHolder::files<GCodeFile>()) {
+        if (!file->itemGroup()->isVisible())
+            continue;
+        isEmpty = false;
+        QSettings settings;
+        QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
+            QString(settings.value("LastGCodeDir").toString()).append(file->shortFileName()),
+            tr("GCode (*.tap)")));
+
+        if (name.isEmpty())
+            return;
+
+        settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
+        file->save(name);
+        file->itemGroup()->setVisible(false);
+    }
+    if (isEmpty) {
+        QMessageBox::information(this, "", "No selected toolpath files.");
+    }
+}
+
 void MainWindow::closeFiles()
 {
     dockWidget->close();
@@ -193,9 +211,14 @@ void MainWindow::createActions()
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Toolpaths..."), this, &MainWindow::saveSelectedToolpaths);
+    fileToolBar->addAction(action);
+    action->setShortcuts(QKeySequence::Save);
+    action->setStatusTip(tr("Save selected toolpaths to one directory"));
+
     exportPdfAct = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
     fileToolBar->addAction(exportPdfAct);
-    exportPdfAct->setShortcuts(QKeySequence::Save);
+    exportPdfAct->setShortcuts(QKeySequence::Print);
     exportPdfAct->setStatusTip(tr("Export to PDF file"));
     exportPdfAct->setEnabled(false);
 
@@ -364,7 +387,7 @@ void MainWindow::createShtifts()
         settings.setValue("Shtift/depth", depth);
 
         GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
-        gcode->setFileName("Shtift");
+        gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id) + ")");
         FileModel::self->addGcode(gcode);
     }
 }

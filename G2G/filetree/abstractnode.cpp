@@ -1,6 +1,5 @@
 #include "abstractnode.h"
-
-#include "staticholders/fileholder.h"
+#include "filetree/fileholder.h"
 #include <QDebug>
 #include <mainwindow.h>
 

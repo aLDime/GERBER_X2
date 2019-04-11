@@ -1,7 +1,6 @@
 #include "drillnode.h"
+#include "filetree/fileholder.h"
 #include "gerbernode.h"
-#include "staticholders/fileholder.h"
-
 #include <QFileInfo>
 #include <mainwindow.h>
 
@@ -31,8 +30,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case 0:
         switch (role) {
         case Qt::CheckStateRole:
-            checkState = value.value<Qt::CheckState>();
-            FileHolder::file(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -64,7 +62,7 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
         case Qt::ToolTipRole:
             return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
-            return checkState;
+            return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return QIcon::fromTheme("roll");
         case Qt::UserRole:

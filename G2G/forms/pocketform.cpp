@@ -122,6 +122,7 @@ void PocketForm::on_pbEdit_clicked()
     d.toolEdit->setTool(tool);
     if (d.exec()) {
         tool = d.toolEdit->tool();
+        tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
     }
@@ -133,6 +134,7 @@ void PocketForm::on_pbEdit_2_clicked()
     d.toolEdit->setTool(tool2);
     if (d.exec()) {
         tool2 = d.toolEdit->tool();
+        tool2.id = -1;
         ui->lblToolName_2->setText(tool2.name);
         updateName();
     }

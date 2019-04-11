@@ -77,12 +77,6 @@ Path AbstractAperture::drawDrill(const State& state)
     return drill;
 }
 
-
-
-
-
-
-
 void AbstractAperture::transform(Path& poligon, const State& state)
 {
 
@@ -103,7 +97,6 @@ void AbstractAperture::transform(Path& poligon, const State& state)
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);
 }
-
 
 /////////////////////////////////////////////////////
 /// \brief ApCircle::ApCircle
@@ -143,7 +136,13 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fo
     m_drillDiam = drillDiam;
 }
 
-QString ApRectangle::name() { return QString("RECT(W%1, H%2)").arg(m_width).arg(m_height); } //RECTANGLE
+QString ApRectangle::name() //RECTANGLE
+{
+    if (m_width == m_height)
+        return QString("RECT(□ %1)").arg(m_width).arg(m_height);
+    else
+        return QString("RECT(%1 x %2)").arg(m_width).arg(m_height);
+}
 
 ApertureType ApRectangle::type() const { return Rectangle; }
 
@@ -168,7 +167,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const Format
     m_drillDiam = drillDiam;
 }
 
-QString ApObround::name() { return QString("OBRO(W%1, H%2)").arg(m_width).arg(m_height); } //OBROUND
+QString ApObround::name() { return QString("OBRO(%1 x %2)").arg(m_width).arg(m_height); } //OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 

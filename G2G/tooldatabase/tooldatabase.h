@@ -1,8 +1,8 @@
 #ifndef TOOLEDIT_H
 #define TOOLEDIT_H
 
-#include <QDialog>
 #include "tool.h"
+#include <QDialog>
 
 namespace Ui {
 class ToolEdit;
@@ -27,6 +27,9 @@ private:
     Tool m_tool;
     ToolItem* m_item;
     const QVector<Tool::Type> m_types;
+
+protected:
+    void keyPressEvent(QKeyEvent* evt) override;
 };
 
 #endif // TOOLEDIT_H

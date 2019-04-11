@@ -190,7 +190,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxDiameter">
+       <widget class="DoubleSpinBox" name="dsbxDiameter">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -213,7 +213,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxAngle">
+       <widget class="DoubleSpinBox" name="dsbxAngle">
         <property name="suffix">
          <string> °</string>
         </property>
@@ -257,7 +257,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxPassDepth">
+       <widget class="DoubleSpinBox" name="dsbxPassDepth">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -294,7 +294,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QDoubleSpinBox" name="dsbxStepover">
+         <widget class="DoubleSpinBox" name="dsbxStepover">
           <property name="suffix">
            <string> mm</string>
           </property>
@@ -310,7 +310,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="dsbxStepoverPercent">
+         <widget class="DoubleSpinBox" name="dsbxStepoverPercent">
           <property name="suffix">
            <string> %</string>
           </property>
@@ -349,7 +349,7 @@
          <number>0</number>
         </property>
         <item>
-         <widget class="QDoubleSpinBox" name="dsbxOneTurnCut">
+         <widget class="DoubleSpinBox" name="dsbxOneTurnCut">
           <property name="suffix">
            <string> mm</string>
           </property>
@@ -365,7 +365,7 @@
          </widget>
         </item>
         <item>
-         <widget class="QDoubleSpinBox" name="dsbxOneTurnCutPercent">
+         <widget class="DoubleSpinBox" name="dsbxOneTurnCutPercent">
           <property name="suffix">
            <string> %</string>
           </property>
@@ -414,7 +414,7 @@
        </widget>
       </item>
       <item row="0" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxSpindleSpeed">
+       <widget class="DoubleSpinBox" name="dsbxSpindleSpeed">
         <property name="suffix">
          <string> r.p.m.</string>
         </property>
@@ -440,7 +440,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxFeedRate">
+       <widget class="DoubleSpinBox" name="dsbxFeedRate">
         <property name="suffix">
          <string> mm/sec</string>
         </property>
@@ -466,7 +466,7 @@
        </widget>
       </item>
       <item row="2" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxPlungeRate">
+       <widget class="DoubleSpinBox" name="dsbxPlungeRate">
         <property name="suffix">
          <string> mm/sec</string>
         </property>
@@ -509,6 +509,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>doublespinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

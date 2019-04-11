@@ -28,6 +28,7 @@ public:
 protected:
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
+    //Qt::CheckState m_checkState = Qt::Checked;
 };
 
 #endif // TREEITEM_H

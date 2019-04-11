@@ -19,7 +19,6 @@ public:
     static QTimer* repaintTimer();
 
 private:
-    Qt::CheckState checkState = Qt::Checked;
     const int m_id;
     static QTimer m_repaintTimer;
     void repaint();

@@ -18,7 +18,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
 
 private:
-    Qt::CheckState checkState = Qt::Checked;
     const int m_id;
 };
 

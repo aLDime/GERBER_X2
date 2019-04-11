@@ -40,7 +40,88 @@ private:
     Path& fixPath(PolyNode* node);
     void grouping2(PolyNode* node, Paths* addRawPaths, bool fl = false);
 
-    void DoOffset(const Paths& addRawPaths, Pathss& pathss);
+    //    void DoOffset(const Paths& addRawPaths, Pathss& pathss)
+    //    {
+    //        if (paths.isEmpty())
+    //            return;
+    //        static bool fl = false;
+    //        Paths wPaths;
+
+    //        QVector<bool> flags;
+    //        for (const Path& path : paths)
+    //            flags.append(Orientation(path));
+    //        qDebug() << flags;
+
+    //        if (flags.contains(false)) {
+    //            qDebug() << "NNN";
+    //            ClipperOffset offset;
+    //            offset.AddPaths(paths, fl ? jtMiter : jtRound, etClosedPolygon);
+    //            offset.Execute(wPaths, -m_stepOver);
+    //            fl = true;
+    //            if (wPaths.isEmpty())
+    //                return;
+    //            Paths tmp(wPaths);
+    //            //        for (Path& path : tmp) {
+    //            //            //path.append(path.first());
+    //            //            //            if (!m_convent)
+    //            //            //                ReversePath(path);
+    //            //        }
+    //            if (paths.size() == tmp.size()) {
+    //                bool fl = true;
+    //                for (int i = 0; i < tmp.size() && fl; ++i) {
+    //                    if (flags[i])
+    //                        fl = PointInPolygon(tmp[i][0], pathss.last()[i]) > 0;
+    //                    else
+    //                        fl = PointInPolygon(pathss.last()[i][0], tmp[i]) > 0;
+    //                }
+    //                if (fl) {
+    //                    qDebug() << "append N";
+    //                    for (int i = 0; i < tmp.size(); ++i)
+    //                        pathss.last()[i].append(tmp[i]);
+    //                    DoOffset(wPaths, pathss);
+    //                } else {
+    //                    qDebug() << "insert N1";
+    //                    pathss.append(tmp);
+    //                    DoOffset(wPaths, pathss);
+    //                }
+    //            } else {
+    //                qDebug() << "insert N2";
+    //                pathss.append(tmp);
+    //                DoOffset(wPaths, pathss);
+    //            }
+    //        } else {
+    //            for (const Path& path : paths) {
+    //                qDebug() << "111";
+    //                ClipperOffset offset;
+    //                offset.AddPath(path, fl ? jtMiter : jtRound, etClosedPolygon);
+    //                offset.Execute(wPaths, -m_stepOver);
+    //                fl = true;
+    //                if (wPaths.isEmpty())
+    //                    return;
+    //                Paths tmp(wPaths);
+    //                for (Path& path : tmp) {
+    //                    flags.append(Orientation(path));
+    //                    //path.append(path.first());
+    //                    //                if (!m_convent)
+    //                    //                    ReversePath(path);
+    //                }
+    //                if (wPaths.size() == 1) {
+    //                    qDebug() << "append";
+    //                    if (PointInPolygon(tmp[0][0], pathss.last()[0]))
+    //                        pathss.last()[0].append(tmp[0]);
+    //                    else
+    //                        pathss.append({ tmp[0] });
+    //                    DoOffset(wPaths, pathss);
+    //                } else {
+    //                    for (int i = 0; i < tmp.size(); ++i) {
+    //                        qDebug() << "insert";
+    //                        pathss.append({ tmp[i] });
+    //                        DoOffset({ wPaths[i] }, pathss);
+    //                    }
+    //                }
+    //            }
+    //        }
+    //    }
 
     double m_toolDiameter = 0.0;
     double m_dOffset = 0.0;

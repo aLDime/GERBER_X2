@@ -102,7 +102,7 @@ Depth:</string>
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxDepth">
+       <widget class="DoubleSpinBox" name="dsbxDepth">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -357,7 +357,7 @@ Pass:</string>
        </widget>
       </item>
       <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxAngle">
+       <widget class="DoubleSpinBox" name="dsbxAngle">
         <property name="enabled">
          <bool>false</bool>
         </property>
@@ -954,6 +954,13 @@ Pass:</string>
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>doublespinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

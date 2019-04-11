@@ -1,20 +1,15 @@
 #include "drillform.h"
+#include "drillmodel.h"
+#include "filetree/fileholder.h"
+#include "filetree/filemodel.h"
 #include "materialsetupform.h"
+#include "tooldatabase/tooldatabase.h"
 #include "ui_drillform.h"
-
 #include <QMenu>
 #include <QPainter>
 #include <QTimer>
 #include <file.h>
 #include <scene.h>
-
-#include "filetree/filemodel.h"
-
-#include "tooldatabase/tooldatabase.h"
-
-#include "staticholders/fileholder.h"
-
-#include "drillmodel.h"
 
 DrillForm* DrillForm::self = nullptr;
 enum { Size = 24 };
@@ -418,10 +413,10 @@ void DrillForm::on_pbCreate_clicked()
             QString indexes;
             QVector<int>& v = paths[toolId].second;
             for (int id : v)
-                indexes += QString::number(id) + (id != v.last() ? ", " : "");
+                indexes += QString::number(id) + (id != v.last() ? "," : "");
 
             gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drilling);
-            gcode->setFileName(ToolHolder::tools[toolId].name + (m_type ? " - D(" : " - T(") + indexes + ')');
+            gcode->setFileName(ToolHolder::tools[toolId].name + (m_type ? " - T(" : " - D(") + indexes + ')');
             gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
         }
 

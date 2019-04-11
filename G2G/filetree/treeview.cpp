@@ -1,10 +1,10 @@
 #include "treeview.h"
 #include "abstractnode.h"
 #include "excellondialog.h"
+#include "filetree/fileholder.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
 #include "layerdelegate.h"
-#include "staticholders/fileholder.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
 #include <QGraphicsScene>

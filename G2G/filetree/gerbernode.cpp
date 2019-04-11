@@ -1,6 +1,5 @@
 #include "gerbernode.h"
-
-#include "staticholders/fileholder.h"
+#include "filetree/fileholder.h"
 #include <QFileInfo>
 #include <mainwindow.h>
 
@@ -39,8 +38,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case 0:
         switch (role) {
         case Qt::CheckStateRole:
-            checkState = value.value<Qt::CheckState>();
-            FileHolder::file(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -50,7 +48,6 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         case Qt::EditRole:
             FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
-
         default:
             return false;
         }
@@ -82,7 +79,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         case Qt::ToolTipRole:
             return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
-            return checkState;
+            return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: {
             QColor color(FileHolder::file(m_id)->color());
             color.setAlpha(255);

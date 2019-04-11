@@ -6,7 +6,6 @@
 #include <gcode/gcode.h>
 
 class GcodeNode : public AbstractNode {
-    Qt::CheckState checkState = Qt::Checked;
 
 public:
     GcodeNode(GCodeFile* gCode);

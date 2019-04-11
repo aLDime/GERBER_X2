@@ -1,5 +1,5 @@
 #include "gcodenode.h"
-#include "staticholders/fileholder.h"
+#include "filetree/fileholder.h"
 
 #include <QFileInfo>
 #include <QIcon>
@@ -20,8 +20,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case 0:
         switch (role) {
         case Qt::CheckStateRole:
-            checkState = value.value<Qt::CheckState>();
-            FileHolder::file(m_id)->itemGroup()->setVisible(checkState == Qt::Checked);
+            FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -70,7 +69,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         case Qt::ToolTipRole:
             return FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
-            return checkState;
+            return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             switch (FileHolder::file<GCodeFile>(m_id)->gtype()) {
             case Profile:

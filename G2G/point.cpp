@@ -1,19 +1,14 @@
 #include "point.h"
+#include "filetree/fileholder.h"
+#include "forms/materialsetupform.h"
+#include "gi/graphicsitem.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
-
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-
-#include "forms/materialsetupform.h"
-
 #include <QSettings>
 #include <clipper.hpp>
-
-#include "gi/graphicsitem.h"
-#include "settingsdialog.h"
-#include "staticholders/fileholder.h"
 
 using namespace ClipperLib;
 

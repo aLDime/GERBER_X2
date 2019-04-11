@@ -4,6 +4,7 @@
 #include "tooltreeview.h"
 #include "ui_tooledit.h"
 
+#include <QKeyEvent>
 #include <QMessageBox>
 
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
@@ -11,6 +12,7 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     , ui(new Ui::ToolEdit)
     , m_types(types)
 {
+
     ui->setupUi(this);
     ui->treeView->setButtons({ ui->pbCopy, ui->pbDelete, ui->pbNew, ui->pbNewGroup });
 
@@ -59,4 +61,13 @@ Tool ToolDatabase::tool() const
 void ToolDatabase::setTool(const Tool& tool)
 {
     m_tool = tool;
+}
+
+void ToolDatabase::keyPressEvent(QKeyEvent* evt)
+{
+    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+        ui->toolEdit->on_pbApply_clicked();
+        return;
+    }
+    QDialog::keyPressEvent(evt);
 }

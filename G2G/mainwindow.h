@@ -66,6 +66,7 @@ private:
     void createStatusBar();
     void createShtifts();
     void open();
+    void saveSelectedToolpaths();
     void setCurrentFile(const QString& fileName);
     void showSettingsDialog();
     void readSettings();

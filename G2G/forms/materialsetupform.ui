@@ -128,7 +128,7 @@
        </widget>
       </item>
       <item row="1" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxThickness">
+       <widget class="DoubleSpinBox" name="dsbxThickness">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -150,19 +150,6 @@
         </property>
        </widget>
       </item>
-      <item row="4" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxClearence">
-        <property name="suffix">
-         <string> mm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="maximum">
-         <double>100.000000000000000</double>
-        </property>
-       </widget>
-      </item>
       <item row="4" column="0">
        <widget class="QLabel" name="clearenceLabel">
         <property name="text">
@@ -178,7 +165,7 @@
        </widget>
       </item>
       <item row="5" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxPlunge">
+       <widget class="DoubleSpinBox" name="dsbxPlunge">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -208,7 +195,7 @@
        </widget>
       </item>
       <item row="9" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxHomeY">
+       <widget class="DoubleSpinBox" name="dsbxHomeY">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -224,7 +211,7 @@
        </widget>
       </item>
       <item row="8" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxHomeX">
+       <widget class="DoubleSpinBox" name="dsbxHomeX">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -277,7 +264,7 @@
        </widget>
       </item>
       <item row="12" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxZeroX">
+       <widget class="DoubleSpinBox" name="dsbxZeroX">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -293,7 +280,7 @@
        </widget>
       </item>
       <item row="13" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxZeroY">
+       <widget class="DoubleSpinBox" name="dsbxZeroY">
         <property name="suffix">
          <string> mm</string>
         </property>
@@ -322,22 +309,6 @@
         </property>
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
-        </property>
-       </widget>
-      </item>
-      <item row="15" column="1">
-       <widget class="QDoubleSpinBox" name="dsbxSafeZ">
-        <property name="suffix">
-         <string> mm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="minimum">
-         <double>20.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>1000.000000000000000</double>
         </property>
        </widget>
       </item>
@@ -380,6 +351,35 @@
         </property>
        </widget>
       </item>
+      <item row="4" column="1">
+       <widget class="DoubleSpinBox" name="dsbxClearence">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="15" column="1">
+       <widget class="DoubleSpinBox" name="dsbxSafeZ">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="minimum">
+         <double>20.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>1000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
      </layout>
     </widget>
    </item>
@@ -405,6 +405,13 @@
    </item>
   </layout>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>DoubleSpinBox</class>
+   <extends>QDoubleSpinBox</extends>
+   <header>doublespinbox.h</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>
