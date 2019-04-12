@@ -6,7 +6,7 @@
 #include <graphicsview.h>
 #include <myclipper.h>
 
-RawItem::RawItem(const Path& path, G::File* file)
+RawItem::RawItem(const Path &path, G::File* file)
     : m_file(file)
 {
     m_paths = { path };

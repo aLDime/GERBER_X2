@@ -151,12 +151,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         }
 
         m_file->setRawItemGroup(new ItemGroup);
-        QVector<QPair<IntPoint, double>> dd;
+        Paths dd;
         for (const GraphicObject& go : *m_file) {
             if (go.path.size() > 1) { // skip empty
-                QPair<IntPoint, double> p = { go.path.first(), Area(go.path) };
-                if (!dd.contains(p)) { // skip dublicates
-                    dd.append(p);
+                if (!dd.contains(go.path)) { // skip dublicates
+                    dd.append(go.path);
                     m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
                 }
             }
@@ -512,54 +511,27 @@ Paths Parser::createLine()
         throw QString("Aperture %1 not found!").arg(m_state.aperture());
 
     if (m_file->m_apertures[m_state.aperture()]->type() == Rectangle) {
-        State tmpState(m_state);
-        tmpState.curPos() = IntPoint();
-        Path pattern = m_file->m_apertures[m_state.aperture()]->draw(tmpState)[0];
-        ReversePath(pattern);
-        for (int i = 0, end = m_path.size() - 1; i < end; ++i) {
-            int vi = 0;
-            int wi = 0;
-            const int nv = pattern.size();
-            const int nw = 2;
-            Path A;
-            Path W({ m_path[i + 1], m_path[i] });
-            double wAngle = Angle(W[(wi + 1) % nw], W[(wi) % nw]);
-            double vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
-            while (vAngle > wAngle) {
-                ++vi;
-                vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
-            }
-            qDebug() << vi;
-            while (A.size() < (nv + nw)) {
-                A.append(IntPoint(pattern[vi % nv].X + W[wi % nw].X, pattern[vi % nv].Y + W[wi % nw].Y));
-                vAngle = Angle(pattern[(vi + 1) % nv], pattern[(vi) % nv]);
-                wAngle = Angle(W[(wi + 1) % nw], W[(wi) % nw]);
-                if (vAngle < wAngle)
-                    ++vi;
-                else if (vAngle > wAngle)
-                    ++wi;
-                else {
-                    ++vi;
-                    ++wi;
-                }
-            }
-            solution.append(A);
-        }
-        SimplifyPolygons(solution);
-        ReversePaths(solution);
+        ApRectangle* rect = static_cast<ApRectangle*>(m_file->m_apertures[m_state.aperture()].data());
+        if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
+            throw QString("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
+        double size = rect->m_width * uScale * 0.5 * m_state.scaling();
+        if (qFuzzyIsNull(size))
+            size = 1;
+        ClipperOffset offset;
+        offset.AddPath(m_path, jtSquare, etOpenSquare);
+        offset.Execute(solution, size);
         if (m_state.imgPolarity() == Negative)
             ReversePaths(solution);
-    } else { //if (file->m_apertures[state.aperture]->type() == Circle) {        //РїРѕС‚СЂРѕРІРёС‚СЃСЏ РµСЃС‚Рё РЅРµС‚ Р°РїРµСЂС‚СѓСЂС‹!!!!!!!
+    } else {
         double size = m_file->m_apertures[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             size = 1;
-        ClipperOffset offset(2.0, uScale / 10000); ///*miterLimit*/ 20.0, /*roundPrecision*/ 100.0);
+        ClipperOffset offset;
         offset.AddPath(m_path, jtRound, etOpenRound);
         offset.Execute(solution, size);
         if (m_state.imgPolarity() == Negative)
             ReversePaths(solution);
     }
-
     return solution;
 }
 

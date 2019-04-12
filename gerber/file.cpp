@@ -95,8 +95,9 @@ File::~File()
 
 Paths File::merge() const
 {
+#ifdef QT_DEBUG
     qDebug() << "merge()" << size();
-
+#endif
     QElapsedTimer t;
     t.start();
     m_mergedPaths.clear();
@@ -155,7 +156,9 @@ Paths File::merge() const
         }
     }
     CleanPolygons(m_mergedPaths, 0.0009 * uScale);
+#ifdef QT_DEBUG
     qDebug() << shortFileName() << t.elapsed();
+#endif
     return m_mergedPaths;
 }
 

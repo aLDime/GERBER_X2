@@ -289,20 +289,27 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
         // calc offset
         const double dOffset = (side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
+        //        for (int i = 0; i < m_workingRawPaths.size(); ++i) {
+        //            if (m_workingRawPaths[i].begin() == m_workingRawPaths[i].end()) {
+        //                m_workingPaths.append(m_workingRawPaths.takeAt(i));
+        //                --i;
+        //            }
+        //        }
+
         // execute offset
-        {
+        if (!m_workingPaths.isEmpty()) {
             ClipperOffset offset;
             for (Paths& paths : groupedPaths(CopperPaths))
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
             offset.Execute(m_returnPaths, dOffset);
         }
-        {
+        if (!m_workingRawPaths.isEmpty()) {
             ClipperOffset offset;
             offset.AddPaths(m_workingRawPaths, jtRound, etOpenRound);
             offset.Execute(m_workingRawPaths, dOffset);
         }
 
-        if (m_workingRawPaths.size())
+        if (!m_workingRawPaths.isEmpty())
             m_returnPaths.append(m_workingRawPaths);
 
         // fix direction
@@ -442,13 +449,12 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
     Clipper clipper;
 
     for (Path path : paths) {
-        if (path.first() == path.last())
+        if (Length(path.first(), path.last()) < glueLen) //path.first() == path.last())
             clipper.AddPath(path, ptSubject, true);
         else
             m_workingRawPaths.append(path);
     }
 
-    //clipper.AddPaths(paths, ptSubject, true);
     IntRect r(clipper.GetBounds());
     int k = uScale * 10;
     Path outer = {

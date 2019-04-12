@@ -211,7 +211,7 @@ void MainWindow::createActions()
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Toolpaths..."), this, &MainWindow::saveSelectedToolpaths);
+    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
     fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save selected toolpaths to one directory"));
@@ -396,19 +396,16 @@ void MainWindow::readSettings()
 {
     QSettings settings;
     if (isHidden()) {
-        const QByteArray geometry = settings.value("geometry", QByteArray()).toByteArray();
-        restoreGeometry(geometry);
-
-        const QByteArray state = settings.value("state", QByteArray()).toByteArray();
-        restoreState(state);
+        restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+        restoreState(settings.value("state", QByteArray()).toByteArray());
     }
-    lastPath = settings.value("lastPath").toString();
-    QString files = settings.value("files").toString();
-    for (const QString& file : files.split('|', QString::SkipEmptyParts))
-        openFile(file);
-    SettingsDialog().readSettings();
 
-    //QTimer::singleShot(1000, Qt::CoarseTimer, [=] { SettingsDialog sd(this);  sd.exec(); graphicsView->update(); });
+    lastPath = settings.value("lastPath").toString();
+
+    for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
+        openFile(file);
+
+    SettingsDialog().readSettings();
 }
 
 void MainWindow::writeSettings()
@@ -535,7 +532,7 @@ void MainWindow::writeRecentFiles(const QStringList& files, QSettings& settings)
 
 bool MainWindow::hasRecentFiles()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     const int count = settings.beginReadArray(recentFilesKey());
     settings.endArray();
     return count > 0;
@@ -543,7 +540,7 @@ bool MainWindow::hasRecentFiles()
 
 void MainWindow::prependToRecentFiles(const QString& fileName)
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
     const QStringList oldRecentFiles = readRecentFiles(settings);
     QStringList recentFiles = oldRecentFiles;
     recentFiles.removeAll(fileName);
@@ -556,7 +553,7 @@ void MainWindow::prependToRecentFiles(const QString& fileName)
 
 void MainWindow::updateRecentFileActions()
 {
-    QSettings settings(QCoreApplication::organizationName(), QCoreApplication::applicationName());
+    QSettings settings;
 
     const QStringList recentFiles = readRecentFiles(settings);
     const int count = qMin(int(MaxRecentFiles), recentFiles.size());

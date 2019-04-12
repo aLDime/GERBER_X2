@@ -38,8 +38,6 @@ public:
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
 
-
-
 protected:
     bool m_isFlashed = false;
     double m_drillDiam = 0.0;
@@ -72,6 +70,8 @@ private:
 /// \brief The GARectangle class
 ///
 class ApRectangle : public AbstractAperture {
+    friend class Parser;
+
 public:
     ApRectangle(double width, double height, double drillDiam, const Format* format);
     QString name() override;
