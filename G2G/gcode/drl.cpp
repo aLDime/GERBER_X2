@@ -17,7 +17,6 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
-    qDebug() << fileName;
 
     m_file = new DrillFile;
     m_file->setFileName(fileName);
@@ -35,13 +34,13 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
             if (parseFormat(line))
                 continue;
 
+            if (parseTCode(line))
+                continue;
+
             if (parseGCode(line))
                 continue;
 
             if (parseMCode(line))
-                continue;
-
-            if (parseTCode(line))
                 continue;
 
             if (parseRepeat(line))
@@ -110,9 +109,17 @@ bool DrillParser::parseComment(const QString& line)
 
 bool DrillParser::parseGCode(const QString& line)
 {
-    const QRegExp match("^G([0]?[0-9]{2})$");
+    const QRegExp match("^G([0]?[0-9]{2}).*$");
     if (match.exactMatch(line)) {
         switch (match.cap(1).toInt()) {
+        case G00:
+            m_state.gCode = G00;
+            parsePos(line);
+            break;
+        case G01:
+            m_state.gCode = G01;
+            parsePos(line);
+            break;
         case G05:
             m_state.gCode = G05;
             break;
@@ -132,6 +139,19 @@ bool DrillParser::parseMCode(const QString& line)
     const QRegExp match("^M([0]?[0-9]{2})$");
     if (match.exactMatch(line)) {
         switch (match.cap(1).toInt()) {
+        case M15:
+            m_state.mCode = M15;
+            m_state.rawPosList = { m_state.rawPos };
+            m_state.path = QPolygonF({ m_state.pos });
+            break;
+        case M16:
+            m_state.mCode = M16;
+            m_state.rawPosList.append(m_state.rawPos);
+            m_state.path.append(m_state.pos);
+            m_file->append(Hole(m_state, m_file));
+            m_state.path.clear();
+            m_state.rawPosList.clear();
+            break;
         case M30:
             m_state.mCode = M30;
             break;
@@ -194,13 +214,18 @@ bool DrillParser::parsePos(const QString& line)
     if (match.exactMatch(line)) {
 
         if (!match.cap(2).isEmpty())
-            m_state.rawPos[0] = match.cap(2);
+            m_state.rawPos.first = match.cap(2);
         if (!match.cap(3).isEmpty())
-            m_state.rawPos[1] = match.cap(3);
+            m_state.rawPos.second = match.cap(3);
 
         parseNumber(match.cap(2), m_state.pos.rx());
         parseNumber(match.cap(3), m_state.pos.ry());
-        m_file->append(Hole(m_state, m_file));
+
+        if (!(m_state.mCode == M15 || m_state.mCode == M16)
+            && !(m_state.gCode == G00 || m_state.gCode == G01)) {
+
+            m_file->append(Hole(m_state, m_file));
+        }
         return true;
     }
     return false;
@@ -351,10 +376,10 @@ void State::reset(Format* f)
         format->decimal = 4;
         format->integer = 3;
     }
-    rawPos[0].clear();
-    rawPos[1].clear();
-    gCode = G00;
-    mCode = M00;
+    rawPos.first.clear();
+    rawPos.second.clear();
+    gCode = G_NULL;
+    mCode = M_NULL;
     tCode = 0;
     pos = QPointF();
     path.clear();
@@ -365,7 +390,10 @@ void State::reset(Format* f)
 ///
 void State::updatePos()
 {
-    pos = QPointF(parseNumber(rawPos[0]), parseNumber(rawPos[1]));
+    pos = QPointF(parseNumber(rawPos.first), parseNumber(rawPos.second));
+    for (int i = 0; i < rawPosList.size(); ++i) {
+        path[i] = QPointF(parseNumber(rawPosList[i].first), parseNumber(rawPosList[i].second));
+    }
 }
 ///////////////////////////////////////////////////////
 /// \brief State::parseNumber

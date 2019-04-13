@@ -21,6 +21,10 @@ void DrillModel::setToolId(int row, int id)
 
 int DrillModel::toolId(int row) { return m_data[row].id[1]; }
 
+void DrillModel::setSlot(int row, bool slot) { m_data[row].isSlot = slot; }
+
+bool DrillModel::isSlot(int row) { return m_data[row].isSlot; }
+
 void DrillModel::setApertureId(int row, int id)
 {
     m_data[row].id[0] = id;
@@ -87,8 +91,6 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
                     return "Aperture";
                 case tTool:
                     return "Tool";
-                case tItem:
-                    return "Item";
                 }
             case 1:
                 return "Tool";
@@ -100,8 +102,6 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
                 return QString("D%1").arg(m_data[section].id[0]);
             case tTool:
                 return QString("T%1").arg(m_data[section].id[0]);
-            case tItem:
-                return QString::number(m_data[section].id[0]);
             }
         }
         return QVariant();

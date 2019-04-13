@@ -1,16 +1,14 @@
-#ifndef RAWITEM_H
-#define RAWITEM_H
+#ifndef SLOTITEM_H
+#define SLOTITEM_H
 
 #include "graphicsitem.h"
 
-namespace G {
-class File;
-}
+class DrillFile;
 
-class RawItem : /*public QObject, */ public GraphicsItem {
+class SlotItem : public GraphicsItem {
     //Q_OBJECT
 public:
-    RawItem(const Path& path, G::File* file);
+    SlotItem(const Path& path, double size, DrillFile* file);
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -18,11 +16,11 @@ public:
     Paths paths() const override;
     QPainterPath shape() const override;
 
-    const G::File* file() const;
+    const DrillFile* file() const;
 
 private:
     QPolygonF m_polygon;
-    const G::File* m_file;
+    const DrillFile* m_file;
+    const double m_size;
 };
-
-#endif // RAWITEM_H
+#endif // SLOTITEM_H

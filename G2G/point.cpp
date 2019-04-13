@@ -41,7 +41,7 @@ Point::Point(int type)
 
     QSettings settings;
     settings.beginGroup("Point" + QString::number(m_type));
-    setPos(settings.value("pos").toPoint());
+    setPos(settings.value("pos").toPointF());
     setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
 }
 
@@ -180,7 +180,6 @@ Shtift::Shtift()
 
     QSettings settings;
     settings.beginGroup("Shtift");
-    //if (!m_shtifts.size()) SettingsDialog().readSettings();
     setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
     setPos(settings.value("pos" + QString::number(m_shtifts.size())).toPointF());
 

@@ -36,11 +36,10 @@ include(../file/file.pri)
 DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-VERSION = 0.5
+VERSION = 0.7.1
 VER_MAJ = 0
-VER_MIN = 5
-
-DEFINES += APP_VERSION=\\\"$$VERSION\\\"
+VER_MIN = 7
+VER_PAT = 1
 
 ICON = res/toolpath/raster_climb.png
 #macx: ICON = resources/icon.icns
@@ -57,7 +56,6 @@ HEADERS += \
     aboutform.h \
     application.h \
     colorselector.h \
-    drillforapertureform.h \
     excellondialog.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
@@ -97,13 +95,13 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    doublespinbox.h
+    doublespinbox.h \
+    gi/slotitem.h
 
 
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
-    drillforapertureform.cpp \
     excellondialog.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
@@ -143,7 +141,8 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    doublespinbox.cpp
+    doublespinbox.cpp \
+    gi/slotitem.cpp
 
 
 

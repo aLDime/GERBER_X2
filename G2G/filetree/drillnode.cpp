@@ -8,16 +8,11 @@ DrillNode::DrillNode(DrillFile* file)
     : m_id(FileHolder::addFile(file))
 {
     FileHolder::file(m_id)->itemGroup()->addToTheScene();
-    //FileHolder::file<Drill>(m_id)->itemGroup()->setZValue(-m_id);
-    GraphicsView::self->zoomFit();
-    GraphicsView::self->zoom100();
-    //MainWindow::self->closeAllAct->setEnabled(true);
 }
 
 DrillNode::~DrillNode()
 {
     FileHolder::deleteFile(m_id);
-    //MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
     if (Scene::self) {
         Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
         Scene::self->update();

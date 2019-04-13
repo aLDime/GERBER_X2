@@ -24,8 +24,9 @@ private:
     const Format m_format;
     Format m_tmpFormat;
     int m_step = 3;
-    //    ExcellonDialog*& m_widget;
-    // QWidget interface
+
+    void updateFormat();
+
 protected:
     void closeEvent(QCloseEvent* event) override;
 };

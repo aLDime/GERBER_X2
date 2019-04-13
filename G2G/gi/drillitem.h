@@ -10,20 +10,22 @@ class DrillItem : public GraphicsItem {
 public:
     DrillItem(Hole* hole);
     DrillItem(double diameter);
+    DrillItem(const QPolygonF& path, double diameter);
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
+    bool isSlot() { return !m_paths.isEmpty(); }
 
     double diameter() const;
     void setDiameter(double diameter);
+    void updateHole();
 
     const DrillFile* file() const;
 
     // GraphicsItem interface
     Paths paths() const override;
-    void updateHole();
 
 private:
     void create();

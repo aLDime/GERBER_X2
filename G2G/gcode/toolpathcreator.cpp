@@ -289,13 +289,6 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
         // calc offset
         const double dOffset = (side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
-        //        for (int i = 0; i < m_workingRawPaths.size(); ++i) {
-        //            if (m_workingRawPaths[i].begin() == m_workingRawPaths[i].end()) {
-        //                m_workingPaths.append(m_workingRawPaths.takeAt(i));
-        //                --i;
-        //            }
-        //        }
-
         // execute offset
         if (!m_workingPaths.isEmpty()) {
             ClipperOffset offset;

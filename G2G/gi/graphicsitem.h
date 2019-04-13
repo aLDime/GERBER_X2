@@ -8,15 +8,16 @@
 using namespace ClipperLib;
 
 enum {
-    GerberItemType = QGraphicsItem::UserType + 1,
+    GerberItemType = QGraphicsItem::UserType,
+    BridgeType,
     DrillItemType,
     PathItemType,
-    RawItemType,
     PointHomeType,
     PointZeroType,
+    RawItemType,
+    RulerType,
     ShtiftType,
-    BridgeType,
-    RulerType
+    SlotItemType,
 };
 
 class ItemGroup;

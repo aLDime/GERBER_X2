@@ -20,6 +20,8 @@ enum Grouping {
     CutoffPaths,
 };
 
+void fixBegin(Path& path);
+
 class ToolPathCreator {
 public:
     ToolPathCreator(const Paths& value, const bool convent);

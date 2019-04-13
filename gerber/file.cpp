@@ -155,7 +155,7 @@ Paths File::merge() const
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
         }
     }
-    CleanPolygons(m_mergedPaths, 0.0009 * uScale);
+    CleanPolygons(m_mergedPaths, 0.0005 * uScale);
 #ifdef QT_DEBUG
     qDebug() << shortFileName() << t.elapsed();
 #endif

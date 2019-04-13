@@ -145,22 +145,44 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     if (m_file->isEmpty()) {
         delete m_file;
     } else {
-        m_file->setItemGroup(new ItemGroup);
-        for (const Paths& paths : m_file->groupedPaths()) {
-            m_file->itemGroup()->append(new GerberItem(paths, m_file));
+        if (m_file->shortFileName().contains("bot", Qt::CaseInsensitive))
+            m_file->setSide(Bottom);
+        {
+            m_file->setItemGroup(new ItemGroup);
+            for (const Paths& paths : m_file->groupedPaths()) {
+                m_file->itemGroup()->append(new GerberItem(paths, m_file));
+            }
         }
-
-        m_file->setRawItemGroup(new ItemGroup);
-        Paths dd;
-        for (const GraphicObject& go : *m_file) {
-            if (go.path.size() > 1) { // skip empty
-                if (!dd.contains(go.path)) { // skip dublicates
-                    dd.append(go.path);
+        {
+            m_file->setRawItemGroup(new ItemGroup);
+            QList<Path> checkList;
+            for (const GraphicObject& go : *m_file) {
+                if (go.path.size() > 1) { // skip empty
+                    bool contains = false;
+                    for (const Path& path : checkList) { // find copy
+                        int counter = 0;
+                        for (const IntPoint& p1 : path) {
+                            for (const IntPoint& p2 : go.path) {
+                                const double k = 0.001 * uScale;
+                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k) && ++counter > 2) {
+                                    contains = true;
+                                    break;
+                                }
+                            }
+                            if (contains)
+                                break;
+                        }
+                        if (contains)
+                            break;
+                    }
+                    if (contains) // skip dublicates
+                        continue;
+                    checkList.append(go.path);
                     m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
                 }
             }
+            m_file->rawItemGroup()->setVisible(false);
         }
-        m_file->rawItemGroup()->setVisible(false);
         emit fileReady(m_file);
     }
     emit fileProgress(m_file->shortFileName(), 1, 1);

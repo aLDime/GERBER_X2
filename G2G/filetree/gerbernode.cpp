@@ -17,7 +17,6 @@ GerberNode::GerberNode(File* file)
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
-    GraphicsView::self->zoomFit();
 }
 
 GerberNode::~GerberNode()

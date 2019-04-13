@@ -39,7 +39,11 @@ MainWindow::MainWindow(QWidget* parent)
     gerberParser->moveToThread(&gerberThread);
     connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
-    connect(gerberParser, &G::Parser::fileReady, [=](G::File* file) { prependToRecentFiles(file->fileName()); });
+    connect(gerberParser, &G::Parser::fileReady, [=](G::File* file) {
+        prependToRecentFiles(file->fileName());
+        //        GraphicsView::self->zoomFit();
+        QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
+    });
     connect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
@@ -113,6 +117,7 @@ Point* MainWindow::home() const
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+    qApp->closeAllWindows();
     event->accept();
     writeSettings();
     closeFiles();
@@ -349,7 +354,7 @@ void MainWindow::createActions()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Drilling]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif
@@ -496,6 +501,7 @@ void MainWindow::openFile(const QString& fileName)
         if (dFile) {
             FileModel::self->addDrlFile(dFile);
             prependToRecentFiles(dFile->fileName());
+            QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }
     } else
         emit parseFile(fileName);

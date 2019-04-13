@@ -61,51 +61,26 @@ Paths FileHolder::getSelectedPaths()
 
 QRectF FileHolder::getSelectedBoundingRect()
 {
-    //    QMutexLocker locker(&m_mutex);
-    //    IntRect r{
-    //        std::numeric_limits<cInt>::max(),
-    //        std::numeric_limits<cInt>::max(),
-    //        std::numeric_limits<cInt>::min(),
-    //        std::numeric_limits<cInt>::min()
-    //    };
-    //    for (const QSharedPointer<AbstractFile>& sp : m_files) {
-    //        AbstractFile* file = sp.data();
-    //        if (file && file->itemGroup()->isVisible()) {
-    //            for (GraphicsItem* item : *file->itemGroup()) {
-    //                if (item->isSelected()) {
-    //                    for (const Path& path : item->paths()) {
-    //                        for (const IntPoint& pt : path) {
-    //                            if (r.left > pt.X)
-    //                                r.left = pt.X;
-    //                            if (r.right < pt.X)
-    //                                r.right = pt.X;
-    //                            if (r.top > pt.Y)
-    //                                r.top = pt.Y;
-    //                            if (r.bottom < pt.Y)
-    //                                r.bottom = pt.Y;
-    //                        }
-    //                    }
-    //                }
-    //            }
-    //        }
-    //    }
-    //    QRectF rect(QPoint(r.left * dScale, r.top * dScale), QPoint(r.right * dScale, r.bottom * dScale));
-    //    qDebug() << rect.topLeft() << rect.bottomRight();
-    //    return rect;
     QMutexLocker locker(&m_mutex);
-    QRectF rect;
-    for (const QSharedPointer<AbstractFile>& sp : m_files) {
-        AbstractFile* file = sp.data();
-        if (file && file->itemGroup()->isVisible())
-            for (GraphicsItem* item : *file->itemGroup())
+    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+        if (filePtr->itemGroup()->isVisible()) {
+            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
                 if (item->isSelected()) {
-                    QRectF r(item->boundingRect());
-                    if (!item->pos().isNull())
-                        r.moveTo(item->pos());
-                    rect = rect.united(r);
+                    for (const Path& path : item->paths()) {
+                        for (const IntPoint& pt : path) {
+                            topleft.X = qMin(pt.X, topleft.X);
+                            topleft.Y = qMin(pt.Y, topleft.Y);
+                            bottomRight.X = qMax(pt.X, bottomRight.X);
+                            bottomRight.Y = qMax(pt.Y, bottomRight.Y);
+                        }
+                    }
                 }
+            }
+        }
     }
-    return rect;
+    return QRectF(toQPointF(topleft), toQPointF(bottomRight));
 }
 
 QString FileHolder::fileNames()

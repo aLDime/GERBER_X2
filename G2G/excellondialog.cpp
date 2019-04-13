@@ -18,22 +18,25 @@ ExcellonDialog::ExcellonDialog(DrillFile* file)
     ui->dsbxX->setValue(m_format.offsetPos.x());
     ui->dsbxY->setValue(m_format.offsetPos.y());
 
-    m_format.unitMode == Inches ? ui->rbInches->setChecked(true) : ui->rbMillimeters->setChecked(true);
-    m_format.zeroMode == LeadingZeros ? ui->rbLeading->setChecked(true) : ui->rbTrailing->setChecked(true);
+    ui->rbInches->setChecked(!m_format.unitMode);
+    ui->rbMillimeters->setChecked(m_format.unitMode);
+
+    ui->rbLeading->setChecked(!m_format.zeroMode);
+    ui->rbTrailing->setChecked(m_format.zeroMode);
 
     connect(ui->buttonBox, &QDialogButtonBox::rejected, [=] { m_file->setFormat(m_format); hide(); deleteLater(); });
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [=] { hide(); deleteLater(); });
 
-    auto dsbxValueChanged = static_cast<void (QDoubleSpinBox::*)(double)>(&QDoubleSpinBox::valueChanged);
-    connect(ui->dsbxX, dsbxValueChanged, [&](double val) { m_tmpFormat.offsetPos.rx() = val; m_file->setFormat(m_tmpFormat); });
-    connect(ui->dsbxY, dsbxValueChanged, [&](double val) { m_tmpFormat.offsetPos.ry() = val; m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&] { updateFormat(); });
+    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&] { updateFormat(); });
 
-    auto sbxValueChanged = static_cast<void (QSpinBox::*)(int)>(&QSpinBox::valueChanged);
-    connect(ui->sbxInteger, sbxValueChanged, [&](double val) { m_tmpFormat.integer = val; m_file->setFormat(m_tmpFormat); });
-    connect(ui->sbxDecimal, sbxValueChanged, [&](double val) { m_tmpFormat.decimal = val; m_file->setFormat(m_tmpFormat); });
+    connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
+    connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
 
-    connect(ui->rbInches, &QRadioButton::toggled, [&](bool checked) { m_tmpFormat.unitMode = static_cast<UnitMode>(checked), m_tmpFormat.zeroMode = static_cast<ZeroMode>(checked), m_file->setFormat(m_tmpFormat); });
-    connect(ui->rbLeading, &QRadioButton::toggled, [&](bool checked) { m_tmpFormat.zeroMode = static_cast<ZeroMode>(checked), m_tmpFormat.unitMode = static_cast<UnitMode>(checked), m_file->setFormat(m_tmpFormat); });
+    connect(ui->rbInches, &QRadioButton::toggled, [&] { updateFormat(); });
+    connect(ui->rbLeading, &QRadioButton::toggled, [&] { updateFormat(); });
+    connect(ui->rbMillimeters, &QRadioButton::toggled, [&] { updateFormat(); });
+    connect(ui->rbTrailing, &QRadioButton::toggled, [&] { updateFormat(); });
 
     on_pbStep_clicked();
 }
@@ -52,6 +55,20 @@ void ExcellonDialog::on_pbStep_clicked()
     ui->pbStep->setText("x" + QString::number(singleStep));
     ui->dsbxX->setSingleStep(singleStep);
     ui->dsbxY->setSingleStep(singleStep);
+}
+
+void ExcellonDialog::updateFormat()
+{
+    m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
+    m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
+
+    m_tmpFormat.integer = ui->sbxInteger->value();
+    m_tmpFormat.decimal = ui->sbxDecimal->value();
+
+    m_tmpFormat.unitMode = static_cast<UnitMode>(ui->rbMillimeters->isChecked());
+    m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
+
+    m_file->setFormat(m_tmpFormat);
 }
 
 void ExcellonDialog::closeEvent(QCloseEvent* event)

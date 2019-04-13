@@ -7,7 +7,6 @@
 enum {
     tAperture,
     tTool,
-    tItem
 };
 
 class DrillModel : public QAbstractTableModel {
@@ -21,6 +20,7 @@ class DrillModel : public QAbstractTableModel {
         QString name[2];
         QIcon icon[2];
         int id[2];
+        bool isSlot = false;
     } Row;
     QList<Row> m_data;
     int m_type;
@@ -30,6 +30,10 @@ public:
     void appendRow(const QString& name, const QIcon& icon, int id);
     void setToolId(int row, int id);
     int toolId(int row);
+
+    void setSlot(int row, bool slot);
+    bool isSlot(int row);
+
     void setApertureId(int row, int id);
     int apertureId(int row);
 

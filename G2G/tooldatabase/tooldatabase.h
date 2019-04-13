@@ -5,7 +5,7 @@
 #include <QDialog>
 
 namespace Ui {
-class ToolEdit;
+class ToolDatabase;
 }
 class ToolItem;
 
@@ -17,7 +17,7 @@ public:
     ~ToolDatabase();
 
 private:
-    Ui::ToolEdit* ui;
+    Ui::ToolDatabase* ui;
 
 public:
     Tool tool() const;

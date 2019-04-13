@@ -2,14 +2,13 @@
 #include "tooleditform.h"
 #include "toolitem.h"
 #include "tooltreeview.h"
-#include "ui_tooledit.h"
-
+#include "ui_tooldatabase.h"
 #include <QKeyEvent>
 #include <QMessageBox>
 
 ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     : QDialog(parent)
-    , ui(new Ui::ToolEdit)
+    , ui(new Ui::ToolDatabase)
     , m_types(types)
 {
 

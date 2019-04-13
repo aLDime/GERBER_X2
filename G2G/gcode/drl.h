@@ -19,6 +19,7 @@ enum ZeroMode {
 };
 
 enum MCode {
+    M_NULL = -1,
     M00 = 0, //  End of Program - No Rewind (X#Y#)
     M01 = 1, //  End of Pattern
     M02 = 2, //  Repeat Pattern Offset ((M02)X#Y#)
@@ -54,6 +55,7 @@ enum MCode {
 };
 
 enum GCode {
+    G_NULL = -1,
     G00 = 0, //  Route Mode (X#Y#) перемещение.
     G01 = 1, //  Linear (Straight Line) Mode
     G02 = 2, //  Circular CW Mode
@@ -156,11 +158,12 @@ struct State {
     void reset(Format* f);
     void updatePos();
 
-    QString rawPos[2];
+    QPair<QString, QString> rawPos;
+    QList<QPair<QString, QString>> rawPosList;
     Format* format = nullptr;
-    GCode gCode = G00;
-    MCode mCode = M00;
-    int tCode = 0;
+    GCode gCode = G_NULL;
+    MCode mCode = M_NULL;
+    int tCode = -1;
     QPointF pos;
     QPolygonF path;
     int line = 0;
@@ -176,7 +179,7 @@ public:
         , state(state)
     {
     }
-    DrillFile* const file = nullptr;
+    const DrillFile* const file = nullptr;
     State state;
     DrillItem* item = nullptr;
 };

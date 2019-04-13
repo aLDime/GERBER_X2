@@ -241,9 +241,10 @@ struct IntRect {
     cInt bottom;
 };
 
-//enums that are used internally ...
-enum EdgeSide { esLeft = 1,
-    esRight = 2 };
+enum EdgeSide {
+    esLeft = 1,
+    esRight = 2
+};
 
 //forward declarations (for stuff used internally) ...
 struct TEdge;

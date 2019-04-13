@@ -32,7 +32,7 @@ int main(int argc, char* argv[])
 
     app.setApplicationName("G2G");
     app.setOrganizationName("XrSoft");
-    app.setApplicationVersion(APP_VERSION);
+    app.setApplicationVersion("0.7.1");
 
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
