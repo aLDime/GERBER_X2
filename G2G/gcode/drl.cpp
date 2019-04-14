@@ -46,6 +46,9 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
             if (parseRepeat(line))
                 continue;
 
+            if (parseSlot(line))
+                continue;
+
             if (parsePos(line))
                 continue;
 
@@ -231,6 +234,55 @@ bool DrillParser::parsePos(const QString& line)
     return false;
 }
 
+bool DrillParser::parseSlot(const QString& line)
+{
+    QRegExp match(
+        "^(?:X([+-]?\\d*\\.?\\d+))?"
+        "(?:Y([+-]?\\d*\\.?\\d+))?"
+        "G85"
+        "(?:X([+-]?\\d*\\.?\\d+))?"
+        "(?:Y([+-]?\\d*\\.?\\d+))?"
+        ".*$");
+    if (match.exactMatch(line)) {
+        qDebug() << match.capturedTexts();
+        m_state.gCode = G85;
+        m_state.path.clear();
+        m_state.rawPosList.clear();
+        {
+            if (!match.cap(1).isEmpty())
+                m_state.rawPos.first = match.cap(1);
+            parseNumber(match.cap(1), m_state.pos.rx());
+
+            if (!match.cap(2).isEmpty())
+                m_state.rawPos.second = match.cap(2);
+            parseNumber(match.cap(2), m_state.pos.ry());
+
+            m_state.rawPosList.append(m_state.rawPos);
+            m_state.path.append(m_state.pos);
+        }
+
+        {
+            if (!match.cap(3).isEmpty())
+                m_state.rawPos.first = match.cap(3);
+            parseNumber(match.cap(3), m_state.pos.rx());
+
+            if (!match.cap(4).isEmpty())
+                m_state.rawPos.second = match.cap(4);
+            parseNumber(match.cap(4), m_state.pos.ry());
+
+            m_state.rawPosList.append(m_state.rawPos);
+            m_state.path.append(m_state.pos);
+        }
+
+        m_file->append(Hole(m_state, m_file));
+        m_state.path.clear();
+        m_state.rawPosList.clear();
+        m_state.gCode = G05;
+        return true;
+    }
+    return false;
+}
+
 bool DrillParser::parseRepeat(const QString& line)
 {
 
@@ -293,7 +345,7 @@ bool DrillParser::parseFormat(const QString& line)
 bool DrillParser::parseNumber(QString Str, double& val)
 {
     bool flag = false;
-    int sign = 1;
+    int sign = +1;
     if (!Str.isEmpty()) {
         if (Str.contains('.')) {
             val = Str.toDouble();
@@ -301,7 +353,7 @@ bool DrillParser::parseNumber(QString Str, double& val)
 
             if (Str.startsWith('+')) {
                 Str.remove(0, 1);
-                sign = 1;
+                sign = +1;
             } else if (Str.startsWith('-')) {
                 Str.remove(0, 1);
                 sign = -1;
@@ -340,6 +392,19 @@ void DrillFile::setFormat(const Format& value)
     for (Hole& hole : *this) {
         hole.state.updatePos();
         hole.item->updateHole();
+    }
+}
+
+void DrillFile::setFormatForFile(const Format& value)
+{
+    QList<QString> lines;
+    QFile file(fileName());
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+        return;
+
+    QTextStream in(&file);
+    while (!in.atEnd()) {
+        lines.append(in.readLine());
     }
 }
 
@@ -403,7 +468,7 @@ void State::updatePos()
 double State::parseNumber(QString Str)
 {
     double val = 0.0;
-    int sign = 1;
+    int sign = +1;
     if (!Str.isEmpty()) {
         if (Str.contains('.')) {
             val = Str.toDouble();
@@ -411,7 +476,7 @@ double State::parseNumber(QString Str)
 
             if (Str.startsWith('+')) {
                 Str.remove(0, 1);
-                sign = 1;
+                sign = +1;
             } else if (Str.startsWith('-')) {
                 Str.remove(0, 1);
                 sign = -1;

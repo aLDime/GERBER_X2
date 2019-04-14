@@ -82,7 +82,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
                 return QIcon::fromTheme("roll");
             }
         case Qt::UserRole:
-            return QVariant::fromValue(reinterpret_cast<quint64>(FileHolder::file(m_id)));
+            return m_id;
         default:
             return QVariant();
         }

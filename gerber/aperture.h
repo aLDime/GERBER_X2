@@ -29,7 +29,7 @@ public:
     bool isDrilled() const { return m_drillDiam != 0.0; }
     bool isFlashed() const { return m_isFlashed; }
 
-    double drillDiameter() const { return m_drillDiam; }
+    double drillDiameter() const;
     double apertureSize();
 
     Path drawDrill(const State& state);
@@ -37,6 +37,10 @@ public:
 
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
+
+    double apSize() const;
+
+    virtual bool fit(double toolDiam) const = 0;
 
 protected:
     bool m_isFlashed = false;
@@ -58,6 +62,7 @@ public:
     ApCircle(double diam, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
@@ -76,6 +81,7 @@ public:
     ApRectangle(double width, double height, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
@@ -93,6 +99,7 @@ public:
     ApObround(double width, double height, double drillDiam, const Format* format);
     QString name() override;
     ApertureType type() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
@@ -113,6 +120,7 @@ public:
 
     QString name() override;
     ApertureType type() const override;
+    bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
@@ -131,6 +139,7 @@ public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format);
     QString name() override;
     ApertureType type() const override;
+    bool fit(double) const override { return true; }
 
 protected:
     void draw() override;
@@ -156,6 +165,7 @@ public:
     ApBlock(const Format* format);
     QString name() override;
     ApertureType type() const override;
+    bool fit(double) const override { return true; }
 
 protected:
     void draw() override;

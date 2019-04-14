@@ -10,7 +10,6 @@ class DrillItem : public GraphicsItem {
 public:
     DrillItem(Hole* hole);
     DrillItem(double diameter);
-    DrillItem(const QPolygonF& path, double diameter);
 
     QRectF boundingRect() const override;
     QPainterPath shape() const override;

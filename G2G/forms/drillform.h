@@ -4,6 +4,7 @@
 #include <QAbstractTableModel>
 #include <QGraphicsItem>
 #include <QIcon>
+#include <QItemSelectionModel>
 #include <QWidget>
 #include <aperture.h>
 
@@ -16,6 +17,7 @@ class DrillForm;
 }
 
 class DrillModel;
+class PreviewItem;
 
 class DrillForm : public QWidget {
     Q_OBJECT
@@ -25,21 +27,30 @@ public:
     ~DrillForm();
     static DrillForm* self;
 
-    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>& value);
+    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>* value);
     void setHoles(const QMap<int, double>& value);
     void updateFiles();
 
-private slots:
-    void on_cbxFile_currentIndexChanged(int index);
-    void on_doubleClicked(const QModelIndex& current);
-    void on_clicked(const QModelIndex& index);
-    void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
+public slots:
     void on_pbClose_clicked();
+
+private slots:
     void on_pbCreate_clicked();
 
 private:
+    enum WorckType {
+        drilling,
+        profile,
+        pocket,
+    };
+    WorckType worckType = drilling;
+    void on_cbxFileCurrentIndexChanged(int index);
+    void on_clicked(const QModelIndex& index);
+    void on_doubleClicked(const QModelIndex& current);
+    void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
+    void on_customContextMenuRequested(const QPoint& pos);
+
     void createHoles(int toolId, double diameter);
-    void removeHoles(int apertureId);
     void pickUpTool(int apertureId, double diameter, bool isSlot = false);
 
     DrillModel* model;
@@ -48,11 +59,7 @@ private:
     int m_type;
     QMap<int, QSharedPointer<G::AbstractAperture>> m_apertures;
     QMap<int, double> m_tools;
-    QMap<int, QVector<QGraphicsPathItem*>> m_sourcePreview;
-    QMap<int, QVector<DrillItem*>> m_giDrill;
-
-    QMap<int, QPolygonF> m_drills;
-    QMap<int, QVector<QPolygonF>> m_slots;
+    QMap<int, QVector<QSharedPointer<PreviewItem>>> m_sourcePreview;
 
     void clear();
 };

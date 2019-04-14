@@ -97,8 +97,8 @@ void GraphicsView::zoomToSelected()
 {
     QRectF rect;
     for (const QGraphicsItem* item : scene()->selectedItems()) {
-        if (item->type() == DrillItemType)
-            continue;
+//        if (item->type() == DrillItemType)
+//            continue;
         if (rect.isEmpty())
             rect = item->boundingRect();
         else
@@ -107,7 +107,18 @@ void GraphicsView::zoomToSelected()
     if (rect.isEmpty())
         return;
     fitInView(rect, Qt::KeepAspectRatio);
-    zoomOut();
+
+#ifdef ANIM
+    numScheduledScalings -= 1;
+    QTimeLine* anim = new QTimeLine(DURATION, this);
+    anim->setUpdateInterval(INTERVAL);
+    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    anim->start();
+#else
+    scale(0.9, 0.9);
+    UpdateRuler();
+#endif
 }
 
 void GraphicsView::zoom100()

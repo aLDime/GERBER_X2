@@ -32,7 +32,7 @@ public:
     Layer layer = Copper;
     Miror miror = Vertical;
     FileType type() const override { return FileType::Gerber; }
-    QMap<int, QSharedPointer<AbstractAperture>> apertures() const;
+    const QMap<int, QSharedPointer<AbstractAperture>>* const apertures() const;
     bool flashedApertures() const;
     ItemGroup* itemGroup() const override;
     void setItemType(ItemsType type);

@@ -165,6 +165,7 @@ struct State {
     MCode mCode = M_NULL;
     int tCode = -1;
     QPointF pos;
+    QPointF offsetPos() const { return pos + format->offsetPos; }
     QPolygonF path;
     int line = 0;
 };
@@ -206,6 +207,7 @@ public:
 
     Format format() const;
     void setFormat(const Format& value);
+    void setFormatForFile(const Format& value);
 
 protected:
     Paths merge() const override
@@ -235,6 +237,7 @@ private:
     bool parseMCode(const QString& line);
     bool parseTCode(const QString& line);
     bool parsePos(const QString& line);
+    bool parseSlot(const QString& line);
     bool parseRepeat(const QString& line);
     bool parseFormat(const QString& line);
     bool parseNumber(QString Str, double& val);

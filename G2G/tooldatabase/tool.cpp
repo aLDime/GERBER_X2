@@ -13,7 +13,7 @@ Tool::Tool()
 
 double Tool::getDiameter(double depth) const
 {
-    if (depth > 0.0 && angle > 0.0 && angle < 90.0) {
+    if (type == Engraving && depth > 0.0 && angle > 0.0 && angle < 90.0) {
         double a = qDegreesToRadians(90 - angle / 2);
         double d = depth * cos(a) / sin(a);
         return d * 2 + diameter;

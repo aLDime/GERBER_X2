@@ -44,7 +44,10 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
     if (!index.column())
         switch (role) {
         case Qt::DisplayRole:
-            return m_data[row].name[0];
+            if (m_data[row].isSlot)
+                return QString(m_data[row].name[0]).replace("Tool", "Slot");
+            else
+                return m_data[row].name[0];
         case Qt::DecorationRole:
             return m_data[row].icon[0];
         case Qt::UserRole:

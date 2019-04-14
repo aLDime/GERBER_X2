@@ -17,7 +17,6 @@ enum {
     RawItemType,
     RulerType,
     ShtiftType,
-    SlotItemType,
 };
 
 class ItemGroup;

@@ -12,6 +12,11 @@ AbstractAperture::AbstractAperture(const Format* format)
 
 AbstractAperture::~AbstractAperture() {}
 
+double AbstractAperture::drillDiameter() const
+{
+    return m_drillDiam;
+}
+
 Paths AbstractAperture::draw(const State& state)
 {
     if (state.dCode() == D03)
@@ -54,6 +59,11 @@ Paths AbstractAperture::draw(const State& state)
     //        tmpPpaths.push_back(path);
     //    }
     return tmpPpaths;
+}
+
+double AbstractAperture::apSize() const
+{
+    return m_size;
 }
 
 double AbstractAperture::apertureSize()
@@ -116,6 +126,8 @@ QString ApCircle::name() { return QString("CIRC(Ø%1)").arg(m_diam); } //CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
+bool ApCircle::fit(double toolDiam) const { return m_diam > toolDiam; }
+
 void ApCircle::draw()
 {
     m_paths.push_back(CirclePath(m_diam * uScale));
@@ -146,6 +158,8 @@ QString ApRectangle::name() //RECTANGLE
 
 ApertureType ApRectangle::type() const { return Rectangle; }
 
+bool ApRectangle::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
+
 void ApRectangle::draw()
 {
     m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
@@ -170,6 +184,8 @@ ApObround::ApObround(double width, double height, double drillDiam, const Format
 QString ApObround::name() { return QString("OBRO(%1 x %2)").arg(m_width).arg(m_height); } //OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
+
+bool ApObround::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
 
 void ApObround::draw()
 {
@@ -216,6 +232,8 @@ int ApPolygon::verticesCount() const { return m_verticesCount; }
 QString ApPolygon::name() { return QString("POLY(Ø%1, N%2)").arg(m_diam).arg(m_verticesCount); } //POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
+
+bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(M_PI / m_verticesCount) > toolDiam; }
 
 void ApPolygon::draw()
 {

@@ -24,13 +24,8 @@ DrillItem::DrillItem(Hole* hole)
 DrillItem::DrillItem(double diameter)
     : m_diameter(diameter)
 {
-    create();
-}
-
-DrillItem::DrillItem(const QPolygonF& path, double diameter)
-    : m_diameter(diameter)
-{
-    m_paths = { toPath(path) };
+    setAcceptHoverEvents(true);
+    setFlag(ItemIsSelectable, true);
     create();
 }
 
@@ -87,10 +82,15 @@ const DrillFile* DrillItem::file() const
 
 Paths DrillItem::paths() const
 {
+    qDebug("paths()");
     if (m_paths.isEmpty() || m_paths.first().isEmpty()) {
-        Path poligon(CirclePath(m_diameter * uScale, toIntPoint(pos())));
-        ReversePath(poligon);
-        return { poligon };
+        Path path;
+        if (m_hole)
+            path = CirclePath(m_diameter * uScale, toIntPoint(m_hole->state.offsetPos()));
+        else
+            path = CirclePath(m_diameter * uScale, toIntPoint(pos()));
+        ReversePath(path);
+        return { path };
     }
     return m_paths;
 }
@@ -118,11 +118,11 @@ void DrillItem::create()
     m_shape = QPainterPath();
     if (m_paths.isEmpty() || m_paths.first().isEmpty()) {
         if (m_hole) {
-            State& state = m_hole->state;
-            setPos(state.pos + state.format->offsetPos);
-            setToolTip(QString("Tool %1, Ø%2mm").arg(state.tCode).arg(state.currentToolDiameter()));
+            setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+            m_shape.addEllipse(m_hole->state.offsetPos(), m_diameter / 2, m_diameter / 2);
+        } else {
+            m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
         }
-        m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
         m_rect = m_shape.boundingRect();
     } else {
         Paths tmpPpath;

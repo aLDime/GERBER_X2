@@ -128,8 +128,7 @@ void TreeView::closeFile()
 {
     m_model->removeRow(m_menuIndex.row(), m_menuIndex.parent());
     if (DrillForm::self)
-        //&& (m_menuIndex.parent().row() == NodeGerberFiles || m_menuIndex.parent().row() == NodeDrillFiles))
-        DrillForm::self->updateFiles();
+        DrillForm::self->on_pbClose_clicked();
 }
 
 void TreeView::saveGcodeFile()
@@ -143,12 +142,14 @@ void TreeView::saveGcodeFile()
         return;
 
     settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
-    GCodeFile* gcp = reinterpret_cast<GCodeFile*>(m_menuIndex.data(Qt::UserRole).toULongLong());
+    GCodeFile* gcp = FileHolder::file<GCodeFile>(m_menuIndex.data(Qt::UserRole).toInt());
     gcp->save(name);
 }
 
 void TreeView::showExcellonDialog()
 {
+    if (DrillForm::self)
+        DrillForm::self->on_pbClose_clicked();
     d = new ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(d, &ExcellonDialog::destroyed, [&] { d = nullptr; });
     d->show();

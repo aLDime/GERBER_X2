@@ -93,6 +93,11 @@ File::~File()
     }
 }
 
+const QMap<int, QSharedPointer<AbstractAperture>>* const File::apertures() const
+{
+    return &m_apertures;
+}
+
 Paths File::merge() const
 {
 #ifdef QT_DEBUG
@@ -233,7 +238,7 @@ void File::setItemType(File::ItemsType type)
     //        return m_rawItemGroup.data();
 }
 
-QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const { return m_apertures; }
+//QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const { return m_apertures; }
 
 //Pathss& File::groupedPaths(Group group, bool fl)
 //{

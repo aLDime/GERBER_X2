@@ -165,8 +165,14 @@ void ProfileForm::create()
                 return;
             }
         }
-        if (item->type() == GerberItemType || item->type() == DrillItemType)
+        if (item->type() == GerberItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        if (item->type() == DrillItemType) {
+            if (static_cast<DrillItem*>(item)->isSlot())
+                wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            else
+                wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        }
         if (item->type() == RawItemType)
             wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
