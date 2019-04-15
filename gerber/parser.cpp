@@ -126,7 +126,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
                 continue;
 
             // Line did not match any pattern. Warn user.
-            // qWarning() << QString("Line ignored (%1): '%2'").arg(state.lineNum).arg(gerberLine);
+            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
             emit fileError("", m_file->shortFileName() + "\n" + errStr);
@@ -319,12 +319,10 @@ QList<QString> Parser::format(QString data)
 
 double Parser::arcAngle(double start, double stop)
 {
-    if (m_state.interpolation() == CounterclockwiseCircular && stop <= start) {
+    if (m_state.interpolation() == CounterclockwiseCircular && stop < start)
         stop += 2.0 * M_PI;
-    }
-    if (m_state.interpolation() == ClockwiseCircular && stop >= start) {
+    if (m_state.interpolation() == ClockwiseCircular && stop > start)
         stop -= 2.0 * M_PI;
-    }
     return qAbs(stop - start);
 }
 
@@ -456,7 +454,6 @@ void Parser::reset(const QString& fileName)
     m_path.clear();
     m_file = new File(fileName);
     m_state.reset(&m_file->format);
-
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ Normal, 0 });
     m_stepRepeat.reset();
@@ -790,25 +787,19 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
     double radius1, radius2, start, stop, angle;
     radius1 = radius2 = start = stop = angle = 0.0;
     if (match.exactMatch(gLine)) {
-        if (match.cap(1).isEmpty()) {
-            if (m_state.gCode() != G02 && m_state.gCode() != G03) {
-                return false;
-            }
-        }
+        if (match.cap(1).isEmpty() && m_state.gCode() != G02 && m_state.gCode() != G03)
+            return false;
 
-        cInt x, y, i, j;
-        x = y = i = j = 0.0;
-        if (match.cap(2).isEmpty()) {
+        cInt x = 0, y = 0, i = 0, j = 0;
+        if (match.cap(2).isEmpty())
             x = m_state.curPos().X;
-        } else {
+        else
             parseNumber(match.cap(2), x, m_state.format()->xInteger, m_state.format()->xDecimal);
-        }
 
-        if (match.cap(3).isEmpty()) {
+        if (match.cap(3).isEmpty())
             y = m_state.curPos().Y;
-        } else {
+        else
             parseNumber(match.cap(3), y, m_state.format()->yInteger, m_state.format()->yDecimal);
-        }
 
         parseNumber(match.cap(4), i, m_state.format()->xInteger, m_state.format()->xDecimal);
         parseNumber(match.cap(5), j, m_state.format()->yInteger, m_state.format()->yDecimal);
@@ -847,8 +838,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             break;
         case D02: // Nothing created! Pen Up.
             m_state.setDCode(D01);
-            m_state.setCurPos({ x, y });
             addPath();
+            m_state.setCurPos({ x, y });
             return true;
         case D03: // Flash should not happen here
             m_state.setCurPos({ x, y });
@@ -874,19 +865,19 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
-            // �­то должно привести к образованию дуги в 360 градусов.
-            if (m_state.curPos() == IntPoint(x, y)) {
+            // Ч­то должно привести к образованию дуги в 360 градусов.
+            if (m_state.curPos() == IntPoint(x, y))
                 stop = start;
-            } else {
+            else
                 stop = atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
-            }
+
             arcPolygon = arc(centerPos[0], radius1, start, stop);
-            //arcPolygon = Arc2(currentPos, IntPoint(x, y), center);
+            // arcPolygon = Arc2(currentPos, IntPoint(x, y), center);
             // Последняя точка в вычисленной дуге может иметь числовые ошибки.
             // Точной конечной точкой является указанная (x, y). Заменить.
-            m_state.curPos() = IntPoint(x, y);
+            m_state.curPos() = { x, y };
             if (arcPolygon.size())
-                arcPolygon[arcPolygon.size() - 1] = m_state.curPos();
+                arcPolygon.last() = m_state.curPos();
             else
                 arcPolygon.push_back(m_state.curPos());
             break;
@@ -895,14 +886,12 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 radius1 = sqrt(i * i + j * j);
                 radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
-                if (qAbs(radius2 - radius1) > (1e-4 * uScale)) {
-                    // Недействительный центр.
+                if (qAbs(radius2 - radius1) > (1e-4 * uScale)) // Недействительный центр.
                     continue;
-                }
                 // Correct i and j and return true; as with multi-quadrant.
                 i = centerPos[c].X - m_state.curPos().X;
                 j = centerPos[c].Y - m_state.curPos().Y;
-                // РЈРіР»С‹
+                // Углы
                 start = atan2(-j, -i);
                 stop = atan2(-centerPos[c].Y + y, -centerPos[c].X + x);
                 angle = arcAngle(start, stop);
@@ -917,9 +906,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                     valid = true;
                 }
             }
-            if (!valid) {
+            if (!valid)
                 qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
-            }
+
             break;
         default:
             m_state.setCurPos({ x, y });
@@ -1097,17 +1086,21 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     static const QRegExp match(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
     if (match.exactMatch(gLine)) {
         parsePosition(gLine);
-        if (!match.cap(2).isEmpty())
-            m_state.setDCode(static_cast<DCode>(match.cap(2).toInt()));
-        switch (/*match.cap(2).isEmpty() ? */ m_state.dCode() /*: match.cap(2).toInt()*/) {
+        if (match.cap(2).isEmpty())
+            return false;
+        const DCode dcode = static_cast<const DCode>(match.cap(2).toInt());
+        switch (dcode) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
+            m_state.setDCode(dcode);
             m_path.push_back(m_state.curPos());
             break;
         case D02: //перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();
+            m_state.setDCode(dcode);
             break;
         case D03: //перемещение в указанную точку x-y с закрытым затвором засветки и вспышка
             addPath();
+            m_state.setDCode(dcode);
             addFlash();
             break;
         default:
@@ -1127,12 +1120,13 @@ bool Parser::parseDCode(const QString& gLine)
             m_state.setDCode(D01);
             break;
         case D02:
+            addPath();
             m_state.setDCode(D02);
             break;
         case D03:
+            addPath();
             m_state.setDCode(D03);
             addFlash();
-            m_state.setDCode(D01);
             break;
         }
         return true;

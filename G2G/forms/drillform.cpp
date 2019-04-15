@@ -22,10 +22,12 @@ Paths offset(const Path path, double offset, bool fl = false)
         cpOffset.AddPath(path, jtRound, etClosedLine);
     else
         cpOffset.AddPath(path, jtRound, etOpenRound);
+
     cpOffset.Execute(tmpPpaths, offset * 0.5 * uScale);
-    for (Path& path : tmpPpaths) {
+
+    for (Path& path : tmpPpaths)
         path.append(path.first());
-    }
+
     return tmpPpaths;
 }
 
@@ -33,8 +35,10 @@ class PreviewItem : public QGraphicsItem {
     static QPainterPath drawApetrure(const G::GraphicObject& go, int id)
     {
         QPainterPath painterPath;
-        for (QPolygonF& polygon : toQPolygons(go.paths /*go.gFile->apertures()->value(id)->draw(go.state)*/))
+        for (QPolygonF& polygon : toQPolygons(go.paths /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
+            polygon.append(polygon.first());
             painterPath.addPolygon(polygon);
+        }
         const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
         if (hole)
             painterPath.addEllipse(toQPointF(go.state.curPos()), hole, hole);
@@ -49,10 +53,8 @@ class PreviewItem : public QGraphicsItem {
     static QPainterPath drawSlot(const Hole& hole)
     {
         QPainterPath painterPath;
-        for (Path& path : offset(toPath(hole.state.path), hole.state.currentToolDiameter())) {
-            path.append(path.first());
+        for (Path& path : offset(toPath(hole.state.path), hole.state.currentToolDiameter()))
             painterPath.addPolygon(toQPolygon(path));
-        }
         return painterPath;
     }
 
@@ -558,7 +560,6 @@ void DrillForm::on_pbCreate_clicked()
                     if (item->type() == PreviewItem::Slot) {
                         if (item->sourceDrill() > item->currentDrill()) {
                             for (Path& path : offset(item->paths().first(), item->sourceDrill() - item->currentDrill())) {
-                                path.append(path.first());
                                 pathsMap[selectedToolId].first.append(path);
                             }
                         } else {

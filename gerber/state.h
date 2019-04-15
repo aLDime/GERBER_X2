@@ -30,7 +30,7 @@ public:
     }
 
     inline Format* format() const { return m_format; }
-    inline void setFormat(Format* format) { m_format = format; }
+    //    inline void setFormat(Format* format) { m_format = format; }
 
     inline DCode dCode() const { return m_dCode; }
     inline void setDCode(DCode dCode) { m_dCode = dCode; }
