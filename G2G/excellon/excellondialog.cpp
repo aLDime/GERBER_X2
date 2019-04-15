@@ -1,9 +1,8 @@
 #include "excellondialog.h"
+#include "exfile.h"
 #include "ui_excellondialog.h"
 #include <graphicsview.h>
 #include <scene.h>
-
-#include "exfile.h"
 
 using namespace Excellon;
 
@@ -87,16 +86,20 @@ void ExcellonDialog::closeEvent(QCloseEvent* event)
 
 void ExcellonDialog::on_pushButton_clicked()
 {
-    QPolygonF pair;
+    QPair<QPointF, QPointF> pair;
+    int c = 0;
     for (QGraphicsItem* item : GraphicsView::self->scene()->selectedItems()) {
-        if (item->type() == DrillItemType)
-            pair << item->boundingRect().center();
-        if (item->type() == GerberItemType)
-            pair << item->boundingRect().center();
-        if (pair.size() == 2) {
-            QPointF p(pair.first() - pair.last());
-            qDebug() << p;
-            if (QLineF(pair.first(), pair.last()).length() < 0.001) // 1 uMetr
+        if (item->type() == DrillItemType) {
+            pair.first = item->boundingRect().center();
+            ++c;
+        }
+        if (item->type() == GerberItemType) {
+            pair.second = item->boundingRect().center();
+            ++c;
+        }
+        if (c == 2) {
+            QPointF p(pair.second - pair.first);
+            if (QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
             ui->dsbxX->setValue(p.x());
             ui->dsbxY->setValue(p.y());

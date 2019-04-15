@@ -53,7 +53,7 @@ class PreviewItem : public QGraphicsItem {
     static QPainterPath drawSlot(const Hole& hole)
     {
         QPainterPath painterPath;
-        for (Path& path : offset(toPath(hole.state.path), hole.state.currentToolDiameter()))
+        for (Path& path : offset(hole.item->paths().first(), hole.state.currentToolDiameter()))
             painterPath.addPolygon(toQPolygon(path));
         return painterPath;
     }
@@ -131,7 +131,7 @@ public:
             case Slot: {
                 Paths tmpPpath;
                 ClipperOffset offset;
-                offset.AddPath(toPath(hole->state.path), jtRound, etOpenRound);
+                offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
                 offset.Execute(tmpPpath, m_currentDrill * 0.5 * uScale);
                 for (Path& path : tmpPpath) {
                     path.append(path.first());
@@ -179,7 +179,7 @@ public:
     {
         switch (m_type) {
         case Slot:
-            return { toPath(hole->state.path) };
+            return hole->item->paths();
         case Drill:
             return hole->item->paths();
         case Apetrure: {
@@ -662,6 +662,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
         return;
     QMenu menu;
     menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [=] {
+        //ToolDatabase tdb(this, model->isSlot(current.row()) ? QVector<Tool::Type>{ Tool::EndMill } : (worckType ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving } : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }));
         ToolDatabase tdb(this, worckType ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving } : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
         if (tdb.exec()) {
             const Tool tool(tdb.tool());
@@ -670,6 +671,8 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
                     model->setToolId(current.row(), tool.id);
                     createHoles(model->apertureId(current.row()), tool.diameter);
                     ui->pbCreate->setEnabled(true);
+                } else if (model->isSlot(current.row()) && tool.type != Tool::EndMill) {
+                    QMessageBox::information(this, "", "\"" + tool.name + "\" not suitable for T" + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "(" + model->data(current.sibling(current.row(), 0)).toString() + ")");
                 } else if (!model->isSlot(current.row())) {
                     model->setToolId(current.row(), tool.id);
                     createHoles(model->apertureId(current.row()), tool.diameter);
