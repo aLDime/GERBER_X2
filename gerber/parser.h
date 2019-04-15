@@ -2,11 +2,11 @@
 #define GERBERPARSER_H
 
 #include "file.h"
-#include "gerber.h"
+#include "gerbervars.h"
 #include <QObject>
 #include <QStack>
 
-namespace G {
+namespace Gerber {
 
 class Parser : public QObject {
     Q_OBJECT

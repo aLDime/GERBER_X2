@@ -1,20 +1,22 @@
 #ifndef EXCELLONDIALOG_H
 #define EXCELLONDIALOG_H
 
-#include "excellon.h"
+#include "exvars.h"
 #include <QDialog>
-
-using namespace Excellon;
 
 namespace Ui {
 class ExcellonDialog;
 }
+
+namespace Excellon {
 class DrillFile;
+}
+
 class ExcellonDialog : public QDialog {
     Q_OBJECT
 
 public:
-    explicit ExcellonDialog(DrillFile* file);
+    explicit ExcellonDialog(Excellon::DrillFile* file);
     ~ExcellonDialog();
 
 private slots:
@@ -22,9 +24,9 @@ private slots:
 
 private:
     Ui::ExcellonDialog* ui;
-    DrillFile* m_file;
-    const Format m_format;
-    Format m_tmpFormat;
+    Excellon::DrillFile* m_file;
+    const Excellon::Format m_format;
+    Excellon::Format m_tmpFormat;
     int m_step = 3;
 
     void updateFormat();

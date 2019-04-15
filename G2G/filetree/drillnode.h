@@ -3,16 +3,19 @@
 
 #include "abstractnode.h"
 #include <QObject>
-#include <gcode/drl.h>
+
+namespace Excellon {
+class DrillFile;
+}
 
 class DrillNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    DrillNode(DrillFile* file);
+    DrillNode(Excellon::DrillFile* file);
     ~DrillNode();
+
     // AbstractItem interface
-public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;

@@ -14,18 +14,12 @@ INCLUDEPATH += $$PWD
 HEADERS += \
     $$PWD/aperture.h \
     $$PWD/file.h \
-    $$PWD/gerber.h \
     $$PWD/mathparser.h \
     $$PWD/parser.h \
-    $$PWD/state.h \
-    $$PWD/format.h \
-    $$PWD/graphicobject.h
+    $$PWD/gerbervars.h
 
 SOURCES += \
     $$PWD/aperture.cpp \
     $$PWD/file.cpp \
     $$PWD/mathparser.cpp \
-    $$PWD/parser.cpp \
-    $$PWD/state.cpp \
-    $$PWD/format.cpp \
-    $$PWD/graphicobject.cpp
+    $$PWD/parser.cpp

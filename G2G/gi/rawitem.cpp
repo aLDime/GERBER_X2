@@ -6,7 +6,7 @@
 #include <graphicsview.h>
 #include <myclipper.h>
 
-RawItem::RawItem(const Path& path, G::File* file)
+RawItem::RawItem(const Path& path, Gerber::File* file)
     : m_file(file)
 {
     m_paths = { path };
@@ -76,4 +76,4 @@ Paths RawItem::paths() const { return m_paths; }
 
 QPainterPath RawItem::shape() const { return m_shape; }
 
-const G::File* RawItem::file() const { return m_file; }
+const Gerber::File* RawItem::file() const { return m_file; }

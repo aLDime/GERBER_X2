@@ -1,6 +1,10 @@
 #ifndef VARS_H
 #define VARS_H
 
+#include <QPolygonF>
+
+class DrillItem;
+
 namespace Excellon {
 
 enum UnitMode {
@@ -124,6 +128,49 @@ M16                  // Retract With Clamping
 M17
 M30
 */
+
+class DrillFile;
+
+struct Format {
+    Format(DrillFile* file = nullptr);
+    ZeroMode zeroMode = LeadingZeros;
+    UnitMode unitMode = Millimeters;
+    int decimal = 0;
+    int integer = 0;
+    QPointF offsetPos;
+    DrillFile* /*const*/ file = nullptr;
+};
+
+struct State {
+    double currentToolDiameter() const;
+    double parseNumber(QString Str);
+    void reset(Format* f);
+    void updatePos();
+
+    QPair<QString, QString> rawPos;
+    QList<QPair<QString, QString>> rawPosList;
+    Format* format = nullptr;
+    GCode gCode = G_NULL;
+    MCode mCode = M_NULL;
+    int tCode = -1;
+    QPointF pos;
+    QPointF offsetPos() const { return pos + format->offsetPos; }
+    QPolygonF path;
+    int line = 0;
+};
+
+class Hole {
+public:
+    Hole(const State& state, DrillFile* file)
+        : file(file)
+        , state(state)
+    {
+    }
+
+    const DrillFile* const file = nullptr;
+    State state;
+    DrillItem* item = nullptr;
+};
 
 } // namespace Excellon
 

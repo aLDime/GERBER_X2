@@ -1,14 +1,12 @@
 #ifndef GERBERAPERTURE_H
 #define GERBERAPERTURE_H
 
-#include "aperture.h"
-#include "gerber.h"
-#include "graphicobject.h"
-#include "state.h"
+#include "gerbervars.h"
 
 #include <QMap>
 #include <QtMath>
-namespace G {
+
+namespace Gerber {
 
 enum ApertureType {
     Circle,
@@ -18,6 +16,8 @@ enum ApertureType {
     Macro,
     Block,
 };
+
+struct Format;
 
 class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)

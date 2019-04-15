@@ -3,7 +3,7 @@
 #include <QSemaphore>
 #include <QThread>
 
-using namespace G;
+using namespace Gerber;
 
 class Union : public QThread {
     //    Q_OBJECT

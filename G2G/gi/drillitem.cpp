@@ -1,14 +1,11 @@
 #include "drillitem.h"
-
+#include "excellon/exvars.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <aperture.h>
-#include <gerber.h>
 #include <graphicsview.h>
 
-#include "gcode/drl.h"
-
 using namespace ClipperLib;
+using namespace Excellon;
 
 DrillItem::DrillItem(Hole* hole)
     : m_hole(hole)

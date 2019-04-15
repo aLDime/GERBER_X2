@@ -1,11 +1,13 @@
-#include "exformatstate.h"
+#include "exvars.h"
+#include "exfile.h"
 
-using namespace Excellon;
+namespace Excellon {
 
-///////////////////////////////////////////////////////
-/// \brief State::reset
-/// \param f
-///
+Format::Format(DrillFile* file)
+    : file(file)
+{
+}
+
 void State::reset(Format* f)
 {
     format = f;
@@ -23,9 +25,7 @@ void State::reset(Format* f)
     path.clear();
     line = 0;
 }
-///////////////////////////////////////////////////////
-/// \brief State::updatePos
-///
+
 void State::updatePos()
 {
     pos = QPointF(parseNumber(rawPos.first), parseNumber(rawPos.second));
@@ -33,11 +33,7 @@ void State::updatePos()
         path[i] = QPointF(parseNumber(rawPosList[i].first), parseNumber(rawPosList[i].second));
     }
 }
-///////////////////////////////////////////////////////
-/// \brief State::parseNumber
-/// \param Str
-/// \return
-///
+
 double State::parseNumber(QString Str)
 {
     double val = 0.0;
@@ -71,11 +67,10 @@ double State::parseNumber(QString Str)
     }
     return val;
 }
-///////////////////////////////////////////////////////
-/// \brief State::currentToolDiameter
-/// \return
-///
+
 double State::currentToolDiameter() const
 {
     return format->file->tool(tCode);
 }
+
+} //namespace Excellon

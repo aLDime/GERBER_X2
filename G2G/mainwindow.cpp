@@ -5,6 +5,7 @@
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QToolBar>
+#include <excellon/exparser.h>
 #include <filetree/fileholder.h>
 #include <forms/drillform.h>
 #include <forms/materialsetupform.h>
@@ -19,7 +20,7 @@ MainWindow* MainWindow::self = nullptr;
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
 
-    , gerberParser(new G::Parser)
+    , gerberParser(new Gerber::Parser)
     , m_zeroPoint(new Point(Point::Zero))
     , m_homePoint(new Point(Point::Home))
 {
@@ -37,15 +38,15 @@ MainWindow::MainWindow(QWidget* parent)
     init();
 
     gerberParser->moveToThread(&gerberThread);
-    connect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile, Qt::QueuedConnection);
-    connect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
-    connect(gerberParser, &G::Parser::fileReady, [=](G::File* file) {
+    connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
+    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
+    connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
         prependToRecentFiles(file->fileName());
         //        GraphicsView::self->zoomFit();
         QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
     });
-    connect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
-    connect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
+    connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
+    connect(gerberParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     gerberThread.start(QThread::HighestPriority);
 
@@ -495,7 +496,7 @@ void MainWindow::openFile(const QString& fileName)
     }
     QFileInfo fi(fileName);
     lastPath = fi.absolutePath();
-    DrillParser dp;
+    Excellon::DrillParser dp;
     if (dp.isDrillFile(fileName)) {
         DrillFile* dFile = dp.parseFile(fileName);
         if (dFile) {

@@ -1,8 +1,11 @@
 #include "excellondialog.h"
 #include "ui_excellondialog.h"
-#include <QWidget>
 
-ExcellonDialog::ExcellonDialog(DrillFile* file)
+#include "exfile.h"
+
+using namespace Excellon;
+
+ExcellonDialog::ExcellonDialog(Excellon::DrillFile* file)
     : m_file(file)
     , m_format(file->format())
     , m_tmpFormat(file->format())

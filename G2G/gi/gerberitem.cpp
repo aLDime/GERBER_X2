@@ -6,7 +6,7 @@
 #include <graphicsview.h>
 #include <scene.h>
 
-GerberItem::GerberItem(const Paths& paths, G::File* file)
+GerberItem::GerberItem(const Paths& paths, Gerber::File* file)
     : m_file(file)
 {
     m_paths = paths;
@@ -77,4 +77,4 @@ int GerberItem::type() const { return GerberItemType; }
 
 Paths GerberItem::paths() const { return m_paths; }
 
-const G::File* GerberItem::file() const { return m_file; }
+const Gerber::File* GerberItem::file() const { return m_file; }

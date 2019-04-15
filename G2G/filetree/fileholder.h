@@ -3,12 +3,13 @@
 
 #include <QMap>
 #include <QMutex>
+#include <excellon/exfile.h>
 #include <file.h>
-#include <gcode/drl.h>
 #include <gcode/gcode.h>
 #include <myclipper.h>
 
 using namespace ClipperLib;
+using namespace Excellon;
 
 class FileHolder {
 public:

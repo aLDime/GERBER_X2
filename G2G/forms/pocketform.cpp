@@ -168,7 +168,7 @@ void PocketForm::create()
     Paths wPaths;
     Side boardSide = NullSide;
 
-    G::File const* file = nullptr;
+    Gerber::File const* file = nullptr;
 
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {

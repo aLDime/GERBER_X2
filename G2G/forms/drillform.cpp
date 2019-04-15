@@ -32,7 +32,7 @@ Paths offset(const Path path, double offset, bool fl = false)
 }
 
 class PreviewItem : public QGraphicsItem {
-    static QPainterPath drawApetrure(const G::GraphicObject& go, int id)
+    static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id)
     {
         QPainterPath painterPath;
         for (QPolygonF& polygon : toQPolygons(go.paths /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
@@ -59,7 +59,7 @@ class PreviewItem : public QGraphicsItem {
     }
 
 public:
-    explicit PreviewItem(const G::GraphicObject& go, int id)
+    explicit PreviewItem(const Gerber::GraphicObject& go, int id)
         : id(id)
         , grob(&go)
         , m_sourcePath(drawApetrure(go, id))
@@ -203,7 +203,7 @@ public:
 
 private:
     const int id = 0;
-    const G::GraphicObject* const grob = nullptr;
+    const Gerber::GraphicObject* const grob = nullptr;
     const Hole* const hole = nullptr;
 
     QPainterPath m_sourcePath;
@@ -225,11 +225,11 @@ private:
 /// \param aperture
 /// \return
 ///
-QIcon drawApertureIcon(G::AbstractAperture* aperture)
+QIcon drawApertureIcon(Gerber::AbstractAperture* aperture)
 {
     QPainterPath painterPath;
 
-    for (QPolygonF& polygon : toQPolygons(aperture->draw(G::State())))
+    for (QPolygonF& polygon : toQPolygons(aperture->draw(Gerber::State())))
         painterPath.addPolygon(polygon);
 
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
@@ -343,13 +343,13 @@ DrillForm::~DrillForm()
     delete ui;
 }
 
-void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>* value)
+void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
 {
     m_type = tAperture;
     clear();
     m_apertures = *value;
     model = new DrillModel(m_type, this);
-    QMap<int, QSharedPointer<G::AbstractAperture>>::const_iterator apertureIt;
+    QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
     for (apertureIt = m_apertures.begin(); apertureIt != m_apertures.end(); ++apertureIt) {
         if (apertureIt.value()->isFlashed()) {
             double drillDiameter = 0.0;
@@ -357,13 +357,13 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>
             if (apertureIt.value()->isDrilled()) {
                 drillDiameter = apertureIt.value()->drillDiameter();
                 name += QString(", drill Ø%1mm").arg(drillDiameter);
-            } else if (apertureIt.value()->type() == G::Circle) {
+            } else if (apertureIt.value()->type() == Gerber::Circle) {
                 drillDiameter = apertureIt.value()->apertureSize();
             }
             model->appendRow(name, drawApertureIcon(apertureIt.value().data()), apertureIt.key());
-            const G::File* file = static_cast<G::File*>(ui->cbxFile->currentData().value<void*>());
-            for (const G::GraphicObject& go : *file) {
-                if (go.state.dCode() == G::D03 && go.state.aperture() == apertureIt.key()) {
+            const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+            for (const Gerber::GraphicObject& go : *file) {
+                if (go.state.dCode() == Gerber::D03 && go.state.aperture() == apertureIt.key()) {
                     PreviewItem* item = new PreviewItem(go, apertureIt.key());
                     m_sourcePreview[apertureIt.key()].append(QSharedPointer<PreviewItem>(item));
                     Scene::self->addItem(item);
@@ -430,7 +430,7 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (G::File* file : FileHolder::files<G::File>()) {
+    for (Gerber::File* file : FileHolder::files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
@@ -593,7 +593,7 @@ void DrillForm::on_pbCreate_clicked()
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
     if (static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->type() == FileType::Gerber)
-        setApertures(static_cast<G::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
+        setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
     else
         setHoles(static_cast<DrillFile*>(ui->cbxFile->currentData().value<void*>())->tools());
 }

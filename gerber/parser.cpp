@@ -10,13 +10,13 @@
 
 //#include <toolpath/toolpathcreator.h>
 
-using namespace G;
+namespace Gerber {
 
 #ifndef M_PI
 #define M_PI 3.1415926535897932384626433832795
 #endif
 
-int id1 = qRegisterMetaType<G::File*>("G::GFile*");
+int id1 = qRegisterMetaType<Gerber::File*>("G::GFile*");
 
 Parser::Parser(QObject* parent)
     : QObject(parent)
@@ -453,7 +453,7 @@ void Parser::reset(const QString& fileName)
     m_apertureMacro.clear();
     m_path.clear();
     m_file = new File(fileName);
-    m_state.reset(&m_file->format);
+    m_state = State(&m_file->format);
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ Normal, 0 });
     m_stepRepeat.reset();
@@ -1164,3 +1164,5 @@ bool Parser::parseUnitMode(const QString& gLine)
     }
     return false;
 }
+
+} // namespace Gerber

@@ -1,8 +1,9 @@
 #include "exfile.h"
+#include "gi/drillitem.h"
 
-using namespace Excellon;
+namespace Excellon {
 
-Excellon::DrillFile::DrillFile()
+DrillFile::DrillFile()
     : m_format(this)
 {
 }
@@ -26,17 +27,17 @@ void DrillFile::setFormat(const Format& value)
     }
 }
 
-void DrillFile::setFormatForFile(const Format& value)
+void DrillFile::setFormatForFile(const Format& /*value*/)
 {
-    QList<QString> lines;
-    QFile file(fileName());
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return;
+    //    QList<QString> lines;
+    //    QFile file(fileName());
+    //    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    //        return;
 
-    QTextStream in(&file);
-    while (!in.atEnd()) {
-        lines.append(in.readLine());
-    }
+    //    QTextStream in(&file);
+    //    while (!in.atEnd()) {
+    //        lines.append(in.readLine());
+    //    }
 }
 
 double DrillFile::tool(int t) const
@@ -66,3 +67,4 @@ Paths Excellon::DrillFile::merge() const
         m_mergedPaths.append(item->paths());
     return m_mergedPaths;
 }
+} //  namespace Excellon

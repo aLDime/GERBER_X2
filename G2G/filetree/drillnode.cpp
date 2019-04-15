@@ -1,10 +1,11 @@
 #include "drillnode.h"
+#include "excellon/exfile.h"
 #include "filetree/fileholder.h"
 #include "gerbernode.h"
 #include <QFileInfo>
 #include <mainwindow.h>
 
-DrillNode::DrillNode(DrillFile* file)
+DrillNode::DrillNode(Excellon::DrillFile* file)
     : m_id(FileHolder::addFile(file))
 {
     FileHolder::file(m_id)->itemGroup()->addToTheScene();

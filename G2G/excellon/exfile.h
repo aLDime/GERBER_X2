@@ -1,12 +1,11 @@
 #ifndef EXFILE_H
 #define EXFILE_H
 
-#include "excellon.h"
+#include "exvars.h"
+#include <abstractfile.h>
 
 namespace Excellon {
-///////////////////////////////////////////////////////
-/// \brief The DrillFile class
-///
+
 class DrillFile : public AbstractFile, public QList<Hole> {
     QMap<int, double> m_tools;
     friend class DrillParser;

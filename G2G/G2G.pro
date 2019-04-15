@@ -60,10 +60,7 @@ HEADERS += \
     excellon/excellon.h \
     excellon/excellondialog.h \
     excellon/exfile.h \
-    excellon/exformatstate.h \
-    excellon/exhole.h \
     excellon/exparser.h \
-    excellon/exvars.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
     filetree/fileholder.h \
@@ -101,17 +98,16 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
+    excellon/exvars.h
 
 
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
     doublespinbox.cpp \
-    excellon/excellon.cpp \
     excellon/excellondialog.cpp \
     excellon/exfile.cpp \
     excellon/exformatstate.cpp \
-    excellon/exhole.cpp \
     excellon/exparser.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
@@ -149,7 +145,7 @@ SOURCES += \
     tooldatabase/tooleditform.cpp \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
-    tooldatabase/tooltreeview.cpp \
+    tooldatabase/tooltreeview.cpp
 
 
 

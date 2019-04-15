@@ -27,7 +27,7 @@ FileModel::~FileModel()
     self = nullptr;
 }
 
-void FileModel::addGerberFile(G::File* gerberFile)
+void FileModel::addGerberFile(Gerber::File* gerberFile)
 {
     AbstractNode* item = rootItem->child(NodeGerberFiles);
     QModelIndex index = createIndex(0, 0, rootItem);
@@ -37,7 +37,7 @@ void FileModel::addGerberFile(G::File* gerberFile)
     endInsertRows();
 }
 
-void FileModel::addDrlFile(DrillFile* drl)
+void FileModel::addDrlFile(Excellon::DrillFile* drl)
 {
     if (!drl)
         return;

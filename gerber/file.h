@@ -2,14 +2,13 @@
 #define GFILE_H
 
 #include "aperture.h"
-#include "gerber.h"
-#include "graphicobject.h"
+#include "gerbervars.h"
 
 #include <QDebug>
 #include <abstractfile.h>
 #include <gi/itemgroup.h>
 
-namespace G {
+namespace Gerber {
 
 class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;

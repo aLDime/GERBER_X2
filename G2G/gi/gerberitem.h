@@ -3,13 +3,13 @@
 
 #include "graphicsitem.h"
 
-namespace G {
+namespace Gerber {
 class File;
 }
 
 class GerberItem : public GraphicsItem {
 public:
-    GerberItem(const Paths& m_paths, G::File* file);
+    GerberItem(const Paths& m_paths, Gerber::File* file);
     ~GerberItem();
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
@@ -17,9 +17,9 @@ public:
     int type() const override;
 
     Paths paths() const override;
-    const G::File* file() const;
+    const Gerber::File* file() const;
 
 private:
-    const G::File* m_file;
+    const Gerber::File* m_file;
 };
 #endif // WORKITEM_H

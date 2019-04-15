@@ -6,8 +6,8 @@
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
+#include <excellon/exfile.h>
 #include <file.h>
-#include <gcode/drl.h>
 #include <gcode/gcode.h>
 
 enum RootNodes {
@@ -29,8 +29,8 @@ public:
     explicit FileModel(QObject* parent = nullptr);
     ~FileModel();
 
-    void addGerberFile(G::File* gerberFile);
-    void addDrlFile(DrillFile* drl);
+    void addGerberFile(Gerber::File* gerberFile);
+    void addDrlFile(Excellon::DrillFile* drl);
     void addGcode(GCodeFile* group);
     void closeAllFiles();
 

@@ -140,7 +140,7 @@ void ProfileForm::create()
     Paths wrPaths;
     Side boardSide = Top;
 
-    G::File const* file = nullptr;
+    Gerber::File const* file = nullptr;
 
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {

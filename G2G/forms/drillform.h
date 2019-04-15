@@ -27,7 +27,7 @@ public:
     ~DrillForm();
     static DrillForm* self;
 
-    void setApertures(const QMap<int, QSharedPointer<G::AbstractAperture>>* value);
+    void setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
     void setHoles(const QMap<int, double>& value);
     void updateFiles();
 
@@ -60,7 +60,7 @@ private:
     Ui::DrillForm* ui;
 
     int m_type;
-    QMap<int, QSharedPointer<G::AbstractAperture>> m_apertures;
+    QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
     QMap<int, double> m_tools;
     QMap<int, QVector<QSharedPointer<PreviewItem>>> m_sourcePreview;
 

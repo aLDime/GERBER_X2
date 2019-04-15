@@ -7,7 +7,7 @@
 #include <QThread>
 #include <qevent.h>
 
-namespace G {
+namespace Gerber {
 class Parser;
 }
 
@@ -50,7 +50,7 @@ private:
     void writeRecentFiles(const QStringList& files, QSettings& settings);
 
     QString lastPath;
-    G::Parser* gerberParser;
+    Gerber::Parser* gerberParser;
     QThread gerberThread;
 
     //////////////////////

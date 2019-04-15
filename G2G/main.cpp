@@ -7,8 +7,6 @@
 
 #ifndef linux
 #include <qt_windows.h>
-
-#include <gcode/drl.h>
 #endif
 
 int main(int argc, char* argv[])

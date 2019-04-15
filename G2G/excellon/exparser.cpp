@@ -1,4 +1,7 @@
 #include "exparser.h"
+#include "exfile.h"
+
+#include <QFile>
 
 using namespace Excellon;
 

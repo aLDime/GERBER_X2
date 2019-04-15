@@ -4,7 +4,7 @@
 #include <QGraphicsItemGroup>
 #include <QObject>
 #include <abstractfile.h>
-#include <gerber.h>
+#include <gerbervars.h>
 #include <gi/itemgroup.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>

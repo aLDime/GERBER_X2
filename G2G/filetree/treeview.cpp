@@ -1,6 +1,6 @@
 #include "treeview.h"
 #include "abstractnode.h"
-#include "excellondialog.h"
+#include "excellon/excellondialog.h"
 #include "filetree/fileholder.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
@@ -165,10 +165,10 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     case NodeGerberFiles: {
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        G::File* file = FileHolder::file<G::File>(m_menuIndex.data(Qt::UserRole).toInt());
+        Gerber::File* file = FileHolder::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
             if (file)
-                file->setItemType(static_cast<G::File::ItemsType>(checked));
+                file->setItemType(static_cast<Gerber::File::ItemsType>(checked));
         });
         a->setCheckable(true);
         a->setChecked(file->itemsType());

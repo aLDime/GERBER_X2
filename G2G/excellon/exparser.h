@@ -1,12 +1,13 @@
 #ifndef EXPARSER_H
 #define EXPARSER_H
 
-#include "excellon.h"
+#include "exvars.h"
+#include <QObject>
 
 namespace Excellon {
-///////////////////////////////////////////////////////
-/// \brief The DrillParser class
-///
+
+class DrillFile;
+
 class DrillParser : public QObject {
     Q_OBJECT
 

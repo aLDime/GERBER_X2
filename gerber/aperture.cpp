@@ -3,7 +3,7 @@
 #include <QDebug>
 #include <QLineF>
 
-using namespace G;
+namespace Gerber {
 
 AbstractAperture::AbstractAperture(const Format* format)
     : m_format(format)
@@ -618,3 +618,5 @@ void ApBlock::draw()
     qDebug() << m_paths.size();
     //CleanPolygons(m_paths, 0.0009 * uScale);
 }
+
+} // namespace Gerber
