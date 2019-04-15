@@ -9,7 +9,6 @@
 #include <QPainter>
 #include <QTimer>
 #include <file.h>
-#include <gcode/toolpathcreator.h>
 #include <scene.h>
 
 DrillForm* DrillForm::self = nullptr;
@@ -290,11 +289,46 @@ DrillForm::DrillForm(QWidget* parent)
 
     ui->tableView->setWordWrap(false);
     ui->pbCreate->setEnabled(false);
-    ui->rb_drilling->setChecked(true);
 
-    connect(ui->rb_drilling, &QRadioButton::toggled, [=] { worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket); });
-    connect(ui->rb_profile, &QRadioButton::toggled, [=] { worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket); });
-    connect(ui->rb_pocket, &QRadioButton::toggled, [=] { worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket); });
+    ui->rb_drilling->setChecked(true);
+    ui->rb_in->setChecked(true);
+
+    ui->rb_on->setEnabled(worckType == profile);
+    ui->rb_out->setEnabled(worckType == profile);
+    ui->rb_in->setEnabled(worckType == profile);
+
+    connect(ui->rb_drilling, &QRadioButton::toggled, [=] {
+        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
+        ui->rb_in->setEnabled(worckType == profile);
+        ui->rb_on->setEnabled(worckType == profile);
+        ui->rb_out->setEnabled(worckType == profile);
+    });
+
+    connect(ui->rb_profile, &QRadioButton::toggled, [=] {
+        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
+        ui->rb_in->setEnabled(worckType == profile);
+        ui->rb_on->setEnabled(worckType == profile);
+        ui->rb_out->setEnabled(worckType == profile);
+    });
+
+    connect(ui->rb_pocket, &QRadioButton::toggled, [=] {
+        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
+        ui->rb_in->setEnabled(worckType == profile);
+        ui->rb_on->setEnabled(worckType == profile);
+        ui->rb_out->setEnabled(worckType == profile);
+    });
+
+    connect(ui->rb_on, &QRadioButton::toggled, [=] {
+        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+    });
+
+    connect(ui->rb_out, &QRadioButton::toggled, [=] {
+        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+    });
+
+    connect(ui->rb_in, &QRadioButton::toggled, [=] {
+        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+    });
 
     updateFiles();
     self = this;
@@ -496,7 +530,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCodeFile* gcode = nullptr;
                 switch (worckType) {
                 case profile:
-                    gcode = tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value(), Inner);
+                    gcode = tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value(), side);
                     break;
                 case pocket:
                     gcode = tpc.createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), false, 0, true);

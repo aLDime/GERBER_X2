@@ -7,9 +7,9 @@
 #include <QItemSelectionModel>
 #include <QWidget>
 #include <aperture.h>
+#include <gcode/toolpathcreator.h>
 
 #include <gcode/gcode.h>
-
 #include <gi/drillitem.h>
 
 namespace Ui {
@@ -44,6 +44,9 @@ private:
         pocket,
     };
     WorckType worckType = drilling;
+
+    SideOfMilling side = Inner;
+
     void on_cbxFileCurrentIndexChanged(int index);
     void on_clicked(const QModelIndex& index);
     void on_doubleClicked(const QModelIndex& current);

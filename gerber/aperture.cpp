@@ -151,7 +151,7 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fo
 QString ApRectangle::name() //RECTANGLE
 {
     if (m_width == m_height)
-        return QString("RECT(□ %1)").arg(m_width).arg(m_height);
+        return QString("RECT(□ %1)").arg(m_width);
     else
         return QString("RECT(%1 x %2)").arg(m_width).arg(m_height);
 }
