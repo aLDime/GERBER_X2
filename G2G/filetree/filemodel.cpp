@@ -37,7 +37,7 @@ void FileModel::addGerberFile(Gerber::File* gerberFile)
     endInsertRows();
 }
 
-void FileModel::addDrlFile(Excellon::DrillFile* drl)
+void FileModel::addDrlFile(Excellon::File* drl)
 {
     if (!drl)
         return;

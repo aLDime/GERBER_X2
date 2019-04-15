@@ -70,7 +70,7 @@ void DrillItem::setDiameter(double diameter)
     update(m_rect);
 }
 
-const DrillFile* DrillItem::file() const
+const File* DrillItem::file() const
 {
     if (m_hole)
         return m_hole->file;
@@ -79,7 +79,6 @@ const DrillFile* DrillItem::file() const
 
 Paths DrillItem::paths() const
 {
-    qDebug("paths()");
     if (m_paths.isEmpty() || m_paths.first().isEmpty()) {
         Path path;
         if (m_hole)
@@ -97,15 +96,9 @@ void DrillItem::updateHole()
     if (!m_hole)
         return;
 
-    State& state = m_hole->state;
-    setToolTip(QString("Tool %1, Ø%2mm").arg(state.tCode).arg(m_diameter));
-
-    if (state.path.isEmpty())
-        setPos(state.pos + state.format->offsetPos);
-    else
-        m_paths = { toPath(state.path.translated(state.format->offsetPos)) };
-
-    m_diameter = state.currentToolDiameter();
+    setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
+    m_paths = { toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)) };
+    m_diameter = m_hole->state.currentToolDiameter();
     create();
     update(m_rect);
 }

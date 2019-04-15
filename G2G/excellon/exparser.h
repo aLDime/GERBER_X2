@@ -6,17 +6,16 @@
 
 namespace Excellon {
 
-class DrillFile;
+class File;
 
-class DrillParser : public QObject {
+class Parser : public QObject {
     Q_OBJECT
 
 public:
-    explicit DrillParser(QObject* parent = nullptr);
-    DrillFile* parseFile(const QString& fileName);
+    explicit Parser(QObject* parent = nullptr);
+    File* parseFile(const QString& fileName);
     bool isDrillFile(const QString& fileName);
-
-signals:
+    static double parseNumber(QString Str, const State& state);
 
 private:
     bool parseComment(const QString& line);
@@ -30,7 +29,7 @@ private:
     bool parseNumber(QString Str, double& val);
 
     State m_state;
-    DrillFile* m_file = nullptr;
+    File* m_file = nullptr;
 };
 } // namespace Excellon
 

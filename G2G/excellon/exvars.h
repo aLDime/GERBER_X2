@@ -129,21 +129,52 @@ M17
 M30
 */
 
-class DrillFile;
+class File;
 
 struct Format {
-    Format(DrillFile* file = nullptr);
+    Format(File* file = nullptr);
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
     int decimal = 0;
     int integer = 0;
     QPointF offsetPos;
-    DrillFile* /*const*/ file = nullptr;
+    File* /*const*/ file = nullptr;
 };
 
 struct State {
     double currentToolDiameter() const;
-    double parseNumber(QString Str);
+    //    double parseNumber(QString Str)
+    //    {
+    //        double val = 0.0;
+    //        int sign = +1;
+    //        if (!Str.isEmpty()) {
+    //            if (Str.contains('.')) {
+    //                val = Str.toDouble();
+    //            } else {
+    //                if (Str.startsWith('+')) {
+    //                    Str.remove(0, 1);
+    //                    sign = +1;
+    //                } else if (Str.startsWith('-')) {
+    //                    Str.remove(0, 1);
+    //                    sign = -1;
+    //                }
+    //                if (Str.length() < format->integer + format->decimal) {
+    //                    switch (format->zeroMode) {
+    //                    case LeadingZeros:
+    //                        Str = Str + QString(format->integer + format->decimal - Str.length(), '0');
+    //                        break;
+    //                    case TrailingZeros:
+    //                        Str = QString(format->integer + format->decimal - Str.length(), '0') + Str;
+    //                        break;
+    //                    }
+    //                }
+    //                val = Str.toDouble() * pow(10.0, -format->decimal) * sign;
+    //            }
+    //            if (format->unitMode == Inches)
+    //                val *= 25.4;
+    //        }
+    //        return val;
+    //    }
     void reset(Format* f);
     void updatePos();
 
@@ -161,13 +192,13 @@ struct State {
 
 class Hole {
 public:
-    Hole(const State& state, DrillFile* file)
+    Hole(const State& state, File* file)
         : file(file)
         , state(state)
     {
     }
 
-    const DrillFile* const file = nullptr;
+    const File* const file = nullptr;
     State state;
     DrillItem* item = nullptr;
 };

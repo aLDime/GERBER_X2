@@ -4,9 +4,8 @@
 #include <mainwindow.h>
 
 QTimer GerberNode::m_repaintTimer;
-using namespace Gerber;
 
-GerberNode::GerberNode(File* file)
+GerberNode::GerberNode(Gerber::File* file)
     : m_id(FileHolder::addFile(file))
 {
     FileHolder::file(m_id)->itemGroup()->addToTheScene();

@@ -1,11 +1,13 @@
 #include "excellondialog.h"
 #include "ui_excellondialog.h"
+#include <graphicsview.h>
+#include <scene.h>
 
 #include "exfile.h"
 
 using namespace Excellon;
 
-ExcellonDialog::ExcellonDialog(Excellon::DrillFile* file)
+ExcellonDialog::ExcellonDialog(Excellon::File* file)
     : m_file(file)
     , m_format(file->format())
     , m_tmpFormat(file->format())
@@ -27,11 +29,11 @@ ExcellonDialog::ExcellonDialog(Excellon::DrillFile* file)
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);
 
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, [=] { m_file->setFormat(m_format); hide(); deleteLater(); });
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, [=] { hide(); deleteLater(); });
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, [=] { GraphicsView::self->zoomFit(); m_file->setFormat(m_format); hide(); deleteLater(); });
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, [=] { GraphicsView::self->zoomFit(); hide(); deleteLater(); });
 
-    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.rx() = val; m_file->setFormat(m_tmpFormat); });
-    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.ry() = val; m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setX(val); m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setY(val); m_file->setFormat(m_tmpFormat); });
 
     connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
     connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
@@ -73,6 +75,7 @@ void ExcellonDialog::updateFormat()
     m_tmpFormat.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
 
     m_file->setFormat(m_tmpFormat);
+    GraphicsView::self->zoomFit();
 }
 
 void ExcellonDialog::closeEvent(QCloseEvent* event)
@@ -80,4 +83,25 @@ void ExcellonDialog::closeEvent(QCloseEvent* event)
     m_file->setFormat(m_format);
     deleteLater();
     QDialog::closeEvent(event);
+}
+
+void ExcellonDialog::on_pushButton_clicked()
+{
+    QPolygonF pair;
+    for (QGraphicsItem* item : GraphicsView::self->scene()->selectedItems()) {
+        if (item->type() == DrillItemType)
+            pair << item->boundingRect().center();
+        if (item->type() == GerberItemType)
+            pair << item->boundingRect().center();
+        if (pair.size() == 2) {
+            QPointF p(pair.first() - pair.last());
+            qDebug() << p;
+            if (QLineF(pair.first(), pair.last()).length() < 0.001) // 1 uMetr
+                return;
+            ui->dsbxX->setValue(p.x());
+            ui->dsbxY->setValue(p.y());
+            GraphicsView::self->zoomFit();
+            return;
+        }
+    }
 }

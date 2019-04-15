@@ -395,7 +395,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
     for (toolIt = m_tools.begin(); toolIt != m_tools.end(); ++toolIt) {
         QString name(QString("Tool Ø%1mm").arg(toolIt.value()));
         model->appendRow(name, drawDrillIcon(), toolIt.key());
-        const DrillFile* file = static_cast<DrillFile*>(ui->cbxFile->currentData().value<void*>());
+        const File* file = static_cast<File*>(ui->cbxFile->currentData().value<void*>());
         bool isSlot = false;
         for (const Hole& hole : *file) {
             if (hole.state.tCode == toolIt.key()) {
@@ -442,7 +442,7 @@ void DrillForm::updateFiles()
         }
     }
 
-    for (DrillFile* file : FileHolder::files<DrillFile>()) {
+    for (File* file : FileHolder::files<File>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon::fromTheme("roll"), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
@@ -595,7 +595,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     if (static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->type() == FileType::Gerber)
         setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
     else
-        setHoles(static_cast<DrillFile*>(ui->cbxFile->currentData().value<void*>())->tools());
+        setHoles(static_cast<File*>(ui->cbxFile->currentData().value<void*>())->tools());
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)

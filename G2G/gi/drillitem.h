@@ -4,7 +4,7 @@
 #include "graphicsitem.h"
 
 namespace Excellon {
-class DrillFile;
+class File;
 class Hole;
 }
 
@@ -23,7 +23,7 @@ public:
     void setDiameter(double diameter);
     void updateHole();
 
-    const Excellon::DrillFile* file() const;
+    const Excellon::File* file() const;
 
     // GraphicsItem interface
     Paths paths() const override;

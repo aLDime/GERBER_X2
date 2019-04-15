@@ -3,17 +3,17 @@
 
 namespace Excellon {
 
-DrillFile::DrillFile()
+File::File()
     : m_format(this)
 {
 }
 
-Format DrillFile::format() const
+Format File::format() const
 {
     return m_format;
 }
 
-void DrillFile::setFormat(const Format& value)
+void File::setFormat(const Format& value)
 {
     m_format = value;
     //    m_format.zeroMode = value.zeroMode;
@@ -22,12 +22,12 @@ void DrillFile::setFormat(const Format& value)
     //    m_format.integer = value.integer;
     //    m_format.offsetPos = value.offsetPos;
     for (Hole& hole : *this) {
-        hole.state.updatePos();
+        //        hole.state.updatePos();
         hole.item->updateHole();
     }
 }
 
-void DrillFile::setFormatForFile(const Format& /*value*/)
+void File::setFormatForFile(const Format& /*value*/)
 {
     //    QList<QString> lines;
     //    QFile file(fileName());
@@ -40,7 +40,7 @@ void DrillFile::setFormatForFile(const Format& /*value*/)
     //    }
 }
 
-double DrillFile::tool(int t) const
+double File::tool(int t) const
 {
     double tool = 0.0;
     if (m_tools.contains(t)) {
@@ -51,7 +51,7 @@ double DrillFile::tool(int t) const
     return tool;
 }
 
-QMap<int, double> DrillFile::tools() const
+QMap<int, double> File::tools() const
 {
     QMap<int, double> tools(m_tools);
     QMap<int, double>::iterator toolIt;
@@ -61,7 +61,7 @@ QMap<int, double> DrillFile::tools() const
     return tools;
 }
 
-Paths Excellon::DrillFile::merge() const
+Paths Excellon::File::merge() const
 {
     for (GraphicsItem* item : *m_itemGroup.data())
         m_mergedPaths.append(item->paths());

@@ -1,8 +1,6 @@
 #ifndef VIEW_H
 #define VIEW_H
 
-#include "graphicsview.h"
-
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QSettings>

@@ -30,7 +30,7 @@ public:
     ~FileModel();
 
     void addGerberFile(Gerber::File* gerberFile);
-    void addDrlFile(Excellon::DrillFile* drl);
+    void addDrlFile(Excellon::File* drl);
     void addGcode(GCodeFile* group);
     void closeAllFiles();
 

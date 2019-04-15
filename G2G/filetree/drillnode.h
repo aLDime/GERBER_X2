@@ -5,14 +5,14 @@
 #include <QObject>
 
 namespace Excellon {
-class DrillFile;
+class File;
 }
 
 class DrillNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    DrillNode(Excellon::DrillFile* file);
+    DrillNode(Excellon::File* file);
     ~DrillNode();
 
     // AbstractItem interface

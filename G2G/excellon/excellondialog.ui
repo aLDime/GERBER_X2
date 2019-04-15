@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>205</width>
-    <height>407</height>
+    <width>168</width>
+    <height>383</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -215,6 +215,13 @@
        <widget class="QPushButton" name="pbStep">
         <property name="text">
          <string>x1.0</string>
+        </property>
+       </widget>
+      </item>
+      <item row="3" column="0" colspan="2">
+       <widget class="QPushButton" name="pushButton">
+        <property name="text">
+         <string>Flatten by selected</string>
         </property>
        </widget>
       </item>

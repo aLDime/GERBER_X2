@@ -150,7 +150,7 @@ void TreeView::showExcellonDialog()
 {
     if (DrillForm::self)
         DrillForm::self->on_pbClose_clicked();
-    d = new ExcellonDialog(FileHolder::file<DrillFile>(m_menuIndex.data(Qt::UserRole).toInt()));
+    d = new ExcellonDialog(FileHolder::file<File>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(d, &ExcellonDialog::destroyed, [&] { d = nullptr; });
     d->show();
 }

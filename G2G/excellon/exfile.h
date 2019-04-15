@@ -6,14 +6,14 @@
 
 namespace Excellon {
 
-class DrillFile : public AbstractFile, public QList<Hole> {
+class File : public AbstractFile, public QList<Hole> {
     QMap<int, double> m_tools;
-    friend class DrillParser;
+    friend class Parser;
     Format m_format;
 
 public:
-    DrillFile();
-    ~DrillFile() {}
+    File();
+    ~File() {}
 
     FileType type() const override { return FileType::Drill; }
 

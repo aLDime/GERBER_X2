@@ -496,9 +496,9 @@ void MainWindow::openFile(const QString& fileName)
     }
     QFileInfo fi(fileName);
     lastPath = fi.absolutePath();
-    Excellon::DrillParser dp;
+    Excellon::Parser dp;
     if (dp.isDrillFile(fileName)) {
-        DrillFile* dFile = dp.parseFile(fileName);
+        File* dFile = dp.parseFile(fileName);
         if (dFile) {
             FileModel::self->addDrlFile(dFile);
             prependToRecentFiles(dFile->fileName());

@@ -5,7 +5,7 @@
 #include <QFileInfo>
 #include <mainwindow.h>
 
-DrillNode::DrillNode(Excellon::DrillFile* file)
+DrillNode::DrillNode(Excellon::File* file)
     : m_id(FileHolder::addFile(file))
 {
     FileHolder::file(m_id)->itemGroup()->addToTheScene();

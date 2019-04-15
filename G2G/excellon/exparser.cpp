@@ -5,18 +5,18 @@
 
 using namespace Excellon;
 
-DrillParser::DrillParser(QObject* parent)
+Parser::Parser(QObject* parent)
     : QObject(parent)
 {
 }
 
-DrillFile* DrillParser::parseFile(const QString& fileName)
+File* Parser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
-    m_file = new DrillFile;
+    m_file = new File;
     m_file->setFileName(fileName);
     m_state.reset(&m_file->m_format);
 
@@ -76,7 +76,7 @@ DrillFile* DrillParser::parseFile(const QString& fileName)
     return m_file;
 }
 
-bool DrillParser::isDrillFile(const QString& fileName)
+bool Parser::isDrillFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -93,7 +93,7 @@ bool DrillParser::isDrillFile(const QString& fileName)
     return false;
 }
 
-bool DrillParser::parseComment(const QString& line)
+bool Parser::parseComment(const QString& line)
 {
     const QRegExp match("^;(.*)$");
     if (match.exactMatch(line)) {
@@ -108,7 +108,7 @@ bool DrillParser::parseComment(const QString& line)
     return false;
 }
 
-bool DrillParser::parseGCode(const QString& line)
+bool Parser::parseGCode(const QString& line)
 {
     const QRegExp match("^G([0]?[0-9]{2}).*$");
     if (match.exactMatch(line)) {
@@ -135,7 +135,7 @@ bool DrillParser::parseGCode(const QString& line)
     return false;
 }
 
-bool DrillParser::parseMCode(const QString& line)
+bool Parser::parseMCode(const QString& line)
 {
     const QRegExp match("^M([0]?[0-9]{2})$");
     if (match.exactMatch(line)) {
@@ -182,7 +182,7 @@ bool DrillParser::parseMCode(const QString& line)
     return false;
 }
 
-bool DrillParser::parseTCode(const QString& line)
+bool Parser::parseTCode(const QString& line)
 {
     const QRegExp match("^T([0-9]{1,2})"
                         "(?:([CFS])(\\d*\\.?\\d+))?"
@@ -206,7 +206,7 @@ bool DrillParser::parseTCode(const QString& line)
     return false;
 }
 
-bool DrillParser::parsePos(const QString& line)
+bool Parser::parsePos(const QString& line)
 {
     QRegExp match("^(?:G(\\d+))?"
                   "(?:X([+-]?\\d*\\.?\\d+))?"
@@ -232,7 +232,7 @@ bool DrillParser::parsePos(const QString& line)
     return false;
 }
 
-bool DrillParser::parseSlot(const QString& line)
+bool Parser::parseSlot(const QString& line)
 {
     QRegExp match(
         "^(?:X([+-]?\\d*\\.?\\d+))?"
@@ -242,7 +242,6 @@ bool DrillParser::parseSlot(const QString& line)
         "(?:Y([+-]?\\d*\\.?\\d+))?"
         ".*$");
     if (match.exactMatch(line)) {
-        qDebug() << match.capturedTexts();
         m_state.gCode = G85;
         m_state.path.clear();
         m_state.rawPosList.clear();
@@ -281,7 +280,7 @@ bool DrillParser::parseSlot(const QString& line)
     return false;
 }
 
-bool DrillParser::parseRepeat(const QString& line)
+bool Parser::parseRepeat(const QString& line)
 {
 
     QRegExp match("^R(\\d+)"
@@ -302,7 +301,7 @@ bool DrillParser::parseRepeat(const QString& line)
     return false;
 }
 
-bool DrillParser::parseFormat(const QString& line)
+bool Parser::parseFormat(const QString& line)
 {
     static const QVector<QString> unitMode({ QStringLiteral("INCH"), QStringLiteral("METRIC") });
     static const QVector<QString> zeroMode({ QStringLiteral("LZ"), QStringLiteral("TZ") });
@@ -340,7 +339,7 @@ bool DrillParser::parseFormat(const QString& line)
     return false;
 }
 
-bool DrillParser::parseNumber(QString Str, double& val)
+bool Parser::parseNumber(QString Str, double& val)
 {
     bool flag = false;
     int sign = +1;
@@ -373,4 +372,40 @@ bool DrillParser::parseNumber(QString Str, double& val)
         return true;
     }
     return flag;
+}
+
+double Parser::parseNumber(QString Str, const State& state)
+{
+    double val = 0.0;
+    int sign = +1;
+    if (!Str.isEmpty()) {
+        if (Str.contains('.')) {
+            val = Str.toDouble();
+        } else {
+
+            if (Str.startsWith('+')) {
+                Str.remove(0, 1);
+                sign = +1;
+            } else if (Str.startsWith('-')) {
+                Str.remove(0, 1);
+                sign = -1;
+            }
+
+            if (Str.length() < state.format->integer + state.format->decimal) {
+                switch (state.format->zeroMode) {
+                case LeadingZeros:
+                    Str = Str + QString(state.format->integer + state.format->decimal - Str.length(), '0');
+                    break;
+                case TrailingZeros:
+                    Str = QString(state.format->integer + state.format->decimal - Str.length(), '0') + Str;
+                    break;
+                }
+            }
+            val = Str.toDouble() * pow(10.0, -state.format->decimal) * sign;
+        }
+        if (state.format->unitMode == Inches)
+            val *= 25.4;
+        return val;
+    }
+    return val;
 }
