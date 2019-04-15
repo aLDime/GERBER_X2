@@ -27,8 +27,8 @@ ExcellonDialog::ExcellonDialog(DrillFile* file)
     connect(ui->buttonBox, &QDialogButtonBox::rejected, [=] { m_file->setFormat(m_format); hide(); deleteLater(); });
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [=] { hide(); deleteLater(); });
 
-    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&] { updateFormat(); });
-    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&] { updateFormat(); });
+    connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.rx() = val; m_file->setFormat(m_tmpFormat); });
+    connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.ry() = val; m_file->setFormat(m_tmpFormat); });
 
     connect(ui->sbxInteger, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
     connect(ui->sbxDecimal, QOverload<int>::of(&QSpinBox::valueChanged), [&] { updateFormat(); });
@@ -59,6 +59,7 @@ void ExcellonDialog::on_pbStep_clicked()
 
 void ExcellonDialog::updateFormat()
 {
+    qDebug("updateFormat");
     m_tmpFormat.offsetPos.rx() = ui->dsbxX->value();
     m_tmpFormat.offsetPos.ry() = ui->dsbxY->value();
 

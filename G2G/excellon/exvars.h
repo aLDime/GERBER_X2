@@ -1,12 +1,7 @@
-#ifndef DRL_H
-#define DRL_H
+#ifndef VARS_H
+#define VARS_H
 
-#include <QMap>
-#include <QObject>
-#include <abstractfile.h>
-#include <myclipper.h>
-
-using namespace ClipperLib;
+namespace Excellon {
 
 enum UnitMode {
     Inches,
@@ -130,120 +125,6 @@ M17
 M30
 */
 
-class DrillFile;
-class ItemGroup;
+} // namespace Excellon
 
-///////////////////////////////////////////////////////
-/// \brief The Format struct
-///
-struct Format {
-    Format(DrillFile* file = nullptr)
-        : file(file)
-    {
-    }
-    ZeroMode zeroMode = LeadingZeros;
-    UnitMode unitMode = Millimeters;
-    int decimal = 0;
-    int integer = 0;
-    QPointF offsetPos;
-    DrillFile* const file = nullptr;
-};
-
-///////////////////////////////////////////////////////
-/// \brief The State struct
-///
-struct State {
-    double currentToolDiameter() const;
-    double parseNumber(QString Str);
-    void reset(Format* f);
-    void updatePos();
-
-    QPair<QString, QString> rawPos;
-    QList<QPair<QString, QString>> rawPosList;
-    Format* format = nullptr;
-    GCode gCode = G_NULL;
-    MCode mCode = M_NULL;
-    int tCode = -1;
-    QPointF pos;
-    QPointF offsetPos() const { return pos + format->offsetPos; }
-    QPolygonF path;
-    int line = 0;
-};
-
-///////////////////////////////////////////////////////
-/// \brief The Hole class
-///
-class Hole {
-public:
-    Hole(const State& state, DrillFile* file)
-        : file(file)
-        , state(state)
-    {
-    }
-    const DrillFile* const file = nullptr;
-    State state;
-    DrillItem* item = nullptr;
-};
-
-///////////////////////////////////////////////////////
-/// \brief The DrillFile class
-///
-class DrillFile : public AbstractFile, public QList<Hole> {
-    QMap<int, double> m_tools;
-    friend class DrillParser;
-    Format m_format;
-
-public:
-    DrillFile()
-        : m_format(this)
-    {
-    }
-    ~DrillFile() {}
-
-    FileType type() const override { return FileType::Drill; }
-
-    double tool(int t) const;
-    QMap<int, double> tools() const;
-
-    Format format() const;
-    void setFormat(const Format& value);
-    void setFormatForFile(const Format& value);
-
-protected:
-    Paths merge() const override
-    {
-        for (GraphicsItem* item : *m_itemGroup.data())
-            m_mergedPaths.append(item->paths());
-        return m_mergedPaths;
-    }
-};
-
-///////////////////////////////////////////////////////
-/// \brief The DrillParser class
-///
-class DrillParser : public QObject {
-    Q_OBJECT
-
-public:
-    explicit DrillParser(QObject* parent = nullptr);
-    DrillFile* parseFile(const QString& fileName);
-    bool isDrillFile(const QString& fileName);
-
-signals:
-
-private:
-    bool parseComment(const QString& line);
-    bool parseGCode(const QString& line);
-    bool parseMCode(const QString& line);
-    bool parseTCode(const QString& line);
-    bool parsePos(const QString& line);
-    bool parseSlot(const QString& line);
-    bool parseRepeat(const QString& line);
-    bool parseFormat(const QString& line);
-    bool parseNumber(QString Str, double& val);
-
-    State m_state;
-    DrillFile* m_file = nullptr;
-};
-
-#endif // DRL_H
+#endif // VARS_H

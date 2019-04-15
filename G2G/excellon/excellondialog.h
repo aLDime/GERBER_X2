@@ -1,8 +1,10 @@
 #ifndef EXCELLONDIALOG_H
 #define EXCELLONDIALOG_H
 
-#include "gcode/drl.h"
+#include "excellon.h"
 #include <QDialog>
+
+using namespace Excellon;
 
 namespace Ui {
 class ExcellonDialog;

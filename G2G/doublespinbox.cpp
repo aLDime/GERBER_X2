@@ -49,9 +49,7 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event)
 
 bool DoubleSpinBox::eventFilter(QObject* watched, QEvent* event)
 {
-    if (event->type() == QEvent::MouseButtonRelease) {
+    if (event->type() == QEvent::MouseButtonRelease)
         lineEdit()->selectAll();
-        qDebug() << watched << event;
-    }
     return QDoubleSpinBox::eventFilter(watched, event);
 }

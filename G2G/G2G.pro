@@ -8,16 +8,16 @@ DEFINES += G2G
 
 FORMS += \
     aboutform.ui \
+    colorselector.ui \
+    excellon/excellondialog.ui \
     forms/drillform.ui \
     forms/materialsetupform.ui \
     forms/pocketform.ui \
     forms/profileform.ui \
     mainwindow.ui \
     settingsdialog.ui \
-    tooldatabase/tooleditform.ui \
-    excellondialog.ui \
-    colorselector.ui \
     tooldatabase/tooleditdialog.ui \
+    tooldatabase/tooleditform.ui \
     tooldatabase/tooldatabase.ui
 
 RESOURCES += \
@@ -56,7 +56,14 @@ HEADERS += \
     aboutform.h \
     application.h \
     colorselector.h \
-    excellondialog.h \
+    doublespinbox.h \
+    excellon/excellon.h \
+    excellon/excellondialog.h \
+    excellon/exfile.h \
+    excellon/exformatstate.h \
+    excellon/exhole.h \
+    excellon/exparser.h \
+    excellon/exvars.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
     filetree/fileholder.h \
@@ -72,7 +79,6 @@ HEADERS += \
     forms/pocketform.h \
     forms/profileform.h \
     forms/toolpathutil.h \
-    gcode/drl.h \
     gcode/gcode.h \
     gcode/toolpathcreator.h \
     gi/boarditem.h \
@@ -95,13 +101,18 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    doublespinbox.h
 
 
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
-    excellondialog.cpp \
+    doublespinbox.cpp \
+    excellon/excellon.cpp \
+    excellon/excellondialog.cpp \
+    excellon/exfile.cpp \
+    excellon/exformatstate.cpp \
+    excellon/exhole.cpp \
+    excellon/exparser.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
     filetree/fileholder.cpp \
@@ -117,7 +128,6 @@ SOURCES += \
     forms/pocketform.cpp \
     forms/profileform.cpp \
     forms/toolpathutil.cpp \
-    gcode/drl.cpp \
     gcode/gcode.cpp \
     gcode/toolpathcreator.cpp \
     gi/boarditem.cpp \
@@ -140,7 +150,6 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    doublespinbox.cpp
 
 
 

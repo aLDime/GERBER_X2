@@ -1086,9 +1086,11 @@ bool Parser::parseLineInterpolation(const QString& gLine)
     static const QRegExp match(QStringLiteral("^(?:G0?(1))?(?=.*X([\\+-]?\\d+))?(?=.*Y([\\+-]?\\d+))?[XY]*[^DIJ]*(?:D0?([123]))?\\*$"));
     if (match.exactMatch(gLine)) {
         parsePosition(gLine);
-        if (match.cap(2).isEmpty())
-            return false;
-        const DCode dcode = static_cast<const DCode>(match.cap(2).toInt());
+
+        DCode dcode = m_state.dCode();
+        if (!match.cap(2).isEmpty())
+            dcode = static_cast<const DCode>(match.cap(2).toInt());
+
         switch (dcode) {
         case D01: //перемещение в указанную точку x-y с открытым затвором засветки
             m_state.setDCode(dcode);

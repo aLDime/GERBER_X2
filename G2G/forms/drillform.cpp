@@ -526,7 +526,11 @@ void DrillForm::on_pbCreate_clicked()
                 FileModel::self->addGcode(gcode);
             }
             if (!pathsMap[toolId].first.second.isEmpty()) {
-                ReversePaths(pathsMap[toolId].first.second);
+                Clipper clipper;
+                clipper.AddPaths(pathsMap[toolId].first.second, ptClip, true);
+                clipper.Execute(ctUnion, pathsMap[toolId].first.second, pftPositive);
+
+                //ReversePaths(pathsMap[toolId].first.second);
                 ToolPathCreator tpc(pathsMap[toolId].first.second, true);
 
                 GCodeFile* gcode = nullptr;
