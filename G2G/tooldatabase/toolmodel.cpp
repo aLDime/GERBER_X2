@@ -260,7 +260,7 @@ QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolIt
 
 void ToolModel::exportTools()
 {
-    QFile saveFile(QStringLiteral("tools.dat"));
+    QFile saveFile(fileName);
     if (!saveFile.open(QIODevice::WriteOnly)) {
         qWarning("Couldn't open tools file.");
         return;
@@ -316,13 +316,12 @@ void ToolModel::exportTools()
 
 void ToolModel::importTools()
 {
-
-    QFile loadFile(QStringLiteral("tools.dat"));
-
+    fileName = QStringLiteral("tools.dat");
+    QFile loadFile(fileName);
     if (!loadFile.open(QIODevice::ReadOnly)) {
         qWarning("Couldn't open tools file.");
-        //        return;
-        loadFile.setFileName(QStringLiteral("../tools.dat"));
+        fileName = QStringLiteral("../tools.dat");
+        loadFile.setFileName(fileName);
         if (!loadFile.open(QIODevice::ReadOnly)) {
             qWarning("Couldn't open tools file.");
             return;

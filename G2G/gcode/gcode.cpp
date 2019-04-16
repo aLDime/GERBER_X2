@@ -238,7 +238,7 @@ void GCodeFile::saveDrill()
     }
 
     for (QPointF& point : path)
-        point -= MaterialSetup::zeroPos;
+        point -= MaterialSetup::zeroPoint->pos();
 
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size();
@@ -270,7 +270,7 @@ void GCodeFile::saveProfilePocket()
     }
     for (QPolygonF& path : paths) {
         for (QPointF& point : path) {
-            point -= MaterialSetup::zeroPos;
+            point -= MaterialSetup::zeroPoint->pos();
         }
     }
 
@@ -360,7 +360,7 @@ void GCodeFile::endFile()
 {
     sl.append(g0() + z(MaterialSetup::safeZ)); //HomeZ
 
-    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
+    QPointF home(MaterialSetup::homePoint->pos() - MaterialSetup::zeroPoint->pos());
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
 
     sl.append("M30");

@@ -19,21 +19,21 @@ MainWindow* MainWindow::self = nullptr;
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
-
     , gerberParser(new Gerber::Parser)
-    , m_zeroPoint(new Point(Point::Zero))
-    , m_homePoint(new Point(Point::Home))
 {
     setupUi(this);
     setToolTipDuration(0);
 
+    MaterialSetup::homePoint = new Point(Point::Home);
+    MaterialSetup::zeroPoint = new Point(Point::Zero);
+
     new Shtift();
     new Shtift();
     new Shtift();
     new Shtift();
 
-    Scene::self->addItem(m_zeroPoint);
-    Scene::self->addItem(m_homePoint);
+    Scene::self->addItem(MaterialSetup::homePoint);
+    Scene::self->addItem(MaterialSetup::zeroPoint);
 
     init();
 
@@ -95,25 +95,11 @@ MainWindow::MainWindow(QWidget* parent)
 
 MainWindow::~MainWindow()
 {
-    delete m_zeroPoint;
-    delete m_homePoint;
+    //    delete m_zeroPoint;
+    //    delete m_homePoint;
     gerberThread.quit();
     gerberThread.wait();
     self = nullptr;
-}
-
-Point* MainWindow::zero() const
-{
-    if (self)
-        return m_zeroPoint;
-    return nullptr;
-}
-
-Point* MainWindow::home() const
-{
-    if (self)
-        return m_homePoint;
-    return nullptr;
 }
 
 void MainWindow::closeEvent(QCloseEvent* event)

@@ -41,6 +41,7 @@ public:
 private:
     void exportTools();
     void importTools();
+    QString fileName;
 };
 
 #endif // MYMODEL_H

@@ -7,8 +7,8 @@
 #include <QGraphicsItem>
 #include <QPen>
 
-class Point : public QGraphicsObject {
-    Q_OBJECT
+class Point : public QGraphicsItem { //Object {
+    //    Q_OBJECT
 
 public:
     Point(int type);
@@ -20,7 +20,6 @@ public:
     int type() const override;
 
     void resetPos();
-    void setPos(const QPointF& pos);
     void setPosX(double x);
     void setPosY(double y);
 
@@ -35,7 +34,7 @@ private:
     QPainterPath m_path;
     QPainterPath m_shape;
     int m_type = Null;
-    void updateMaterialSetupForm();
+    void updateMatSetForm();
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
@@ -55,6 +54,7 @@ public:
     static double min() { return qMin(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
     static double max() { return qMax(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
     void resetPos();
+    static QRectF worckRect;
 
 private:
     QRectF m_rect;

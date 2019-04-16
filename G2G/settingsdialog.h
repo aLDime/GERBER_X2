@@ -29,8 +29,8 @@ public:
     /////////////////////
     static QColor& color(Colors id) { return m_color[static_cast<int>(id)]; }
 
-    static QRectF worckRect();
-    static void setWorckRect(const QRectF& value);
+    //    static QRectF worckRect();
+    //    static void setWorckRect(const QRectF& value);
 
 public slots:
     void reject() override;
@@ -43,7 +43,6 @@ private:
     void onScrollBarValueChanged(int value);
     void onListCategoriesCurrentRowChanged(int currentRow);
 
-    static QRectF m_worckRect;
     static QColor m_color[Colors::Count];
 };
 

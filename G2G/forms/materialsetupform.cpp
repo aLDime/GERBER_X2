@@ -9,8 +9,8 @@
 
 MaterialSetup* MaterialSetup::self = nullptr;
 
-QPointF MaterialSetup::homePos;
-QPointF MaterialSetup::zeroPos;
+Point* MaterialSetup::homePoint = nullptr;
+Point* MaterialSetup::zeroPoint = nullptr;
 double MaterialSetup::safeZ;
 double MaterialSetup::thickness;
 double MaterialSetup::clearence;
@@ -36,10 +36,17 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->home(), &Point::setPosX);
-    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->home(), &Point::setPosY);
-    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->zero(), &Point::setPosX);
-    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), MainWindow::self->zero(), &Point::setPosY);
+    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+        [=](double val) { homePoint->setPosX(val); }); //MaterialSetup::homePoint, &Point::setPosX);
+
+    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+        [=](double val) { homePoint->setPosY(val); }); //MaterialSetup::homePoint, &Point::setPosY);
+
+    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+        [=](double val) { zeroPoint->setPosX(val); }); //MaterialSetup::zeroPoint, &Point::setPosX);
+
+    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
+        [=](double val) { zeroPoint->setPosY(val); }); //MaterialSetup::zeroPoint, &Point::setPosY);
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -52,19 +59,17 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
 
     QSettings settings;
     settings.beginGroup("Material");
-    homePos = settings.value("HomePoint").toPointF();
-    zeroPos = settings.value("ZeroPoint").toPointF();
     ui->dsbxSafeZ->setValue(settings.value("dsbxSafeZ", 20).toDouble());
     ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
     ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
     ui->dsbxThickness->setValue(settings.value("dsbxThickness", 1).toDouble());
     settings.endGroup();
 
-    ui->dsbxHomeX->setValue(homePos.x());
-    ui->dsbxHomeY->setValue(homePos.y());
+    ui->dsbxHomeX->setValue(homePoint->pos().x());
+    ui->dsbxHomeY->setValue(homePoint->pos().y());
 
-    ui->dsbxZeroX->setValue(zeroPos.x());
-    ui->dsbxZeroY->setValue(zeroPos.y());
+    ui->dsbxZeroX->setValue(zeroPoint->pos().x());
+    ui->dsbxZeroY->setValue(zeroPoint->pos().y());
 
     safeZ = ui->dsbxSafeZ->value();
     thickness = ui->dsbxThickness->value();
@@ -106,13 +111,11 @@ MaterialSetup::~MaterialSetup()
 {
     self = nullptr;
 
-    homePos = QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value());
-    zeroPos = QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value());
+    homePoint->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
+    zeroPoint->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     QSettings settings;
     settings.beginGroup("Material");
-    settings.setValue("HomePoint", homePos);
-    settings.setValue("ZeroPoint", zeroPos);
     settings.setValue("dsbxSafeZ", ui->dsbxSafeZ->value());
     settings.setValue("dsbxClearence", ui->dsbxClearence->value());
     settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
@@ -127,24 +130,10 @@ MaterialSetup::~MaterialSetup()
     delete ui;
 }
 
-void MaterialSetup::setHomePos(QPointF pos)
+void MaterialSetup::updatePosDsbxs()
 {
-    QSettings settings;
-    settings.beginGroup("Material");
-    settings.setValue("HomePoint", pos);
-    settings.endGroup();
-    homePos = pos;
-    ui->dsbxHomeX->setValue(pos.x());
-    ui->dsbxHomeY->setValue(pos.y());
-}
-
-void MaterialSetup::setZeroPos(QPointF pos)
-{
-    QSettings settings;
-    settings.beginGroup("Material");
-    settings.setValue("ZeroPoint", pos);
-    settings.endGroup();
-    zeroPos = pos;
-    ui->dsbxZeroX->setValue(pos.x());
-    ui->dsbxZeroY->setValue(pos.y());
+    ui->dsbxHomeX->setValue(homePoint->pos().x());
+    ui->dsbxHomeY->setValue(homePoint->pos().y());
+    ui->dsbxZeroX->setValue(zeroPoint->pos().x());
+    ui->dsbxZeroY->setValue(zeroPoint->pos().y());
 }

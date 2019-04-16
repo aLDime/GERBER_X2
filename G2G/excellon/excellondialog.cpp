@@ -93,7 +93,7 @@ void ExcellonDialog::on_pushButton_clicked()
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (item->type() == GerberItemType) {
+        if (item->type() != DrillItemType) {
             pair.second = item->boundingRect().center();
             ++c;
         }

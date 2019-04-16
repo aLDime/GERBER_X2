@@ -503,7 +503,7 @@ void DrillForm::on_pbCreate_clicked()
 
             if (!pathsMap[toolId].first.first.isEmpty()) {
                 Path& path = pathsMap[toolId].first.first;
-                IntPoint point1(toIntPoint(MaterialSetup::homePos));
+                IntPoint point1(toIntPoint(MaterialSetup::homePoint->pos()));
                 int counter = 0;
                 { // sort by distance
                     while (counter < path.size()) {

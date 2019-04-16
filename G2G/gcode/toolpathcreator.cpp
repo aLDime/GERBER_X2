@@ -33,7 +33,7 @@ void fixBegin(Path& path)
 
 Paths& sortByStratDistance(Paths& src)
 {
-    IntPoint startPt(toIntPoint(MaterialSetup::homePos + MaterialSetup::zeroPos));
+    IntPoint startPt(toIntPoint(MaterialSetup::homePoint->pos() + MaterialSetup::zeroPoint->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -53,7 +53,7 @@ Paths& sortByStratDistance(Paths& src)
 
 Pathss& sortByStratDistance2(Pathss& src)
 {
-    IntPoint startPt(toIntPoint(MaterialSetup::homePos + MaterialSetup::zeroPos));
+    IntPoint startPt(toIntPoint(MaterialSetup::homePoint->pos() + MaterialSetup::zeroPoint->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

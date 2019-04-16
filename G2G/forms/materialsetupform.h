@@ -1,6 +1,7 @@
 #ifndef MATERIALSETUPFORM_H
 #define MATERIALSETUPFORM_H
 
+#include "point.h"
 #include <QWidget>
 
 namespace Ui {
@@ -14,11 +15,10 @@ public:
     explicit MaterialSetup(QWidget* prnt = nullptr);
     ~MaterialSetup();
 
-    void setHomePos(QPointF pos);
-    void setZeroPos(QPointF pos);
+    void updatePosDsbxs();
 
-    static QPointF homePos;
-    static QPointF zeroPos;
+    static Point* homePoint;
+    static Point* zeroPoint;
     static double safeZ;
     static double thickness;
     static double clearence;
