@@ -2,7 +2,7 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <file.h>
+#include <gerberfile.h>
 #include <graphicsview.h>
 #include <myclipper.h>
 

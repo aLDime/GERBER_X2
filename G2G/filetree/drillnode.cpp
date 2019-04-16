@@ -1,5 +1,5 @@
 #include "drillnode.h"
-#include "excellon/exfile.h"
+#include <exfile.h>
 #include "filetree/fileholder.h"
 #include "gerbernode.h"
 #include <QFileInfo>

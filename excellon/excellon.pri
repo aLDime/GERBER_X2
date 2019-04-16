@@ -11,15 +11,18 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 INCLUDEPATH += $$PWD
 
+FORMS += \
+    $$PWD/excellondialog.ui \
+
 HEADERS += \
-    $$PWD/aperture.h \
-    $$PWD/gerberfile.h \
-    $$PWD/gerberparser.h \
-    $$PWD/mathparser.h \
-    $$PWD/gerbervars.h
+    $$PWD/excellon.h \
+    $$PWD/excellondialog.h \
+    $$PWD/exfile.h \
+    $$PWD/exparser.h \
+    $$PWD/exvars.h
 
 SOURCES += \
-    $$PWD/aperture.cpp \
-    $$PWD/file.cpp \
-    $$PWD/mathparser.cpp \
-    $$PWD/parser.cpp
+    $$PWD/excellondialog.cpp \
+    $$PWD/exfile.cpp \
+    $$PWD/exformatstate.cpp \
+    $$PWD/exparser.cpp \

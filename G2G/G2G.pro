@@ -9,7 +9,6 @@ DEFINES += G2G
 FORMS += \
     aboutform.ui \
     colorselector.ui \
-    excellon/excellondialog.ui \
     forms/drillform.ui \
     forms/materialsetupform.ui \
     forms/pocketform.ui \
@@ -27,10 +26,12 @@ DISTFILES += \
     qdarkstyle/style.qss \
     res/toolpath/bookOfComplaintsAndSuggestions.txt
 
-include(../graphicsview/mygraphicsview.pri)
-include(../gerber/gerber.pri)
-include(../clipper/clipper.pri)
 include(../file/file.pri)
+
+include(../clipper/clipper.pri)
+include(../excellon/excellon.pri)
+include(../gerber/gerber.pri)
+include(../graphicsview/mygraphicsview.pri)
 
 
 DEFINES += QT_DEPRECATED_WARNINGS G2G
@@ -57,10 +58,6 @@ HEADERS += \
     application.h \
     colorselector.h \
     doublespinbox.h \
-    excellon/excellon.h \
-    excellon/excellondialog.h \
-    excellon/exfile.h \
-    excellon/exparser.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
     filetree/fileholder.h \
@@ -98,17 +95,12 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
-    excellon/exvars.h
 
 
 SOURCES += \
     aboutform.cpp \
     colorselector.cpp \
     doublespinbox.cpp \
-    excellon/excellondialog.cpp \
-    excellon/exfile.cpp \
-    excellon/exformatstate.cpp \
-    excellon/exparser.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
     filetree/fileholder.cpp \

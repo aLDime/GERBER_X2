@@ -1,4 +1,4 @@
-#include "file.h"
+#include "gerberfile.h"
 #include <QElapsedTimer>
 #include <QSemaphore>
 #include <QThread>

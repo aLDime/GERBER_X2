@@ -5,14 +5,14 @@
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QToolBar>
-#include <excellon/exparser.h>
+#include <exparser.h>
 #include <filetree/fileholder.h>
 #include <forms/drillform.h>
 #include <forms/materialsetupform.h>
 #include <forms/pocketform.h>
 #include <forms/profileform.h>
 #include <gi/bridgeitem.h>
-#include <parser.h>
+#include <gerberparser.h>
 #include <tooldatabase/tooldatabase.h>
 
 MainWindow* MainWindow::self = nullptr;

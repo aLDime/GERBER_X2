@@ -1,7 +1,7 @@
 #ifndef GERBERPARSER_H
 #define GERBERPARSER_H
 
-#include "file.h"
+#include "gerberfile.h"
 #include "gerbervars.h"
 #include <QObject>
 #include <QStack>

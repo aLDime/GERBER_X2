@@ -38,14 +38,8 @@ private slots:
     void on_pbCreate_clicked();
 
 private:
-    enum WorckType {
-        drilling,
-        profile,
-        pocket,
-    };
-    WorckType worckType = drilling;
-
-    SideOfMilling side = Inner;
+    volatile GCodeType worckType = Drilling;
+    volatile SideOfMilling side = Inner;
 
     void on_cbxFileCurrentIndexChanged(int index);
     void on_clicked(const QModelIndex& index);

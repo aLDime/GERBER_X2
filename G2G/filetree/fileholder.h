@@ -3,8 +3,8 @@
 
 #include <QMap>
 #include <QMutex>
-#include <excellon/exfile.h>
-#include <file.h>
+#include <exfile.h>
+#include <gerberfile.h>
 #include <gcode/gcode.h>
 #include <myclipper.h>
 

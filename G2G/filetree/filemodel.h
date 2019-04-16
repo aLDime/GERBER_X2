@@ -6,8 +6,8 @@
 #include <QDebug>
 #include <QFile>
 #include <QMessageBox>
-#include <excellon/exfile.h>
-#include <file.h>
+#include <exfile.h>
+#include <gerberfile.h>
 #include <gcode/gcode.h>
 
 enum RootNodes {

@@ -1,6 +1,5 @@
 #include "treeview.h"
 #include "abstractnode.h"
-#include "excellon/excellondialog.h"
 #include "filetree/fileholder.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
@@ -12,6 +11,7 @@
 #include <QMenu>
 #include <QPainter>
 #include <QSettings>
+#include <excellondialog.h>
 
 TreeView::TreeView(QWidget* parent)
     : QTreeView(parent)

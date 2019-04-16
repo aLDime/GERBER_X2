@@ -2,7 +2,7 @@
 #define TOOLPATHCREATOR_H
 
 #include <QObject>
-#include <file.h>
+#include <gerberfile.h>
 #include <gcode/gcode.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>

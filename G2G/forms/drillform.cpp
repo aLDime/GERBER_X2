@@ -8,7 +8,8 @@
 #include <QMenu>
 #include <QPainter>
 #include <QTimer>
-#include <file.h>
+#include <gerberfile.h>
+#include <graphicsview.h>
 #include <scene.h>
 
 DrillForm* DrillForm::self = nullptr;
@@ -107,8 +108,12 @@ public:
         // draw hole
         if (!qFuzzyIsNull(m_currentDrill)) {
             //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
-            painter->setPen(QPen(Qt::red, 0.0));
-            painter->setBrush(QBrush(QColor(255, 0, 0, 150)));
+            //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
+            if (isSelected)
+                painter->setPen(m_pen);
+            else
+                painter->setPen(QPen(Qt::red, 0.0));
+            painter->setBrush(QBrush(QColor(255, 0, 0, 100)));
             painter->drawPath(m_currentPath);
         }
     }
@@ -137,12 +142,33 @@ public:
                     path.append(path.first());
                     m_currentPath.addPolygon(toQPolygon(path));
                 }
+                Path path(hole->item->paths().first());
+                if (path.size()) {
+                    for (IntPoint& pt : path) {
+                        m_currentPath.moveTo(toQPointF(pt) - QPointF(0.0, m_currentDrill * 0.7));
+                        m_currentPath.lineTo(toQPointF(pt) + QPointF(0.0, m_currentDrill * 0.7));
+                        m_currentPath.moveTo(toQPointF(pt) - QPointF(m_currentDrill * 0.7, 0.0));
+                        m_currentPath.lineTo(toQPointF(pt) + QPointF(m_currentDrill * 0.7, 0.0));
+                    }
+                    m_currentPath.moveTo(toQPointF(path.first()));
+                    for (IntPoint& pt : path) {
+                        m_currentPath.lineTo(toQPointF(pt));
+                    }
+                }
             } break;
             case Drill:
                 m_currentPath.addEllipse(hole->state.offsetPos(), m_currentDrill * 0.5, m_currentDrill * 0.5);
+                m_currentPath.moveTo(hole->state.offsetPos() - QPointF(0.0, m_currentDrill * 0.7));
+                m_currentPath.lineTo(hole->state.offsetPos() + QPointF(0.0, m_currentDrill * 0.7));
+                m_currentPath.moveTo(hole->state.offsetPos() - QPointF(m_currentDrill * 0.7, 0.0));
+                m_currentPath.lineTo(hole->state.offsetPos() + QPointF(m_currentDrill * 0.7, 0.0));
                 break;
             case Apetrure:
                 m_currentPath.addEllipse(toQPointF(grob->state.curPos()), m_currentDrill * 0.5, m_currentDrill * 0.5);
+                m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, m_currentDrill * 0.7));
+                m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, m_currentDrill * 0.7));
+                m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(m_currentDrill * 0.7, 0.0));
+                m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(m_currentDrill * 0.7, 0.0));
                 break;
             }
         }
@@ -295,29 +321,29 @@ DrillForm::DrillForm(QWidget* parent)
     ui->rb_drilling->setChecked(true);
     ui->rb_in->setChecked(true);
 
-    ui->rb_on->setEnabled(worckType == profile);
-    ui->rb_out->setEnabled(worckType == profile);
-    ui->rb_in->setEnabled(worckType == profile);
+    ui->rb_on->setEnabled(worckType == Profile);
+    ui->rb_out->setEnabled(worckType == Profile);
+    ui->rb_in->setEnabled(worckType == Profile);
 
     connect(ui->rb_drilling, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
-        ui->rb_in->setEnabled(worckType == profile);
-        ui->rb_on->setEnabled(worckType == profile);
-        ui->rb_out->setEnabled(worckType == profile);
+        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(worckType == Profile);
+        ui->rb_on->setEnabled(worckType == Profile);
+        ui->rb_out->setEnabled(worckType == Profile);
     });
 
     connect(ui->rb_profile, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
-        ui->rb_in->setEnabled(worckType == profile);
-        ui->rb_on->setEnabled(worckType == profile);
-        ui->rb_out->setEnabled(worckType == profile);
+        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(worckType == Profile);
+        ui->rb_on->setEnabled(worckType == Profile);
+        ui->rb_out->setEnabled(worckType == Profile);
     });
 
     connect(ui->rb_pocket, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? drilling : (ui->rb_profile->isChecked() ? profile : pocket);
-        ui->rb_in->setEnabled(worckType == profile);
-        ui->rb_on->setEnabled(worckType == profile);
-        ui->rb_out->setEnabled(worckType == profile);
+        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(worckType == Profile);
+        ui->rb_on->setEnabled(worckType == Profile);
+        ui->rb_out->setEnabled(worckType == Profile);
     });
 
     connect(ui->rb_on, &QRadioButton::toggled, [=] {
@@ -481,7 +507,7 @@ void DrillForm::on_pbCreate_clicked()
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
                     if (item->type() == PreviewItem::Slot)
                         continue;
-                    if (worckType == drilling && ToolHolder::tools[toolId].type != Tool::Engraving) {
+                    if (worckType == Drilling && ToolHolder::tools[toolId].type != Tool::Engraving) {
                         pathsMap[toolId].first.first.append(item->pos());
                     } else if (ToolHolder::tools[toolId].type != Tool::Drill && item->fit()) {
                         pathsMap[toolId].first.second.append(item->paths());
@@ -528,17 +554,17 @@ void DrillForm::on_pbCreate_clicked()
             if (!pathsMap[toolId].first.second.isEmpty()) {
                 Clipper clipper;
                 clipper.AddPaths(pathsMap[toolId].first.second, ptClip, true);
-                clipper.Execute(ctUnion, pathsMap[toolId].first.second, pftPositive);
+                clipper.Execute(ctUnion, pathsMap[toolId].first.second, pftNonZero);
 
                 //ReversePaths(pathsMap[toolId].first.second);
                 ToolPathCreator tpc(pathsMap[toolId].first.second, true);
 
                 GCodeFile* gcode = nullptr;
                 switch (worckType) {
-                case profile:
+                case Profile:
                     gcode = tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value(), side);
                     break;
-                case pocket:
+                case Pocket:
                     gcode = tpc.createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), false, 0, true);
                     break;
                 default:

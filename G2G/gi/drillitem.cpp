@@ -1,5 +1,5 @@
 #include "drillitem.h"
-#include "excellon/exvars.h"
+#include <exvars.h>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <graphicsview.h>

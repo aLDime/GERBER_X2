@@ -1,4 +1,4 @@
-#include "parser.h"
+#include "gerberparser.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QElapsedTimer>
@@ -126,7 +126,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
                 continue;
 
             // Line did not match any pattern. Warn user.
-            qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
+            //qWarning() << QString("Line ignored (%1): '%2'").arg(m_lineNum).arg(gerberLine);
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
             emit fileError("", m_file->shortFileName() + "\n" + errStr);
@@ -268,6 +268,8 @@ QList<QString> Parser::format(QString data)
         line = line.trimmed();
 
         if (line.isEmpty())
+            continue;
+        if (line == '*')
             continue;
 
         if (line.startsWith('%') && line.endsWith('%') && line.size() > 1) {
