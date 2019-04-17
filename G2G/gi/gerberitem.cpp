@@ -2,15 +2,15 @@
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <gerberfile.h>
+#include <gbrfile.h>
 #include <graphicsview.h>
 #include <scene.h>
 
-GerberItem::GerberItem(const Paths& paths, Gerber::File* file)
+GerberItem::GerberItem(Paths& paths, Gerber::File* file)
     : m_file(file)
+    , m_paths(paths)
 {
-    m_paths = paths;
-    for (Path path : this->m_paths) {
+    for (Path path : m_paths) {
         if (path.size() && path.first() != path.last())
             path.append(path.first());
         m_shape.addPolygon(toQPolygon(path));

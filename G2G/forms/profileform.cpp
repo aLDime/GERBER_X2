@@ -1,19 +1,18 @@
 #include "profileform.h"
-#include "materialsetupform.h"
-#include "ui_profileform.h"
-
 #include "filetree/filemodel.h"
 #include "gcode/gcode.h"
-#include <QDockWidget>
-
+#include "gi/bridgeitem.h"
+#include "materialsetupform.h"
 #include "tooldatabase/tooldatabase.h"
+#include "tooldatabase/tooleditdialog.h"
+#include "ui_profileform.h"
+#include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
-#include <gi/bridgeitem.h>
 #include <graphicsview.h>
 #include <myclipper.h>
 #include <scene.h>
-#include <tooldatabase/tooleditdialog.h>
+
 
 ProfileForm::ProfileForm(QWidget* parent)
     : QWidget(parent)
@@ -59,11 +58,11 @@ ProfileForm::ProfileForm(QWidget* parent)
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
 
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("tools-wizard"));
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
-    ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
+    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
+    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
+    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
+    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    ui->pbAddBridge->setIcon(Icon(PuttonAddBridgeIcon));
 
     rb_clicked();
     connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
@@ -182,16 +181,12 @@ void ProfileForm::create()
         return;
     }
 
-    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked());
+    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked(), side);
 
-    if (!wrPaths.isEmpty()) {
-        //        if (side == On)
-        //            tpc.addPaths(wrPaths);
-        //        else
+    if (!wrPaths.isEmpty())
         tpc.addRawPaths(wrPaths);
-    }
 
-    GCodeFile* gcode = tpc.createProfile(tool, ui->dsbxDepth->value(), side);
+    GCodeFile* gcode = tpc.createProfile(tool, ui->dsbxDepth->value());
 
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("The tool does not fit in the Working items!"));
@@ -200,7 +195,7 @@ void ProfileForm::create()
 
     gcode->setFileName(ui->leName->text());
     gcode->setSide(boardSide);
-    FileModel::self->addGcode(gcode);
+    FileModel::addFile(gcode);
 }
 
 void ProfileForm::updateName()

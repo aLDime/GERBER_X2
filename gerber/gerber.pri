@@ -12,11 +12,11 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/aperture.h \
-    $$PWD/gerberfile.h \
-    $$PWD/gerberparser.h \
     $$PWD/mathparser.h \
-    $$PWD/gerbervars.h
+    $$PWD/gbraperture.h \
+    $$PWD/gbrfile.h \
+    $$PWD/gbrparser.h \
+    $$PWD/gbrvars.h
 
 SOURCES += \
     $$PWD/aperture.cpp \

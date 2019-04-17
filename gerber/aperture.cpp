@@ -1,4 +1,4 @@
-#include "aperture.h"
+#include "gbraperture.h"
 #include "mathparser.h"
 #include <QDebug>
 #include <QLineF>

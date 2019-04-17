@@ -95,6 +95,8 @@ HEADERS += \
     tooldatabase/toolitem.h \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
+    icons.h \
+    forms/previewitem.h
 
 
 SOURCES += \
@@ -137,7 +139,8 @@ SOURCES += \
     tooldatabase/tooleditform.cpp \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
-    tooldatabase/tooltreeview.cpp
+    tooldatabase/tooltreeview.cpp \
+    forms/previewitem.cpp
 
 
 

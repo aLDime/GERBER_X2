@@ -2,7 +2,7 @@
 #define TOOLPATHCREATOR_H
 
 #include <QObject>
-#include <gerberfile.h>
+#include <gbrfile.h>
 #include <gcode/gcode.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
@@ -24,10 +24,10 @@ void fixBegin(Path& path);
 
 class ToolPathCreator {
 public:
-    ToolPathCreator(const Paths& value, const bool convent);
-    GCodeFile* createPocket(const Tool& tool, const double depth, const bool side, const int steps, const bool ex);
+    ToolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
+    GCodeFile* createPocket(const Tool& tool, const double depth, const int steps);
     QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, double depth, bool side, int steps);
-    GCodeFile* createProfile(const Tool& tool, double depth, const SideOfMilling side);
+    GCodeFile* createProfile(const Tool& tool, double depth);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);
     void addPaths(const Paths& paths);
@@ -124,7 +124,7 @@ private:
     //            }
     //        }
     //    }
-
+    const SideOfMilling m_side;
     double m_toolDiameter = 0.0;
     double m_dOffset = 0.0;
     double m_stepOver = 0.0;

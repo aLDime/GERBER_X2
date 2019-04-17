@@ -61,15 +61,14 @@ PocketForm::PocketForm(QWidget* parent)
         ui->rbOutside->setChecked(true);
     if (settings.value("rbRaster").toBool())
         ui->rbRaster->setChecked(true);
-    ui->checkBox->setChecked(settings.value("checkBox").toBool());
     settings.endGroup();
 
-    ui->pbEdit->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect->setIcon(QIcon::fromTheme("tools-wizard"));
-    ui->pbEdit_2->setIcon(QIcon::fromTheme("document-edit"));
-    ui->pbSelect_2->setIcon(QIcon::fromTheme("tools-wizard"));
-    ui->pbClose->setIcon(QIcon::fromTheme("window-close"));
-    ui->pbCreate->setIcon(QIcon::fromTheme("document-export"));
+    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
+    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
+    ui->pbEdit_2->setIcon(Icon(PuttonEditIcon));
+    ui->pbSelect_2->setIcon(Icon(PuttonSelectIcon));
+    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
+    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
 
     ui->sbxSteps->setSuffix(" - Infinity");
 
@@ -93,7 +92,6 @@ PocketForm::~PocketForm()
     settings.setValue("rbOffset", ui->rbOffset->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
-    settings.setValue("checkBox", ui->checkBox->isChecked());
     settings.endGroup();
     delete ui;
 }
@@ -199,19 +197,15 @@ void PocketForm::create()
         return;
     }
 
-    //    if (ui->chbxUseTwoTools->isChecked()) {
-    //        QVector<GCodeFile*> gcode = ToolPathCreator(wPaths).createPocket2({ tool, tool2 }, ui->rbConventional->isChecked(), ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value());
-
-    //    } else {
-    GCodeFile* gcode = ToolPathCreator(wPaths, ui->rbConventional->isChecked()).createPocket(tool, ui->dsbxDepth->value(), ui->rbOutside->isChecked(), ui->sbxSteps->value(), ui->checkBox->isChecked());
+    GCodeFile* gcode = ToolPathCreator(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner)
+                           .createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
     if (gcode == nullptr) {
         QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
         return;
     }
     gcode->setFileName(ui->leName->text());
     gcode->setSide(boardSide);
-    FileModel::self->addGcode(gcode);
-    //    }
+    FileModel::addFile(gcode);
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)

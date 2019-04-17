@@ -1,14 +1,7 @@
 #ifndef MODEL_H
 #define MODEL_H
 
-#include "abstractnode.h"
 #include <QAbstractItemModel>
-#include <QDebug>
-#include <QFile>
-#include <QMessageBox>
-#include <exfile.h>
-#include <gerberfile.h>
-#include <gcode/gcode.h>
 
 enum RootNodes {
     NodeGerberFiles,
@@ -16,6 +9,17 @@ enum RootNodes {
     NodeToolPath,
     NodeSpecial,
 };
+
+namespace Gerber {
+class File;
+}
+
+namespace Excellon {
+class File;
+}
+
+class GCodeFile;
+class AbstractNode;
 
 class FileModel : public QAbstractItemModel {
     Q_OBJECT
@@ -27,12 +31,16 @@ signals:
 public:
     static FileModel* self;
     explicit FileModel(QObject* parent = nullptr);
+
+    //    FileModel(Gerber::File* file);
+    //    FileModel(Excellon::File* file);
+    //    FileModel(GCodeFile* file);
     ~FileModel();
 
-    void addGerberFile(Gerber::File* gerberFile);
-    void addDrlFile(Excellon::File* drl);
-    void addGcode(GCodeFile* group);
-    void closeAllFiles();
+    static void addFile(Gerber::File* file);
+    static void addFile(Excellon::File* file);
+    static void addFile(GCodeFile* file);
+    static void closeAllFiles();
 
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;

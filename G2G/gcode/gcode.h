@@ -4,7 +4,7 @@
 #include <QGraphicsItemGroup>
 #include <QObject>
 #include <abstractfile.h>
-#include <gerbervars.h>
+#include <gbrvars.h>
 #include <gi/itemgroup.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
@@ -33,7 +33,7 @@ private:
     void saveProfilePocket();
 
     const GCodeType m_type;
-
+    Paths m_g0path;
     const Paths m_toolPaths;
     const Tool m_tool;
     double m_depth;

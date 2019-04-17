@@ -1,8 +1,8 @@
 #include "gcodenode.h"
 #include "filetree/fileholder.h"
+#include "icons.h"
 
 #include <QFileInfo>
-#include <QIcon>
 
 GcodeNode::GcodeNode(GCodeFile* gCode)
     : m_id(FileHolder::addFile(gCode))
@@ -73,13 +73,13 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             switch (FileHolder::file<GCodeFile>(m_id)->gtype()) {
             case Profile:
-                return QIcon::fromTheme("object-to-path");
+                return Icon(PathProfileIcon);
             case Pocket:
-                return QIcon::fromTheme("stroke-to-path");
+                return Icon(PathPocketIcon);
             case Drilling:
-                return QIcon::fromTheme("roll");
+                return Icon(PathDrillIcon);
             default:
-                return QIcon::fromTheme("roll");
+                return Icon(PathDrillIcon);
             }
         case Qt::UserRole:
             return m_id;

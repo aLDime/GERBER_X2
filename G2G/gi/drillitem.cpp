@@ -1,7 +1,7 @@
 #include "drillitem.h"
-#include <exvars.h>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <exvars.h>
 #include <graphicsview.h>
 
 using namespace ClipperLib;
@@ -14,7 +14,7 @@ DrillItem::DrillItem(Hole* hole)
     setAcceptHoverEvents(true);
     //    setCacheMode(DeviceCoordinateCache);
     setFlag(ItemIsSelectable, true);
-    m_paths = { toPath(hole->state.path) };
+    //    m_paths = { toPath(hole->state.path) };
     create();
 }
 
@@ -58,6 +58,13 @@ void DrillItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option,
 
 int DrillItem::type() const { return DrillItemType; }
 
+bool DrillItem::isSlot()
+{
+    if (m_hole)
+        return !m_hole->state.path.isEmpty();
+    return false;
+}
+
 double DrillItem::diameter() const { return m_diameter; }
 
 void DrillItem::setDiameter(double diameter)
@@ -79,25 +86,23 @@ const File* DrillItem::file() const
 
 Paths DrillItem::paths() const
 {
-    if (m_paths.isEmpty() || m_paths.first().isEmpty()) {
-        Path path;
-        if (m_hole)
+    Path path;
+    if (m_hole) {
+        if (m_hole->state.path.isEmpty())
             path = CirclePath(m_diameter * uScale, toIntPoint(m_hole->state.offsetPos()));
         else
-            path = CirclePath(m_diameter * uScale, toIntPoint(pos()));
-        ReversePath(path);
-        return { path };
-    }
-    return m_paths;
+            return { toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)) };
+    } else
+        path = CirclePath(m_diameter * uScale, toIntPoint(pos()));
+    ReversePath(path);
+    return { path };
 }
 
 void DrillItem::updateHole()
 {
     if (!m_hole)
         return;
-
     setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
-    m_paths = { toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)) };
     m_diameter = m_hole->state.currentToolDiameter();
     create();
     update(m_rect);
@@ -106,18 +111,18 @@ void DrillItem::updateHole()
 void DrillItem::create()
 {
     m_shape = QPainterPath();
-    if (m_paths.isEmpty() || m_paths.first().isEmpty()) {
-        if (m_hole) {
-            setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
-            m_shape.addEllipse(m_hole->state.offsetPos(), m_diameter / 2, m_diameter / 2);
-        } else {
-            m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
-        }
+    if (!m_hole) {
+        m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
+        m_rect = m_shape.boundingRect();
+    } else if (m_hole->state.path.isEmpty()) {
+        setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+        m_shape.addEllipse(m_hole->state.offsetPos(), m_diameter / 2, m_diameter / 2);
         m_rect = m_shape.boundingRect();
     } else {
+        setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         Paths tmpPpath;
         ClipperOffset offset;
-        offset.AddPath(m_paths.first(), jtRound, etOpenRound);
+        offset.AddPath(toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)), jtRound, etOpenRound);
         offset.Execute(tmpPpath, m_diameter * 0.5 * uScale);
         for (Path& path : tmpPpath) {
             path.append(path.first());

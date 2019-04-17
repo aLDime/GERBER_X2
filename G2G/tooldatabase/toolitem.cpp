@@ -2,7 +2,6 @@
 #include "tooldatabase.h"
 #include "toolmodel.h"
 
-#include <QIcon>
 #include <QJsonArray>
 #include <QPixmap>
 
@@ -143,7 +142,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const
                 if (m_isTool)
                     return ToolHolder::tools[m_toolId].icon();
                 else
-                    return QIcon::fromTheme("folder-sync");
+                    return Icon(ToolFolderIcon);
         case Qt::UserRole:
             return ToolHolder::tools[m_toolId].type;
         case Qt::UserRole + 1:

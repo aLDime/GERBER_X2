@@ -1,8 +1,8 @@
 #include "drillnode.h"
-#include <exfile.h>
 #include "filetree/fileholder.h"
 #include "gerbernode.h"
 #include <QFileInfo>
+#include <exfile.h>
 #include <mainwindow.h>
 
 DrillNode::DrillNode(Excellon::File* file)
@@ -60,7 +60,7 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            return QIcon::fromTheme("roll");
+            return Icon(PathDrillIcon);
         case Qt::UserRole:
             return m_id;
         default:

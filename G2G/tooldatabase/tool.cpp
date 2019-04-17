@@ -73,11 +73,11 @@ QIcon Tool::icon()
 {
     switch (type) {
     case Tool::Drill:
-        return QIcon::fromTheme("stroke-cap-butt");
+        return Icon(ToolDrillIcon);
     case Tool::EndMill:
-        return QIcon::fromTheme("stroke-cap-round");
+        return Icon(ToolEndmillIcon);
     case Tool::Engraving:
-        return QIcon::fromTheme("stroke-cap-square");
+        return Icon(ToolEngraverIcon);
     default:
         return QIcon();
     }

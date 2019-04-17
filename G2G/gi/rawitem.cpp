@@ -1,15 +1,16 @@
 #include "rawitem.h"
 
+#include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <gerberfile.h>
+#include <gbrfile.h>
 #include <graphicsview.h>
 #include <myclipper.h>
 
-RawItem::RawItem(const Path& path, Gerber::File* file)
+RawItem::RawItem(Path& path, Gerber::File* file)
     : m_file(file)
+    , m_path(path)
 {
-    m_paths = { path };
     m_polygon = toQPolygon(path);
 
     Paths tmpPpath;
@@ -33,7 +34,6 @@ QRectF RawItem::boundingRect() const
 void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 
 {
-    //    static int t = 0;
     if (m_penColor)
         m_pen.setColor(*m_penColor);
     if (m_brushColor)
@@ -46,34 +46,58 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         color.setAlpha(255);
         pen.setColor(color);
         pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
-        //        pen.setStyle(Qt::DashLine);
-        //        pen.setDashOffset(t++ % 10);
     }
     if (option->state & QStyle::State_MouseOver) {
-        //color = color.dark(110);
-        //color.setAlpha(100);
-        //pen.setColor(color);
-        pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
+        pen.setWidthF(3.0 / GraphicsView::self->matrix().m11());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({ 2.0, 2.0 });
-        //        pen.setDashOffset(t++ % 10);
+        pen.setDashPattern({ 3.0, 3.0 });
     }
-
-    if (pen.widthF() == 0)
-        pen.setWidthF(1.5 / GraphicsView::self->matrix().m11());
 
     painter->setPen(pen);
     painter->setBrush(Qt::NoBrush);
-    painter->drawPolyline(toQPolygon(m_paths.first()));
-
-    //painter->drawPath(m_shape);
+    painter->drawPolyline(toQPolygon(m_path));
 }
 
 int RawItem::type() const { return RawItemType; }
 
-Paths RawItem::paths() const { return m_paths; }
+Paths RawItem::paths() const { return { m_path }; }
 
 QPainterPath RawItem::shape() const { return m_shape; }
 
 const Gerber::File* RawItem::file() const { return m_file; }
+
+void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
+{
+    event->ignore();
+    if (event->modifiers() & Qt::ShiftModifier) {
+        const double glueLen = 0.2 * uScale;
+        IntPoint dest(m_path.last());
+        IntPoint init(m_path.last());
+        QList<int> skip;
+        ItemGroup* ig = m_file->rawItemGroup();
+        for (int i = 0; i < ig->size(); ++i) {
+            if (skip.contains(i))
+                continue;
+            const IntPoint& first = ig->at(i)->paths().first().first();
+            const IntPoint& last = ig->at(i)->paths().first().last();
+            if (Length(dest, first) < glueLen) {
+                dest = last;
+                skip.append(i);
+                ig->at(i)->setSelected(true);
+                if (init == dest)
+                    break;
+                i = -1;
+            } else if (Length(dest, last) < glueLen) {
+                dest = first;
+                skip.append(i);
+                ig->at(i)->setSelected(true);
+                if (init == dest)
+                    break;
+                i = -1;
+            }
+        }
+        return;
+    }
+    GraphicsItem::mouseReleaseEvent(event);
+}

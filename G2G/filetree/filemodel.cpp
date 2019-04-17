@@ -3,10 +3,8 @@
 #include "foldernode.h"
 #include "gcodenode.h"
 #include "gerbernode.h"
-#include <QApplication>
 #include <QDebug>
-#include <QMimeData>
-#include <QStandardItem>
+#include <QFile>
 
 FileModel* FileModel::self = nullptr;
 
@@ -21,59 +19,97 @@ FileModel::FileModel(QObject* parent)
     rootItem->append(new FolderNode("Special"));
 }
 
+//FileModel::FileModel(Gerber::File* file)
+//{
+//    if (self && file) {
+//        AbstractNode* item = rootItem->child(NodeGerberFiles);
+//        QModelIndex index = createIndex(0, 0, rootItem);
+//        int rowCount = item->childCount();
+//        beginInsertRows(index, rowCount, rowCount);
+//        item->append(new GerberNode(file));
+//        endInsertRows();
+//    }
+//}
+//FileModel::FileModel(Excellon::File* file)
+//{
+//    if (self && file) {
+//        AbstractNode* item{ rootItem->child(NodeDrillFiles) };
+//        QModelIndex index = createIndex(0, 0, item);
+//        int rowCount = item->childCount();
+//        beginInsertRows(index, rowCount, rowCount);
+//        item->append(new DrillNode(file));
+//        endInsertRows();
+//    }
+//}
+//FileModel::FileModel(GCodeFile* file)
+//{
+//    if (self && file) {
+//        AbstractNode* item{ rootItem->child(NodeToolPath) };
+//        QModelIndex index = createIndex(0, 0, item);
+//        int rowCount = item->childCount();
+//        beginInsertRows(index, rowCount, rowCount);
+//        item->append(new GcodeNode(file));
+//        endInsertRows();
+//    }
+//}
+
 FileModel::~FileModel()
 {
     delete rootItem;
     self = nullptr;
 }
 
-void FileModel::addGerberFile(Gerber::File* gerberFile)
+void FileModel::addFile(Gerber::File* file)
 {
-    AbstractNode* item = rootItem->child(NodeGerberFiles);
-    QModelIndex index = createIndex(0, 0, rootItem);
-    int rowCount = item->childCount();
-    beginInsertRows(index, rowCount, rowCount);
-    item->append(new GerberNode(gerberFile));
-    endInsertRows();
-}
-
-void FileModel::addDrlFile(Excellon::File* drl)
-{
-    if (!drl)
+    if (!self || !file)
         return;
-    AbstractNode* item{ rootItem->child(NodeDrillFiles) };
-    QModelIndex index = createIndex(0, 0, item);
+    AbstractNode* item(self->rootItem->child(NodeGerberFiles));
+    QModelIndex index = self->createIndex(0, 0, item);
     int rowCount = item->childCount();
-    beginInsertRows(index, rowCount, rowCount);
-    item->append(new DrillNode(drl));
-    endInsertRows();
+    self->beginInsertRows(index, rowCount, rowCount);
+    item->append(new GerberNode(file));
+    self->endInsertRows();
 }
 
-void FileModel::addGcode(GCodeFile* group)
+void FileModel::addFile(Excellon::File* file)
 {
-    AbstractNode* item{ rootItem->child(NodeToolPath) };
-    QModelIndex index = createIndex(0, 0, item);
+    if (!self || !file)
+        return;
+    AbstractNode* item(self->rootItem->child(NodeDrillFiles));
+    QModelIndex index = self->createIndex(0, 0, item);
     int rowCount = item->childCount();
-    beginInsertRows(index, rowCount, rowCount);
-    item->append(new GcodeNode(group));
-    endInsertRows();
+    self->beginInsertRows(index, rowCount, rowCount);
+    item->append(new DrillNode(file));
+    self->endInsertRows();
+}
+
+void FileModel::addFile(GCodeFile* file)
+{
+    if (!self || !file)
+        return;
+    AbstractNode* item(self->rootItem->child(NodeToolPath));
+    QModelIndex index = self->createIndex(0, 0, item);
+    int rowCount = item->childCount();
+    self->beginInsertRows(index, rowCount, rowCount);
+    item->append(new GcodeNode(file));
+    self->endInsertRows();
 }
 
 void FileModel::closeAllFiles()
 {
     AbstractNode* item;
-    for (int i = 0; i < rootItem->childCount(); ++i) {
-        item = rootItem->child(i);
-        QModelIndex index = createIndex(0, 0, item);
+    for (int i = 0; i < self->rootItem->childCount(); ++i) {
+        item = self->rootItem->child(i);
+        QModelIndex index = self->createIndex(0, 0, item);
         int rowCount = item->childCount();
         if (rowCount) {
-            beginRemoveRows(index, 0, rowCount - 1);
+            self->beginRemoveRows(index, 0, rowCount - 1);
             for (int i = 0; i < rowCount; ++i)
                 item->remove(0);
-            endRemoveRows();
+            self->endRemoveRows();
         }
     }
-    resetInternalData();
+    self->resetInternalData();
 }
 
 QModelIndex FileModel::index(int row, int column, const QModelIndex& parent) const

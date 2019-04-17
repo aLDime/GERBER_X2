@@ -26,7 +26,7 @@ private:
     void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     void hideOther();
-    ExcellonDialog* d = nullptr;
+    ExcellonDialog* m_exFormatDialog = nullptr;
     QModelIndex m_menuIndex;
     void closeFile();
     void saveGcodeFile();

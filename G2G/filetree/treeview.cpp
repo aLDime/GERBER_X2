@@ -150,9 +150,9 @@ void TreeView::showExcellonDialog()
 {
     if (DrillForm::self)
         DrillForm::self->on_pbClose_clicked();
-    d = new ExcellonDialog(FileHolder::file<File>(m_menuIndex.data(Qt::UserRole).toInt()));
-    connect(d, &ExcellonDialog::destroyed, [&] { d = nullptr; });
-    d->show();
+    m_exFormatDialog = new ExcellonDialog(FileHolder::file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
+    connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
+    m_exFormatDialog->show();
 }
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)
@@ -163,8 +163,8 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
     switch (m_menuIndex.parent().row()) {
     case NodeGerberFiles: {
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
+        menu.addAction(Icon(CloseIcon), tr("&Close"), this, &TreeView::closeFile);
+        menu.addAction(Icon(HideOtherIcon), tr("&Hide other"), this, &TreeView::hideOther);
         Gerber::File* file = FileHolder::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
             if (file)
@@ -174,21 +174,22 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
         a->setChecked(file->itemsType());
     } break;
     case NodeDrillFiles:
-        a = menu.addAction(QIcon::fromTheme("document-close"), tr("&Close"), this, &TreeView::closeFile);
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        menu.addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Edit Format"), this, &TreeView::showExcellonDialog)->setEnabled(!d);
+        a = menu.addAction(Icon(CloseIcon), tr("&Close"), this, &TreeView::closeFile);
+        menu.addAction(Icon(HideOtherIcon), tr("&Hide other"), this, &TreeView::hideOther);
+        if (!m_exFormatDialog)
+            menu.addAction(Icon(SettingsIcon), tr("&Edit Format"), this, &TreeView::showExcellonDialog);
         break;
     case NodeToolPath:
-        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete Toolpath"), this, &TreeView::closeFile);
-        menu.addAction(QIcon::fromTheme("hint"), tr("&Hide other"), this, &TreeView::hideOther);
-        menu.addAction(QIcon::fromTheme("document-save"), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
+        a = menu.addAction(Icon(DeleteIcon), tr("&Delete Toolpath"), this, &TreeView::closeFile);
+        menu.addAction(Icon(HideOtherIcon), tr("&Hide other"), this, &TreeView::hideOther);
+        menu.addAction(Icon(SaveIcon), tr("&Save Toolpath"), this, &TreeView::saveGcodeFile);
         break;
     default:
         break;
     }
 
     if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
-        a = menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [=] {
+        a = menu.addAction(Icon(DeleteIcon), tr("&Delete All Toolpaths"), [=] {
             if (QMessageBox::question(this, "", "Really?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
         });

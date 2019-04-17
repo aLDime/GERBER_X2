@@ -1,19 +1,16 @@
 #ifndef DRILLFORM_H
 #define DRILLFORM_H
 
-#include <QAbstractTableModel>
-#include <QGraphicsItem>
-#include <QIcon>
-#include <QItemSelectionModel>
 #include <QWidget>
-#include <aperture.h>
-#include <gcode/toolpathcreator.h>
 
 #include <gcode/gcode.h>
-#include <gi/drillitem.h>
+#include <gcode/toolpathcreator.h>
 
 namespace Ui {
 class DrillForm;
+}
+namespace Gerber {
+class AbstractAperture;
 }
 
 class DrillModel;
@@ -38,8 +35,8 @@ private slots:
     void on_pbCreate_clicked();
 
 private:
-    volatile GCodeType worckType = Drilling;
-    volatile SideOfMilling side = Inner;
+    GCodeType m_worckType = Drilling;
+    SideOfMilling m_side = Inner;
 
     void on_cbxFileCurrentIndexChanged(int index);
     void on_clicked(const QModelIndex& index);

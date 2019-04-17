@@ -1,19 +1,19 @@
 #include "mainwindow.h"
 #include "aboutform.h"
+#include "filetree/fileholder.h"
+#include "forms/drillform.h"
+#include "forms/materialsetupform.h"
+#include "forms/pocketform.h"
+#include "forms/profileform.h"
+#include "gi/bridgeitem.h"
 #include "settingsdialog.h"
+#include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>
 #include <QToolBar>
 #include <exparser.h>
-#include <filetree/fileholder.h>
-#include <forms/drillform.h>
-#include <forms/materialsetupform.h>
-#include <forms/pocketform.h>
-#include <forms/profileform.h>
-#include <gi/bridgeitem.h>
-#include <gerberparser.h>
-#include <tooldatabase/tooldatabase.h>
+#include <gbrparser.h>
 
 MainWindow* MainWindow::self = nullptr;
 
@@ -39,10 +39,9 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
-    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
+    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self, QOverload<Gerber::File*>::of(&FileModel::addFile));
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
         prependToRecentFiles(file->fileName());
-        //        GraphicsView::self->zoomFit();
         QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
     });
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
@@ -198,17 +197,17 @@ void MainWindow::createActions()
         });
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
 
-    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
     fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
 
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
+    action = fileMenu->addAction(Icon(SaveAllIcon), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
     fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save selected toolpaths to one directory"));
 
-    exportPdfAct = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
+    exportPdfAct = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
     fileToolBar->addAction(exportPdfAct);
     exportPdfAct->setShortcuts(QKeySequence::Print);
     exportPdfAct->setStatusTip(tr("Export to PDF file"));
@@ -237,19 +236,19 @@ void MainWindow::createActions()
 
     setRecentFilesVisible(MainWindow::hasRecentFiles());
 
-    closeAllAct = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close all"), this, &MainWindow::closeFiles);
+    closeAllAct = fileMenu->addAction(Icon(CloseIcon), tr("&Close all"), this, &MainWindow::closeFiles);
     fileToolBar->addAction(closeAllAct);
     closeAllAct->setShortcuts(QKeySequence::Close);
     closeAllAct->setStatusTip(tr("Close all files"));
     closeAllAct->setEnabled(false);
 
-    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+    action = fileMenu->addAction(Icon(ExitIcon), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);
     action->setStatusTip(tr("Exit the application"));
 
     //==================== serviceMenu ====================
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"),
+    action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"),
         this, &MainWindow::showSettingsDialog);
     action->setStatusTip(tr("Show the application's settings box"));
 
@@ -266,21 +265,22 @@ void MainWindow::createActions()
     zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     zoomToolBar->setMovable(false);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
+    action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
     action->setShortcut(QKeySequence::FullScreen);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), [=]() { graphicsView->zoom100(); });
+    action = zoomToolBar->addAction(Icon(Zoom100Icon), tr("100%"), [=]() { graphicsView->zoom100(); });
     action->setShortcut(tr("Ctrl+0"));
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), [=]() { graphicsView->zoomIn(); });
+    action = zoomToolBar->addAction(Icon(ZoomInIcon), tr("Zoom in"), [=]() { graphicsView->zoomIn(); });
     action->setShortcut(QKeySequence::ZoomIn);
-    action = zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
+    action = zoomToolBar->addAction(Icon(ZoomOutIcon), tr("Zoom out"), [=]() { graphicsView->zoomOut(); });
     action->setShortcut(QKeySequence::ZoomOut);
-    action = zoomToolBar->addAction(QIcon::fromTheme("edit-select-all"), tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
+    zoomToolBar->addSeparator();
+    action = zoomToolBar->addAction(Icon(ZoomToSelectedIcon), tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
 
     //==================== Selection / Delete selected ====================
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
     s->setMovable(false);
-    action = s->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), [=]() {
+    action = s->addAction(Icon(SelectAll), tr("Select all"), [=]() {
         for (QGraphicsItem* item : Scene::self->items())
             if (item->isVisible())
                 item->setSelected(true);
@@ -324,19 +324,19 @@ void MainWindow::createActions()
     //        }
     //    });
 
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("object-to-path"), tr("Profile"), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Profile"), [=] {
         createDockWidget(new ProfileForm(), Profile);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("stroke-to-path"), tr("Pocket"), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] {
         createDockWidget(new PocketForm(), Pocket);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("roll"), tr("Drilling"), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
         createDockWidget(new DrillForm(), Drilling);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("Setup Material "), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material "), [=] {
         createDockWidget(new MaterialSetup(), Material);
     }));
-
+    toolpathToolBar->addSeparator();
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
@@ -346,10 +346,40 @@ void MainWindow::createActions()
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif
 
-    toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [=] {
+    toolpathToolBar->addAction(Icon(ToolDatabaseIcon), tr("Tool Base"), [=] {
         ToolDatabase tdb(this, {});
         tdb.exec();
     });
+    toolpathToolBar->addSeparator();
+    toolpathToolBar->addAction(Icon(AutoRefpointsIcon), tr("Autoplace All Refpoints"), [=] {
+        QList<bool> selected;
+        for (QGraphicsItem* item : Scene::self->items()) {
+            selected.append(item->isSelected());
+            if (item->isVisible())
+                item->setSelected(true);
+        }
+
+        MaterialSetup::homePoint->resetPos();
+        MaterialSetup::zeroPoint->resetPos();
+        Shtift::shtifts().first()->resetPos();
+        for (QGraphicsItem* item : Scene::self->items())
+            item->setSelected(selected.takeFirst());
+        graphicsView->zoomFit();
+    });
+    //==================== grafica ====================
+    QToolBar* tb = addToolBar(tr("QGraphics Items"));
+    tb->setEnabled(false);
+    tb->setMovable(false);
+    tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
+    tb->addAction(QIcon::fromTheme("draw-line"), tr("line"));
+    tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
+    tb->addAction(QIcon::fromTheme("draw-ellipse-arc"), tr("Arc"));
+    tb->addAction(QIcon::fromTheme("draw-text"), tr("Text"));
+    tb->addSeparator();
+    tb->addAction(QIcon::fromTheme("path-union"), tr("union"));
+    tb->addAction(QIcon::fromTheme("path-difference"), tr("difference"));
+    tb->addAction(QIcon::fromTheme("path-exclusion"), tr("exclusion"));
+    tb->addAction(QIcon::fromTheme("path-intersection"), tr("intersection"));
 }
 
 void MainWindow::createStatusBar()
@@ -380,7 +410,7 @@ void MainWindow::createShtifts()
 
         GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
         gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id) + ")");
-        FileModel::self->addGcode(gcode);
+        FileModel::addFile(gcode);
     }
 }
 
@@ -419,7 +449,7 @@ void MainWindow::on_customContextMenuRequested(const QPoint& pos)
         return;
 
     if (item->type() == ShtiftType) {
-        a = menu.addAction(QIcon::fromTheme("roll"), tr("&Create path for Shtifts"), this, &MainWindow::createShtifts);
+        a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Shtifts"), this, &MainWindow::createShtifts);
         a = menu.addAction(tr("Fixed"));
         a->setCheckable(true);
         a->setChecked(!(Shtift::shtifts()[0]->flags() & QGraphicsItem::ItemIsMovable));
@@ -484,9 +514,9 @@ void MainWindow::openFile(const QString& fileName)
     lastPath = fi.absolutePath();
     Excellon::Parser dp;
     if (dp.isDrillFile(fileName)) {
-        File* dFile = dp.parseFile(fileName);
+        Excellon::File* dFile = dp.parseFile(fileName);
         if (dFile) {
-            FileModel::self->addDrlFile(dFile);
+            FileModel::self->addFile(dFile);
             prependToRecentFiles(dFile->fileName());
             QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }

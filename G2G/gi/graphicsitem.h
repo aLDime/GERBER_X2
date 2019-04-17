@@ -43,7 +43,6 @@ protected:
     QColor* m_brushColor = nullptr;
 
     QPainterPath m_shape;
-    mutable Paths m_paths;
     QRectF m_rect;
 
 private:

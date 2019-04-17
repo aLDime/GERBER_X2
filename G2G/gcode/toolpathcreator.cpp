@@ -8,7 +8,7 @@
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
-#include <aperture.h>
+#include <gbraperture.h>
 #include <gi/bridgeitem.h>
 #include <limits>
 #include <scene.h>
@@ -95,8 +95,9 @@ bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
 /// \param value
 /// \param convent
 ///
-ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent)
-    : m_workingPaths(value)
+ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
+    : m_side(side)
+    , m_workingPaths(value)
     , m_convent(convent)
 {
 }
@@ -109,150 +110,154 @@ ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent)
 /// \param ex
 /// \return
 ///
-GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, const bool side, const int steps, const bool ex)
+GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, const int steps)
 {
+    if (m_side == On)
+        return nullptr;
+
     m_toolDiameter = tool.getDiameter(depth) * uScale;
     m_dOffset = m_toolDiameter / 2;
     m_stepOver = tool.stepover * uScale;
 
     Paths fillPaths;
 
-    if (ex) {
-
-        if (side) {
-            groupedPaths(CutoffPaths, m_toolDiameter + 5);
-        } else
-            groupedPaths(CopperPaths);
-
-        if (side)
-            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
-                m_groupedPaths.removeFirst();
-
-        for (Paths paths : m_groupedPaths) {
-            Paths tmpPaths;
-            ClipperOffset offset(uScale, uScale / 1000);
-            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
-            offset.Execute(paths, -m_dOffset);
-            fillPaths.append(paths);
-            if (steps) {
-                int counter = steps;
-                if (counter > 1) {
-                    do {
-                        if (counter == 1)
-                            fillPaths.append(paths);
-                        tmpPaths.append(paths);
-                        offset.Clear();
-                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                        offset.Execute(paths, -m_stepOver);
-                    } while (paths.size() && --counter);
-                } else {
-                    tmpPaths.append(paths);
-                    fillPaths.append(paths);
-                }
-            } else {
-                do {
-                    tmpPaths.append(paths);
-                    offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                    offset.Execute(paths, -m_stepOver);
-                } while (paths.size());
-            }
-            m_returnPaths.append(tmpPaths);
-        }
-
-        if (m_returnPaths.size() == 0)
-            return nullptr;
-
-        Clipper clipper;
-        clipper.AddPaths(m_returnPaths, ptSubject, true);
-        IntRect r(clipper.GetBounds());
-        int k = tool.diameter * uScale;
-        Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
-        PolyTree polyTree;
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-        m_returnPaths.clear();
-        grouping2(polyTree.GetFirst(), &m_returnPaths);
-        ReversePaths(m_returnPaths);
-        sortByStratDistance(m_returnPaths);
-    } else {
-        if (side) {
-            groupedPaths(CutoffPaths, m_toolDiameter + 5);
-        } else
-            groupedPaths(CopperPaths);
-
-        if (side)
-            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
-                m_groupedPaths.removeFirst();
-
-        for (Paths paths : m_groupedPaths) {
-            ClipperOffset offset(uScale, uScale / 1000);
-            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
-            offset.Execute(paths, -m_dOffset);
-            Paths tmpPaths;
-            fillPaths.append(paths);
-            if (steps) {
-                int counter = steps;
-                if (counter > 1) {
-                    do {
-                        if (counter == 1)
-                            fillPaths.append(paths);
-                        tmpPaths.append(paths);
-                        offset.Clear();
-                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                        offset.Execute(paths, -m_stepOver);
-                    } while (paths.size() && --counter);
-                } else {
-                    tmpPaths.append(paths);
-                    fillPaths.append(paths);
-                }
-            } else {
-                do {
-                    tmpPaths.append(paths);
-                    offset.Clear();
-                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                    offset.Execute(paths, -m_stepOver);
-                } while (paths.size());
-            }
-
-            Pathss sortedPathss;
-            Clipper clipper;
-            clipper.AddPaths(tmpPaths, ptSubject, true);
-            IntRect r(clipper.GetBounds());
-            int k = tool.diameter * uScale;
-            Path outer = {
-                IntPoint(r.left - k, r.bottom + k),
-                IntPoint(r.right + k, r.bottom + k),
-                IntPoint(r.right + k, r.top - k),
-                IntPoint(r.left - k, r.top - k)
-            };
-
-            PolyTree polyTree;
-            clipper.AddPath(outer, ptSubject, true);
-            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-            grouping(polyTree.GetFirst(), &sortedPathss, CopperPaths);
-            for (Paths paths : sortedPathss)
-                m_returnPaths.append(paths);
-        }
-
-        if (m_returnPaths.size() == 0)
-            return nullptr;
-
-        for (Path& path : m_returnPaths) {
-            if (m_convent ^ !Orientation(path))
-                ReversePath(path);
-            else
-                fixBegin(path);
-            if (path.first() != path.last())
-                path.append(path.first());
-        }
-        sortByStratDistance(m_returnPaths);
+    //    if (ex) {
+    switch (m_side) {
+    case Outer:
+        groupedPaths(CutoffPaths, m_toolDiameter + 5);
+        if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+            m_groupedPaths.removeFirst();
+        break;
+    case Inner:
+        groupedPaths(CopperPaths);
+        break;
     }
+
+    for (Paths paths : m_groupedPaths) {
+        Paths tmpPaths;
+        ClipperOffset offset(uScale, uScale / 1000);
+        offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
+        offset.Execute(paths, -m_dOffset);
+        fillPaths.append(paths);
+        if (steps) {
+            int counter = steps;
+            if (counter > 1) {
+                do {
+                    if (counter == 1)
+                        fillPaths.append(paths);
+                    tmpPaths.append(paths);
+                    offset.Clear();
+                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                    offset.Execute(paths, -m_stepOver);
+                } while (paths.size() && --counter);
+            } else {
+                tmpPaths.append(paths);
+                fillPaths.append(paths);
+            }
+        } else {
+            do {
+                tmpPaths.append(paths);
+                offset.Clear();
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.Execute(paths, -m_stepOver);
+            } while (paths.size());
+        }
+        m_returnPaths.append(tmpPaths);
+    }
+
+    if (m_returnPaths.size() == 0)
+        return nullptr;
+
+    Clipper clipper;
+    clipper.AddPaths(m_returnPaths, ptSubject, true);
+    IntRect r(clipper.GetBounds());
+    int k = tool.diameter * uScale;
+    Path outer = {
+        IntPoint(r.left - k, r.bottom + k),
+        IntPoint(r.right + k, r.bottom + k),
+        IntPoint(r.right + k, r.top - k),
+        IntPoint(r.left - k, r.top - k)
+    };
+    PolyTree polyTree;
+    clipper.AddPath(outer, ptSubject, true);
+    clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+    m_returnPaths.clear();
+    grouping2(polyTree.GetFirst(), &m_returnPaths);
+    ReversePaths(m_returnPaths);
+    sortByStratDistance(m_returnPaths);
+    //    } else {
+    //        if (m_side) {
+    //            groupedPaths(CutoffPaths, m_toolDiameter + 5);
+    //        } else
+    //            groupedPaths(CopperPaths);
+
+    //        if (m_side)
+    //            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+    //                m_groupedPaths.removeFirst();
+
+    //        for (Paths paths : m_groupedPaths) {
+    //            ClipperOffset offset(uScale, uScale / 1000);
+    //            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //            offset.Execute(paths, -m_dOffset);
+    //            Paths tmpPaths;
+    //            fillPaths.append(paths);
+    //            if (steps) {
+    //                int counter = steps;
+    //                if (counter > 1) {
+    //                    do {
+    //                        if (counter == 1)
+    //                            fillPaths.append(paths);
+    //                        tmpPaths.append(paths);
+    //                        offset.Clear();
+    //                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
+    //                        offset.Execute(paths, -m_stepOver);
+    //                    } while (paths.size() && --counter);
+    //                } else {
+    //                    tmpPaths.append(paths);
+    //                    fillPaths.append(paths);
+    //                }
+    //            } else {
+    //                do {
+    //                    tmpPaths.append(paths);
+    //                    offset.Clear();
+    //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+    //                    offset.Execute(paths, -m_stepOver);
+    //                } while (paths.size());
+    //            }
+
+    //            Pathss sortedPathss;
+    //            Clipper clipper;
+    //            clipper.AddPaths(tmpPaths, ptSubject, true);
+    //            IntRect r(clipper.GetBounds());
+    //            int k = tool.diameter * uScale;
+    //            Path outer = {
+    //                IntPoint(r.left - k, r.bottom + k),
+    //                IntPoint(r.right + k, r.bottom + k),
+    //                IntPoint(r.right + k, r.top - k),
+    //                IntPoint(r.left - k, r.top - k)
+    //            };
+
+    //            PolyTree polyTree;
+    //            clipper.AddPath(outer, ptSubject, true);
+    //            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+    //            grouping(polyTree.GetFirst(), &sortedPathss, CopperPaths);
+    //            for (Paths paths : sortedPathss)
+    //                m_returnPaths.append(paths);
+    //        }
+
+    //    if (m_returnPaths.size() == 0)
+    //        return nullptr;
+
+    //    for (Path& path : m_returnPaths) {
+    //        if (m_convent ^ !Orientation(path))
+    //            ReversePath(path);
+    //        else
+    //            fixBegin(path);
+    //        if (path.first() != path.last())
+    //            path.append(path.first());
+    //    }
+    //    sortByStratDistance(m_returnPaths);
+    //}
     return new GCodeFile(m_returnPaths, tool, depth, Pocket, fillPaths);
 }
 
@@ -268,11 +273,11 @@ QPair<GCodeFile*, GCodeFile*> ToolPathCreator::createPocket2(const QPair<Tool, T
 /// \param side
 /// \return
 ///
-GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const SideOfMilling side)
+GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth)
 {
     m_toolDiameter = tool.getDiameter(depth);
     // execute offset
-    if (side == On) {
+    if (m_side == On) {
         m_returnPaths = m_workingPaths;
 
         for (Path& path : m_returnPaths)
@@ -287,7 +292,7 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
 
     } else {
         // calc offset
-        const double dOffset = (side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = (m_side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
 
         // execute offset
         if (!m_workingPaths.isEmpty()) {
@@ -306,9 +311,9 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth, const 
             m_returnPaths.append(m_workingRawPaths);
 
         // fix direction
-        if (side == Outer && !m_convent)
+        if (m_side == Outer && !m_convent)
             ReversePaths(m_returnPaths);
-        else if (side == Inner && m_convent)
+        else if (m_side == Inner && m_convent)
             ReversePaths(m_returnPaths);
 
         for (Path& path : m_returnPaths)
@@ -415,6 +420,11 @@ Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
 ///
 void ToolPathCreator::addRawPaths(Paths rawPaths)
 {
+    if (m_side == On) {
+        m_workingRawPaths.append(rawPaths);
+        return;
+    }
+
     qDebug() << rawPaths.size();
 
     const double glueLen = 0.1 * uScale;

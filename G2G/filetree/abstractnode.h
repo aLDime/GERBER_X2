@@ -1,6 +1,7 @@
 #ifndef TREEITEM_H
 #define TREEITEM_H
 
+#include "icons.h"
 #include <QAbstractItemModel>
 #include <QSharedPointer>
 #include <QVariant>

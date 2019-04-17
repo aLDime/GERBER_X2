@@ -1,7 +1,7 @@
 #ifndef TOOL_H
 #define TOOL_H
 
-#include <QIcon>
+#include "icons.h"
 #include <QJsonObject>
 #include <QMap>
 #include <QMessageBox>

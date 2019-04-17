@@ -17,7 +17,7 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    bool isSlot() { return !m_paths.isEmpty(); }
+    bool isSlot();
 
     double diameter() const;
     void setDiameter(double diameter);

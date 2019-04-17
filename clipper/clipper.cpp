@@ -44,7 +44,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <functional>
-#include <gerbervars.h>
+#include <gbrvars.h>
 #include <ostream>
 #include <stdexcept>
 #include <vector>

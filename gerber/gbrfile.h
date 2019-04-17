@@ -1,8 +1,8 @@
 #ifndef GFILE_H
 #define GFILE_H
 
-#include "aperture.h"
-#include "gerbervars.h"
+#include "gbraperture.h"
+#include "gbrvars.h"
 
 #include <QDebug>
 #include <abstractfile.h>

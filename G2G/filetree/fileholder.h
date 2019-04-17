@@ -4,12 +4,11 @@
 #include <QMap>
 #include <QMutex>
 #include <exfile.h>
-#include <gerberfile.h>
+#include <gbrfile.h>
 #include <gcode/gcode.h>
 #include <myclipper.h>
 
 using namespace ClipperLib;
-using namespace Excellon;
 
 class FileHolder {
 public:

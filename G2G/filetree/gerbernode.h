@@ -3,7 +3,7 @@
 
 #include "abstractnode.h"
 #include <QObject>
-#include <gerberfile.h>
+#include <gbrfile.h>
 
 class GerberNode : public QObject, public AbstractNode {
     Q_OBJECT

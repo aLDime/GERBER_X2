@@ -100,6 +100,7 @@ void Point::resetPos()
             setPos(Shtift::worckRect.bottomRight());
         else
             setPos(Shtift::worckRect.topLeft());
+    updateMatSetForm();
 }
 
 void Point::setPosX(double x)

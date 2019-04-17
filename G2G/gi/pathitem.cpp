@@ -6,16 +6,27 @@
 
 PathItem::PathItem(const Paths& paths)
 {
-    m_paths = paths;
-    for (const Path& path : m_paths)
+    for (const Path& path : paths)
         m_shape.addPolygon(toQPolygon(path));
-
     const double k = m_pen.widthF() / 2;
     m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
 #ifdef QT_DEBUG
     //setAcceptHoverEvents(true);
 #endif
 }
+
+PathItem::PathItem(const Path& path)
+
+{
+    m_shape.addPolygon(toQPolygon(path));
+    const double k = m_pen.widthF() / 2;
+    m_rect = m_shape.boundingRect() + QMarginsF(k, k, k, k);
+#ifdef QT_DEBUG
+    //setAcceptHoverEvents(true);
+#endif
+}
+
+PathItem::~PathItem() {}
 
 QRectF PathItem::boundingRect() const { return m_rect; }
 
@@ -50,9 +61,9 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
     if (m_pen.widthF() == 0) {
-        for (Path path : m_paths) {
+        for (const QPolygonF& path : m_shape.toFillPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
-                QLineF line(toQPointF(path[i + 1]), toQPointF(path[i]));
+                QLineF line(path[i + 1], path[i]);
                 double length = 20 / GraphicsView::self->matrix().m11();
                 if (line.length() < length && i)
                     continue;
@@ -70,7 +81,7 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
                     const QString text = "   " + QString::number(i);
                     const QRectF textRect = QFontMetricsF(painter->font()).boundingRect(QRectF(), Qt::AlignLeft, text);
                     const double k = 1.0 / GraphicsView ::self->matrix().m11();
-                    painter->translate(toQPointF(path[i]));
+                    painter->translate(path[i]);
                     painter->scale(k, -k);
                     //painter->setBrush(QColor(127, 127, 127, 255));
                     //painter->drawRect(textRect);
@@ -85,4 +96,4 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
 int PathItem::type() const { return PathItemType; }
 
-Paths PathItem::paths() const { return m_paths; }
+Paths PathItem::paths() const { return {} /*m_paths*/; }

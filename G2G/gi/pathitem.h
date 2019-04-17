@@ -6,7 +6,8 @@
 class PathItem : public GraphicsItem {
 public:
     PathItem(const Paths& paths);
-
+    PathItem(const Path& path);
+    ~PathItem();
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;

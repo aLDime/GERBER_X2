@@ -1,4 +1,4 @@
-#include "gerberparser.h"
+#include "gbrparser.h"
 #include <QDateTime>
 #include <QDebug>
 #include <QElapsedTimer>
@@ -149,14 +149,14 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             m_file->setSide(Bottom);
         {
             m_file->setItemGroup(new ItemGroup);
-            for (const Paths& paths : m_file->groupedPaths()) {
+            for (Paths& paths : m_file->groupedPaths()) {
                 m_file->itemGroup()->append(new GerberItem(paths, m_file));
             }
         }
         {
             m_file->setRawItemGroup(new ItemGroup);
             QList<Path> checkList;
-            for (const GraphicObject& go : *m_file) {
+            for (GraphicObject& go : *m_file) {
                 if (go.path.size() > 1) { // skip empty
                     //                    bool contains = false;
                     //                    for (const Path& path : checkList) { // find copy

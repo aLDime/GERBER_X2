@@ -1,18 +1,18 @@
 #include "drillform.h"
+#include "ui_drillform.h"
+
 #include "drillmodel.h"
 #include "filetree/fileholder.h"
 #include "filetree/filemodel.h"
 #include "materialsetupform.h"
+#include "previewitem.h"
 #include "tooldatabase/tooldatabase.h"
-#include "ui_drillform.h"
 #include <QMenu>
 #include <QPainter>
 #include <QTimer>
-#include <gerberfile.h>
-#include <graphicsview.h>
-#include <scene.h>
 
 DrillForm* DrillForm::self = nullptr;
+
 enum { Size = 24 };
 
 Paths offset(const Path path, double offset, bool fl = false)
@@ -31,220 +31,6 @@ Paths offset(const Path path, double offset, bool fl = false)
 
     return tmpPpaths;
 }
-
-class PreviewItem : public QGraphicsItem {
-    static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id)
-    {
-        QPainterPath painterPath;
-        for (QPolygonF& polygon : toQPolygons(go.paths /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
-            polygon.append(polygon.first());
-            painterPath.addPolygon(polygon);
-        }
-        const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
-        if (hole)
-            painterPath.addEllipse(toQPointF(go.state.curPos()), hole, hole);
-        return painterPath;
-    }
-    static QPainterPath drawDrill(const Hole& hole)
-    {
-        QPainterPath painterPath;
-        painterPath.addEllipse(hole.state.offsetPos(), hole.state.currentToolDiameter() * 0.5, hole.state.currentToolDiameter() * 0.5);
-        return painterPath;
-    }
-    static QPainterPath drawSlot(const Hole& hole)
-    {
-        QPainterPath painterPath;
-        for (Path& path : offset(hole.item->paths().first(), hole.state.currentToolDiameter()))
-            painterPath.addPolygon(toQPolygon(path));
-        return painterPath;
-    }
-
-public:
-    explicit PreviewItem(const Gerber::GraphicObject& go, int id)
-        : id(id)
-        , grob(&go)
-        , m_sourcePath(drawApetrure(go, id))
-        , m_sourceDrill(go.gFile->apertures()->value(id)->drillDiameter() ? go.gFile->apertures()->value(id)->drillDiameter() : go.gFile->apertures()->value(id)->apSize())
-        , m_type(Apetrure)
-        , m_pen(Qt::darkGray, 0.0)
-        , m_brush(Qt::darkGray)
-    {
-    }
-    explicit PreviewItem(const Hole& hole, const QPolygonF& toolPath)
-        : hole(&hole)
-        , m_sourcePath(drawSlot(hole))
-        , m_sourceDrill(hole.state.currentToolDiameter())
-        , m_toolPath(toolPath)
-        , m_type(Slot)
-        , m_pen(Qt::darkGray, 0.0)
-        , m_brush(Qt::darkGray)
-    {
-    }
-    explicit PreviewItem(const Hole& hole)
-        : hole(&hole)
-        , m_sourcePath(drawDrill(hole))
-        , m_sourceDrill(hole.state.currentToolDiameter())
-        , m_type(Drill)
-        , m_pen(Qt::darkGray, 0.0)
-        , m_brush(Qt::darkGray)
-    {
-    }
-
-    ~PreviewItem() {}
-
-    enum Type {
-        Slot = ShtiftType + 1,
-        Drill,
-        Apetrure
-    };
-
-    // QGraphicsItem interface
-    virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override
-    {
-        // draw source
-        painter->setPen(m_pen);
-        painter->setBrush(m_brush);
-        painter->drawPath(m_sourcePath);
-        // draw hole
-        if (!qFuzzyIsNull(m_currentDrill)) {
-            //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
-            //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
-            if (isSelected)
-                painter->setPen(m_pen);
-            else
-                painter->setPen(QPen(Qt::red, 0.0));
-            painter->setBrush(QBrush(QColor(255, 0, 0, 100)));
-            painter->drawPath(m_currentPath);
-        }
-    }
-
-    virtual QRectF boundingRect() const override { return m_sourcePath.boundingRect().united(m_currentPath.boundingRect()); }
-
-    //////////////////////////////////////////
-
-    int type() const override { return m_type; }
-    double sourceDrill() const { return m_sourceDrill; }
-    QPolygonF toolPath() const { return m_toolPath; }
-
-    double currentDrill() const { return m_currentDrill; }
-    void setCurrentDrill(double currentDrill)
-    {
-        m_currentDrill = currentDrill;
-        if (!qFuzzyIsNull(m_currentDrill)) {
-            m_currentPath = QPainterPath();
-            switch (m_type) {
-            case Slot: {
-                Paths tmpPpath;
-                ClipperOffset offset;
-                offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
-                offset.Execute(tmpPpath, m_currentDrill * 0.5 * uScale);
-                for (Path& path : tmpPpath) {
-                    path.append(path.first());
-                    m_currentPath.addPolygon(toQPolygon(path));
-                }
-                Path path(hole->item->paths().first());
-                if (path.size()) {
-                    for (IntPoint& pt : path) {
-                        m_currentPath.moveTo(toQPointF(pt) - QPointF(0.0, m_currentDrill * 0.7));
-                        m_currentPath.lineTo(toQPointF(pt) + QPointF(0.0, m_currentDrill * 0.7));
-                        m_currentPath.moveTo(toQPointF(pt) - QPointF(m_currentDrill * 0.7, 0.0));
-                        m_currentPath.lineTo(toQPointF(pt) + QPointF(m_currentDrill * 0.7, 0.0));
-                    }
-                    m_currentPath.moveTo(toQPointF(path.first()));
-                    for (IntPoint& pt : path) {
-                        m_currentPath.lineTo(toQPointF(pt));
-                    }
-                }
-            } break;
-            case Drill:
-                m_currentPath.addEllipse(hole->state.offsetPos(), m_currentDrill * 0.5, m_currentDrill * 0.5);
-                m_currentPath.moveTo(hole->state.offsetPos() - QPointF(0.0, m_currentDrill * 0.7));
-                m_currentPath.lineTo(hole->state.offsetPos() + QPointF(0.0, m_currentDrill * 0.7));
-                m_currentPath.moveTo(hole->state.offsetPos() - QPointF(m_currentDrill * 0.7, 0.0));
-                m_currentPath.lineTo(hole->state.offsetPos() + QPointF(m_currentDrill * 0.7, 0.0));
-                break;
-            case Apetrure:
-                m_currentPath.addEllipse(toQPointF(grob->state.curPos()), m_currentDrill * 0.5, m_currentDrill * 0.5);
-                m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, m_currentDrill * 0.7));
-                m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, m_currentDrill * 0.7));
-                m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(m_currentDrill * 0.7, 0.0));
-                m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(m_currentDrill * 0.7, 0.0));
-                break;
-            }
-        }
-        update();
-    }
-
-    void setSelected(bool value)
-    {
-        isSelected = value;
-        if (isSelected) {
-            m_pen.setColor(Qt::green);
-            m_brush.setColor(Qt::green);
-        } else {
-            m_pen.setColor(Qt::darkGray);
-            m_brush.setColor(Qt::darkGray);
-        }
-        update();
-    }
-
-    IntPoint pos() const
-    {
-        switch (m_type) {
-        case Slot:
-            return toIntPoint(hole->state.offsetPos());
-        case Drill:
-            return toIntPoint(hole->state.offsetPos());
-        case Apetrure:
-            return grob->state.curPos();
-        }
-        return IntPoint();
-    }
-
-    Paths paths() const
-    {
-        switch (m_type) {
-        case Slot:
-            return hole->item->paths();
-        case Drill:
-            return hole->item->paths();
-        case Apetrure: {
-            return grob->paths;
-        }
-        }
-        return Paths();
-    }
-
-    bool fit()
-    {
-        switch (m_type) {
-        case Slot:
-        case Drill:
-            return m_sourceDrill > m_currentDrill;
-        case Apetrure:
-            return grob->gFile->apertures()->value(id)->fit(m_currentDrill);
-        }
-        return false;
-    }
-
-private:
-    const int id = 0;
-    const Gerber::GraphicObject* const grob = nullptr;
-    const Hole* const hole = nullptr;
-
-    QPainterPath m_sourcePath;
-    QPainterPath m_currentPath;
-
-    const double m_sourceDrill;
-    double m_currentDrill = 0.0;
-    const QPolygonF m_toolPath;
-    const Type m_type;
-
-    QPen m_pen;
-    QBrush m_brush;
-
-    bool isSelected = false;
-};
 
 /////////////////////////////////////////////
 /// \brief draw
@@ -321,41 +107,41 @@ DrillForm::DrillForm(QWidget* parent)
     ui->rb_drilling->setChecked(true);
     ui->rb_in->setChecked(true);
 
-    ui->rb_on->setEnabled(worckType == Profile);
-    ui->rb_out->setEnabled(worckType == Profile);
-    ui->rb_in->setEnabled(worckType == Profile);
+    ui->rb_on->setEnabled(m_worckType == Profile);
+    ui->rb_out->setEnabled(m_worckType == Profile);
+    ui->rb_in->setEnabled(m_worckType == Profile);
 
     connect(ui->rb_drilling, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(worckType == Profile);
-        ui->rb_on->setEnabled(worckType == Profile);
-        ui->rb_out->setEnabled(worckType == Profile);
+        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(m_worckType == Profile);
+        ui->rb_on->setEnabled(m_worckType == Profile);
+        ui->rb_out->setEnabled(m_worckType == Profile);
     });
 
     connect(ui->rb_profile, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(worckType == Profile);
-        ui->rb_on->setEnabled(worckType == Profile);
-        ui->rb_out->setEnabled(worckType == Profile);
+        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(m_worckType == Profile);
+        ui->rb_on->setEnabled(m_worckType == Profile);
+        ui->rb_out->setEnabled(m_worckType == Profile);
     });
 
     connect(ui->rb_pocket, &QRadioButton::toggled, [=] {
-        worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(worckType == Profile);
-        ui->rb_on->setEnabled(worckType == Profile);
-        ui->rb_out->setEnabled(worckType == Profile);
+        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        ui->rb_in->setEnabled(m_worckType == Profile);
+        ui->rb_on->setEnabled(m_worckType == Profile);
+        ui->rb_out->setEnabled(m_worckType == Profile);
     });
 
     connect(ui->rb_on, &QRadioButton::toggled, [=] {
-        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+        m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
     });
 
     connect(ui->rb_out, &QRadioButton::toggled, [=] {
-        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+        m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
     });
 
     connect(ui->rb_in, &QRadioButton::toggled, [=] {
-        side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
+        m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
     });
 
     updateFiles();
@@ -421,9 +207,9 @@ void DrillForm::setHoles(const QMap<int, double>& value)
     for (toolIt = m_tools.begin(); toolIt != m_tools.end(); ++toolIt) {
         QString name(QString("Tool Ø%1mm").arg(toolIt.value()));
         model->appendRow(name, drawDrillIcon(), toolIt.key());
-        const File* file = static_cast<File*>(ui->cbxFile->currentData().value<void*>());
+        const Excellon::File* file = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
         bool isSlot = false;
-        for (const Hole& hole : *file) {
+        for (const Excellon::Hole& hole : *file) {
             if (hole.state.tCode == toolIt.key()) {
                 PreviewItem* item = nullptr;
                 if (hole.state.path.isEmpty()) {
@@ -468,9 +254,9 @@ void DrillForm::updateFiles()
         }
     }
 
-    for (File* file : FileHolder::files<File>()) {
+    for (Excellon::File* file : FileHolder::files<Excellon::File>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon::fromTheme("roll"), Qt::DecorationRole);
+        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, Icon(PathDrillIcon), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 
@@ -488,13 +274,6 @@ void DrillForm::on_pbClose_clicked()
         static_cast<QWidget*>(parent())->close();
 }
 
-//static QDebug operator<<(QDebug debug, const IntPoint& p)
-//{
-//    //QDebugStateSaver saver(debug);
-//    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-//    return debug;
-//}
-
 void DrillForm::on_pbCreate_clicked()
 {
     { //   drills only
@@ -507,14 +286,12 @@ void DrillForm::on_pbCreate_clicked()
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
                     if (item->type() == PreviewItem::Slot)
                         continue;
-                    if (worckType == Drilling && ToolHolder::tools[toolId].type != Tool::Engraving) {
+                    if (m_worckType == Drilling && ToolHolder::tools[toolId].type != Tool::Engraving)
                         pathsMap[toolId].first.first.append(item->pos());
-                    } else if (ToolHolder::tools[toolId].type != Tool::Drill && item->fit()) {
+                    else if (ToolHolder::tools[toolId].type != Tool::Drill && item->fit())
                         pathsMap[toolId].first.second.append(item->paths());
-                        //                        } else {
-                        //                            pathsMap[toolId].first.first.append(item->pos());
-                        //                        }
-                    }
+                    else
+                        pathsMap[toolId].first.first.append(item->pos());
                 }
             }
         }
@@ -549,33 +326,26 @@ void DrillForm::on_pbCreate_clicked()
                 GCodeFile* gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drilling);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
-                FileModel::self->addGcode(gcode);
+                FileModel::addFile(gcode);
             }
             if (!pathsMap[toolId].first.second.isEmpty()) {
-                Clipper clipper;
-                clipper.AddPaths(pathsMap[toolId].first.second, ptClip, true);
-                clipper.Execute(ctUnion, pathsMap[toolId].first.second, pftNonZero);
-
-                //ReversePaths(pathsMap[toolId].first.second);
-                ToolPathCreator tpc(pathsMap[toolId].first.second, true);
-
+                ReversePaths(pathsMap[toolId].first.second);
                 GCodeFile* gcode = nullptr;
-                switch (worckType) {
+                switch (m_worckType) {
                 case Profile:
-                    gcode = tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value(), side);
+                    gcode = ToolPathCreator(pathsMap[toolId].first.second, true, m_side).createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
                     break;
                 case Pocket:
-                    gcode = tpc.createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), false, 0, true);
+                    gcode = ToolPathCreator(pathsMap[toolId].first.second, true, Inner).createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
                     break;
                 default:
                     continue;
-                    break;
                 }
                 if (!gcode)
                     continue;
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[toolId].name + " - T(" + indexes + ')');
                 gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
-                FileModel::self->addGcode(gcode);
+                FileModel::addFile(gcode);
             }
         }
     }
@@ -610,7 +380,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCodeFile* gcode = new GCodeFile(pathsMap[selectedToolId].first, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name + " - T(" + indexes + ')');
                 gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
-                FileModel::self->addGcode(gcode);
+                FileModel::addFile(gcode);
             }
         }
     }
@@ -621,7 +391,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
     if (static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->type() == FileType::Gerber)
         setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
     else
-        setHoles(static_cast<File*>(ui->cbxFile->currentData().value<void*>())->tools());
+        setHoles(static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>())->tools());
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)
@@ -635,7 +405,13 @@ void DrillForm::on_clicked(const QModelIndex& index)
 void DrillForm::on_doubleClicked(const QModelIndex& current)
 {
     if (current.column() == 1) {
-        ToolDatabase tdb(this, model->isSlot(current.row()) ? QVector<Tool::Type>{ Tool::EndMill } : (worckType ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving } : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }));
+        QVector<Tool::Type> tools;
+        tools = model->isSlot(current.row())
+            ? QVector<Tool::Type>{ Tool::EndMill }
+            : ((m_worckType == Profile || m_worckType == Pocket)
+                      ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
+                      : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
+        ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
             const Tool tool(tdb.tool());
@@ -687,9 +463,23 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
     if (ui->tableView->selectionModel()->selectedIndexes().isEmpty())
         return;
     QMenu menu;
-    menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [=] {
-        //ToolDatabase tdb(this, model->isSlot(current.row()) ? QVector<Tool::Type>{ Tool::EndMill } : (worckType ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving } : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill }));
-        ToolDatabase tdb(this, worckType ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving } : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill });
+    menu.addAction(Icon(ToolDatabaseIcon), tr("&Select Tool"), [=] {
+        bool fl = true;
+        for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
+            fl = model->isSlot(current.row());
+            if (!fl)
+                break;
+        }
+
+        QVector<Tool::Type> tools;
+        if (fl)
+            tools = QVector<Tool::Type>{ Tool::EndMill };
+        else
+            tools = (m_worckType == Profile || m_worckType == Pocket)
+                ? QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving }
+                : QVector<Tool::Type>{ Tool::Drill, Tool::EndMill };
+
+        ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             const Tool tool(tdb.tool());
             for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
@@ -710,7 +500,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
 
     for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
         if (model->toolId(current.row()) != -1) {
-            menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [=] {
+            menu.addAction(Icon(RemoveIcon), tr("&Remove Tool"), [=] {
                 for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
                     model->setToolId(current.row(), -1);
                     createHoles(model->apertureId(current.row()), 0.0);
