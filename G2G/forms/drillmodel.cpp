@@ -7,32 +7,33 @@ DrillModel::DrillModel(int type, QObject* parent)
 {
 }
 
-void DrillModel::appendRow(const QString& name, const QIcon& icon, int id)
-{
-    m_data.append(Row(name, icon, id));
-}
+void DrillModel::appendRow(const QString& name, const QIcon& icon, int id) { m_data.append(Row(name, icon, id)); }
 
 void DrillModel::setToolId(int row, int id)
 {
-    m_data[row].id[1] = id;
-    //    QModelIndex index(createIndex(row, 1));
-    //    dataChanged(index, index);
+    if (m_data[row].toolId != id)
+        m_data[row].create = id > -1;
+    m_data[row].toolId = id;
+    dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
-int DrillModel::toolId(int row) { return m_data[row].id[1]; }
+int DrillModel::toolId(int row) { return m_data[row].toolId; }
 
 void DrillModel::setSlot(int row, bool slot) { m_data[row].isSlot = slot; }
 
 bool DrillModel::isSlot(int row) { return m_data[row].isSlot; }
 
-void DrillModel::setApertureId(int row, int id)
-{
-    m_data[row].id[0] = id;
-    //    QModelIndex index(createIndex(row, 0));
-    //    dataChanged(index, index);
-}
+int DrillModel::apertureId(int row) { return m_data[row].apToolId; }
 
-int DrillModel::apertureId(int row) { return m_data[row].id[0]; }
+bool DrillModel::create(int row) const { return m_data[row].create; }
+
+void DrillModel::setCreate(int row, bool create)
+{
+    if (m_data[row].toolId == -1)
+        return;
+    m_data[row].create = create;
+    dataChanged(createIndex(row, 0), createIndex(row, 1));
+}
 
 int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return m_data.size(); }
 
@@ -51,35 +52,52 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole:
             return m_data[row].icon[0];
         case Qt::UserRole:
-            return m_data[row].id[0];
+            return m_data[row].apToolId;
+        case Qt::CheckStateRole:
+            return m_data[row].create ? Qt::Checked : Qt::Unchecked;
         default:
             break;
         }
     else {
-        if (m_data[row].id[1] == -1)
+        if (m_data[row].toolId == -1)
             switch (role) {
             case Qt::DisplayRole:
                 return "Select Tool";
             case Qt::TextAlignmentRole:
                 return Qt::AlignCenter;
             case Qt::UserRole:
-                return m_data[row].id[index.column()];
+                return m_data[row].toolId;
             default:
                 break;
             }
         else
             switch (role) {
             case Qt::DisplayRole:
-                return ToolHolder::tools[m_data[row].id[1]].name;
+                return ToolHolder::tools[m_data[row].toolId].name;
             case Qt::DecorationRole:
-                return ToolHolder::tools[m_data[row].id[1]].icon();
+                return ToolHolder::tools[m_data[row].toolId].icon();
             case Qt::UserRole:
-                return m_data[row].id[index.column()];
+                return m_data[row].toolId;
             default:
                 break;
             }
     }
     return QVariant();
+}
+
+bool DrillModel::setData(const QModelIndex& index, const QVariant& value, int role)
+{
+    int row = index.row();
+    if (!index.column())
+        switch (role) {
+        case Qt::CheckStateRole:
+            if (m_data[row].toolId > -1)
+                m_data[row].create = value.toBool();
+            return true;
+        default:
+            break;
+        }
+    return false;
 }
 
 QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int role) const
@@ -102,9 +120,9 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
         } else {
             switch (m_type) {
             case tAperture:
-                return QString("D%1").arg(m_data[section].id[0]);
+                return QString("D%1").arg(m_data[section].apToolId);
             case tTool:
-                return QString("T%1").arg(m_data[section].id[0]);
+                return QString("T%1").arg(m_data[section].apToolId);
             }
         }
         return QVariant();
@@ -117,7 +135,7 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
 
 Qt::ItemFlags DrillModel::flags(const QModelIndex& index) const
 {
-    if (index.column())
-        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    return Qt::ItemIsEnabled;
+    if (!index.column())
+        return (m_data[index.row()].toolId > -1 ? Qt::ItemIsEnabled : Qt::NoItemFlags) | Qt::ItemIsUserCheckable;
+    return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }

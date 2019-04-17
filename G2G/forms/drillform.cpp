@@ -7,9 +7,52 @@
 #include "materialsetupform.h"
 #include "previewitem.h"
 #include "tooldatabase/tooldatabase.h"
+#include <QCheckBox>
 #include <QMenu>
+#include <QMouseEvent>
 #include <QPainter>
+#include <QSettings>
 #include <QTimer>
+
+//////////////////////////////////////////////////////////////
+/// \brief MyHeader::MyHeader
+/// \param orientation
+/// \param parent
+///
+MyHeader::MyHeader(Qt::Orientation orientation, QWidget* parent)
+    : QHeaderView(orientation, parent)
+{
+}
+
+void MyHeader::mouseReleaseEvent(QMouseEvent* event)
+{
+    int index = logicalIndexAt(event->pos());
+    if (!index) {
+        isShecked = !isShecked;
+        DrillModel* model = static_cast<DrillModel*>(static_cast<QTableView*>(parentWidget())->model());
+        for (int row = 0; row < model->rowCount(); ++row)
+            model->setCreate(row, isShecked);
+        updateSection(index);
+        emit updateCreateButton();
+    }
+    QHeaderView::mouseReleaseEvent(event);
+}
+
+void MyHeader::paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const
+{
+    painter->save();
+    QHeaderView::paintSection(painter, rect, logicalIndex);
+    painter->restore();
+    if (logicalIndex)
+        return;
+    QStyleOptionButton option;
+    option.rect = QRect(rect.left() + 4, (rect.height() - 16) / 2 + rect.top(), 16, 16);
+    isShecked ? option.state = QStyle::State_On : option.state = QStyle::State_Off;
+    option.state |= (isEnabled() ? QStyle::State_Enabled : QStyle::State_None);
+    style()->drawPrimitive(QStyle::PE_IndicatorCheckBox, &option, painter);
+}
+
+/////////////////////////////////////////////////////////////////////////////////
 
 DrillForm* DrillForm::self = nullptr;
 
@@ -83,6 +126,8 @@ QIcon drawDrillIcon()
     painter.drawEllipse(QRect(0, 0, Size - 1, Size - 1));
     return QIcon(pixmap);
 }
+QGridLayout* lay;
+QCheckBox* cbx;
 
 /////////////////////////////////////////////
 /// \brief DrillForm::DrillForm
@@ -100,49 +145,60 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->tableView, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
     connect(ui->tableView, &QTableView::doubleClicked, this, &DrillForm::on_doubleClicked);
     connect(ui->tableView, &QTableView::clicked, this, &DrillForm::on_clicked);
+    //    MyHeader* header = new MyHeader(Qt::Horizontal /*, ui->tableView*/);
+    //    ui->tableView->setHorizontalHeader(header);
+
+    lay = new QGridLayout(ui->tableView);
+    cbx = new QCheckBox("", ui->tableView);
+    lay->addWidget(cbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
+    lay->setContentsMargins(25, 0, 0, 0);
+    cbx->setMinimumHeight(ui->tableView->horizontalHeader()->height() - 4);
+    connect(cbx, &QCheckBox::toggled, [=](bool checked) {
+        for (int row = 0; row < model->rowCount(); ++row)
+            model->setCreate(row, checked);
+        updateCreateButton();
+    });
 
     ui->tableView->setWordWrap(false);
     ui->pbCreate->setEnabled(false);
 
     ui->rb_drilling->setChecked(true);
-    ui->rb_in->setChecked(true);
 
-    ui->rb_on->setEnabled(m_worckType == Profile);
-    ui->rb_out->setEnabled(m_worckType == Profile);
-    ui->rb_in->setEnabled(m_worckType == Profile);
-
-    connect(ui->rb_drilling, &QRadioButton::toggled, [=] {
+    auto updateState = [=] {
         m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(m_worckType == Profile);
-        ui->rb_on->setEnabled(m_worckType == Profile);
-        ui->rb_out->setEnabled(m_worckType == Profile);
-    });
-
-    connect(ui->rb_profile, &QRadioButton::toggled, [=] {
-        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(m_worckType == Profile);
-        ui->rb_on->setEnabled(m_worckType == Profile);
-        ui->rb_out->setEnabled(m_worckType == Profile);
-    });
-
-    connect(ui->rb_pocket, &QRadioButton::toggled, [=] {
-        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
-        ui->rb_in->setEnabled(m_worckType == Profile);
-        ui->rb_on->setEnabled(m_worckType == Profile);
-        ui->rb_out->setEnabled(m_worckType == Profile);
-    });
-
-    connect(ui->rb_on, &QRadioButton::toggled, [=] {
+        ui->grbxSide->setEnabled(m_worckType == Profile);
+        ui->grbxDirection->setEnabled(m_worckType == Profile || m_worckType == Pocket);
         m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
-    });
+    };
 
-    connect(ui->rb_out, &QRadioButton::toggled, [=] {
-        m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
-    });
+    QSettings settings;
+    settings.beginGroup("DrillForm");
+    if (settings.value("rbClimb").toBool())
+        ui->rbClimb->setChecked(true);
+    if (settings.value("rbConventional", true).toBool())
+        ui->rbConventional->setChecked(true);
+    if (settings.value("rb_drilling", true).toBool())
+        ui->rb_drilling->setChecked(true);
+    if (settings.value("rb_in").toBool(), true)
+        ui->rb_in->setChecked(true);
+    if (settings.value("rb_on").toBool())
+        ui->rb_on->setChecked(true);
+    if (settings.value("rb_out").toBool())
+        ui->rb_out->setChecked(true);
+    if (settings.value("rb_pocket").toBool())
+        ui->rb_pocket->setChecked(true);
+    if (settings.value("rb_profile").toBool())
+        ui->rb_profile->setChecked(true);
+    settings.endGroup();
 
-    connect(ui->rb_in, &QRadioButton::toggled, [=] {
-        m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
-    });
+    connect(ui->rb_drilling, &QRadioButton::clicked, updateState);
+    connect(ui->rb_in, &QRadioButton::clicked, updateState);
+    connect(ui->rb_on, &QRadioButton::clicked, updateState);
+    connect(ui->rb_out, &QRadioButton::clicked, updateState);
+    connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
+    connect(ui->rb_profile, &QRadioButton::clicked, updateState);
+
+    updateState();
 
     updateFiles();
     self = this;
@@ -151,6 +207,21 @@ DrillForm::DrillForm(QWidget* parent)
 DrillForm::~DrillForm()
 {
     self = nullptr;
+
+    qDebug("~DrillForm()");
+
+    QSettings settings;
+    settings.beginGroup("DrillForm");
+    settings.setValue("rbClimb", ui->rbClimb->isChecked());
+    settings.setValue("rbConventional", ui->rbConventional->isChecked());
+    settings.setValue("rb_drilling", ui->rb_drilling->isChecked());
+    settings.setValue("rb_in", ui->rb_in->isChecked());
+    settings.setValue("rb_on", ui->rb_on->isChecked());
+    settings.setValue("rb_out", ui->rb_out->isChecked());
+    settings.setValue("rb_pocket", ui->rb_pocket->isChecked());
+    settings.setValue("rb_profile", ui->rb_profile->isChecked());
+    settings.endGroup();
+
     clear();
     delete ui;
 }
@@ -211,13 +282,9 @@ void DrillForm::setHoles(const QMap<int, double>& value)
         bool isSlot = false;
         for (const Excellon::Hole& hole : *file) {
             if (hole.state.tCode == toolIt.key()) {
-                PreviewItem* item = nullptr;
-                if (hole.state.path.isEmpty()) {
-                    item = new PreviewItem(hole);
-                } else {
-                    item = new PreviewItem(hole, hole.state.path);
+                PreviewItem* item = new PreviewItem(hole);
+                if (!hole.state.path.isEmpty())
                     isSlot = true;
-                }
                 m_sourcePreview[toolIt.key()].append(QSharedPointer<PreviewItem>(item));
                 Scene::self->addItem(item);
             }
@@ -277,35 +344,65 @@ void DrillForm::on_pbClose_clicked()
 void DrillForm::on_pbCreate_clicked()
 {
     { //   drills only
-        QMap<int, QPair<QPair<Path, Paths>, QVector<int>>> pathsMap;
+        struct data {
+            Path drillPath;
+            Paths paths;
+            QVector<int> vector;
+        };
+        QMap<int, data> pathsMap;
         for (int row = 0; row < model->rowCount(); ++row) {
             int toolId = model->toolId(row);
-            if (toolId != -1) {
-                int apertureId = model->apertureId(row);
-                pathsMap[toolId].second.append(apertureId);
+            if (toolId != -1 && model->create(row)) {
+                const int apertureId = model->apertureId(row);
+                pathsMap[toolId].vector.append(apertureId);
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
                     if (item->type() == PreviewItem::Slot)
                         continue;
-                    if (m_worckType == Drilling && ToolHolder::tools[toolId].type != Tool::Engraving)
-                        pathsMap[toolId].first.first.append(item->pos());
-                    else if (ToolHolder::tools[toolId].type != Tool::Drill && item->fit())
-                        pathsMap[toolId].first.second.append(item->paths());
-                    else
-                        pathsMap[toolId].first.first.append(item->pos());
+                    switch (m_worckType) {
+                    case Profile:
+                        if (ToolHolder::tools[toolId].type != Tool::Drill) {
+                            switch (m_side) {
+                            case On:
+                            case Outer:
+                                pathsMap[toolId].paths.append(item->paths());
+                                model->setCreate(row, false);
+                                break;
+                            case Inner:
+                                if (item->fit(ui->dsbxDepth->value())) {
+                                    pathsMap[toolId].paths.append(item->paths());
+                                    model->setCreate(row, false);
+                                }
+                                break;
+                            }
+                        }
+                        break;
+                    case Pocket:
+                        if (ToolHolder::tools[toolId].type != Tool::Drill && item->fit(ui->dsbxDepth->value())) {
+                            pathsMap[toolId].paths.append(item->paths());
+                            model->setCreate(row, false);
+                        }
+                        break;
+                    case Drilling:
+                        if (ToolHolder::tools[toolId].type != Tool::Engraving) {
+                            pathsMap[toolId].drillPath.append(item->pos());
+                            model->setCreate(row, false);
+                        }
+                        break;
+                    }
                 }
             }
         }
 
-        QMap<int, QPair<QPair<Path, Paths>, QVector<int>>>::iterator iterator;
+        QMap<int, data>::iterator iterator;
         for (iterator = pathsMap.begin(); iterator != pathsMap.end(); ++iterator) {
-            int toolId = iterator.key();
+            const int toolId = iterator.key();
             QString indexes;
-            QVector<int>& v = pathsMap[toolId].second;
+            QVector<int>& v = pathsMap[toolId].vector;
             for (int id : v)
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
 
-            if (!pathsMap[toolId].first.first.isEmpty()) {
-                Path& path = pathsMap[toolId].first.first;
+            if (!pathsMap[toolId].drillPath.isEmpty()) {
+                Path& path = pathsMap[toolId].drillPath;
                 IntPoint point1(toIntPoint(MaterialSetup::homePoint->pos()));
                 int counter = 0;
                 { // sort by distance
@@ -328,15 +425,18 @@ void DrillForm::on_pbCreate_clicked()
                 gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
                 FileModel::addFile(gcode);
             }
-            if (!pathsMap[toolId].first.second.isEmpty()) {
-                ReversePaths(pathsMap[toolId].first.second);
+            if (!pathsMap[toolId].paths.isEmpty()) {
+                Clipper clipper;
+                clipper.AddPaths(pathsMap[toolId].paths, ptSubject, true);
+                clipper.Execute(ctUnion, pathsMap[toolId].paths, pftPositive);
+                ReversePaths(pathsMap[toolId].paths);
                 GCodeFile* gcode = nullptr;
                 switch (m_worckType) {
                 case Profile:
-                    gcode = ToolPathCreator(pathsMap[toolId].first.second, true, m_side).createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
+                    gcode = ToolPathCreator(pathsMap[toolId].paths, ui->rbConventional->isChecked(), m_side).createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
                     break;
                 case Pocket:
-                    gcode = ToolPathCreator(pathsMap[toolId].first.second, true, Inner).createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
+                    gcode = ToolPathCreator(pathsMap[toolId].paths, ui->rbConventional->isChecked(), Inner).createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
                     break;
                 default:
                     continue;
@@ -353,13 +453,13 @@ void DrillForm::on_pbCreate_clicked()
         QMap<int, QPair<Paths, QVector<int>>> pathsMap;
         for (int row = 0; row < model->rowCount(); ++row) {
             int selectedToolId = model->toolId(row);
-            if (selectedToolId != -1) {
+            if (selectedToolId != -1 && model->create(row)) {
                 int apertureId = model->apertureId(row);
                 pathsMap[selectedToolId].second.append(apertureId);
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
                     if (item->type() == PreviewItem::Slot) {
-                        if (item->sourceDrill() > item->currentDrill()) {
-                            for (Path& path : offset(item->paths().first(), item->sourceDrill() - item->currentDrill())) {
+                        if (item->fit(ui->dsbxDepth->value())) {
+                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter)) {
                                 pathsMap[selectedToolId].first.append(path);
                             }
                         } else {
@@ -384,6 +484,8 @@ void DrillForm::on_pbCreate_clicked()
             }
         }
     }
+    updateCreateButton();
+    QTimer::singleShot(100, Qt::CoarseTimer, [=] { ui->pbCreate->update(); });
 }
 
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
@@ -392,6 +494,7 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
         setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
     else
         setHoles(static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>())->tools());
+    QTimer::singleShot(10, Qt::CoarseTimer, [=] { lay->setContentsMargins(ui->tableView->verticalHeader()->width() + 2, 0, 0, 0); });
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)
@@ -400,6 +503,7 @@ void DrillForm::on_clicked(const QModelIndex& index)
     for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
         item->setSelected(true);
     }
+    updateCreateButton();
 }
 
 void DrillForm::on_doubleClicked(const QModelIndex& current)
@@ -416,8 +520,8 @@ void DrillForm::on_doubleClicked(const QModelIndex& current)
             int apertureId = model->apertureId(current.row());
             const Tool tool(tdb.tool());
             model->setToolId(current.row(), tool.id);
-            createHoles(apertureId, tool.diameter);
-            ui->pbCreate->setEnabled(true);
+            createHoles(apertureId, tool.id);
+            updateCreateButton();
         }
     }
 }
@@ -456,6 +560,7 @@ void DrillForm::on_currentChanged(const QModelIndex& current, const QModelIndex&
             item->setSelected(true);
         }
     }
+    ui->pbCreate->setEnabled(false); // updateCreateButton();
 }
 
 void DrillForm::on_customContextMenuRequested(const QPoint& pos)
@@ -485,14 +590,16 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
             for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
                 if (model->isSlot(current.row()) && tool.type == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id);
-                    createHoles(model->apertureId(current.row()), tool.diameter);
-                    ui->pbCreate->setEnabled(true);
+                    createHoles(model->apertureId(current.row()), tool.id);
+                    updateCreateButton();
                 } else if (model->isSlot(current.row()) && tool.type != Tool::EndMill) {
                     QMessageBox::information(this, "", "\"" + tool.name + "\" not suitable for T" + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "(" + model->data(current.sibling(current.row(), 0)).toString() + ")");
                 } else if (!model->isSlot(current.row())) {
+                    if (model->toolId(current.row()) > -1 && !model->create(current.row()))
+                        continue;
                     model->setToolId(current.row(), tool.id);
-                    createHoles(model->apertureId(current.row()), tool.diameter);
-                    ui->pbCreate->setEnabled(true);
+                    createHoles(model->apertureId(current.row()), tool.id);
+                    updateCreateButton();
                 }
             }
         }
@@ -503,13 +610,13 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
             menu.addAction(Icon(RemoveIcon), tr("&Remove Tool"), [=] {
                 for (QModelIndex current : ui->tableView->selectionModel()->selectedIndexes()) {
                     model->setToolId(current.row(), -1);
-                    createHoles(model->apertureId(current.row()), 0.0);
+                    createHoles(model->apertureId(current.row()), -1);
                 }
                 for (int i = 0; i < model->rowCount(); ++i) {
                     if (model->toolId(i) != -1)
                         return;
                 }
-                ui->pbCreate->setEnabled(false);
+                updateCreateButton();
             });
             break;
         }
@@ -518,10 +625,10 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
     menu.exec(ui->tableView->mapToGlobal(pos /*+ QPoint(24, 24)*/));
 }
 
-void DrillForm::createHoles(int toolId, double diameter)
+void DrillForm::createHoles(int toolId, int toolIdSelected)
 {
     for (QSharedPointer<PreviewItem>& item : m_sourcePreview[toolId]) {
-        item->setCurrentDrill(diameter);
+        item->setToolId(toolIdSelected);
     }
 }
 
@@ -534,11 +641,11 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
     for (toolIt = ToolHolder::tools.begin(); !isSlot && toolIt != ToolHolder::tools.end(); ++toolIt) {
         if (toolIt.value().type == Tool::Drill && drillDiameterMin <= toolIt.value().diameter && drillDiameterMax >= toolIt.value().diameter) {
             model->setToolId(model->rowCount() - 1, toolIt.key());
-            createHoles(apertureId, toolIt.value().diameter);
+            createHoles(apertureId, toolIt.value().id);
             for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                item->setCurrentDrill(toolIt.value().diameter);
+                item->setToolId(toolIt.value().id);
             }
-            ui->pbCreate->setEnabled(true);
+            updateCreateButton();
             return;
         }
     }
@@ -547,12 +654,24 @@ void DrillForm::pickUpTool(int apertureId, double diameter, bool isSlot)
             model->setToolId(model->rowCount() - 1, toolIt.key());
             createHoles(apertureId, toolIt.value().diameter);
             for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                item->setCurrentDrill(toolIt.value().diameter);
+                item->setToolId(toolIt.value().id);
             }
+            updateCreateButton();
+            return;
+        }
+    }
+}
+
+void DrillForm::updateCreateButton()
+{
+    for (int row = 0; row < model->rowCount(); ++row) {
+        if (model->create(row)) {
             ui->pbCreate->setEnabled(true);
             return;
         }
     }
+    cbx->setChecked(false);
+    ui->pbCreate->setEnabled(false);
 }
 
 void DrillForm::clear()

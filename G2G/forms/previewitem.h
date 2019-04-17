@@ -13,7 +13,6 @@ class PreviewItem : public QGraphicsItem {
 
 public:
     explicit PreviewItem(const Gerber::GraphicObject& go, int id);
-    explicit PreviewItem(const Excellon::Hole& hole, const QPolygonF& toolPath);
     explicit PreviewItem(const Excellon::Hole& hole);
 
     ~PreviewItem();
@@ -26,25 +25,17 @@ public:
 
     // QGraphicsItem interface
     virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
-
     virtual QRectF boundingRect() const override;
 
     //////////////////////////////////////////
-
     int type() const override;
-    double sourceDrill() const;
-    QPolygonF toolPath() const;
-
-    double currentDrill() const;
-    void setCurrentDrill(double currentDrill);
-
+    double sourceDiameter() const;
+    int toolId() const;
+    void setToolId(int toolId);
     void setSelected(bool value);
-
     IntPoint pos() const;
-
     Paths paths() const;
-
-    bool fit();
+    bool fit(double depth);
 
 private:
     const int id = 0;
@@ -52,11 +43,10 @@ private:
     const Excellon::Hole* const hole = nullptr;
 
     QPainterPath m_sourcePath;
-    QPainterPath m_currentPath;
+    QPainterPath m_toolPath;
 
-    const double m_sourceDrill;
-    double m_currentDrill = 0.0;
-    const QPolygonF m_toolPath;
+    const double m_sourceDiameter;
+    int m_toolId = -1;
     const Type m_type;
 
     QPen m_pen;

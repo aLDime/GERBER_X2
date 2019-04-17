@@ -37,10 +37,10 @@ include(../graphicsview/mygraphicsview.pri)
 DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-VERSION = 0.7.2
+VERSION = 0.7.3
 VER_MAJ = 0
 VER_MIN = 7
-VER_PAT = 2
+VER_PAT = 3
 
 ICON = res/toolpath/raster_climb.png
 #macx: ICON = resources/icon.icns

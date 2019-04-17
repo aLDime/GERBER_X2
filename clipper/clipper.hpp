@@ -231,8 +231,8 @@ void PolyTreeToPaths(const PolyTree& polytree, Paths& paths);
 void ClosedPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 void OpenPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 
-void ReversePath(Path& p);
-void ReversePaths(Paths& p);
+Path& ReversePath(Path& p);
+Paths& ReversePaths(Paths& p);
 
 struct IntRect {
     cInt left;

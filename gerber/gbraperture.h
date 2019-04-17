@@ -38,7 +38,7 @@ public:
     virtual QString name() = 0;
     virtual ApertureType type() const = 0;
 
-    double apSize() const;
+    double minSize() const;
 
     virtual bool fit(double toolDiam) const = 0;
 

@@ -14,13 +14,16 @@ class DrillModel : public QAbstractTableModel {
         Row(const QString& name, const QIcon& icon, int id)
             : name{ name, "" }
             , icon{ icon, QIcon() }
-            , id{ id, -1 }
+            , apToolId(id)
+            , toolId(-1)
         {
         }
         QString name[2];
         QIcon icon[2];
-        int id[2];
+        int apToolId;
+        int toolId;
         bool isSlot = false;
+        bool create = false;
     } Row;
     QList<Row> m_data;
     int m_type;
@@ -30,18 +33,17 @@ public:
     void appendRow(const QString& name, const QIcon& icon, int id);
     void setToolId(int row, int id);
     int toolId(int row);
-
     void setSlot(int row, bool slot);
     bool isSlot(int row);
-
-    void setApertureId(int row, int id);
     int apertureId(int row);
+    bool create(int row) const;
+    void setCreate(int row, bool create);
 
     // QAbstractItemModel interface
-public:
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;
     int columnCount(const QModelIndex& parent = QModelIndex()) const override;
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 };

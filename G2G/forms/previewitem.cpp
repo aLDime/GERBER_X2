@@ -1,4 +1,5 @@
 #include "previewitem.h"
+#include "tooldatabase/tool.h"
 #include <QPainter>
 #include <exfile.h>
 #include <gbrfile.h>
@@ -37,19 +38,8 @@ PreviewItem::PreviewItem(const Gerber::GraphicObject& go, int id)
     : id(id)
     , grob(&go)
     , m_sourcePath(drawApetrure(go, id))
-    , m_sourceDrill(go.gFile->apertures()->value(id)->drillDiameter() ? go.gFile->apertures()->value(id)->drillDiameter() : go.gFile->apertures()->value(id)->apSize())
+    , m_sourceDiameter(go.gFile->apertures()->value(id)->drillDiameter() ? go.gFile->apertures()->value(id)->drillDiameter() : go.gFile->apertures()->value(id)->minSize())
     , m_type(Apetrure)
-    , m_pen(Qt::darkGray, 0.0)
-    , m_brush(Qt::darkGray)
-{
-}
-
-PreviewItem::PreviewItem(const Excellon::Hole& hole, const QPolygonF& toolPath)
-    : hole(&hole)
-    , m_sourcePath(drawSlot(hole))
-    , m_sourceDrill(hole.state.currentToolDiameter())
-    , m_toolPath(toolPath)
-    , m_type(Slot)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -57,9 +47,9 @@ PreviewItem::PreviewItem(const Excellon::Hole& hole, const QPolygonF& toolPath)
 
 PreviewItem::PreviewItem(const Excellon::Hole& hole)
     : hole(&hole)
-    , m_sourcePath(drawDrill(hole))
-    , m_sourceDrill(hole.state.currentToolDiameter())
-    , m_type(Drill)
+    , m_sourcePath(hole.state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
+    , m_sourceDiameter(hole.state.currentToolDiameter())
+    , m_type(hole.state.path.isEmpty() ? Drill : Slot)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -74,7 +64,7 @@ void PreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWid
     painter->setBrush(m_brush);
     painter->drawPath(m_sourcePath);
     // draw hole
-    if (!qFuzzyIsNull(m_currentDrill)) {
+    if (m_toolId > -1) {
         //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
         //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
         if (isSelected)
@@ -82,62 +72,61 @@ void PreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWid
         else
             painter->setPen(QPen(Qt::red, 0.0));
         painter->setBrush(QBrush(QColor(255, 0, 0, 100)));
-        painter->drawPath(m_currentPath);
+        painter->drawPath(m_toolPath);
     }
 }
 
-QRectF PreviewItem::boundingRect() const { return m_sourcePath.boundingRect().united(m_currentPath.boundingRect()); }
+QRectF PreviewItem::boundingRect() const { return m_sourcePath.boundingRect().united(m_toolPath.boundingRect()); }
 
 int PreviewItem::type() const { return m_type; }
 
-double PreviewItem::sourceDrill() const { return m_sourceDrill; }
+double PreviewItem::sourceDiameter() const { return m_sourceDiameter; }
 
-QPolygonF PreviewItem::toolPath() const { return m_toolPath; }
+int PreviewItem::toolId() const { return m_toolId; }
 
-double PreviewItem::currentDrill() const { return m_currentDrill; }
-
-void PreviewItem::setCurrentDrill(double currentDrill)
+void PreviewItem::setToolId(int toolId)
 {
-    m_currentDrill = currentDrill;
-    if (!qFuzzyIsNull(m_currentDrill)) {
-        m_currentPath = QPainterPath();
+    m_toolId = toolId;
+    if (m_toolId > -1) {
+        m_toolPath = QPainterPath();
+        const double diameter = ToolHolder::tools[m_toolId].diameter;
         switch (m_type) {
         case Slot: {
             Paths tmpPpath;
             ClipperOffset offset;
             offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
-            offset.Execute(tmpPpath, m_currentDrill * 0.5 * uScale);
+            offset.Execute(tmpPpath, diameter * 0.5 * uScale);
             for (Path& path : tmpPpath) {
                 path.append(path.first());
-                m_currentPath.addPolygon(toQPolygon(path));
+                m_toolPath.addPolygon(toQPolygon(path));
             }
             Path path(hole->item->paths().first());
             if (path.size()) {
                 for (IntPoint& pt : path) {
-                    m_currentPath.moveTo(toQPointF(pt) - QPointF(0.0, m_currentDrill * 0.7));
-                    m_currentPath.lineTo(toQPointF(pt) + QPointF(0.0, m_currentDrill * 0.7));
-                    m_currentPath.moveTo(toQPointF(pt) - QPointF(m_currentDrill * 0.7, 0.0));
-                    m_currentPath.lineTo(toQPointF(pt) + QPointF(m_currentDrill * 0.7, 0.0));
+                    m_toolPath.moveTo(toQPointF(pt) - QPointF(0.0, diameter * 0.7));
+                    m_toolPath.lineTo(toQPointF(pt) + QPointF(0.0, diameter * 0.7));
+                    m_toolPath.moveTo(toQPointF(pt) - QPointF(diameter * 0.7, 0.0));
+                    m_toolPath.lineTo(toQPointF(pt) + QPointF(diameter * 0.7, 0.0));
                 }
-                m_currentPath.moveTo(toQPointF(path.first()));
+                m_toolPath.moveTo(toQPointF(path.first()));
                 for (IntPoint& pt : path) {
-                    m_currentPath.lineTo(toQPointF(pt));
+                    m_toolPath.lineTo(toQPointF(pt));
                 }
             }
         } break;
         case Drill:
-            m_currentPath.addEllipse(hole->state.offsetPos(), m_currentDrill * 0.5, m_currentDrill * 0.5);
-            m_currentPath.moveTo(hole->state.offsetPos() - QPointF(0.0, m_currentDrill * 0.7));
-            m_currentPath.lineTo(hole->state.offsetPos() + QPointF(0.0, m_currentDrill * 0.7));
-            m_currentPath.moveTo(hole->state.offsetPos() - QPointF(m_currentDrill * 0.7, 0.0));
-            m_currentPath.lineTo(hole->state.offsetPos() + QPointF(m_currentDrill * 0.7, 0.0));
+            m_toolPath.addEllipse(hole->state.offsetPos(), diameter * 0.5, diameter * 0.5);
+            m_toolPath.moveTo(hole->state.offsetPos() - QPointF(0.0, diameter * 0.7));
+            m_toolPath.lineTo(hole->state.offsetPos() + QPointF(0.0, diameter * 0.7));
+            m_toolPath.moveTo(hole->state.offsetPos() - QPointF(diameter * 0.7, 0.0));
+            m_toolPath.lineTo(hole->state.offsetPos() + QPointF(diameter * 0.7, 0.0));
             break;
         case Apetrure:
-            m_currentPath.addEllipse(toQPointF(grob->state.curPos()), m_currentDrill * 0.5, m_currentDrill * 0.5);
-            m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, m_currentDrill * 0.7));
-            m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, m_currentDrill * 0.7));
-            m_currentPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(m_currentDrill * 0.7, 0.0));
-            m_currentPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(m_currentDrill * 0.7, 0.0));
+            m_toolPath.addEllipse(toQPointF(grob->state.curPos()), diameter * 0.5, diameter * 0.5);
+            m_toolPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, diameter * 0.7));
+            m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, diameter * 0.7));
+            m_toolPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(diameter * 0.7, 0.0));
+            m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(diameter * 0.7, 0.0));
             break;
         }
     }
@@ -175,23 +164,24 @@ Paths PreviewItem::paths() const
     switch (m_type) {
     case Slot:
         return hole->item->paths();
-    case Drill:
-        return hole->item->paths();
-    case Apetrure: {
-        return grob->paths;
+    case Drill: {
+        Paths paths(hole->item->paths());
+        return ReversePaths(paths);
     }
+    case Apetrure:
+        return grob->paths;
     }
     return Paths();
 }
 
-bool PreviewItem::fit()
+bool PreviewItem::fit(double depth)
 {
     switch (m_type) {
     case Slot:
     case Drill:
-        return m_sourceDrill > m_currentDrill;
+        return m_sourceDiameter > ToolHolder::tools[m_toolId].getDiameter(depth);
     case Apetrure:
-        return grob->gFile->apertures()->value(id)->fit(m_currentDrill);
+        return grob->gFile->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
     }
     return false;
 }

@@ -13,7 +13,6 @@
 #include <myclipper.h>
 #include <scene.h>
 
-
 ProfileForm::ProfileForm(QWidget* parent)
     : QWidget(parent)
     , ToolPathUtil("ProfileForm")
@@ -74,7 +73,6 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 ProfileForm::~ProfileForm()
 {
-    qDebug("~PocketForm()");
 
     QSettings settings;
     settings.beginGroup("ProfileForm");

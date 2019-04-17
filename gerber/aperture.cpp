@@ -61,7 +61,7 @@ Paths AbstractAperture::draw(const State& state)
     return tmpPpaths;
 }
 
-double AbstractAperture::apSize() const
+double AbstractAperture::minSize() const
 {
     return m_size;
 }

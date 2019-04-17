@@ -1,10 +1,26 @@
 #ifndef DRILLFORM_H
 #define DRILLFORM_H
 
+#include <QHeaderView>
 #include <QWidget>
 
 #include <gcode/gcode.h>
 #include <gcode/toolpathcreator.h>
+
+class MyHeader : public QHeaderView {
+    Q_OBJECT
+    bool isShecked = false;
+
+public:
+    MyHeader(Qt::Orientation orientation, QWidget* parent = nullptr);
+    // QWidget interface
+signals:
+    void updateCreateButton();
+
+protected:
+    void mouseReleaseEvent(QMouseEvent* event) override;
+    void paintSection(QPainter* painter, const QRect& rect, int logicalIndex) const override;
+};
 
 namespace Ui {
 class DrillForm;
@@ -44,8 +60,9 @@ private:
     void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
     void on_customContextMenuRequested(const QPoint& pos);
 
-    void createHoles(int toolId, double diameter);
+    void createHoles(int toolId, int toolIdSelected);
     void pickUpTool(int apertureId, double diameter, bool isSlot = false);
+    void updateCreateButton();
 
     DrillModel* model;
     Ui::DrillForm* ui;

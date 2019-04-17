@@ -3880,7 +3880,7 @@ void ClipperOffset::DoOffset(double delta)
     } else {
         const double length = 0.5; // mm
         const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (delta * dScale)));
-        int intSteps = MinStepsPerCircle;//32 aka 10 degres
+        int intSteps = MinStepsPerCircle; //32 aka 10 degres
         while (intSteps < destSteps)
             intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
         steps = intSteps;
@@ -4178,16 +4178,18 @@ void Clipper::DoSimplePolygons()
 }
 //------------------------------------------------------------------------------
 
-void ReversePath(Path& p)
+Path& ReversePath(Path& p)
 {
     std::reverse(p.begin(), p.end());
+    return p;
 }
 //------------------------------------------------------------------------------
 
-void ReversePaths(Paths& p)
+Paths& ReversePaths(Paths& p)
 {
     for (Paths::size_type i = 0; i < p.size(); ++i)
         ReversePath(p[i]);
+    return p;
 }
 //------------------------------------------------------------------------------
 
