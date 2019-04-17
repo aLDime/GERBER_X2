@@ -148,10 +148,10 @@ DrillForm::DrillForm(QWidget* parent)
     //    MyHeader* header = new MyHeader(Qt::Horizontal /*, ui->tableView*/);
     //    ui->tableView->setHorizontalHeader(header);
 
-    lay = new QGridLayout(ui->tableView);
+    lay = new QGridLayout(ui->tableView->horizontalHeader());
     cbx = new QCheckBox("", ui->tableView);
     lay->addWidget(cbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
-    lay->setContentsMargins(25, 0, 0, 0);
+    lay->setContentsMargins(3, 0, 0, 0);
     cbx->setMinimumHeight(ui->tableView->horizontalHeader()->height() - 4);
     connect(cbx, &QCheckBox::toggled, [=](bool checked) {
         for (int row = 0; row < model->rowCount(); ++row)
@@ -494,7 +494,6 @@ void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
         setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
     else
         setHoles(static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>())->tools());
-    QTimer::singleShot(10, Qt::CoarseTimer, [=] { lay->setContentsMargins(ui->tableView->verticalHeader()->width() + 2, 0, 0, 0); });
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)
