@@ -1,6 +1,9 @@
 #include "drillmodel.h"
 #include "tooldatabase/tool.h"
 
+#include <QBitmap>
+#include <QDebug>
+
 DrillModel::DrillModel(int type, QObject* parent)
     : QAbstractTableModel(parent)
     , m_type(type)
@@ -35,6 +38,14 @@ void DrillModel::setCreate(int row, bool create)
     dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
+void DrillModel::setCreate(bool create)
+{
+    for (int row = 0; row < rowCount(); ++row) {
+        m_data[row].create = create && m_data[row].toolId != -1;
+    }
+    dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
+}
+
 int DrillModel::rowCount(const QModelIndex& /*parent*/) const { return m_data.size(); }
 
 int DrillModel::columnCount(const QModelIndex& /*parent*/) const { return 2; }
@@ -49,8 +60,15 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
                 return QString(m_data[row].name[0]).replace("Tool", "Slot");
             else
                 return m_data[row].name[0];
-        case Qt::DecorationRole:
-            return m_data[row].icon[0];
+        case Qt::DecorationRole: {
+            if (m_data[index.row()].toolId > -1)
+                return m_data[row].icon[0];
+            QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+            for (int x = 0; x < 24; ++x)
+                for (int y = 0; y < 24; ++y)
+                    image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
+            return QIcon(QPixmap::fromImage(image));
+        }
         case Qt::UserRole:
             return m_data[row].apToolId;
         case Qt::CheckStateRole:
@@ -136,6 +154,6 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
 Qt::ItemFlags DrillModel::flags(const QModelIndex& index) const
 {
     if (!index.column())
-        return (m_data[index.row()].toolId > -1 ? Qt::ItemIsEnabled : Qt::NoItemFlags) | Qt::ItemIsUserCheckable;
+        return /*(m_data[index.row()].toolId > -1 ? Qt::ItemIsEnabled : Qt::NoItemFlags)*/ Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }

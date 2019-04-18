@@ -32,7 +32,6 @@ public:
     double sourceDiameter() const;
     int toolId() const;
     void setToolId(int toolId);
-    void setSelected(bool value);
     IntPoint pos() const;
     Paths paths() const;
     bool fit(double depth);
@@ -51,8 +50,6 @@ private:
 
     QPen m_pen;
     QBrush m_brush;
-
-    bool isSelected = false;
 };
 
 #endif // PREVIEWITEM_H

@@ -68,6 +68,7 @@ private:
     void showSettingsDialog();
     void readSettings();
     void writeSettings();
+    void selectAll();
     void on_customContextMenuRequested(const QPoint& pos);
 
     QAction* recentFileActs[MaxRecentFiles + 1];

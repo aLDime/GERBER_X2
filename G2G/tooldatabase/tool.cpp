@@ -114,13 +114,14 @@ ToolHolder::ToolHolder()
 
 void ToolHolder::readTools()
 {
-    QFile loadFile(QStringLiteral("tools.dat"));
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open tools file.");
-        //return;
-        loadFile.setFileName(QStringLiteral("../tools.dat"));
+    QFile loadFile(QStringLiteral("../tools.dat"));
+    if (loadFile.exists()) {
         if (!loadFile.open(QIODevice::ReadOnly)) {
-            qWarning("Couldn't open tools file.");
+            return;
+        }
+    } else {
+        loadFile.setFileName(QStringLiteral("tools.dat"));
+        if (!loadFile.open(QIODevice::ReadOnly)) {
             return;
         }
     }

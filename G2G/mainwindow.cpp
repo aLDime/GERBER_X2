@@ -11,6 +11,7 @@
 #include <QFileDialog>
 #include <QInputDialog>
 #include <QProgressDialog>
+#include <QTableView>
 #include <QToolBar>
 #include <exparser.h>
 #include <gbrparser.h>
@@ -186,7 +187,7 @@ void MainWindow::createActions()
     fileToolBar = addToolBar(tr("File"));
     fileToolBar->setIconSize(QSize(24, 24));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-    fileToolBar->setMovable(false);
+    //     fileToolBar->setMovable(false);
     connect(fileToolBar, &QToolBar::customContextMenuRequested,
         [=](const QPoint& pos) {
             QMenu menu(this);
@@ -264,7 +265,7 @@ void MainWindow::createActions()
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
-    zoomToolBar->setMovable(false);
+    //     zoomToolBar->setMovable(false);
     action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
     action->setShortcut(QKeySequence::FullScreen);
     action = zoomToolBar->addAction(Icon(Zoom100Icon), tr("100%"), [=]() { graphicsView->zoom100(); });
@@ -279,12 +280,8 @@ void MainWindow::createActions()
     //==================== Selection / Delete selected ====================
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
-    s->setMovable(false);
-    action = s->addAction(Icon(SelectAll), tr("Select all"), [=]() {
-        for (QGraphicsItem* item : Scene::self->items())
-            if (item->isVisible())
-                item->setSelected(true);
-    });
+    //     s->setMovable(false);
+    action = s->addAction(Icon(SelectAll), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
     //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     //        QList<QGraphicsItem*> list;
@@ -309,7 +306,7 @@ void MainWindow::createActions()
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
-    toolpathToolBar->setMovable(false);
+    //     toolpathToolBar->setMovable(false);
     dockWidget = new DockWidget(this);
     dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
     addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
@@ -367,9 +364,10 @@ void MainWindow::createActions()
         graphicsView->zoomFit();
     });
     //==================== grafica ====================
-    QToolBar* tb = addToolBar(tr("QGraphics Items"));
+    QToolBar* tb = addToolBar(tr("Graphics Items"));
+    tb->setObjectName("GraphicsItemsToolBar");
     tb->setEnabled(false);
-    tb->setMovable(false);
+    //     tb->setMovable(false);
     tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
     tb->addAction(QIcon::fromTheme("draw-line"), tr("line"));
     tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
@@ -437,6 +435,16 @@ void MainWindow::writeSettings()
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("files", FileHolder::fileNames());
+}
+
+void MainWindow::selectAll()
+{
+    if (focusWidget() == graphicsView)
+        for (QGraphicsItem* item : Scene::self->items())
+            if (item->isVisible())
+                item->setSelected(true);
+    if (focusWidget()->objectName() == "toolTable")
+        static_cast<QTableView*>(focusWidget())->selectAll();
 }
 
 void MainWindow::on_customContextMenuRequested(const QPoint& pos)
@@ -518,7 +526,7 @@ void MainWindow::openFile(const QString& fileName)
         if (dFile) {
             FileModel::self->addFile(dFile);
             prependToRecentFiles(dFile->fileName());
-            QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
+            QTimer::singleShot(100, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }
     } else
         emit parseFile(fileName);

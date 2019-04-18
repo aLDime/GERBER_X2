@@ -38,6 +38,7 @@ public:
     int apertureId(int row);
     bool create(int row) const;
     void setCreate(int row, bool create);
+    void setCreate(bool create);
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = QModelIndex()) const override;

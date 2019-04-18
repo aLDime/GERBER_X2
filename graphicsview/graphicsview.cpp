@@ -97,8 +97,6 @@ void GraphicsView::zoomToSelected()
 {
     QRectF rect;
     for (const QGraphicsItem* item : scene()->selectedItems()) {
-//        if (item->type() == DrillItemType)
-//            continue;
         if (rect.isEmpty())
             rect = item->boundingRect();
         else

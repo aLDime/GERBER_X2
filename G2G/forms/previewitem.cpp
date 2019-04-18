@@ -43,6 +43,7 @@ PreviewItem::PreviewItem(const Gerber::GraphicObject& go, int id)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
+    setFlag(ItemIsSelectable, true);
 }
 
 PreviewItem::PreviewItem(const Excellon::Hole& hole)
@@ -53,6 +54,7 @@ PreviewItem::PreviewItem(const Excellon::Hole& hole)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
+    setFlag(ItemIsSelectable, true);
 }
 
 PreviewItem::~PreviewItem() {}
@@ -60,6 +62,13 @@ PreviewItem::~PreviewItem() {}
 void PreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*)
 {
     // draw source
+    if (isSelected()) {
+        m_pen.setColor(Qt::green);
+        m_brush.setColor(Qt::green);
+    } else {
+        m_pen.setColor(Qt::darkGray);
+        m_brush.setColor(Qt::darkGray);
+    }
     painter->setPen(m_pen);
     painter->setBrush(m_brush);
     painter->drawPath(m_sourcePath);
@@ -67,7 +76,7 @@ void PreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWid
     if (m_toolId > -1) {
         //item->setBrush(QBrush(Qt::red, Qt::Dense4Pattern));
         //painter->setPen(QPen(Qt::red, 1.5 / scene()->views().first()->matrix().m11()));
-        if (isSelected)
+        if (isSelected())
             painter->setPen(m_pen);
         else
             painter->setPen(QPen(Qt::red, 0.0));
@@ -129,19 +138,6 @@ void PreviewItem::setToolId(int toolId)
             m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(diameter * 0.7, 0.0));
             break;
         }
-    }
-    update();
-}
-
-void PreviewItem::setSelected(bool value)
-{
-    isSelected = value;
-    if (isSelected) {
-        m_pen.setColor(Qt::green);
-        m_brush.setColor(Qt::green);
-    } else {
-        m_pen.setColor(Qt::darkGray);
-        m_brush.setColor(Qt::darkGray);
     }
     update();
 }

@@ -159,6 +159,13 @@
        </layout>
       </item>
       <item>
+       <widget class="QCheckBox" name="chbxZoomToSelected">
+        <property name="text">
+         <string>Zoom To Selected</string>
+        </property>
+       </widget>
+      </item>
+      <item>
        <layout class="QGridLayout" name="gridLayout_2">
         <property name="topMargin">
          <number>10</number>
@@ -288,7 +295,7 @@
        </layout>
       </item>
       <item>
-       <widget class="QTableView" name="tableView"/>
+       <widget class="QTableView" name="toolTable"/>
       </item>
      </layout>
     </widget>

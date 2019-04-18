@@ -260,10 +260,19 @@ QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolIt
 
 void ToolModel::exportTools()
 {
-    QFile saveFile(fileName);
-    if (!saveFile.open(QIODevice::WriteOnly)) {
-        qWarning("Couldn't open tools file.");
-        return;
+
+    QFile file(QStringLiteral("../tools.dat"));
+    if (file.exists()) {
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << file.errorString();
+            return;
+        }
+    } else {
+        file.setFileName(QStringLiteral("tools.dat"));
+        if (!file.open(QIODevice::WriteOnly)) {
+            qWarning() << file.errorString();
+            return;
+        }
     }
 
     QJsonObject jsonObject;
@@ -311,24 +320,27 @@ void ToolModel::exportTools()
     }
     jsonObject["tree"] = treeArray;
     QJsonDocument saveDoc(jsonObject);
-    saveFile.write(saveDoc.toBinaryData());
+    file.write(saveDoc.toBinaryData());
 }
 
 void ToolModel::importTools()
 {
-    fileName = QStringLiteral("tools.dat");
-    QFile loadFile(fileName);
-    if (!loadFile.open(QIODevice::ReadOnly)) {
-        qWarning("Couldn't open tools file.");
-        fileName = QStringLiteral("../tools.dat");
-        loadFile.setFileName(fileName);
-        if (!loadFile.open(QIODevice::ReadOnly)) {
-            qWarning("Couldn't open tools file.");
+
+    QFile file(QStringLiteral("../tools.dat"));
+    if (file.exists()) {
+        if (!file.open(QIODevice::ReadOnly)) {
+            qWarning() << file.errorString();
+            return;
+        }
+    } else {
+        file.setFileName(QStringLiteral("tools.dat"));
+        if (!file.open(QIODevice::ReadOnly)) {
+            qWarning() << file.errorString();
             return;
         }
     }
 
-    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
+    QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
     //    rootItem->read(loadDoc.object());
     ToolHolder::readTools(loadDoc.object());
 
