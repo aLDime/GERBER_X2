@@ -321,9 +321,9 @@ QList<QString> Parser::format(QString data)
 
 double Parser::arcAngle(double start, double stop)
 {
-    if (m_state.interpolation() == CounterclockwiseCircular && stop < start)
+    if (m_state.interpolation() == CounterclockwiseCircular && stop <= start)
         stop += 2.0 * M_PI;
-    if (m_state.interpolation() == ClockwiseCircular && stop > start)
+    if (m_state.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * M_PI;
     return qAbs(stop - start);
 }
@@ -785,9 +785,7 @@ bool Parser::parseAttributes(const QString& gLine)
 bool Parser::parseCircularInterpolation(const QString& gLine)
 {
     static const QRegExp match(QStringLiteral("^(?:G0?([23]))?[X]?([\\+-]?\\d+)*[Y]?([\\+-]?\\d+)*[I]?([\\+-]?\\d+)*[J]?([\\+-]?\\d+)*[^D]*(?:D0?([12]))?\\*$"));
-    Path arcPolygon;
-    double radius1, radius2, start, stop, angle;
-    radius1 = radius2 = start = stop = angle = 0.0;
+
     if (match.exactMatch(gLine)) {
         if (match.cap(1).isEmpty() && m_state.gCode() != G02 && m_state.gCode() != G03)
             return false;
@@ -861,9 +859,12 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
         bool valid = false;
 
         m_path.push_back(m_state.curPos());
+        double radius1 = 0.0, radius2 = 0.0, start = 0.0, stop = 0.0, angle = 0.0;
+        Path arcPolygon;
 
         switch (m_state.quadrant()) {
         case Multi: //G75
+            qDebug("Multi");
             radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
@@ -874,7 +875,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 stop = atan2(-centerPos[0].Y + y, -centerPos[0].X + x); // Stop angle
 
             arcPolygon = arc(centerPos[0], radius1, start, stop);
-            // arcPolygon = Arc2(currentPos, IntPoint(x, y), center);
+            //arcPolygon = arc(curPos, IntPoint(x, y), centerPos[0]);
             // Последняя точка в вычисленной дуге может иметь числовые ошибки.
             // Точной конечной точкой является указанная (x, y). Заменить.
             m_state.curPos() = { x, y };
@@ -884,12 +885,14 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 arcPolygon.push_back(m_state.curPos());
             break;
         case Single: //G74
+            qDebug("Single");
             for (int c = 0; c < 4; ++c) {
                 radius1 = sqrt(i * i + j * j);
                 radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
                 if (qAbs(radius2 - radius1) > (1e-4 * uScale)) // Недействительный центр.
                     continue;
+
                 // Correct i and j and return true; as with multi-quadrant.
                 i = centerPos[c].X - m_state.curPos().X;
                 j = centerPos[c].Y - m_state.curPos().Y;
@@ -910,7 +913,6 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
             }
             if (!valid)
                 qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
-
             break;
         default:
             m_state.setCurPos({ x, y });

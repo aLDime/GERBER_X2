@@ -26,7 +26,7 @@ class ToolPathCreator {
 public:
     ToolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
     GCodeFile* createPocket(const Tool& tool, const double depth, const int steps);
-    QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, double depth, bool side, int steps);
+    QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, double depth);
     GCodeFile* createProfile(const Tool& tool, double depth);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);

@@ -338,7 +338,7 @@ void MainWindow::createActions()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(10, [=] { toolpathActionList[Drilling]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Pocket]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif

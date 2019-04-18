@@ -157,6 +157,9 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
+    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
+    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+
     updateState();
 
     updateFiles();

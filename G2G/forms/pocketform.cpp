@@ -61,6 +61,7 @@ PocketForm::PocketForm(QWidget* parent)
         ui->rbOutside->setChecked(true);
     if (settings.value("rbRaster").toBool())
         ui->rbRaster->setChecked(true);
+    on_chbxUseTwoTools_clicked(settings.value("chbxUseTwoTools").toBool());
     settings.endGroup();
 
     ui->pbEdit->setIcon(Icon(PuttonEditIcon));
@@ -92,6 +93,7 @@ PocketForm::~PocketForm()
     settings.setValue("rbOffset", ui->rbOffset->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
+    settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
     settings.endGroup();
     delete ui;
 }
@@ -197,15 +199,35 @@ void PocketForm::create()
         return;
     }
 
-    GCodeFile* gcode = ToolPathCreator(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner)
-                           .createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
-    if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
-        return;
+    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner);
+    if (ui->chbxUseTwoTools->isChecked()) {
+        QPair<GCodeFile*, GCodeFile*> files = tpc.createPocket2({ tool2, tool }, ui->dsbxDepth->value());
+
+        if (files.first) {
+            files.first->setFileName(ui->leName->text() + "1");
+            files.first->setSide(boardSide);
+            FileModel::addFile(files.first);
+        } else {
+            //QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
+        }
+
+        if (files.second) {
+            files.second->setFileName(ui->leName->text() + "2");
+            files.second->setSide(boardSide);
+            FileModel::addFile(files.second);
+        } else {
+            //QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
+        }
+
+    } else {
+        GCodeFile* gcode = tpc.createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
+        if (gcode) {
+            gcode->setFileName(ui->leName->text());
+            gcode->setSide(boardSide);
+            FileModel::addFile(gcode);
+        } else
+            QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
     }
-    gcode->setFileName(ui->leName->text());
-    gcode->setSide(boardSide);
-    FileModel::addFile(gcode);
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)
@@ -221,9 +243,11 @@ void PocketForm::updateName()
 
 void PocketForm::on_chbxUseTwoTools_clicked(bool checked)
 {
+    ui->chbxUseTwoTools->setChecked(checked);
     ui->lblToolName_2->setEnabled(checked);
     ui->pbEdit_2->setEnabled(checked);
     ui->pbSelect_2->setEnabled(checked);
+    ui->sbxSteps->setEnabled(!checked);
 }
 
 void PocketForm::updatePixmap()
