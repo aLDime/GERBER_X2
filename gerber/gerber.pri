@@ -19,7 +19,7 @@ HEADERS += \
     $$PWD/gbrvars.h
 
 SOURCES += \
-    $$PWD/aperture.cpp \
-    $$PWD/file.cpp \
     $$PWD/mathparser.cpp \
-    $$PWD/parser.cpp
+    $$PWD/gbrparser.cpp \
+    $$PWD/gbrfile.cpp \
+    $$PWD/gbraperture.cpp

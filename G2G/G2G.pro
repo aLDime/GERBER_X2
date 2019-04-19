@@ -97,11 +97,12 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     icons.h \
     forms/previewitem.h \
-    voroni/voronoi.h \
-    voroni/rbtree.h \
-    voroni/cell.h \
-    voroni/halfedge.h \
-    voroni/edge.h
+#    voroni/voronoi.h \
+#    voroni/rbtree.h \
+#    voroni/cell.h \
+#    voroni/halfedge.h \
+#    voroni/edge.h \
+    voroni/VoronoiDiagramGenerator.h
 
 
 SOURCES += \
@@ -146,11 +147,12 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     forms/previewitem.cpp \
-    voroni/voronoi.cpp \
-    voroni/rbtree.cpp \
-    voroni/cell.cpp \
-    voroni/halfedge.cpp \
-    voroni/edge.cpp
+#    voroni/voronoi.cpp \
+#    voroni/rbtree.cpp \
+#    voroni/cell.cpp \
+#    voroni/halfedge.cpp \
+#    voroni/edge.cpp \
+    voroni/VoronoiDiagramGenerator.cpp
 
 
 
