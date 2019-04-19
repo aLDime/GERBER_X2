@@ -96,7 +96,12 @@ HEADERS += \
     tooldatabase/toolmodel.h \
     tooldatabase/tooltreeview.h \
     icons.h \
-    forms/previewitem.h
+    forms/previewitem.h \
+    voroni/voronoi.h \
+    voroni/rbtree.h \
+    voroni/cell.h \
+    voroni/halfedge.h \
+    voroni/edge.h
 
 
 SOURCES += \
@@ -140,7 +145,12 @@ SOURCES += \
     tooldatabase/toolitem.cpp \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
-    forms/previewitem.cpp
+    forms/previewitem.cpp \
+    voroni/voronoi.cpp \
+    voroni/rbtree.cpp \
+    voroni/cell.cpp \
+    voroni/halfedge.cpp \
+    voroni/edge.cpp
 
 
 
