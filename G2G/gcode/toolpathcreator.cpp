@@ -488,6 +488,19 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth)
     return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
 }
 
+int indexOf(const Paths& c, const Path& t)
+{
+    int i = 0;
+    for (const Path& path : c) {
+        if (path.first() == t.first() && path.last() == t.last())
+            return i;
+        if (path.first() == t.last() && path.last() == t.first())
+            return i;
+        ++i;
+    }
+    return -1;
+}
+
 GCodeFile* ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k)
 {
     QVector<jcv_point> points;
@@ -526,116 +539,75 @@ GCodeFile* ToolPathCreator::createVoronoi(const Tool& tool, double depth, const 
     }
 
     {
+
         Clipper clipper;
         for (const Paths& paths : m_groupedPaths) {
             clipper.AddPaths(paths, ptClip, true);
         }
         IntRect r(clipper.GetBounds());
-
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
             { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
         };
 
-        jcv_diagram diagram;
-
-        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
-        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
-
-        QVector<QVector<jcv_graphedge*>> edges;
+        Pathss edges;
         edges.resize(id);
-        for (int i = 0; i < diagram.numsites; i++) {
-            jcv_graphedge* graph_edge = sites[i].edges;
-            Path path;
-            while (graph_edge) {
-                path.append(Path{ IntPoint(graph_edge->pos[0].x, graph_edge->pos[0].y), IntPoint(graph_edge->pos[1].x, graph_edge->pos[1].y) });
-                graph_edge = graph_edge->next;
+        {
+            jcv_diagram diagram;
+            jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+            const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+            for (int i = 0; i < diagram.numsites; i++) {
+                jcv_graphedge* graph_edge = sites[i].edges;
+                while (graph_edge) {
+                    Path path{ { static_cast<cInt>(graph_edge->pos[0].x), static_cast<cInt>(graph_edge->pos[0].y) }, { static_cast<cInt>(graph_edge->pos[1].x), static_cast<cInt>(graph_edge->pos[1].y) } };
+                    int index = indexOf(edges[sites[i].p.id], path);
+                    if (index == -1)
+                        edges[sites[i].p.id].append(path);
+                    else
+                        edges[sites[i].p.id].remove(index);
+                    graph_edge = graph_edge->next;
+                }
             }
-            if (edges[sites[i].p.id])
-                edges[sites[i].p.id].append(path);
+            jcv_diagram_free(&diagram);
         }
-        jcv_diagram_free(&diagram);
-    }
 
-    for (Paths& paths : pathss) {
-        Clipper clipper;
-        clipper.AddPaths(paths, ptClip, true);
-        clipper.Execute(ctUnion, paths, pftNonZero);
-        //CleanPolygons(paths, (k * 0.01) * uScale);
-        for (Path& path : paths) {
-            if (Orientation(path))
-                m_returnPaths.append(path);
+        for (Paths& edge : edges) {
+            for (Path& path : edge) {
+                int index = indexOf(m_returnPaths, path);
+                if (index == -1)
+                    m_returnPaths.append(path);
+            }
         }
     }
 
-    //CleanPolygons(m_returnPaths, k * 0.05 * uScale);
-
-    for (Path& path : m_returnPaths) {
-        path.append(path.first());
+    // merge result toolPaths
+    for (int k = 0; k < 10; ++k) { // overhead for better merge result
+        for (int i = 0; i < m_returnPaths.size(); ++i) {
+            qDebug() << "i" << i << m_returnPaths.size();
+            for (int j = 0; j < m_returnPaths.size(); ++j) {
+                if (i == j)
+                    continue;
+                if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
+                    m_returnPaths[i].append(m_returnPaths[j]);
+                    m_returnPaths.remove(j--);
+                    continue;
+                }
+                if (m_returnPaths[i].last() == m_returnPaths[j].last()) {
+                    ReversePath(m_returnPaths[j]);
+                    m_returnPaths[i].append(m_returnPaths[j]);
+                    m_returnPaths.remove(j--);
+                    continue;
+                }
+                if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
+                    m_returnPaths[j].append(m_returnPaths[i]);
+                    m_returnPaths.remove(i--);
+                    break;
+                }
+            }
+        }
     }
 
-    QList<IntPoint> h;
-
-    //    for (int s = 0; s < m_returnPaths.size(); ++s) {
-    //        for (int f = 0; f < m_returnPaths.size(); ++f) {
-    //            if (s == f)
-    //                continue;
-
-    //            qDebug() << "src" << s << "fnd" << f;
-
-    //            QVector<int> foundIndexes;
-    //            for (const IntPoint& pt : m_returnPaths[f]) {
-    //                for (int index = 0; index < m_returnPaths[s].size(); ++index) {
-    //                    if (Length(m_returnPaths[s][index], pt) < k * 0.5) {
-    //                        m_returnPaths[s].takeAt(index);
-    //                        foundIndexes.append(index);
-    //                        break;
-    //                    }
-    //                }
-    //            }
-
-    //            if (!foundIndexes.isEmpty()) {
-    //                std::sort(foundIndexes.begin(), foundIndexes.end());
-    //                QVector<QPair<int, int>> cutIndexes;
-    //                for (int i = 0, j = 0; foundIndexes.size(); ++i) {
-    //                    if (i == foundIndexes.size() - 1) {
-    //                        if (i - j > 2)
-    //                            cutIndexes.append({ foundIndexes[j + 1], foundIndexes[i + 1] });
-    //                        break;
-    //                    }
-    //                    int key = foundIndexes[i + 1] - foundIndexes[i];
-    //                    if (key != 1) {
-    //                        if (i - j > 2)
-    //                            cutIndexes.append({ foundIndexes[j + 1], foundIndexes[i + 1] });
-    //                        j = i + 1;
-    //                    };
-    //                }
-    //                if (!cutIndexes.isEmpty()) {
-    //                    Path path(m_returnPaths.takeAt(s));
-    //                    Paths paths;
-    //                    for (int i = 0; i < cutIndexes.size(); ++i) {
-    //                        if (i == 0) {
-    //                            paths.append(path.mid(0, cutIndexes[i].first));
-    //                        } else if (i == cutIndexes.size() - 1) {
-    //                            paths.append(path.mid(cutIndexes[i].second));
-    //                        } else {
-    //                            paths.append(path.mid(cutIndexes[i].second, cutIndexes[i + 1].first - cutIndexes[i].second));
-    //                        }
-    //                    }
-    //                    m_returnPaths.append(paths);
-    //                    /*  --src;*/ s = -1;
-    //                    f = m_returnPaths.size();
-    //                }
-    //            }
-    //        }
-    //    }
-
-    for (Path& path : m_returnPaths) {
-        FileModel::addFile(new GCodeFile({ path }, tool, depth, Voronoi));
-    }
-
-    //    return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Voronoi);
-    return nullptr;
+    return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Voronoi);
 }
 
 Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
