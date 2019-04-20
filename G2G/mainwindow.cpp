@@ -14,6 +14,7 @@
 #include <QTableView>
 #include <QToolBar>
 #include <exparser.h>
+#include <forms/voronoiform.h>
 #include <gbrparser.h>
 
 MainWindow* MainWindow::self = nullptr;
@@ -327,18 +328,22 @@ void MainWindow::createActions()
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] {
         createDockWidget(new PocketForm(), Pocket);
     }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Pocket"), [=] {
+        createDockWidget(new VoronoiForm(), Voronoi);
+    }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
         createDockWidget(new DrillForm(), Drilling);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material "), [=] {
         createDockWidget(new MaterialSetup(), Material);
     }));
+
     toolpathToolBar->addSeparator();
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(10, [=] { toolpathActionList[Pocket]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Voronoi]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif
@@ -439,12 +444,13 @@ void MainWindow::writeSettings()
 
 void MainWindow::selectAll()
 {
-    if (focusWidget() == graphicsView)
-        for (QGraphicsItem* item : Scene::self->items())
-            if (item->isVisible())
-                item->setSelected(true);
-    if (focusWidget()->objectName() == "toolTable")
+    if (focusWidget()->objectName() == "toolTable") {
         static_cast<QTableView*>(focusWidget())->selectAll();
+        return;
+    }
+    for (QGraphicsItem* item : Scene::self->items())
+        if (item->isVisible())
+            item->setSelected(true);
 }
 
 void MainWindow::on_customContextMenuRequested(const QPoint& pos)

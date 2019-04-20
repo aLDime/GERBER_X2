@@ -1,6 +1,7 @@
 #include "toolpathcreator.h"
 #include "forms/materialsetupform.h"
 #include "toolpathcreator.h"
+#include "voroni/jc_voronoi.h"
 #include <QCoreApplication>
 #include <QDebug>
 #include <QElapsedTimer>
@@ -8,6 +9,7 @@
 #include <QSettings>
 #include <QStack>
 #include <algorithm>
+#include <filetree/filemodel.h>
 #include <gbraperture.h>
 #include <gi/bridgeitem.h>
 #include <limits>
@@ -185,79 +187,7 @@ GCodeFile* ToolPathCreator::createPocket(const Tool& tool, const double depth, c
     grouping2(polyTree.GetFirst(), &m_returnPaths);
     ReversePaths(m_returnPaths);
     sortByStratDistance(m_returnPaths);
-    //    } else {
-    //        if (m_side) {
-    //            groupedPaths(CutoffPaths, m_toolDiameter + 5);
-    //        } else
-    //            groupedPaths(CopperPaths);
 
-    //        if (m_side)
-    //            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
-    //                m_groupedPaths.removeFirst();
-
-    //        for (Paths paths : m_groupedPaths) {
-    //            ClipperOffset offset(uScale, uScale / 1000);
-    //            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
-    //            offset.Execute(paths, -m_dOffset);
-    //            Paths tmpPaths;
-    //            fillPaths.append(paths);
-    //            if (steps) {
-    //                int counter = steps;
-    //                if (counter > 1) {
-    //                    do {
-    //                        if (counter == 1)
-    //                            fillPaths.append(paths);
-    //                        tmpPaths.append(paths);
-    //                        offset.Clear();
-    //                        offset.AddPaths(paths, jtMiter, etClosedPolygon);
-    //                        offset.Execute(paths, -m_stepOver);
-    //                    } while (paths.size() && --counter);
-    //                } else {
-    //                    tmpPaths.append(paths);
-    //                    fillPaths.append(paths);
-    //                }
-    //            } else {
-    //                do {
-    //                    tmpPaths.append(paths);
-    //                    offset.Clear();
-    //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
-    //                    offset.Execute(paths, -m_stepOver);
-    //                } while (paths.size());
-    //            }
-
-    //            Pathss sortedPathss;
-    //            Clipper clipper;
-    //            clipper.AddPaths(tmpPaths, ptSubject, true);
-    //            IntRect r(clipper.GetBounds());
-    //            int k = tool.diameter * uScale;
-    //            Path outer = {
-    //                IntPoint(r.left - k, r.bottom + k),
-    //                IntPoint(r.right + k, r.bottom + k),
-    //                IntPoint(r.right + k, r.top - k),
-    //                IntPoint(r.left - k, r.top - k)
-    //            };
-
-    //            PolyTree polyTree;
-    //            clipper.AddPath(outer, ptSubject, true);
-    //            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-    //            grouping(polyTree.GetFirst(), &sortedPathss, CopperPaths);
-    //            for (Paths paths : sortedPathss)
-    //                m_returnPaths.append(paths);
-    //        }
-
-    //    if (m_returnPaths.size() == 0)
-    //        return nullptr;
-
-    //    for (Path& path : m_returnPaths) {
-    //        if (m_convent ^ !Orientation(path))
-    //            ReversePath(path);
-    //        else
-    //            fixBegin(path);
-    //        if (path.first() != path.last())
-    //            path.append(path.first());
-    //    }
-    //    sortByStratDistance(m_returnPaths);
-    //}
     return new GCodeFile(m_returnPaths, tool, depth, Pocket, fillPaths);
 }
 
@@ -518,7 +448,7 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth)
                     clipper.AddPath(path, ptSubject, false);
                     clipper.AddPaths(tmpPaths, ptClip, true);
                     PolyTree polytree;
-                    clipper.Execute(ctDifference, polytree, pftNonZero);
+                    clipper.Execute(ctDifference, polytree, pftPositive);
                     PolyTreeToPaths(polytree, tmpPaths);
                 }
                 // merge result toolPaths
@@ -529,19 +459,25 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth)
                         if (tmpPaths[i].last() == tmpPaths[j].first()) {
                             tmpPaths[i].append(tmpPaths[j]);
                             tmpPaths.remove(j);
-                            i = 0;
+                            i = -1;
                             break;
                         }
                         if (tmpPaths[i].first() == tmpPaths[j].last()) {
                             tmpPaths[j].append(tmpPaths[i]);
                             tmpPaths.remove(i);
-                            i = 0;
+                            i = -1;
+                            break;
+                        }
+                        if (tmpPaths[i].last() == tmpPaths[j].last()) {
+                            ReversePath(tmpPaths[j]);
+                            tmpPaths[i].append(tmpPaths[j]);
+                            tmpPaths.remove(j);
+                            i = -1;
                             break;
                         }
                     }
                 }
-                if (Orientation(m_returnPaths[index]))
-                    ReversePaths(tmpPaths);
+
                 --size;
                 m_returnPaths.remove(index--);
                 m_returnPaths.append(tmpPaths);
@@ -550,6 +486,156 @@ GCodeFile* ToolPathCreator::createProfile(const Tool& tool, double depth)
     }
 
     return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
+}
+
+GCodeFile* ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k)
+{
+    QVector<jcv_point> points;
+    points.reserve(1000000);
+    //    const double k = 0.1;
+    int id = 0;
+
+    CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+
+    groupedPaths(CopperPaths);
+    for (const Paths& paths : m_groupedPaths) {
+        for (const Path& path : paths) {
+            IntPoint tmp(path.first());
+            for (const IntPoint& point : path) {
+                QLineF line(toQPointF(tmp), toQPointF(point));
+                if (line.length() > k) {
+                    for (int i = 1, total = line.length() / k; i < total; ++i) {
+                        line.setLength(i * k);
+                        IntPoint point(toIntPoint(line.p2()));
+                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                    }
+                }
+                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                tmp = point;
+            }
+            QLineF line(toQPointF(tmp), toQPointF(path.first()));
+            if (line.length() > k) {
+                for (int i = 1, total = line.length() / k; i < total; ++i) {
+                    line.setLength(i * k);
+                    IntPoint point(toIntPoint(line.p2()));
+                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                }
+            }
+        }
+        ++id;
+    }
+
+    {
+        Clipper clipper;
+        for (const Paths& paths : m_groupedPaths) {
+            clipper.AddPaths(paths, ptClip, true);
+        }
+        IntRect r(clipper.GetBounds());
+
+        jcv_rect bounding_box = {
+            { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
+            { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
+        };
+
+        jcv_diagram diagram;
+
+        jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+        const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+
+        QVector<QVector<jcv_graphedge*>> edges;
+        edges.resize(id);
+        for (int i = 0; i < diagram.numsites; i++) {
+            jcv_graphedge* graph_edge = sites[i].edges;
+            Path path;
+            while (graph_edge) {
+                path.append(Path{ IntPoint(graph_edge->pos[0].x, graph_edge->pos[0].y), IntPoint(graph_edge->pos[1].x, graph_edge->pos[1].y) });
+                graph_edge = graph_edge->next;
+            }
+            if (edges[sites[i].p.id])
+                edges[sites[i].p.id].append(path);
+        }
+        jcv_diagram_free(&diagram);
+    }
+
+    for (Paths& paths : pathss) {
+        Clipper clipper;
+        clipper.AddPaths(paths, ptClip, true);
+        clipper.Execute(ctUnion, paths, pftNonZero);
+        //CleanPolygons(paths, (k * 0.01) * uScale);
+        for (Path& path : paths) {
+            if (Orientation(path))
+                m_returnPaths.append(path);
+        }
+    }
+
+    //CleanPolygons(m_returnPaths, k * 0.05 * uScale);
+
+    for (Path& path : m_returnPaths) {
+        path.append(path.first());
+    }
+
+    QList<IntPoint> h;
+
+    //    for (int s = 0; s < m_returnPaths.size(); ++s) {
+    //        for (int f = 0; f < m_returnPaths.size(); ++f) {
+    //            if (s == f)
+    //                continue;
+
+    //            qDebug() << "src" << s << "fnd" << f;
+
+    //            QVector<int> foundIndexes;
+    //            for (const IntPoint& pt : m_returnPaths[f]) {
+    //                for (int index = 0; index < m_returnPaths[s].size(); ++index) {
+    //                    if (Length(m_returnPaths[s][index], pt) < k * 0.5) {
+    //                        m_returnPaths[s].takeAt(index);
+    //                        foundIndexes.append(index);
+    //                        break;
+    //                    }
+    //                }
+    //            }
+
+    //            if (!foundIndexes.isEmpty()) {
+    //                std::sort(foundIndexes.begin(), foundIndexes.end());
+    //                QVector<QPair<int, int>> cutIndexes;
+    //                for (int i = 0, j = 0; foundIndexes.size(); ++i) {
+    //                    if (i == foundIndexes.size() - 1) {
+    //                        if (i - j > 2)
+    //                            cutIndexes.append({ foundIndexes[j + 1], foundIndexes[i + 1] });
+    //                        break;
+    //                    }
+    //                    int key = foundIndexes[i + 1] - foundIndexes[i];
+    //                    if (key != 1) {
+    //                        if (i - j > 2)
+    //                            cutIndexes.append({ foundIndexes[j + 1], foundIndexes[i + 1] });
+    //                        j = i + 1;
+    //                    };
+    //                }
+    //                if (!cutIndexes.isEmpty()) {
+    //                    Path path(m_returnPaths.takeAt(s));
+    //                    Paths paths;
+    //                    for (int i = 0; i < cutIndexes.size(); ++i) {
+    //                        if (i == 0) {
+    //                            paths.append(path.mid(0, cutIndexes[i].first));
+    //                        } else if (i == cutIndexes.size() - 1) {
+    //                            paths.append(path.mid(cutIndexes[i].second));
+    //                        } else {
+    //                            paths.append(path.mid(cutIndexes[i].second, cutIndexes[i + 1].first - cutIndexes[i].second));
+    //                        }
+    //                    }
+    //                    m_returnPaths.append(paths);
+    //                    /*  --src;*/ s = -1;
+    //                    f = m_returnPaths.size();
+    //                }
+    //            }
+    //        }
+    //    }
+
+    for (Path& path : m_returnPaths) {
+        FileModel::addFile(new GCodeFile({ path }, tool, depth, Voronoi));
+    }
+
+    //    return new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Voronoi);
+    return nullptr;
 }
 
 Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)

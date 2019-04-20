@@ -13,6 +13,7 @@ FORMS += \
     forms/materialsetupform.ui \
     forms/pocketform.ui \
     forms/profileform.ui \
+    forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \
     tooldatabase/tooleditdialog.ui \
@@ -73,6 +74,7 @@ HEADERS += \
     forms/pocketform.h \
     forms/profileform.h \
     forms/toolpathutil.h \
+    forms/voronoiform.h \
     gcode/gcode.h \
     gcode/toolpathcreator.h \
     gi/boarditem.h \
@@ -102,7 +104,7 @@ HEADERS += \
 #    voroni/cell.h \
 #    voroni/halfedge.h \
 #    voroni/edge.h \
-    voroni/VoronoiDiagramGenerator.h
+    voroni/jc_voronoi.h
 
 
 SOURCES += \
@@ -124,6 +126,7 @@ SOURCES += \
     forms/pocketform.cpp \
     forms/profileform.cpp \
     forms/toolpathutil.cpp \
+    forms/voronoiform.cpp \
     gcode/gcode.cpp \
     gcode/toolpathcreator.cpp \
     gi/boarditem.cpp \
@@ -152,7 +155,7 @@ SOURCES += \
 #    voroni/cell.cpp \
 #    voroni/halfedge.cpp \
 #    voroni/edge.cpp \
-    voroni/VoronoiDiagramGenerator.cpp
+    voroni/jc_voronoi.cpp
 
 
 

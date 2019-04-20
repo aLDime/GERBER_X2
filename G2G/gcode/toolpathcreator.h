@@ -28,6 +28,7 @@ public:
     GCodeFile* createPocket(const Tool& tool, const double depth, const int steps);
     QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& tool, double depth);
     GCodeFile* createProfile(const Tool& tool, double depth);
+    GCodeFile* createVoronoi(const Tool& tool, double depth, const double k);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);
     void addPaths(const Paths& paths);

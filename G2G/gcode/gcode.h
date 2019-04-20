@@ -12,6 +12,7 @@
 enum GCodeType {
     Profile,
     Pocket,
+    Voronoi,
     Drilling,
     Material
 };

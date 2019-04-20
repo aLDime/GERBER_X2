@@ -79,7 +79,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
 
     switch (type) {
     case Profile:
-
+    case Voronoi:
         for (const Path& path : m_toolPaths) {
             //qDebug() << path;
             item = new PathItem(path);

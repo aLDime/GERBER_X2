@@ -22,7 +22,7 @@ void File::setFormat(const Format& value)
     //    m_format.integer = value.integer;
     //    m_format.offsetPos = value.offsetPos;
     for (Hole& hole : *this) {
-        //        hole.state.updatePos();
+        hole.state.updatePos();
         hole.item->updateHole();
     }
 }
@@ -33,7 +33,6 @@ void File::setFormatForFile(const Format& /*value*/)
     //    QFile file(fileName());
     //    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
     //        return;
-
     //    QTextStream in(&file);
     //    while (!in.atEnd()) {
     //        lines.append(in.readLine());

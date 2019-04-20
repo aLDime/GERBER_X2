@@ -1,11 +1,12 @@
 #include "profileform.h"
+#include "ui_profileform.h"
+
 #include "filetree/filemodel.h"
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
 #include "materialsetupform.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
-#include "ui_profileform.h"
 #include <QDockWidget>
 #include <QMessageBox>
 #include <QPicture>
@@ -20,6 +21,7 @@ ProfileForm::ProfileForm(QWidget* parent)
 
 {
     ui->setupUi(this);
+
     ui->lblToolName->setText(tool.name);
     ui->dsbxDepth->setValue(MaterialSetup::thickness);
 

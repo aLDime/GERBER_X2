@@ -6,6 +6,7 @@
 enum Id {
     PathDrillIcon,
     PathPocketIcon,
+    PathVoronoiIcon,
     PathProfileIcon,
 
     MaterialIcon,
@@ -56,6 +57,8 @@ static QIcon Icon(Id id)
         return QIcon::fromTheme("roll");
     case PathPocketIcon:
         return QIcon::fromTheme("stroke-to-path");
+    case PathVoronoiIcon:
+        return QIcon::fromTheme("path-reverse");
     case PathProfileIcon:
         return QIcon::fromTheme("object-to-path");
     case MaterialIcon:

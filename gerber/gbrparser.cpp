@@ -8,8 +8,6 @@
 #include <QTextStream>
 #include <QThread>
 
-#include <voroni/VoronoiDiagramGenerator.h>
-
 namespace Gerber {
 
 #ifndef M_PI
@@ -156,70 +154,32 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         {
             m_file->setRawItemGroup(new ItemGroup);
             //            QList<Path> checkList;
-            //            for (GraphicObject& go : *m_file) {
-            //                if (go.path.size() > 1) { // skip empty
-            //                    //                    bool contains = false;
-            //                    //                    for (const Path& path : checkList) { // find copy
-            //                    //                        int counter = 0;
-            //                    //                        for (const IntPoint& p1 : path) {
-            //                    //                            for (const IntPoint& p2 : go.path) {
-            //                    //                                const double k = 0.001 * uScale;
-            //                    //                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k) && ++counter > 2) {
-            //                    //                                    contains = true;
-            //                    //                                    break;
-            //                    //                                }
-            //                    //                            }
-            //                    //                            if (contains)
-            //                    //                                break;
-            //                    //                        }
-            //                    //                        if (contains)
-            //                    //                            break;
-            //                    //                    }
-            //                    //                    if (contains) // skip dublicates
-            //                    //                        continue;
-            //                    checkList.append(go.path);
-            //                    m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
-            //                }
-            //            }
-            Clipper clipper;
-
-            int count = 0;
-            for (const Paths& paths : m_file->groupedPaths()) {
-                for (const Path& path : paths) {
-                    count += path.size();
-                    clipper.AddPath(path, ptClip, true);
+            for (GraphicObject& go : *m_file) {
+                if (go.path.size() > 1) { // skip empty
+                    //                    bool contains = false;
+                    //                    for (const Path& path : checkList) { // find copy
+                    //                        int counter = 0;
+                    //                        for (const IntPoint& p1 : path) {
+                    //                            for (const IntPoint& p2 : go.path) {
+                    //                                const double k = 0.001 * uScale;
+                    //                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k) && ++counter > 2) {
+                    //                                    contains = true;
+                    //                                    break;
+                    //                                }
+                    //                            }
+                    //                            if (contains)
+                    //                                break;
+                    //                        }
+                    //                        if (contains)
+                    //                            break;
+                    //                    }
+                    //                    if (contains) // skip dublicates
+                    //                        continue;
+                    //                    checkList.append(go.path);
+                    m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
                 }
             }
-
-            QVector<float> xValues;
-            QVector<float> yValues;
-
-            xValues.reserve(count);
-            yValues.reserve(count);
-
-            for (const Paths& paths : m_file->groupedPaths()) {
-                for (const Path& path : paths) {
-                    for (const IntPoint& point : path) {
-                        xValues.append(point.X);
-                        yValues.append(point.Y);
-                    }
-                }
-            }
-
-            IntRect r(clipper.GetBounds());
-
-            VoronoiDiagramGenerator vdg;
-            //            vdg.generateVoronoi(xValues, yValues, count, -100, 100, -100, 100, 3);
-            vdg.generateVoronoi(xValues.data(), yValues.data(), count, r.left - uScale, r.right + uScale, r.top - uScale, r.bottom + uScale, 0.1 * uScale);
-            vdg.resetIterator();
-            float x1, y1, x2, y2;
-            Paths paths;
-            while (vdg.getNext(x1, y1, x2, y2)) {
-                paths.append({ IntPoint(x1, y1), IntPoint(x2, y2) });
-            }
-            m_file->rawItemGroup()->append(new PathItem(paths));
-            m_file->rawItemGroup()->setVisible(true);
-            m_file->rawItemGroup()->setPen(QPen(QColor(100, 100, 100, 100), 0.0));
+            m_file->rawItemGroup()->setVisible(false);
         }
         emit fileReady(m_file);
     }
@@ -353,11 +313,6 @@ QList<QString> Parser::format(QString data)
     }
     return gerberLines;
 }
-#include <math.h>
-
-#include <gi/graphicsitem.h>
-
-#include <voroni/VoronoiDiagramGenerator.h>
 
 double Parser::arcAngle(double start, double stop)
 {
@@ -904,7 +859,6 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
 
         switch (m_state.quadrant()) {
         case Multi: //G75
-            qDebug("Multi");
             radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
@@ -925,7 +879,6 @@ bool Parser::parseCircularInterpolation(const QString& gLine)
                 arcPolygon.push_back(m_state.curPos());
             break;
         case Single: //G74
-            qDebug("Single");
             for (int c = 0; c < 4; ++c) {
                 radius1 = sqrt(i * i + j * j);
                 radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));

@@ -11,7 +11,7 @@ ItemGroup::~ItemGroup()
 
 void ItemGroup::append(GraphicsItem* value)
 {
-    value->setItemGroup(this);
+    //    value->setItemGroup(this);
     QList::append(value);
 }
 

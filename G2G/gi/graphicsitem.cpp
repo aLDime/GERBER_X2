@@ -13,8 +13,8 @@ GraphicsItem::GraphicsItem()
 
 GraphicsItem::~GraphicsItem()
 {
-    if (m_ig)
-        m_ig->takeAt(m_ig->indexOf(this));
+    //    if (m_ig)
+    //        m_ig->takeAt(m_ig->indexOf(this));
 }
 
 QBrush GraphicsItem::brush() const { return m_brush; }
@@ -25,11 +25,11 @@ void GraphicsItem::setBrush(const QBrush& brush) { m_brush = brush; }
 
 void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
 
-void GraphicsItem::setItemGroup(ItemGroup* itemGroup) { m_ig = itemGroup; }
+//void GraphicsItem::setItemGroup(ItemGroup* itemGroup) { m_ig = itemGroup; }
 
-ItemGroup* GraphicsItem::parentItemGroup() const { return m_ig; }
+//ItemGroup* GraphicsItem::parentItemGroup() const { return m_ig; }
 
-QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }
+//QPointF GraphicsItem::center() const { return m_rect.center() + pos(); }
 
 void GraphicsItem::setPenColor(QColor& penColor) { m_penColor = &penColor; }
 
