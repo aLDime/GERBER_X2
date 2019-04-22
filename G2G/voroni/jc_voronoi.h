@@ -155,10 +155,10 @@ USAGE:
 #ifndef JC_VORONOI_H
 #define JC_VORONOI_H
 
+#include <limits>
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
-#include <limits>
 
 #include <assert.h>
 
@@ -183,7 +183,7 @@ extern "C" {
 #endif
 
 #ifndef JCV_FLT_MAX
-#define JCV_FLT_MAX  std::numeric_limits<JCV_REAL_TYPE>::max() //3.402823466e+38F
+#define JCV_FLT_MAX std::numeric_limits<JCV_REAL_TYPE>::max() //3.402823466e+38F
 #endif
 
 #ifndef JCV_EDGE_INTERSECT_THRESHOLD
@@ -197,7 +197,7 @@ typedef JCV_REAL_TYPE jcv_real;
 typedef struct _jcv_point {
     jcv_real x;
     jcv_real y;
-    int id = 0;
+    int id = -1;
 } jcv_point;
 
 typedef struct _jcv_graphedge {

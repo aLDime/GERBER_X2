@@ -396,12 +396,16 @@ void DrillForm::on_pbCreate_clicked()
                 ReversePaths(pathsMap[toolId].paths);
                 GCodeFile* gcode = nullptr;
                 switch (m_worckType) {
-                case Profile:
-                    gcode = ToolPathCreator(pathsMap[toolId].paths, ui->rbConventional->isChecked(), m_side).createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
-                    break;
-                case Pocket:
-                    gcode = ToolPathCreator(pathsMap[toolId].paths, ui->rbConventional->isChecked(), Inner).createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
-                    break;
+                case Profile: {
+                    ToolPathCreator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), m_side);
+                    tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
+                    gcode = tpc.file();
+                } break;
+                case Pocket: {
+                    ToolPathCreator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), Inner);
+                    tpc.createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
+                    gcode = tpc.file();
+                } break;
                 default:
                     continue;
                 }

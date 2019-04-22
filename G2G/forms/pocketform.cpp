@@ -19,8 +19,7 @@ enum {
 };
 
 PocketForm::PocketForm(QWidget* parent)
-    : QWidget(parent)
-    , ToolPathUtil("PocketForm")
+    : ToolPathUtil("PocketForm", parent)
     , ui(new Ui::PocketForm)
 {
     ui->setupUi(this);
@@ -195,38 +194,33 @@ void PocketForm::create()
         boardSide = Top;
 
     if (wPaths.isEmpty()) {
-        QMessageBox::warning(this, "!!!", tr("No selected items for working..."));
+        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
         return;
     }
 
-    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner);
+    ToolPathCreator* tps = toolPathCreator(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner);
     if (ui->chbxUseTwoTools->isChecked()) {
-        QPair<GCodeFile*, GCodeFile*> files = tpc.createPocket2({ tool2, tool }, ui->dsbxDepth->value());
+        //        QPair<GCodeFile*, GCodeFile*> files = tpc.createPocket2({ tool2, tool }, ui->dsbxDepth->value());
 
-        if (files.first) {
-            files.first->setFileName(ui->leName->text() + "1");
-            files.first->setSide(boardSide);
-            FileModel::addFile(files.first);
-        } else {
-            //QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
-        }
+        //        if (files.first) {
+        //            files.first->setFileName(ui->leName->text() + "1");
+        //            files.first->setSide(boardSide);
+        //            FileModel::addFile(files.first);
+        //        } else {
+        //            //QMessageBox::information(this, "Warning", tr("The tool does not fit in the allocated region!"));
+        //        }
 
-        if (files.second) {
-            files.second->setFileName(ui->leName->text() + "2");
-            files.second->setSide(boardSide);
-            FileModel::addFile(files.second);
-        } else {
-            //QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
-        }
+        //        if (files.second) {
+        //            files.second->setFileName(ui->leName->text() + "2");
+        //            files.second->setSide(boardSide);
+        //            FileModel::addFile(files.second);
+        //        } else {
+        //            //QMessageBox::information(this, "Warning", tr("The tool does not fit in the allocated region!"));
+        //        }
 
     } else {
-        GCodeFile* gcode = tpc.createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
-        if (gcode) {
-            gcode->setFileName(ui->leName->text());
-            gcode->setSide(boardSide);
-            FileModel::addFile(gcode);
-        } else
-            QMessageBox::information(this, "!!!", tr("The tool does not fit in the allocated region!"));
+        connect(this, &PocketForm::createPocket, tps, &ToolPathCreator::createPocket);
+        emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
     }
 }
 
@@ -272,4 +266,9 @@ void PocketForm::showEvent(QShowEvent* event)
 {
     updatePixmap();
     QWidget::showEvent(event);
+}
+
+void PocketForm::on_leName_textChanged(const QString& arg1)
+{
+    m_fileName = arg1;
 }

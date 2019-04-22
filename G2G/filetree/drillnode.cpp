@@ -13,6 +13,7 @@ DrillNode::DrillNode(Excellon::File* file)
 
 DrillNode::~DrillNode()
 {
+    qDebug("~DrillNode()");
     FileHolder::deleteFile(m_id);
     if (Scene::self) {
         Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
@@ -69,8 +70,7 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
     case 1:
         return QVariant();
     default:
-        break;
+        return QVariant();
     }
-
     return QVariant();
 }

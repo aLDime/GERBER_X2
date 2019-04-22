@@ -2,13 +2,12 @@
 #define PROFILEFORM_H
 
 #include "toolpathutil.h"
-#include <QWidget>
 
 namespace Ui {
 class ProfileForm;
 }
 
-class ProfileForm : public QWidget, public ToolPathUtil {
+class ProfileForm : public ToolPathUtil {
     Q_OBJECT
 
 public:
@@ -23,6 +22,11 @@ private slots:
     void on_pbAddBridge_clicked();
     void on_dsbxBridgeLenght_valueChanged(double arg1);
     void on_dsbxDepth_valueChanged(double arg1);
+
+    void on_leName_textChanged(const QString& arg1);
+
+signals:
+    void createProfile(const Tool& tool, double depth);
 
 private:
     Ui::ProfileForm* ui;

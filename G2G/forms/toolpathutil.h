@@ -3,16 +3,17 @@
 
 #include "gcode/toolpathcreator.h"
 #include "tooldatabase/tool.h"
+#include <QThread>
 #include <QVector>
+#include <QWidget>
 
-enum Direction {
-    Climb,
-    Conventional
-};
+class QProgressDialog;
 
-class ToolPathUtil {
+class ToolPathUtil : public QWidget {
+    Q_OBJECT
+
 public:
-    ToolPathUtil(const QString& name);
+    ToolPathUtil(const QString& name, QWidget* parent = nullptr);
     ~ToolPathUtil();
 
 protected:
@@ -21,13 +22,25 @@ protected:
     virtual void create() = 0;
     virtual void updateName() = 0;
 
+    void setFile(GCodeFile* file);
+
     Tool tool;
     Tool tool2;
     Direction direction = Climb;
     SideOfMilling side = Outer;
+    Side boardSide = Top;
+
+    ToolPathCreator* toolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
+    QString m_fileName;
 
 private:
     const QString m_name;
+    QThread thread;
+    GCodeFile* m_file;
+    void progress(int max, int value);
+    void cancel();
+    ToolPathCreator* m_tps = nullptr;
+    QProgressDialog* pd = nullptr;
 };
 
 #endif // TOOLPATHUTIL_H

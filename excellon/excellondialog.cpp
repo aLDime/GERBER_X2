@@ -13,6 +13,7 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     , ui(new Ui::ExcellonDialog)
 {
     ui->setupUi(this);
+    setObjectName("ExcellonDialog");
 
     setWindowFlag(Qt::WindowStaysOnTopHint);
 
@@ -28,8 +29,8 @@ ExcellonDialog::ExcellonDialog(Excellon::File* file)
     ui->rbLeading->setChecked(!m_format.zeroMode);
     ui->rbTrailing->setChecked(m_format.zeroMode);
 
-    connect(ui->buttonBox, &QDialogButtonBox::rejected, [=] { GraphicsView::self->zoomFit(); m_file->setFormat(m_format); hide(); deleteLater(); });
-    connect(ui->buttonBox, &QDialogButtonBox::accepted, [=] { GraphicsView::self->zoomFit(); hide(); deleteLater(); });
+    connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ExcellonDialog::rejectFormat);
+    connect(ui->buttonBox, &QDialogButtonBox::accepted, this, &ExcellonDialog::acceptFormat);
 
     connect(ui->dsbxX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setX(val); m_file->setFormat(m_tmpFormat); });
     connect(ui->dsbxY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [&](double val) { m_tmpFormat.offsetPos.setY(val); m_file->setFormat(m_tmpFormat); });
@@ -77,8 +78,23 @@ void ExcellonDialog::updateFormat()
     GraphicsView::self->zoomFit();
 }
 
+void ExcellonDialog::acceptFormat()
+{
+    GraphicsView::self->zoomFit();
+    deleteLater();
+}
+
+void ExcellonDialog::rejectFormat()
+{
+    GraphicsView::self->zoomFit();
+    //if (FileHolder::contains(m_file))
+    m_file->setFormat(m_format);
+    deleteLater();
+}
+
 void ExcellonDialog::closeEvent(QCloseEvent* event)
 {
+    //if (FileHolder::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
     QDialog::closeEvent(event);

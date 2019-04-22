@@ -4,6 +4,7 @@
 #include "exvars.h"
 #include <abstractfile.h>
 
+
 namespace Excellon {
 
 class File : public AbstractFile, public QList<Hole> {
@@ -13,7 +14,7 @@ class File : public AbstractFile, public QList<Hole> {
 
 public:
     File();
-    ~File() {}
+    ~File();
 
     FileType type() const override { return FileType::Drill; }
 
@@ -23,6 +24,9 @@ public:
     Format format() const;
     void setFormat(const Format& value);
     void setFormatForFile(const Format& value);
+
+    void saveFormat();
+    void restoreFormat();
 
 protected:
     Paths merge() const override;

@@ -15,8 +15,7 @@
 #include <scene.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
-    : QWidget(parent)
-    , ToolPathUtil("ProfileForm")
+    : ToolPathUtil("ProfileForm", parent)
     , ui(new Ui::ProfileForm)
 
 {
@@ -177,25 +176,15 @@ void ProfileForm::create()
     }
 
     if (wrPaths.isEmpty() && wPaths.isEmpty()) {
-        QMessageBox::warning(this, "!!!", tr("No selected items for working..."));
+        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
         return;
     }
 
-    ToolPathCreator tpc(wPaths, ui->rbConventional->isChecked(), side);
+    ToolPathCreator* tpc = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
+    tpc->addRawPaths(wrPaths);
 
-    if (!wrPaths.isEmpty())
-        tpc.addRawPaths(wrPaths);
-
-    GCodeFile* gcode = tpc.createProfile(tool, ui->dsbxDepth->value());
-
-    if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("The tool does not fit in the Working items!"));
-        return;
-    }
-
-    gcode->setFileName(ui->leName->text());
-    gcode->setSide(boardSide);
-    FileModel::addFile(gcode);
+    connect(this, &ProfileForm::createProfile, tpc, &ToolPathCreator::createProfile);
+    emit createProfile(tool, ui->dsbxDepth->value());
 }
 
 void ProfileForm::updateName()
@@ -228,15 +217,9 @@ void ProfileForm::on_pbAddBridge_clicked()
     GraphicsView::self->scene()->addItem(item);
 }
 
-void ProfileForm::on_dsbxBridgeLenght_valueChanged(double /*arg1*/)
-{
-    updateBridge();
-}
+void ProfileForm::on_dsbxBridgeLenght_valueChanged(double /*arg1*/) { updateBridge(); }
 
-void ProfileForm::on_dsbxDepth_valueChanged(double /*arg1*/)
-{
-    updateBridge();
-}
+void ProfileForm::on_dsbxDepth_valueChanged(double /*arg1*/) { updateBridge(); }
 
 void ProfileForm::updateBridge()
 {
@@ -261,3 +244,5 @@ void ProfileForm::updatePixmap()
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon(pixmapList[side + direction * 3]).pixmap(QSize(size, size)));
 }
+
+void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }

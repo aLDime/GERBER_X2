@@ -7,6 +7,7 @@
 GcodeNode::GcodeNode(GCodeFile* gCode)
     : m_id(FileHolder::addFile(gCode))
 {
+    gCode->itemGroup()->addToTheScene();
 }
 
 GcodeNode::~GcodeNode()

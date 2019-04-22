@@ -2,18 +2,20 @@
 #define POCKETFORM_H
 
 #include "toolpathutil.h"
-#include <QWidget>
 
 namespace Ui {
 class PocketForm;
 }
 
-class PocketForm : public QWidget, public ToolPathUtil {
+class PocketForm : public ToolPathUtil {
     Q_OBJECT
 
 public:
     explicit PocketForm(QWidget* parent = nullptr);
     ~PocketForm();
+
+signals:
+    void createPocket(const Tool& tool, const double depth, const int steps);
 
 private slots:
     void on_pbSelect_clicked();
@@ -28,6 +30,8 @@ private slots:
     void on_sbxSteps_valueChanged(int arg1);
 
     void on_chbxUseTwoTools_clicked(bool checked);
+
+    void on_leName_textChanged(const QString &arg1);
 
 private:
     Ui::PocketForm* ui;

@@ -2,24 +2,27 @@
 #define VORONOIFORM_H
 
 #include "toolpathutil.h"
-#include <QWidget>
 
 namespace Ui {
 class VoronoiForm;
 }
 
-class VoronoiForm : public QWidget, public ToolPathUtil {
+class VoronoiForm : public ToolPathUtil {
     Q_OBJECT
 
 public:
     explicit VoronoiForm(QWidget* parent = nullptr);
     ~VoronoiForm();
 
+signals:
+    GCodeFile* createVoronoi(const Tool& tool, double depth, const double k);
+
 private slots:
     void on_pbSelect_clicked();
     void on_pbEdit_clicked();
     void on_pbCreate_clicked();
     void on_pbClose_clicked();
+    void on_leName_textChanged(const QString& arg1);
 
 private:
     Ui::VoronoiForm* ui;

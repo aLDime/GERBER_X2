@@ -105,7 +105,7 @@ void ToolTreeView::newTool()
 
 void ToolTreeView::deleteItem()
 {
-    if (QMessageBox::question(this, "!!!", "Are you sure you want to delete the item and all content?",
+    if (QMessageBox::question(this, "Warning", "Are you sure you want to delete the item and all content?",
             QMessageBox::Yes, QMessageBox::No)
         == QMessageBox::No)
         return;

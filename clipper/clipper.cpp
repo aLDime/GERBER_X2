@@ -45,6 +45,7 @@
 #include <cstring>
 #include <functional>
 #include <gbrvars.h>
+#include <gcode/toolpathcreator.h>
 #include <ostream>
 #include <stdexcept>
 #include <vector>
@@ -1613,7 +1614,10 @@ bool Clipper::ExecuteInternal()
         if (!PopScanbeam(botY))
             return false;
         InsertLocalMinimaIntoAEL(botY);
+
         while (PopScanbeam(topY) || LocalMinimaPending()) {
+            ToolPathCreator::progressOrCancel();
+
             ProcessHorizontals();
             ClearGhostJoins();
             if (!ProcessIntersections(topY)) {
@@ -1624,6 +1628,8 @@ bool Clipper::ExecuteInternal()
             botY = topY;
             InsertLocalMinimaIntoAEL(botY);
         }
+    } catch (bool e) {
+        throw e;
     } catch (...) {
         succeeded = false;
     }
@@ -3840,6 +3846,7 @@ void ClipperOffset::Execute(PolyTree& solution, double delta)
 }
 //------------------------------------------------------------------------------
 #include "myclipper.h"
+#include <gcode/toolpathcreator.h>
 
 void ClipperOffset::DoOffset(double delta)
 {

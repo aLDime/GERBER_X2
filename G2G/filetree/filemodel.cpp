@@ -97,19 +97,27 @@ void FileModel::addFile(GCodeFile* file)
 
 void FileModel::closeAllFiles()
 {
-    AbstractNode* item;
-    for (int i = 0; i < self->rootItem->childCount(); ++i) {
-        item = self->rootItem->child(i);
-        QModelIndex index = self->createIndex(0, 0, item);
-        int rowCount = item->childCount();
-        if (rowCount) {
-            self->beginRemoveRows(index, 0, rowCount - 1);
-            for (int i = 0; i < rowCount; ++i)
-                item->remove(0);
-            self->endRemoveRows();
+    if (self) {
+        //        delete self->rootItem;
+        AbstractNode* item;
+        for (int i = 0; i < self->rootItem->childCount(); ++i) {
+            item = self->rootItem->child(i);
+            QModelIndex index = self->createIndex(i, 0, item);
+            int rowCount = item->childCount();
+            if (rowCount) {
+                self->beginRemoveRows(index, 0, rowCount - 1);
+                for (int i = 0; i < rowCount; ++i)
+                    item->remove(0);
+                self->endRemoveRows();
+            }
         }
+        //        self->rootItem = new FolderNode("rootItem");
+        //        self->rootItem->append(new FolderNode("Gerber Files"));
+        //        self->rootItem->append(new FolderNode("Excellon"));
+        //        self->rootItem->append(new FolderNode("Tool Paths"));
+        //        self->rootItem->append(new FolderNode("Special"));
+        //self->resetInternalData();
     }
-    self->resetInternalData();
 }
 
 QModelIndex FileModel::index(int row, int column, const QModelIndex& parent) const
@@ -154,8 +162,8 @@ bool FileModel::setData(const QModelIndex& index, const QVariant& value, int rol
 {
     bool result = getItem(index)->setData(index, value, role);
 
-    if (result)
-        emit dataChanged(index, index);
+    //    if (result)
+    //        emit dataChanged(index, index);
 
     return result;
     //    if (!index.isValid())

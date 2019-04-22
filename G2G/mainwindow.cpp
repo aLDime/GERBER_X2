@@ -13,6 +13,7 @@
 #include <QProgressDialog>
 #include <QTableView>
 #include <QToolBar>
+#include <excellondialog.h>
 #include <exparser.h>
 #include <forms/voronoiform.h>
 #include <gbrparser.h>
@@ -105,14 +106,21 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    qApp->closeAllWindows();
-    event->accept();
-    writeSettings();
-    closeFiles();
-    return;
-    if (QMessageBox::question(this, "", "Do you really want to quit the program?", "Yes", "No") == 0) {
+    if (QFile("ui_mainwindow.h").exists()) {
         writeSettings();
-        closeFiles();
+        dockWidget->close();
+        FileModel::self->closeAllFiles();
+        qApp->closeAllWindows();
+        event->accept();
+        return;
+    }
+    if (!FileHolder::size() || QMessageBox::question(this, "", "Do you really want to quit the program?", "No", "Yes") == 1) {
+        qApp->closeAllWindows();
+        writeSettings();
+        //        closeFiles();
+        dockWidget->close();
+        FileModel::self->closeAllFiles();
+
         //        disconnect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
         //        disconnect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
         //        disconnect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
@@ -159,8 +167,15 @@ void MainWindow::saveSelectedToolpaths()
 
 void MainWindow::closeFiles()
 {
-    dockWidget->close();
-    FileModel::self->closeAllFiles();
+    if (QFile("ui_mainwindow.h").exists()) {
+        dockWidget->close();
+        FileModel::self->closeAllFiles();
+        return;
+    }
+    if (!FileHolder::size() || QMessageBox::question(this, "", "Do you really want to close all files?", "No", "Yes") == 1) {
+        dockWidget->close();
+        FileModel::self->closeAllFiles();
+    }
 }
 
 void MainWindow::about()

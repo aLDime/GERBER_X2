@@ -201,7 +201,6 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     default:
         break;
     }
-    itemGroup()->addToTheScene();
 }
 
 Paths GCodeFile::getPaths() const { return m_toolPaths; }
@@ -213,6 +212,7 @@ void GCodeFile::save(const QString& name)
     switch (m_type) {
     case Profile:
     case Pocket:
+    case Voronoi:
         saveProfilePocket();
         break;
     case Drilling:

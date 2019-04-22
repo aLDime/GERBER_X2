@@ -8,6 +8,12 @@ File::File()
 {
 }
 
+File::~File()
+{
+    saveFormat();
+    qDebug("~File()");
+}
+
 Format File::format() const
 {
     return m_format;
@@ -15,12 +21,13 @@ Format File::format() const
 
 void File::setFormat(const Format& value)
 {
-    m_format = value;
-    //    m_format.zeroMode = value.zeroMode;
-    //    m_format.unitMode = value.unitMode;
-    //    m_format.decimal = value.decimal;
-    //    m_format.integer = value.integer;
-    //    m_format.offsetPos = value.offsetPos;
+    //    m_format = value;
+    //    m_format.file = this;
+    m_format.zeroMode = value.zeroMode;
+    m_format.unitMode = value.unitMode;
+    m_format.decimal = value.decimal;
+    m_format.integer = value.integer;
+    m_format.offsetPos = value.offsetPos;
     for (Hole& hole : *this) {
         hole.state.updatePos();
         hole.item->updateHole();
@@ -36,6 +43,26 @@ void File::setFormatForFile(const Format& /*value*/)
     //    QTextStream in(&file);
     //    while (!in.atEnd()) {
     //        lines.append(in.readLine());
+    //    }
+}
+
+void File::saveFormat()
+{
+    //    QFile file(m_fileName + ".fmt");
+    //    if (file.open(QFile::WriteOnly)) {
+    //        file.write(reinterpret_cast<const char*>(&m_format), sizeof(Format));
+    //    }
+}
+
+void File::restoreFormat()
+{
+    //    QFile file(m_fileName + ".fmt");
+    //    if (file.exists() && file.open(QFile::ReadOnly)) {
+    //        QByteArray format(file.readAll());
+    //        if (format.size() == sizeof(Format)) {
+    //            m_format = *reinterpret_cast<Format*>(format.data());
+    //            m_format = this;
+    //        }
     //    }
 }
 

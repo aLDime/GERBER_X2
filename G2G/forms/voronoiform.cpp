@@ -1,7 +1,6 @@
 #include "voronoiform.h"
 #include "ui_voronoiform.h"
 
-#include "filetree/filemodel.h"
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
 #include "materialsetupform.h"
@@ -15,8 +14,7 @@
 #include <scene.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
-    : QWidget(parent)
-    , ToolPathUtil("VoronoiForm")
+    : ToolPathUtil("VoronoiForm", parent)
     , ui(new Ui::VoronoiForm)
 {
     ui->setupUi(this);
@@ -87,8 +85,7 @@ void VoronoiForm::create()
     }
 
     Paths wPaths;
-    //    Paths wrPaths;
-    Side boardSide = Top;
+    Paths wRawPaths;
 
     Gerber::File const* file = nullptr;
 
@@ -123,30 +120,19 @@ void VoronoiForm::create()
             //            else
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
         }
-        //        if (item->type() == RawItemType)
-        //            wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        if (item->type() == RawItemType)
+            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
-    if (/*wrPaths.isEmpty() && */ wPaths.isEmpty()) {
-        QMessageBox::warning(this, "!!!", tr("No selected items for working..."));
+    if (wPaths.isEmpty() && wRawPaths.isEmpty()) {
+        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
         return;
     }
 
-    ToolPathCreator tpc(wPaths, true, side);
-
-    //    if (!wrPaths.isEmpty())
-    //        tpc.addRawPaths(wrPaths);
-
-    GCodeFile* gcode = tpc.createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value());
-
-    if (gcode == nullptr) {
-        QMessageBox::information(this, "!!!", tr("The tool does not fit in the Working items!"));
-        return;
-    }
-
-    gcode->setFileName(ui->leName->text());
-    gcode->setSide(boardSide);
-    FileModel::addFile(gcode);
+    ToolPathCreator* tps = toolPathCreator(wPaths, true, side);
+    tps->addRawPaths(wRawPaths);
+    connect(this, &VoronoiForm::createVoronoi, tps, &ToolPathCreator::createVoronoi);
+    emit createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value());
 }
 
 void VoronoiForm::updateName()
@@ -154,3 +140,7 @@ void VoronoiForm::updateName()
     ui->leName->setText("Voronoi (" + tool.name + ")");
 }
 
+void VoronoiForm::on_leName_textChanged(const QString& arg1)
+{
+    m_fileName = arg1;
+}

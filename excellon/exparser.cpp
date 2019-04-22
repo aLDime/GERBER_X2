@@ -66,6 +66,7 @@ File* Parser::parseFile(const QString& fileName)
         delete m_file;
         m_file = nullptr;
     } else {
+        m_file->restoreFormat();
         m_file->setItemGroup(new ItemGroup);
         for (Hole& hole : *m_file) {
             DrillItem* item = new DrillItem(&hole);

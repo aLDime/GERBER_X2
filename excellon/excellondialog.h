@@ -21,7 +21,6 @@ public:
 
 private slots:
     void on_pbStep_clicked();
-
     void on_pushButton_clicked();
 
 private:
@@ -30,8 +29,9 @@ private:
     const Excellon::Format m_format;
     Excellon::Format m_tmpFormat;
     int m_step = 3;
-
     void updateFormat();
+    void acceptFormat();
+    void rejectFormat();
 
 protected:
     void closeEvent(QCloseEvent* event) override;

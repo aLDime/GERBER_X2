@@ -60,6 +60,11 @@ public:
         return rfiles;
     }
 
+    static bool contains(AbstractFile* file)
+    {
+        return m_files.values().contains(QSharedPointer<AbstractFile>(file));
+    }
+
 private:
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;
