@@ -304,10 +304,51 @@ void DrillForm::on_pbClose_clicked()
     if (parent())
         static_cast<QWidget*>(parent())->close();
 }
-
+QDebug operator<<(QDebug debug, const IntPoint& p)
+{
+    //QDebugStateSaver saver(debug);
+    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
+    return debug;
+}
 void DrillForm::on_pbCreate_clicked()
 {
-    { //   drills only
+    { //   slots only
+        QMap<int, QPair<Paths, QVector<int>>> pathsMap;
+        for (int row = 0; row < model->rowCount(); ++row) {
+            int selectedToolId = model->toolId(row);
+            if (selectedToolId != -1 && model->create(row)) {
+                int apertureId = model->apertureId(row);
+                pathsMap[selectedToolId].second.append(apertureId);
+                for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
+                    if (item->type() == PreviewItem::Slot) {
+                        if (item->fit(ui->dsbxDepth->value())) {
+                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter)) {
+                                pathsMap[selectedToolId].first.append(path);
+                            }
+                        } else {
+                            pathsMap[selectedToolId].first.append(item->paths().first());
+                        }
+                    }
+                }
+            }
+        }
+        QMap<int, QPair<Paths, QVector<int>>>::iterator iterator;
+        for (iterator = pathsMap.begin(); iterator != pathsMap.end(); ++iterator) {
+            int selectedToolId = iterator.key();
+            QString indexes;
+            QVector<int>& v = pathsMap[selectedToolId].second;
+            for (int id : v)
+                indexes += QString::number(id) + (id != v.last() ? "," : "");
+            if (!pathsMap[selectedToolId].first.isEmpty()) {
+                GCodeFile* gcode = new GCodeFile(pathsMap[selectedToolId].first, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
+                gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name + " - T(" + indexes + ')');
+                gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
+                FileModel::addFile(gcode);
+            }
+        }
+    }
+
+    { //   other
         struct data {
             Path drillPath;
             Paths paths;
@@ -364,7 +405,6 @@ void DrillForm::on_pbCreate_clicked()
             QVector<int>& v = pathsMap[toolId].vector;
             for (int id : v)
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
-
             if (!pathsMap[toolId].drillPath.isEmpty()) {
                 Path& path = pathsMap[toolId].drillPath;
                 IntPoint point1(toIntPoint(MaterialSetup::homePoint->pos()));
@@ -417,41 +457,7 @@ void DrillForm::on_pbCreate_clicked()
             }
         }
     }
-    { //   slots only
-        QMap<int, QPair<Paths, QVector<int>>> pathsMap;
-        for (int row = 0; row < model->rowCount(); ++row) {
-            int selectedToolId = model->toolId(row);
-            if (selectedToolId != -1 && model->create(row)) {
-                int apertureId = model->apertureId(row);
-                pathsMap[selectedToolId].second.append(apertureId);
-                for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                    if (item->type() == PreviewItem::Slot) {
-                        if (item->fit(ui->dsbxDepth->value())) {
-                            for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter)) {
-                                pathsMap[selectedToolId].first.append(path);
-                            }
-                        } else {
-                            pathsMap[selectedToolId].first.append(item->paths().first());
-                        }
-                    }
-                }
-            }
-        }
-        QMap<int, QPair<Paths, QVector<int>>>::iterator iterator;
-        for (iterator = pathsMap.begin(); iterator != pathsMap.end(); ++iterator) {
-            int selectedToolId = iterator.key();
-            QString indexes;
-            QVector<int>& v = pathsMap[selectedToolId].second;
-            for (int id : v)
-                indexes += QString::number(id) + (id != v.last() ? "," : "");
-            if (!pathsMap[selectedToolId].first.isEmpty()) {
-                GCodeFile* gcode = new GCodeFile(pathsMap[selectedToolId].first, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
-                gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name + " - T(" + indexes + ')');
-                gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
-                FileModel::addFile(gcode);
-            }
-        }
-    }
+
     updateCreateButton();
     QTimer::singleShot(100, Qt::CoarseTimer, [=] { ui->pbCreate->update(); });
 }

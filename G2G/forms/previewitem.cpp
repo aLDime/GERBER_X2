@@ -22,7 +22,7 @@ QPainterPath PreviewItem::drawApetrure(const Gerber::GraphicObject& go, int id)
 QPainterPath PreviewItem::drawDrill(const Excellon::Hole& hole)
 {
     QPainterPath painterPath;
-    painterPath.addEllipse(hole.state.offsetPos(), hole.state.currentToolDiameter() * 0.5, hole.state.currentToolDiameter() * 0.5);
+    painterPath.addEllipse(hole.state.offsetedPos(), hole.state.currentToolDiameter() * 0.5, hole.state.currentToolDiameter() * 0.5);
     return painterPath;
 }
 
@@ -124,11 +124,11 @@ void PreviewItem::setToolId(int toolId)
             }
         } break;
         case Drill:
-            m_toolPath.addEllipse(hole->state.offsetPos(), diameter * 0.5, diameter * 0.5);
-            m_toolPath.moveTo(hole->state.offsetPos() - QPointF(0.0, diameter * 0.7));
-            m_toolPath.lineTo(hole->state.offsetPos() + QPointF(0.0, diameter * 0.7));
-            m_toolPath.moveTo(hole->state.offsetPos() - QPointF(diameter * 0.7, 0.0));
-            m_toolPath.lineTo(hole->state.offsetPos() + QPointF(diameter * 0.7, 0.0));
+            m_toolPath.addEllipse(hole->state.offsetedPos(), diameter * 0.5, diameter * 0.5);
+            m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(0.0, diameter * 0.7));
+            m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(0.0, diameter * 0.7));
+            m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(diameter * 0.7, 0.0));
+            m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(diameter * 0.7, 0.0));
             break;
         case Apetrure:
             m_toolPath.addEllipse(toQPointF(grob->state.curPos()), diameter * 0.5, diameter * 0.5);
@@ -146,9 +146,9 @@ IntPoint PreviewItem::pos() const
 {
     switch (m_type) {
     case Slot:
-        return toIntPoint(hole->state.offsetPos());
+        return toIntPoint(hole->state.offsetedPos());
     case Drill:
-        return toIntPoint(hole->state.offsetPos());
+        return toIntPoint(hole->state.offsetedPos());
     case Apetrure:
         return grob->state.curPos();
     }

@@ -41,7 +41,7 @@ private:
     const Gerber::GraphicObject* const grob = nullptr;
     const Excellon::Hole* const hole = nullptr;
 
-    QPainterPath m_sourcePath;
+    const QPainterPath m_sourcePath;
     QPainterPath m_toolPath;
 
     const double m_sourceDiameter;

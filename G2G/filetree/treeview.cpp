@@ -152,7 +152,7 @@ void TreeView::showExcellonDialog()
         DrillForm::self->on_pbClose_clicked();
     m_exFormatDialog = new ExcellonDialog(FileHolder::file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
-    m_exFormatDialog->exec();
+    m_exFormatDialog->show();
 }
 
 void TreeView::contextMenuEvent(QContextMenuEvent* event)

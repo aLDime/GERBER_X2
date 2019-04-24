@@ -185,7 +185,7 @@ struct State {
     MCode mCode = M_NULL;
     int tCode = -1;
     QPointF pos;
-    QPointF offsetPos() const { return pos + format->offsetPos; }
+    QPointF offsetedPos() const { return pos + format->offsetPos; }
     QPolygonF path;
     int line = 0;
 };

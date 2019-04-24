@@ -58,13 +58,6 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
     }
 }
 
-QDebug operator<<(QDebug debug, const IntPoint& p)
-{
-    //QDebugStateSaver saver(debug);
-    debug.nospace() << '(' << p.X << ", " << p.Y << ')';
-    return debug;
-}
-
 GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
     : m_pocketPaths(pocketPaths)
     , m_type(type)
