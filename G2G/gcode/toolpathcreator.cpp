@@ -15,6 +15,7 @@
 #include <gi/bridgeitem.h>
 #include <limits>
 #include <scene.h>
+#include <voronoi.h>
 
 ToolPathCreator* ToolPathCreator::self = nullptr;
 
@@ -393,234 +394,326 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
     }
 }
 
-//inline uint qHash(const QPair<IntPoint, IntPoint>& tag)
-//{
-//    return tag.first.X ^ tag.second.X ^ tag.first.Y ^ tag.second.Y; // arbitrary value
-//}
-
 using Pair = QPair<IntPoint, IntPoint>;
 using Pairs = QSet<Pair>;
 using Pairss = QVector<Pairs>;
-
 inline uint qHash(const Pair& tag, uint seed = 0)
 {
     return qHash(tag.first.X * tag.second.X, seed ^ 0xa317a317) ^ qHash(tag.first.Y * tag.second.Y, seed ^ 0x17a317a3);
 }
 
-void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k)
+void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k, bool test)
 {
     try {
-
+        qDebug() << "";
         emit progress(3, 0); ////////////////////// progress //////////////////////
-
-        QVector<jcv_point> points;
-        points.reserve(1000000);
-        //    const double k = 0.1;
-        int id = 0;
-
-        CleanPolygons(m_workingPaths, k * 0.1 * uScale);
-
-        //        qDebug() << "";
-        //        QElapsedTimer t;
-        //        t.start();
-
-        groupedPaths(CopperPaths);
-        for (const Paths& paths : m_groupedPaths) {
-            for (const Path& path : paths) {
-                IntPoint tmp(path.first());
-                for (const IntPoint& point : path) {
-                    QLineF line(toQPointF(tmp), toQPointF(point));
+        QElapsedTimer t;
+        t.start();
+        if (test) {
+            QVector<Vrn::Vertex*> points;
+            points.reserve(1000000);
+            int id = 0;
+            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+            groupedPaths(CopperPaths);
+            for (const Paths& paths : m_groupedPaths) {
+                for (const Path& path : paths) {
+                    IntPoint tmp(path.first());
+                    for (const IntPoint& point : path) {
+                        QLineF line(toQPointF(tmp), toQPointF(point));
+                        if (line.length() > k) {
+                            for (int i = 1, total = line.length() / k; i < total; ++i) {
+                                line.setLength(i * k);
+                                IntPoint point(toIntPoint(line.p2()));
+                                points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
+                            }
+                        }
+                        points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
+                        tmp = point;
+                    }
+                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
                     if (line.length() > k) {
                         for (int i = 1, total = line.length() / k; i < total; ++i) {
                             line.setLength(i * k);
                             IntPoint point(toIntPoint(line.p2()));
-                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                            points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
                         }
-                    }
-                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                    tmp = point;
-                }
-                QLineF line(toQPointF(tmp), toQPointF(path.first()));
-                if (line.length() > k) {
-                    for (int i = 1, total = line.length() / k; i < total; ++i) {
-                        line.setLength(i * k);
-                        IntPoint point(toIntPoint(line.p2()));
-                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                    }
-                }
-            }
-            ++id;
-        }
-        if (!m_workingRawPaths.isEmpty()) {
-            for (const Path& path : m_workingRawPaths) {
-                IntPoint tmp(path.first());
-                for (const IntPoint& point : path) {
-                    QLineF line(toQPointF(tmp), toQPointF(point));
-                    if (line.length() > k) {
-                        for (int i = 1, total = line.length() / k; i < total; ++i) {
-                            line.setLength(i * k);
-                            IntPoint point(toIntPoint(line.p2()));
-                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                        }
-                    }
-                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                    tmp = point;
-                }
-                QLineF line(toQPointF(tmp), toQPointF(path.first()));
-                if (line.length() > k) {
-                    for (int i = 1, total = line.length() / k; i < total; ++i) {
-                        line.setLength(i * k);
-                        IntPoint point(toIntPoint(line.p2()));
-                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
                     }
                 }
                 ++id;
             }
-        }
-
-        emit progress(3, 1); ////////////////////// progress //////////////////////
-
-        //        qDebug() << "groupedPaths" << t.elapsed();
-        //        t.start();
-        {
-            Clipper clipper;
-            for (const Paths& paths : m_groupedPaths) {
-                clipper.AddPaths(paths, ptClip, true);
-            }
-            clipper.AddPaths(m_workingRawPaths, ptClip, true);
-            IntRect r(clipper.GetBounds());
-            jcv_rect bounding_box = {
-                { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
-                { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
-            };
-
-            Pairss edges;
-            edges.resize(id);
+            emit progress(3, 1); ////////////////////// progress //////////////////////
             {
-                auto toIntPoint = [](const jcv_point& pos) -> const IntPoint {
-                    return { static_cast<cInt>(pos.x), static_cast<cInt>(pos.y) };
+                Clipper clipper;
+                for (const Paths& paths : m_groupedPaths) {
+                    clipper.AddPaths(paths, ptClip, true);
+                }
+                clipper.AddPaths(m_workingRawPaths, ptClip, true);
+                IntRect r(clipper.GetBounds());
+
+                QRectF bounding_box;
+                bounding_box.setBottom(r.bottom * dScale + 1);
+                bounding_box.setLeft(r.left * dScale - 1);
+                bounding_box.setRight(r.right * dScale + 1);
+                bounding_box.setTop(r.top * dScale - 1);
+                qDebug() << "size" << points.size();
+                Vrn::Voronoi voronoi;
+                Vrn::Diagram* diagram = voronoi.compute(points, bounding_box);
+                qDebug() << "Voronoi.compute" << diagram->execTime;
+
+                m_returnPaths.reserve(diagram->edges.size());
+                for (Vrn::Edge* edge : diagram->edges) {
+                    if (edge->lSite && edge->rSite && edge->lSite->id != edge->rSite->id)
+                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
+                    //                    else if (!edge->lSite)
+                    //                        m_returnPaths.append(Path{ IntPoint(edge->va->x, edge->va->y), IntPoint(edge->vb->x, edge->vb->y) });
+                    else if (!edge->rSite)
+                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
+                }
+                qDebug() << "m_returnPaths" << m_returnPaths.size();
+                delete diagram;
+                emit progress(3, 2); ////////////////////// progress //////////////////////
+            }
+
+            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
+                cInt r = b.first().Y - a.last().Y;
+                if (r)
+                    return r > 0;
+                return (b.first().X - a.last().X) >= 0;
+            });
+
+            // merge result toolPaths
+            const int max = m_returnPaths.size();
+            for (int k = 0; k < 10; ++k) {
+                for (int i = 0; i < m_returnPaths.size(); ++i) {
+                    ////////////////////// progress //////////////////////
+                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
+                        return;
+                    ////////////////////// progress //////////////////////
+                    for (int j = 0; j < m_returnPaths.size(); ++j) {
+                        if (i == j)
+                            continue;
+                        if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
+                            //if (abs(m_returnPaths[i].last().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].last().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
+                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+                            m_returnPaths.remove(j--);
+                            continue;
+                        }
+                        if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
+                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].last().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].last().Y) < 0.01 * uScale) {
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                        if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
+                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
+                            ReversePath(m_returnPaths[j]);
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                    }
+                }
+            }
+            int size = m_returnPaths.size();
+            for (int i = 0; i < m_returnPaths.size(); ++i) {
+                if (m_returnPaths[i].size() == 2) {
+                    m_returnPaths.remove(i--);
+                    continue;
+                }
+            }
+            qDebug() << "remove" << (size - m_returnPaths.size());
+            qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
+        } else {
+
+            QVector<jcv_point> points;
+            points.reserve(1000000);
+            int id = 0;
+
+            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+
+            groupedPaths(CopperPaths);
+            for (const Paths& paths : m_groupedPaths) {
+                for (const Path& path : paths) {
+                    IntPoint tmp(path.first());
+                    for (const IntPoint& point : path) {
+                        QLineF line(toQPointF(tmp), toQPointF(point));
+                        if (line.length() > k) {
+                            for (int i = 1, total = line.length() / k; i < total; ++i) {
+                                line.setLength(i * k);
+                                IntPoint point(toIntPoint(line.p2()));
+                                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                            }
+                        }
+                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                        tmp = point;
+                    }
+                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
+                    if (line.length() > k) {
+                        for (int i = 1, total = line.length() / k; i < total; ++i) {
+                            line.setLength(i * k);
+                            IntPoint point(toIntPoint(line.p2()));
+                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                        }
+                    }
+                }
+                ++id;
+            }
+
+            if (!m_workingRawPaths.isEmpty()) {
+                for (const Path& path : m_workingRawPaths) {
+                    IntPoint tmp(path.first());
+                    for (const IntPoint& point : path) {
+                        QLineF line(toQPointF(tmp), toQPointF(point));
+                        if (line.length() > k) {
+                            for (int i = 1, total = line.length() / k; i < total; ++i) {
+                                line.setLength(i * k);
+                                IntPoint point(toIntPoint(line.p2()));
+                                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                            }
+                        }
+                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                        tmp = point;
+                    }
+                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
+                    if (line.length() > k) {
+                        for (int i = 1, total = line.length() / k; i < total; ++i) {
+                            line.setLength(i * k);
+                            IntPoint point(toIntPoint(line.p2()));
+                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                        }
+                    }
+                    ++id;
+                }
+            }
+            emit progress(3, 1); ////////////////////// progress //////////////////////
+            {
+                Clipper clipper;
+                for (const Paths& paths : m_groupedPaths) {
+                    clipper.AddPaths(paths, ptClip, true);
+                }
+                clipper.AddPaths(m_workingRawPaths, ptClip, true);
+                IntRect r(clipper.GetBounds());
+                jcv_rect bounding_box = {
+                    { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
+                    { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
                 };
 
-                jcv_diagram diagram;
-                jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
-                //                qDebug() << "jcv_diagram_generate" << t.elapsed();
-                //                t.start();
-                const jcv_site* sites = jcv_diagram_get_sites(&diagram);
-                for (int i = 0; i < diagram.numsites; i++) {
-                    jcv_graphedge* graph_edge = sites[i].edges;
-                    while (graph_edge) {
-                        const Pair pair1{ toIntPoint(graph_edge->pos[0]), toIntPoint(graph_edge->pos[1]) };
-                        const Pair pair2{ toIntPoint(graph_edge->pos[1]), toIntPoint(graph_edge->pos[0]) };
-                        if (edges[sites[i].p.id].contains(pair1))
-                            edges[sites[i].p.id].remove(pair1);
-                        else if (edges[sites[i].p.id].contains(pair2))
-                            edges[sites[i].p.id].remove(pair2);
-                        else
-                            edges[sites[i].p.id].insert(pair1);
-                        graph_edge = graph_edge->next;
+                //                QFile file("data.pt");
+                //                if (file.open(QFile::WriteOnly)) {
+                //                    file.write(reinterpret_cast<const char*>(&bounding_box.min.x), sizeof(double));
+                //                    file.write(reinterpret_cast<const char*>(&bounding_box.min.y), sizeof(double));
+                //                    file.write(reinterpret_cast<const char*>(&bounding_box.max.x), sizeof(double));
+                //                    file.write(reinterpret_cast<const char*>(&bounding_box.max.y), sizeof(double));
+                //                    for (const jcv_point& pt : points) {
+                //                        file.write(reinterpret_cast<const char*>(&pt.x), sizeof(double));
+                //                        file.write(reinterpret_cast<const char*>(&pt.y), sizeof(double));
+                //                    }
+                //                }
+
+                Pairss edges;
+                edges.resize(id);
+                {
+                    auto toIntPoint = [](const jcv_point& pos) -> const IntPoint {
+                        return { static_cast<cInt>(pos.x), static_cast<cInt>(pos.y) };
+                    };
+                    QElapsedTimer timer;
+                    timer.start();
+                    jcv_diagram diagram;
+                    qDebug() << "size" << points.size();
+                    jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
+                    qDebug() << "jcv_diagram_generate" << timer.elapsed();
+                    //                qDebug() << "jcv_diagram_generate" << t.elapsed();
+                    //                t.start();
+                    const jcv_site* sites = jcv_diagram_get_sites(&diagram);
+                    for (int i = 0; i < diagram.numsites; i++) {
+                        jcv_graphedge* graph_edge = sites[i].edges;
+                        while (graph_edge) {
+                            const Pair pair1{ toIntPoint(graph_edge->pos[0]), toIntPoint(graph_edge->pos[1]) };
+                            const Pair pair2{ toIntPoint(graph_edge->pos[1]), toIntPoint(graph_edge->pos[0]) };
+                            if (edges[sites[i].p.id].contains(pair1))
+                                edges[sites[i].p.id].remove(pair1);
+                            else if (edges[sites[i].p.id].contains(pair2))
+                                edges[sites[i].p.id].remove(pair2);
+                            else
+                                edges[sites[i].p.id].insert(pair1);
+                            graph_edge = graph_edge->next;
+                        }
+                    }
+                    jcv_diagram_free(&diagram);
+                }
+
+                emit progress(3, 2); ////////////////////// progress //////////////////////
+
+                //            qDebug() << "edges" << t.elapsed();
+                //            t.start();
+
+                Pairs tmp;
+
+                for (const Pairs& edge : edges) {
+                    for (const Pair& pair1 : edge) {
+                        Pair pair2(pair1);
+                        std::swap(pair2.first, pair2.second);
+                        if (!tmp.contains(pair1) && !tmp.contains(pair2)) {
+                            tmp.insert(pair1);
+                            ////////////////////// progress //////////////////////
+                            if (progressOrCancel(edges.size() * edge.size(), tmp.size(), 10000))
+                                return;
+                            ////////////////////// progress //////////////////////
+                        }
                     }
                 }
-                jcv_diagram_free(&diagram);
-            }
 
-            emit progress(3, 2); ////////////////////// progress //////////////////////
-
-            //            qDebug() << "edges" << t.elapsed();
-            //            t.start();
-
-            Pairs tmp;
-
-            for (const Pairs& edge : edges) {
-                for (const Pair& pair1 : edge) {
-                    Pair pair2(pair1);
-                    std::swap(pair2.first, pair2.second);
-                    if (!tmp.contains(pair1) && !tmp.contains(pair2)) {
-                        tmp.insert(pair1);
-                        ////////////////////// progress //////////////////////
-                        if (progressOrCancel(edges.size() * edge.size(), tmp.size(), 10000))
-                            return;
-                        ////////////////////// progress //////////////////////
-                    }
+                m_returnPaths.reserve(tmp.size());
+                for (const Pair& path : tmp) {
+                    m_returnPaths.append(Path{ path.first, path.second });
+                    ////////////////////// progress //////////////////////
+                    if (progressOrCancel(tmp.size(), m_returnPaths.size(), 10000))
+                        return;
+                    ////////////////////// progress //////////////////////
                 }
             }
 
-            m_returnPaths.reserve(tmp.size());
-            for (const Pair& path : tmp) {
-                m_returnPaths.append(Path{ path.first, path.second });
-                ////////////////////// progress //////////////////////
-                if (progressOrCancel(tmp.size(), m_returnPaths.size(), 10000))
-                    return;
-                ////////////////////// progress //////////////////////
+            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
+                const cInt r = b.first().Y - a.last().Y;
+                if (r)
+                    return r > 0;
+                return (b.first().X - a.last().X) > 0;
+            });
+            qDebug() << "m_returnPaths" << m_returnPaths.size();
+            // merge result toolPaths
+            const int max = m_returnPaths.size();
+            for (int k = 0; k < 10; ++k) {
+                for (int i = 0; i < m_returnPaths.size(); ++i) {
+                    ////////////////////// progress //////////////////////
+                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
+                        return;
+                    ////////////////////// progress //////////////////////
+                    for (int j = 0; j < m_returnPaths.size(); ++j) {
+                        if (i == j)
+                            continue;
+                        if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
+                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+                            m_returnPaths.remove(j--);
+                            continue;
+                        }
+                        if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                    }
+                }
             }
-            //            qDebug() << "append" << t.elapsed() << m_returnPaths.size();
-            //            t.start();
-        }
-
-        // merge result toolPaths
-
-        const int max = m_returnPaths.size();
-        for (int k = 0; k < 10; ++k) {
+            int size = m_returnPaths.size();
             for (int i = 0; i < m_returnPaths.size(); ++i) {
-                ////////////////////// progress //////////////////////
-                if (progressOrCancel(max, max - m_returnPaths.size(), 100))
-                    return;
-                ////////////////////// progress //////////////////////
-                for (int j = 0; j < m_returnPaths.size(); ++j) {
-                    if (i == j)
-                        continue;
-                    if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
-                        //if (m_returnPaths[j].size() == 2)
-                        //    m_returnPaths[i].append(m_returnPaths[j].last());
-                        //else {
-                        m_returnPaths[i].append(m_returnPaths[j].mid(1));
-                        //}
-                        m_returnPaths.remove(j--);
-                        continue;
-                    }
-                    if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
-                        //if (m_returnPaths[i].size() == 2)
-                        //    m_returnPaths[j].append(m_returnPaths[i].last());
-                        //else {
-                        m_returnPaths[j].append(m_returnPaths[i].mid(1));
-                        //}
-                        m_returnPaths.remove(i--);
-                        break;
-                    }
-                    //            if (m_returnPaths[i].last() == m_returnPaths[j].last()) { // if (Length(m_returnPaths[i].last(), m_returnPaths[j].last()) < 1) {
-                    //                qDebug("Length1");
-                    //                //if (m_returnPaths[j].size() == 2)
-                    //                //    m_returnPaths[i].append(m_returnPaths[j].first());
-                    //                //else {
-                    //                ReversePath(m_returnPaths[j]);
-                    //                m_returnPaths[i].append(m_returnPaths[j].mid(1));
-                    //                //}
-                    //                m_returnPaths.remove(j--);
-                    //                continue;
-                    //            }
-                    //            if (m_returnPaths[i].first() == m_returnPaths[j].first()) { //   if (Length(m_returnPaths[i].first(), m_returnPaths[j].first()) < 1) {
-                    //                qDebug("Length2");
-                    //                //if (m_returnPaths[i].size() == 2)
-                    //                //    m_returnPaths[j].append(m_returnPaths[i].last());
-                    //                //else {
-                    //                ReversePath(m_returnPaths[j]);
-                    //                m_returnPaths[j].append(m_returnPaths[i].mid(1));
-                    //                //}
-                    //                m_returnPaths.remove(i--);
-                    //                break;
-                    //            }
+                if (m_returnPaths[i].size() == 2) {
+                    m_returnPaths.remove(i--);
+                    continue;
                 }
             }
+            qDebug() << "remove" << (size - m_returnPaths.size());
+            qDebug() << "createVoronoi" << t.elapsed() << m_returnPaths.size();
         }
-        //    for (int i = 0; i < m_returnPaths.size(); ++i) {
-        //        if (m_returnPaths[i].size() == 2) {
-        //            qDebug("remove2");
-        //            m_returnPaths.remove(i--);
-        //            continue;
-        //        }
-        //    }
-
-        //        qDebug() << "merge" << t.elapsed() << m_returnPaths.size();
-
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
             emit progress(0, 0); ////////////////////// progress //////////////////////

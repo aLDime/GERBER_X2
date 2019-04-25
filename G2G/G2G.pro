@@ -6,20 +6,6 @@ DEFINES += G2G
 
 #QMAKE_CXXFLAGS += /std:c++17
 
-FORMS += \
-    aboutform.ui \
-    colorselector.ui \
-    forms/drillform.ui \
-    forms/materialsetupform.ui \
-    forms/pocketform.ui \
-    forms/profileform.ui \
-    forms/voronoiform.ui \
-    mainwindow.ui \
-    settingsdialog.ui \
-    tooldatabase/tooleditdialog.ui \
-    tooldatabase/tooleditform.ui \
-    tooldatabase/tooldatabase.ui
-
 RESOURCES += \
     res/resources.qrc \
 
@@ -28,11 +14,11 @@ DISTFILES += \
     res/toolpath/bookOfComplaintsAndSuggestions.txt
 
 include(../file/file.pri)
-
 include(../clipper/clipper.pri)
 include(../excellon/excellon.pri)
 include(../gerber/gerber.pri)
 include(../graphicsview/mygraphicsview.pri)
+include(../voronoi/voronoi.pri)
 
 
 DEFINES += QT_DEPRECATED_WARNINGS G2G
@@ -99,11 +85,6 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     icons.h \
     forms/previewitem.h \
-#    voroni/voronoi.h \
-#    voroni/rbtree.h \
-#    voroni/cell.h \
-#    voroni/halfedge.h \
-#    voroni/edge.h \
     voroni/jc_voronoi.h
 
 
@@ -150,12 +131,21 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     forms/previewitem.cpp \
-#    voroni/voronoi.cpp \
-#    voroni/rbtree.cpp \
-#    voroni/cell.cpp \
-#    voroni/halfedge.cpp \
-#    voroni/edge.cpp \
     voroni/jc_voronoi.cpp
 
 
+
+FORMS += \
+    aboutform.ui \
+    colorselector.ui \
+    forms/drillform.ui \
+    forms/materialsetupform.ui \
+    forms/pocketform.ui \
+    forms/profileform.ui \
+    forms/voronoiform.ui \
+    mainwindow.ui \
+    settingsdialog.ui \
+    tooldatabase/tooleditdialog.ui \
+    tooldatabase/tooleditform.ui \
+    tooldatabase/tooldatabase.ui
 

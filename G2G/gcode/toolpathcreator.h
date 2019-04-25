@@ -39,7 +39,7 @@ public:
     ~ToolPathCreator();
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createProfile(const Tool& tool, double depth);
-    void createVoronoi(const Tool& tool, double depth, const double k);
+    void createVoronoi(const Tool& tool, double depth, const double k, bool test);
     QPair<GCodeFile*, GCodeFile*> createPocket2(const QPair<Tool, Tool>& /*tool*/, double /*depth*/)
     {
         QPair<GCodeFile*, GCodeFile*> files{ nullptr, nullptr };

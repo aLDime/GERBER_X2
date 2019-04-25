@@ -325,8 +325,10 @@ void DrillForm::on_pbCreate_clicked()
                             for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter)) {
                                 pathsMap[selectedToolId].first.append(path);
                             }
+                            model->setCreate(row, false);
                         } else {
                             pathsMap[selectedToolId].first.append(item->paths().first());
+                            model->setCreate(row, false);
                         }
                     }
                 }
