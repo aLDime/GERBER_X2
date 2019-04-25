@@ -61,7 +61,7 @@
     <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
    </property>
    <property name="windowTitle">
-    <string>Слои</string>
+    <string>Files</string>
    </property>
    <attribute name="dockWidgetArea">
     <number>1</number>

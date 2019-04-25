@@ -102,7 +102,7 @@ void DrillItem::updateHole()
 {
     if (!m_hole)
         return;
-    setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
+    setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
     m_diameter = m_hole->state.currentToolDiameter();
     create();
     update(m_rect);
@@ -115,11 +115,11 @@ void DrillItem::create()
         m_shape.addEllipse(QPointF(), m_diameter / 2, m_diameter / 2);
         m_rect = m_shape.boundingRect();
     } else if (m_hole->state.path.isEmpty()) {
-        setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         m_shape.addEllipse(m_hole->state.offsetedPos(), m_diameter / 2, m_diameter / 2);
         m_rect = m_shape.boundingRect();
     } else {
-        setToolTip(QString("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
+        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_hole->state.currentToolDiameter()));
         Paths tmpPpath;
         ClipperOffset offset;
         offset.AddPath(toPath(m_hole->state.path.translated(m_hole->state.format->offsetPos)), jtRound, etOpenRound);

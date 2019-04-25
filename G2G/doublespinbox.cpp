@@ -15,19 +15,19 @@ DoubleSpinBox::DoubleSpinBox(QWidget* parent)
 void DoubleSpinBox::setRange(double min, double max)
 {
     QDoubleSpinBox::setRange(min, max);
-    setToolTip(QString("Range from %1 to %2.").arg(minimum()).arg(maximum()));
+    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::setMaximum(double max)
 {
     QDoubleSpinBox::setMaximum(max);
-    setToolTip(QString("Range from %1 to %2.").arg(minimum()).arg(maximum()));
+    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::setMinimum(double min)
 {
     QDoubleSpinBox::setMinimum(min);
-    setToolTip(QString("Range from %1 to %2.").arg(minimum()).arg(maximum()));
+    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event)

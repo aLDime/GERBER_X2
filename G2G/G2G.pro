@@ -2,23 +2,13 @@ QT += core gui opengl widgets
 
 TARGET = Getber2Gcode
 TEMPLATE = app
-DEFINES += G2G
 
 #QMAKE_CXXFLAGS += /std:c++17
 
 RESOURCES += \
     res/resources.qrc \
 
-DISTFILES += \
-    qdarkstyle/style.qss \
-    res/toolpath/bookOfComplaintsAndSuggestions.txt
 
-include(../file/file.pri)
-include(../clipper/clipper.pri)
-include(../excellon/excellon.pri)
-include(../gerber/gerber.pri)
-include(../graphicsview/mygraphicsview.pri)
-include(../voronoi/voronoi.pri)
 
 
 DEFINES += QT_DEPRECATED_WARNINGS G2G
@@ -29,8 +19,10 @@ VER_MAJ = 0
 VER_MIN = 7
 VER_PAT = 3
 
-ICON = res/toolpath/raster_climb.png
+ICON = 256.png
+
 #macx: ICON = resources/icon.icns
+
 win32-msvc* {
     LIBS += -lsetupapi -lAdvapi32
     RC_FILE = myapp.rc
@@ -39,6 +31,14 @@ win32* {
     LIBS += -lsetupapi -lAdvapi32 -lpsapi
     RC_FILE = myapp.rc
 }
+
+TRANSLATIONS += \
+    translations/g2g_en.ts \
+    translations/g2g_ru.ts
+#    translations/g2g_es.ts \
+#    translations/g2g_fr.ts \
+#    translations/g2g_pt.ts
+
 
 HEADERS += \
     aboutform.h \
@@ -147,5 +147,16 @@ FORMS += \
     settingsdialog.ui \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
-    tooldatabase/tooldatabase.ui
+    tooldatabase/tooldatabase.ui \
+    ../excellon/excellondialog.ui
 
+DISTFILES += \
+    translations/g2g_en.ts \
+    translations/g2g_ru.ts
+
+include(../file/file.pri)
+include(../clipper/clipper.pri)
+include(../excellon/excellon.pri)
+include(../gerber/gerber.pri)
+include(../graphicsview/mygraphicsview.pri)
+include(../voronoi/voronoi.pri)

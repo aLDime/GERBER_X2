@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QLocale>
+#include <QTranslator>
 
 #include "application.h"
 #include "mainwindow.h"
@@ -34,6 +35,10 @@ int main(int argc, char* argv[])
 
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
+
+    QTranslator translator;
+    translator.load(QString("g2g_") + QString("ru_RU"));
+    app.installTranslator(&translator);
 
     MainWindow* mainWin = new MainWindow;
     mainWin->setIconSize({ 24, 24 });

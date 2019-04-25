@@ -150,7 +150,7 @@ QVariant ToolModel::data(const QModelIndex& index, int role) const
 QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return QString("Name|Note").split('|')[section];
+        return tr("Name|Note").split('|')[section];
     return QVariant();
 }
 
@@ -173,7 +173,7 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const
     //            if (!item)
     //                item = rootItem;
     //            if (index.isValid()) {
-    //                encodedData.append(QString("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
+    //                encodedData.append(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toLocal8Bit());
     //                encodedData.append("|");
     //            }
     //        }

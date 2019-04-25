@@ -11,7 +11,7 @@
 
 namespace Vrn {
 
-class Voronoi {
+class Voronoi : public QObject {
 
 public:
     // ---------------------------------------------------------------------------

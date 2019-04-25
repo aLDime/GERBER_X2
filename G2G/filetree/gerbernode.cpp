@@ -101,7 +101,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QString("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
+            return tr("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
         case Qt::EditRole:
             return static_cast<bool>(FileHolder::file(m_id)->side());
         case Qt::UserRole:

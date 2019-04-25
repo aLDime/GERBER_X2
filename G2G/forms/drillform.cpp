@@ -201,7 +201,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
             QString name(apertureIt.value()->name());
             if (apertureIt.value()->isDrilled()) {
                 drillDiameter = apertureIt.value()->drillDiameter();
-                name += QString(", drill Ø%1mm").arg(drillDiameter);
+                name += tr(", drill Ø%1mm").arg(drillDiameter);
             } else if (apertureIt.value()->type() == Gerber::Circle) {
                 drillDiameter = apertureIt.value()->apertureSize();
             }
@@ -239,7 +239,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
 
     QMap<int, double>::const_iterator toolIt;
     for (toolIt = m_tools.begin(); toolIt != m_tools.end(); ++toolIt) {
-        QString name(QString("Tool Ø%1mm").arg(toolIt.value()));
+        QString name(tr("Tool Ø%1mm").arg(toolIt.value()));
         model->appendRow(name, drawDrillIcon(), toolIt.key());
         const Excellon::File* file = static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>());
         bool isSlot = false;

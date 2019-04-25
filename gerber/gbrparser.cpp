@@ -422,7 +422,7 @@ void Parser::addFlash()
     m_state.setType(Aperture);
 
     if (!m_file->m_apertures.contains(m_state.aperture()) && m_file->m_apertures[m_state.aperture()].data() == nullptr)
-        throw QString("Aperture %1 not found!").arg(m_state.aperture());
+        throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
     Paths paths(m_file->m_apertures[m_state.aperture()]->draw(m_state));
 
@@ -477,10 +477,10 @@ IntPoint Parser::parsePosition(const QString& xyStr)
         }
     }
     if (2.0e-310 > m_state.curPos().X && m_state.curPos().X > 0.0) {
-        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
+        throw tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     if (2.0e-310 > m_state.curPos().Y && m_state.curPos().Y > 0.0) {
-        throw QString("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
+        throw tr("line num %1: '%2', error value.").arg(m_lineNum).arg(m_currentGerbLine);
     }
     return m_state.curPos();
 }
@@ -524,12 +524,12 @@ Paths Parser::createLine()
 {
     Paths solution;
     if (!m_file->m_apertures.contains(m_state.aperture()))
-        throw QString("Aperture %1 not found!").arg(m_state.aperture());
+        throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
     if (m_file->m_apertures[m_state.aperture()]->type() == Rectangle) {
         ApRectangle* rect = static_cast<ApRectangle*>(m_file->m_apertures[m_state.aperture()].data());
         if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
-            throw QString("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
+            throw tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
         double size = rect->m_width * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             size = 1;

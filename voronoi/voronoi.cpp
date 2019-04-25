@@ -1,5 +1,6 @@
 #include "voronoi.h"
 #include <QElapsedTimer>
+#include <QElapsedTimer>
 namespace Vrn {
 Voronoi::Voronoi()
 {
@@ -1025,7 +1026,7 @@ void Voronoi::closeCells(QRectF bbox)
                         // fall through
                         qDebug("Voronoi.closeCells() > this makes no sense!");
                         break;
-                        throw QString("Voronoi.closeCells() > this makes no sense!");
+                        throw tr("Voronoi.closeCells() > this makes no sense!");
                     }
                 } while (0);
             }
