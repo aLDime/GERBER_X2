@@ -704,14 +704,14 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     }
                 }
             }
-            int size = m_returnPaths.size();
-            for (int i = 0; i < m_returnPaths.size(); ++i) {
-                if (m_returnPaths[i].size() == 2) {
-                    m_returnPaths.remove(i--);
-                    continue;
-                }
-            }
-            qDebug() << "remove" << (size - m_returnPaths.size());
+//            int size = m_returnPaths.size();
+//            for (int i = 0; i < m_returnPaths.size(); ++i) {
+//                if (m_returnPaths[i].size() == 2) {
+//                    m_returnPaths.remove(i--);
+//                    continue;
+//                }
+//            }
+//            qDebug() << "remove" << (size - m_returnPaths.size());
             qDebug() << "createVoronoi" << t.elapsed() << m_returnPaths.size();
         }
         if (m_returnPaths.isEmpty()) {
