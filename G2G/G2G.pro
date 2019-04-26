@@ -33,7 +33,6 @@ TRANSLATIONS += \
     translations/g2g_en.ts \
     translations/g2g_ru.ts
 
-
 HEADERS += \
     aboutform.h \
     application.h \

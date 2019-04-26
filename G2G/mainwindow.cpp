@@ -343,7 +343,7 @@ void MainWindow::createActions()
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] {
         createDockWidget(new PocketForm(), Pocket);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Pocket"), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
         createDockWidget(new VoronoiForm(), Voronoi);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {

@@ -1107,7 +1107,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../mainwindow.cpp" line="274"/>
         <source>&amp;About</source>
-        <translation>&amp;О</translation>
+        <translation>&amp;О G2G</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="275"/>
@@ -1181,9 +1181,13 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="343"/>
-        <location filename="../mainwindow.cpp" line="346"/>
         <source>Pocket</source>
         <translation>Карман</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="346"/>
+        <source>Voronoi</source>
+        <translation>Вороной</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="349"/>
@@ -1323,13 +1327,13 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../forms/materialsetupform.ui" line="133"/>
-        <location filename="../forms/materialsetupform.ui" line="170"/>
-        <location filename="../forms/materialsetupform.ui" line="200"/>
-        <location filename="../forms/materialsetupform.ui" line="216"/>
-        <location filename="../forms/materialsetupform.ui" line="269"/>
-        <location filename="../forms/materialsetupform.ui" line="285"/>
-        <location filename="../forms/materialsetupform.ui" line="357"/>
-        <location filename="../forms/materialsetupform.ui" line="370"/>
+        <location filename="../forms/materialsetupform.ui" line="176"/>
+        <location filename="../forms/materialsetupform.ui" line="206"/>
+        <location filename="../forms/materialsetupform.ui" line="222"/>
+        <location filename="../forms/materialsetupform.ui" line="275"/>
+        <location filename="../forms/materialsetupform.ui" line="291"/>
+        <location filename="../forms/materialsetupform.ui" line="363"/>
+        <location filename="../forms/materialsetupform.ui" line="376"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
@@ -1341,42 +1345,44 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/materialsetupform.ui" line="156"/>
         <source>Clearence</source>
-        <translation>Высота перемещений</translation>
+        <translation>Высота
+перемещений</translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="163"/>
+        <location filename="../forms/materialsetupform.ui" line="166"/>
         <source>Plunge</source>
-        <translation>Начало Погружения</translation>
+        <translation>Начало
+погружения</translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="186"/>
-        <location filename="../forms/materialsetupform.ui" line="262"/>
+        <location filename="../forms/materialsetupform.ui" line="192"/>
+        <location filename="../forms/materialsetupform.ui" line="268"/>
         <source>X</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="193"/>
-        <location filename="../forms/materialsetupform.ui" line="301"/>
+        <location filename="../forms/materialsetupform.ui" line="199"/>
+        <location filename="../forms/materialsetupform.ui" line="307"/>
         <source>Y</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="232"/>
+        <location filename="../forms/materialsetupform.ui" line="238"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Размещение &quot;Домй&quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="255"/>
+        <location filename="../forms/materialsetupform.ui" line="261"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zero Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Размещение нуля&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="318"/>
+        <location filename="../forms/materialsetupform.ui" line="324"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Safe Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Безопасная Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="389"/>
+        <location filename="../forms/materialsetupform.ui" line="395"/>
         <source>Ok</source>
         <translation></translation>
     </message>
@@ -1987,7 +1993,7 @@ Depth:</source>
     <message>
         <location filename="../forms/toolpathutil.cpp" line="112"/>
         <source>The tool does not fit in the Working items!</source>
-        <translation>Инструмент не влезает в выбранные полигоны!</translation>
+        <translation>Не выбраны элементы для расчёта...</translation>
     </message>
     <message>
         <location filename="../forms/toolpathutil.cpp" line="112"/>

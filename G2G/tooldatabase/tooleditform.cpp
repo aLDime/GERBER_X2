@@ -144,18 +144,18 @@ void ToolEditForm::on_cbxToolType_currentIndexChanged(int index)
         ui->dsbxStepoverPercent->setEnabled(false);
         if (ui->lblPixmap)
             ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
-        ui->label_3->setText("Pass");
+        ui->label_3->setText(tr("Pass"));
         break;
     case Tool::EndMill:
         ui->dsbxAngle->setEnabled(false);
         if (ui->lblPixmap)
             ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
-        ui->label_3->setText("Depth");
+        ui->label_3->setText(tr("Depth"));
         break;
     case Tool::Engraving:
         if (ui->lblPixmap)
             ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
-        ui->label_3->setText("Depth");
+        ui->label_3->setText(tr("Depth"));
         break;
     }
 

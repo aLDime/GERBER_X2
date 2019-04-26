@@ -1177,8 +1177,12 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="343"/>
-        <location filename="../mainwindow.cpp" line="346"/>
         <source>Pocket</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="346"/>
+        <source>Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
@@ -1318,13 +1322,13 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../forms/materialsetupform.ui" line="133"/>
-        <location filename="../forms/materialsetupform.ui" line="170"/>
-        <location filename="../forms/materialsetupform.ui" line="200"/>
-        <location filename="../forms/materialsetupform.ui" line="216"/>
-        <location filename="../forms/materialsetupform.ui" line="269"/>
-        <location filename="../forms/materialsetupform.ui" line="285"/>
-        <location filename="../forms/materialsetupform.ui" line="357"/>
-        <location filename="../forms/materialsetupform.ui" line="370"/>
+        <location filename="../forms/materialsetupform.ui" line="176"/>
+        <location filename="../forms/materialsetupform.ui" line="206"/>
+        <location filename="../forms/materialsetupform.ui" line="222"/>
+        <location filename="../forms/materialsetupform.ui" line="275"/>
+        <location filename="../forms/materialsetupform.ui" line="291"/>
+        <location filename="../forms/materialsetupform.ui" line="363"/>
+        <location filename="../forms/materialsetupform.ui" line="376"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1339,39 +1343,39 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="163"/>
+        <location filename="../forms/materialsetupform.ui" line="166"/>
         <source>Plunge</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="186"/>
-        <location filename="../forms/materialsetupform.ui" line="262"/>
+        <location filename="../forms/materialsetupform.ui" line="192"/>
+        <location filename="../forms/materialsetupform.ui" line="268"/>
         <source>X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="193"/>
-        <location filename="../forms/materialsetupform.ui" line="301"/>
+        <location filename="../forms/materialsetupform.ui" line="199"/>
+        <location filename="../forms/materialsetupform.ui" line="307"/>
         <source>Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="232"/>
+        <location filename="../forms/materialsetupform.ui" line="238"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="255"/>
+        <location filename="../forms/materialsetupform.ui" line="261"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zero Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="318"/>
+        <location filename="../forms/materialsetupform.ui" line="324"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Safe Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/materialsetupform.ui" line="389"/>
+        <location filename="../forms/materialsetupform.ui" line="395"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
