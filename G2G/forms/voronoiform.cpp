@@ -97,7 +97,7 @@ void VoronoiForm::create()
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", "Working items from different files!");
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
         }
@@ -108,7 +108,7 @@ void VoronoiForm::create()
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", "Working items from different files!");
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
         }
@@ -125,7 +125,7 @@ void VoronoiForm::create()
     }
 
     if (wPaths.isEmpty() && wRawPaths.isEmpty()) {
-        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
+        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
 
@@ -137,7 +137,7 @@ void VoronoiForm::create()
 
 void VoronoiForm::updateName()
 {
-    ui->leName->setText("Voronoi (" + tool.name + ")");
+    ui->leName->setText(tr("Voronoi (") + tool.name + ")");
 }
 
 void VoronoiForm::on_leName_textChanged(const QString& arg1)

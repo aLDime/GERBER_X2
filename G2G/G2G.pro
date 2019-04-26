@@ -8,9 +8,6 @@ TEMPLATE = app
 RESOURCES += \
     res/resources.qrc \
 
-
-
-
 DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
@@ -35,9 +32,6 @@ win32* {
 TRANSLATIONS += \
     translations/g2g_en.ts \
     translations/g2g_ru.ts
-#    translations/g2g_es.ts \
-#    translations/g2g_fr.ts \
-#    translations/g2g_pt.ts
 
 
 HEADERS += \

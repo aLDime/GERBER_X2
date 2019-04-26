@@ -114,7 +114,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         event->accept();
         return;
     }
-    if (!FileHolder::size() || QMessageBox::question(this, "", "Do you really want to quit the program?", "No", "Yes") == 1) {
+    if (!FileHolder::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
         qApp->closeAllWindows();
         writeSettings();
         //        closeFiles();
@@ -161,7 +161,7 @@ void MainWindow::saveSelectedToolpaths()
         file->itemGroup()->setVisible(false);
     }
     if (isEmpty) {
-        QMessageBox::information(this, "", "No selected toolpath files.");
+        QMessageBox::information(this, "", tr("No selected toolpath files."));
     }
 }
 

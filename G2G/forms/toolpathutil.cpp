@@ -109,7 +109,7 @@ void ToolPathUtil::setFile(GCodeFile* file)
     thread.quit();
     thread.wait();
     if (file == nullptr) {
-        QMessageBox::information(this, "Warning", tr("The tool does not fit in the Working items!"));
+        QMessageBox::information(this, tr("Warning"), tr("The tool does not fit in the Working items!"));
         return;
     }
     file->setFileName(m_fileName);

@@ -410,119 +410,119 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         QElapsedTimer t;
         t.start();
         if (test) {
-//            QVector<Vrn::Vertex*> points;
-//            points.reserve(1000000);
-//            int id = 0;
-//            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
-//            groupedPaths(CopperPaths);
-//            for (const Paths& paths : m_groupedPaths) {
-//                for (const Path& path : paths) {
-//                    IntPoint tmp(path.first());
-//                    for (const IntPoint& point : path) {
-//                        QLineF line(toQPointF(tmp), toQPointF(point));
-//                        if (line.length() > k) {
-//                            for (int i = 1, total = line.length() / k; i < total; ++i) {
-//                                line.setLength(i * k);
-//                                IntPoint point(toIntPoint(line.p2()));
-//                                points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-//                            }
-//                        }
-//                        points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-//                        tmp = point;
-//                    }
-//                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
-//                    if (line.length() > k) {
-//                        for (int i = 1, total = line.length() / k; i < total; ++i) {
-//                            line.setLength(i * k);
-//                            IntPoint point(toIntPoint(line.p2()));
-//                            points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-//                        }
-//                    }
-//                }
-//                ++id;
-//            }
-//            emit progress(3, 1); ////////////////////// progress //////////////////////
-//            {
-//                Clipper clipper;
-//                for (const Paths& paths : m_groupedPaths) {
-//                    clipper.AddPaths(paths, ptClip, true);
-//                }
-//                clipper.AddPaths(m_workingRawPaths, ptClip, true);
-//                IntRect r(clipper.GetBounds());
+            //            QVector<Vrn::Vertex*> points;
+            //            points.reserve(1000000);
+            //            int id = 0;
+            //            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+            //            groupedPaths(CopperPaths);
+            //            for (const Paths& paths : m_groupedPaths) {
+            //                for (const Path& path : paths) {
+            //                    IntPoint tmp(path.first());
+            //                    for (const IntPoint& point : path) {
+            //                        QLineF line(toQPointF(tmp), toQPointF(point));
+            //                        if (line.length() > k) {
+            //                            for (int i = 1, total = line.length() / k; i < total; ++i) {
+            //                                line.setLength(i * k);
+            //                                IntPoint point(toIntPoint(line.p2()));
+            //                                points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
+            //                            }
+            //                        }
+            //                        points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
+            //                        tmp = point;
+            //                    }
+            //                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
+            //                    if (line.length() > k) {
+            //                        for (int i = 1, total = line.length() / k; i < total; ++i) {
+            //                            line.setLength(i * k);
+            //                            IntPoint point(toIntPoint(line.p2()));
+            //                            points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
+            //                        }
+            //                    }
+            //                }
+            //                ++id;
+            //            }
+            //            emit progress(3, 1); ////////////////////// progress //////////////////////
+            //            {
+            //                Clipper clipper;
+            //                for (const Paths& paths : m_groupedPaths) {
+            //                    clipper.AddPaths(paths, ptClip, true);
+            //                }
+            //                clipper.AddPaths(m_workingRawPaths, ptClip, true);
+            //                IntRect r(clipper.GetBounds());
 
-//                QRectF bounding_box;
-//                bounding_box.setBottom(r.bottom * dScale + 1);
-//                bounding_box.setLeft(r.left * dScale - 1);
-//                bounding_box.setRight(r.right * dScale + 1);
-//                bounding_box.setTop(r.top * dScale - 1);
-//                qDebug() << "size" << points.size();
-//                Vrn::Voronoi voronoi;
-//                Vrn::Diagram* diagram = voronoi.compute(points, bounding_box);
-//                qDebug() << "Voronoi.compute" << diagram->execTime;
+            //                QRectF bounding_box;
+            //                bounding_box.setBottom(r.bottom * dScale + 1);
+            //                bounding_box.setLeft(r.left * dScale - 1);
+            //                bounding_box.setRight(r.right * dScale + 1);
+            //                bounding_box.setTop(r.top * dScale - 1);
+            //                qDebug() << "size" << points.size();
+            //                Vrn::Voronoi voronoi;
+            //                Vrn::Diagram* diagram = voronoi.compute(points, bounding_box);
+            //                qDebug() << "Voronoi.compute" << diagram->execTime;
 
-//                m_returnPaths.reserve(diagram->edges.size());
-//                for (Vrn::Edge* edge : diagram->edges) {
-//                    if (edge->lSite && edge->rSite && edge->lSite->id != edge->rSite->id)
-//                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
-//                    //                    else if (!edge->lSite)
-//                    //                        m_returnPaths.append(Path{ IntPoint(edge->va->x, edge->va->y), IntPoint(edge->vb->x, edge->vb->y) });
-//                    else if (!edge->rSite)
-//                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
-//                }
-//                qDebug() << "m_returnPaths" << m_returnPaths.size();
-//                delete diagram;
-//                emit progress(3, 2); ////////////////////// progress //////////////////////
-//            }
+            //                m_returnPaths.reserve(diagram->edges.size());
+            //                for (Vrn::Edge* edge : diagram->edges) {
+            //                    if (edge->lSite && edge->rSite && edge->lSite->id != edge->rSite->id)
+            //                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
+            //                    //                    else if (!edge->lSite)
+            //                    //                        m_returnPaths.append(Path{ IntPoint(edge->va->x, edge->va->y), IntPoint(edge->vb->x, edge->vb->y) });
+            //                    else if (!edge->rSite)
+            //                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
+            //                }
+            //                qDebug() << "m_returnPaths" << m_returnPaths.size();
+            //                delete diagram;
+            //                emit progress(3, 2); ////////////////////// progress //////////////////////
+            //            }
 
-//            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
-//                cInt r = b.first().Y - a.last().Y;
-//                if (r)
-//                    return r > 0;
-//                return (b.first().X - a.last().X) >= 0;
-//            });
+            //            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
+            //                cInt r = b.first().Y - a.last().Y;
+            //                if (r)
+            //                    return r > 0;
+            //                return (b.first().X - a.last().X) >= 0;
+            //            });
 
-//            // merge result toolPaths
-//            const int max = m_returnPaths.size();
-//            for (int k = 0; k < 10; ++k) {
-//                for (int i = 0; i < m_returnPaths.size(); ++i) {
-//                    ////////////////////// progress //////////////////////
-//                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
-//                        return;
-//                    ////////////////////// progress //////////////////////
-//                    for (int j = 0; j < m_returnPaths.size(); ++j) {
-//                        if (i == j)
-//                            continue;
-//                        if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
-//                            //if (abs(m_returnPaths[i].last().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].last().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
-//                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
-//                            m_returnPaths.remove(j--);
-//                            continue;
-//                        }
-//                        if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
-//                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].last().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].last().Y) < 0.01 * uScale) {
-//                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
-//                            m_returnPaths.remove(i--);
-//                            break;
-//                        }
-//                        if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
-//                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
-//                            ReversePath(m_returnPaths[j]);
-//                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
-//                            m_returnPaths.remove(i--);
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//            int size = m_returnPaths.size();
-//            for (int i = 0; i < m_returnPaths.size(); ++i) {
-//                if (m_returnPaths[i].size() == 2) {
-//                    m_returnPaths.remove(i--);
-//                    continue;
-//                }
-//            }
-//            qDebug() << "remove" << (size - m_returnPaths.size());
-//            qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
+            //            // merge result toolPaths
+            //            const int max = m_returnPaths.size();
+            //            for (int k = 0; k < 10; ++k) {
+            //                for (int i = 0; i < m_returnPaths.size(); ++i) {
+            //                    ////////////////////// progress //////////////////////
+            //                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
+            //                        return;
+            //                    ////////////////////// progress //////////////////////
+            //                    for (int j = 0; j < m_returnPaths.size(); ++j) {
+            //                        if (i == j)
+            //                            continue;
+            //                        if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
+            //                            //if (abs(m_returnPaths[i].last().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].last().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
+            //                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+            //                            m_returnPaths.remove(j--);
+            //                            continue;
+            //                        }
+            //                        if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
+            //                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].last().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].last().Y) < 0.01 * uScale) {
+            //                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+            //                            m_returnPaths.remove(i--);
+            //                            break;
+            //                        }
+            //                        if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
+            //                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
+            //                            ReversePath(m_returnPaths[j]);
+            //                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+            //                            m_returnPaths.remove(i--);
+            //                            break;
+            //                        }
+            //                    }
+            //                }
+            //            }
+            //            int size = m_returnPaths.size();
+            //            for (int i = 0; i < m_returnPaths.size(); ++i) {
+            //                if (m_returnPaths[i].size() == 2) {
+            //                    m_returnPaths.remove(i--);
+            //                    continue;
+            //                }
+            //            }
+            //            qDebug() << "remove" << (size - m_returnPaths.size());
+            //            qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
         } else {
 
             QVector<jcv_point> points;
@@ -673,12 +673,12 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 }
             }
 
-            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
-                const cInt r = b.first().Y - a.last().Y;
-                if (r)
-                    return r > 0;
-                return (b.first().X - a.last().X) > 0;
-            });
+//            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
+//                const cInt r = b.first().Y - a.last().Y;
+//                if (r)
+//                    return r > 0;
+//                return (b.first().X - a.last().X) > 0;
+//            });
             qDebug() << "m_returnPaths" << m_returnPaths.size();
             // merge result toolPaths
             const int max = m_returnPaths.size();
@@ -704,15 +704,67 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     }
                 }
             }
-//            int size = m_returnPaths.size();
-//            for (int i = 0; i < m_returnPaths.size(); ++i) {
-//                if (m_returnPaths[i].size() == 2) {
-//                    m_returnPaths.remove(i--);
-//                    continue;
-//                }
-//            }
-//            qDebug() << "remove" << (size - m_returnPaths.size());
-            qDebug() << "createVoronoi" << t.elapsed() << m_returnPaths.size();
+            qDebug() << "createVoronoi 1" << t.elapsed() << m_returnPaths.size();
+            for (int k = 0; k < 10; ++k) {
+                for (int i = 0; i < m_returnPaths.size(); ++i) {
+                    ////////////////////// progress //////////////////////
+                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
+                        return;
+                    ////////////////////// progress //////////////////////
+                    for (int j = 0; j < m_returnPaths.size(); ++j) {
+                        if (i == j)
+                            continue;
+                        if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
+                            qDebug("1 f f");
+                            ReversePath(m_returnPaths[j]);
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                        if (m_returnPaths[i].last() == m_returnPaths[j].last()) {
+                            qDebug("2 l l");
+                            ReversePath(m_returnPaths[j]);
+                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+                            m_returnPaths.remove(j--);
+                            break;
+                        }
+                        if (Length(m_returnPaths[i].last(), m_returnPaths[j].last()) < 0.001 * uScale) {
+                            qDebug("3 l l l");
+                            ReversePath(m_returnPaths[j]);
+                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+                            m_returnPaths.remove(j--);
+                            break;
+                        }
+                        if (Length(m_returnPaths[i].last(), m_returnPaths[j].first()) < 0.001 * uScale) {
+                            qDebug("4 l f l");
+                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
+                            m_returnPaths.remove(j--);
+                            break;
+                        }
+                        if (Length(m_returnPaths[i].first(), m_returnPaths[j].last()) < 0.001 * uScale) {
+                            qDebug("5 f l l");
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                        if (Length(m_returnPaths[i].first(), m_returnPaths[j].first()) < 0.001 * uScale) {
+                            qDebug("6 f f l");
+                            ReversePath(m_returnPaths[j]);
+                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
+                            m_returnPaths.remove(i--);
+                            break;
+                        }
+                    }
+                }
+            }
+            qDebug() << "createVoronoi 2" << t.elapsed() << m_returnPaths.size();
+
+            for (int i = 0; i < m_returnPaths.size(); ++i) {
+                if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < 0.1 * uScale)
+                    m_returnPaths.remove(i--);
+            }
+            //            qDebug() << "remove" << (size - m_returnPaths.size());
+            qDebug() << "createVoronoi 3" << t.elapsed() << m_returnPaths.size();
         }
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);

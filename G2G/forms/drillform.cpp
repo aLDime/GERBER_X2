@@ -292,7 +292,7 @@ void DrillForm::updateFiles()
     }
 
     if (!ui->cbxFile->count()) {
-        QMessageBox::information(this, "", "No data to process.");
+        QMessageBox::information(this, "", tr("No data to process."));
         QTimer::singleShot(1, Qt::CoarseTimer, [=] { on_pbClose_clicked(); });
     } else
         on_cbxFileCurrentIndexChanged(0);
@@ -560,7 +560,7 @@ void DrillForm::on_customContextMenuRequested(const QPoint& pos)
                     model->setToolId(current.row(), tool.id);
                     createHoles(model->apertureId(current.row()), tool.id);
                 } else if (model->isSlot(current.row()) && tool.type != Tool::EndMill) {
-                    QMessageBox::information(this, "", "\"" + tool.name + "\" not suitable for T" + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "(" + model->data(current.sibling(current.row(), 0)).toString() + ")");
+                    QMessageBox::information(this, "", "\"" + tool.name + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "(" + model->data(current.sibling(current.row(), 0)).toString() + ")");
                 } else if (!model->isSlot(current.row())) {
                     if (model->toolId(current.row()) > -1 && !model->create(current.row()))
                         continue;

@@ -176,7 +176,7 @@ void PocketForm::create()
             if (!file)
                 file = gi->file();
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", "Working items from different files!");
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
             boardSide = gi->file()->side();
@@ -194,7 +194,7 @@ void PocketForm::create()
         boardSide = Top;
 
     if (wPaths.isEmpty()) {
-        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
+        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
 
@@ -226,12 +226,12 @@ void PocketForm::create()
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)
 {
-    ui->sbxSteps->setSuffix(!arg1 ? " - Infinity" : "");
+    ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
 }
 
 void PocketForm::updateName()
 {
-    QStringList name = { "Pocket Offset", "Pocket Raster" };
+    QStringList name = { tr("Pocket Offset"), tr("Pocket Raster") };
     ui->leName->setText(name[type] + " (" + tool.name + ")");
 }
 

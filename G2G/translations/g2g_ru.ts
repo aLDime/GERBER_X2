@@ -717,6 +717,16 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
+    <name>DoubleSpinBox</name>
+    <message>
+        <location filename="../doublespinbox.cpp" line="18"/>
+        <location filename="../doublespinbox.cpp" line="24"/>
+        <location filename="../doublespinbox.cpp" line="30"/>
+        <source>Range from %1 to %2.</source>
+        <translation>Диапазон от %1 до %2.</translation>
+    </message>
+</context>
+<context>
     <name>DrillForm</name>
     <message>
         <location filename="../forms/drillform.ui" line="20"/>
@@ -814,9 +824,29 @@ Public License instead of this License.  But first, please read
         <translation>Закрыть</translation>
     </message>
     <message>
+        <location filename="../forms/drillform.cpp" line="204"/>
+        <source>, drill Ø%1mm</source>
+        <translation>, сверло Ø%1 мм</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillform.cpp" line="242"/>
+        <source>Tool Ø%1mm</source>
+        <translation>Инструмент Ø%1 мм</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillform.cpp" line="295"/>
+        <source>No data to process.</source>
+        <translation>Нет данных для обработки.</translation>
+    </message>
+    <message>
         <location filename="../forms/drillform.cpp" line="539"/>
         <source>&amp;Select Tool</source>
         <translation>&amp;Выбрать инструмент</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillform.cpp" line="563"/>
+        <source>&quot; not suitable for T</source>
+        <translation>&quot;не подходит для Т</translation>
     </message>
     <message>
         <location filename="../forms/drillform.cpp" line="577"/>
@@ -911,6 +941,14 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
+    <name>GerberNode</name>
+    <message>
+        <location filename="../filetree/gerbernode.cpp" line="104"/>
+        <source>Top|Bottom</source>
+        <translation>Верх|Низ</translation>
+    </message>
+</context>
+<context>
     <name>MainWindow</name>
     <message>
         <location filename="../mainwindow.ui" line="14"/>
@@ -919,8 +957,27 @@ Public License instead of this License.  But first, please read
     </message>
     <message>
         <location filename="../mainwindow.ui" line="64"/>
-        <source>Слои</source>
+        <source>Files</source>
         <translation>Файлы</translation>
+    </message>
+    <message>
+        <source>Слои</source>
+        <translation type="vanished">Файлы</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="117"/>
+        <source>Do you really want to quit the program?</source>
+        <translation>Вы действительно хотите выйти из программы?</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="117"/>
+        <source>No</source>
+        <translation>Нет</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="117"/>
+        <source>Yes</source>
+        <translation>Да</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="138"/>
@@ -941,6 +998,11 @@ Public License instead of this License.  But first, please read
         <location filename="../mainwindow.cpp" line="154"/>
         <source>GCode (*.tap)</source>
         <translation></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="164"/>
+        <source>No selected toolpath files.</source>
+        <translation>Нет выбранных УП.</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="200"/>
@@ -1000,7 +1062,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../mainwindow.cpp" line="236"/>
         <source>Recent...</source>
-        <translation type="unfinished">Недавние...</translation>
+        <translation>Недавние...</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="256"/>
@@ -1466,9 +1528,34 @@ Pass:</source>
         <translation>Закрыть</translation>
     </message>
     <message>
+        <location filename="../forms/pocketform.cpp" line="179"/>
+        <source>Working items from different files!</source>
+        <translation>Рабочие элементы из разных файлов!</translation>
+    </message>
+    <message>
         <location filename="../forms/pocketform.cpp" line="197"/>
         <source>No selected items for working...</source>
         <translation>Не выбраны элементы для расчёта...</translation>
+    </message>
+    <message>
+        <location filename="../forms/pocketform.cpp" line="197"/>
+        <source>Warning</source>
+        <translation>Внимание</translation>
+    </message>
+    <message>
+        <location filename="../forms/pocketform.cpp" line="229"/>
+        <source> - Infinity</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../forms/pocketform.cpp" line="234"/>
+        <source>Pocket Offset</source>
+        <translation></translation>
+    </message>
+    <message>
+        <location filename="../forms/pocketform.cpp" line="234"/>
+        <source>Pocket Raster</source>
+        <translation></translation>
     </message>
 </context>
 <context>
@@ -1577,9 +1664,50 @@ Depth:</source>
         <translation>Закрыть</translation>
     </message>
     <message>
+        <location filename="../forms/profileform.cpp" line="151"/>
+        <location filename="../forms/profileform.cpp" line="162"/>
+        <source>Working items from different files!</source>
+        <translation>Рабочие элементы из разных файлов!</translation>
+    </message>
+    <message>
         <location filename="../forms/profileform.cpp" line="179"/>
         <source>No selected items for working...</source>
         <translation>Не выбраны элементы для расчёта...</translation>
+    </message>
+    <message>
+        <location filename="../forms/profileform.cpp" line="179"/>
+        <source>Warning</source>
+        <translation>Внимание</translation>
+    </message>
+    <message>
+        <location filename="../forms/profileform.cpp" line="192"/>
+        <source>Profile On</source>
+        <translation>Контур (по)</translation>
+    </message>
+    <message>
+        <location filename="../forms/profileform.cpp" line="192"/>
+        <source>Profile Outside</source>
+        <translation>Контур (внеш)</translation>
+    </message>
+    <message>
+        <location filename="../forms/profileform.cpp" line="192"/>
+        <source>Profile Inside</source>
+        <translation>Контур (внутр)</translation>
+    </message>
+</context>
+<context>
+    <name>QObject</name>
+    <message>
+        <location filename="../gi/drillitem.cpp" line="105"/>
+        <location filename="../gi/drillitem.cpp" line="118"/>
+        <location filename="../gi/drillitem.cpp" line="122"/>
+        <source>Tool %1, Ø%2mm</source>
+        <translation>Инструмент%1, Ø%2 мм</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tool.h" line="56"/>
+        <source>No valid tool...!!!</source>
+        <translation>Не верные параметры инструмента ...!</translation>
     </message>
 </context>
 <context>
@@ -1642,6 +1770,11 @@ Depth:</source>
         <location filename="../tooldatabase/tooldatabase.ui" line="56"/>
         <source>Delete</source>
         <translation>&amp;Удалить</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooldatabase.cpp" line="44"/>
+        <source>Invalid tool</source>
+        <translation>Неверный инструмент</translation>
     </message>
 </context>
 <context>
@@ -1842,11 +1975,47 @@ Depth:</source>
     </message>
 </context>
 <context>
+    <name>ToolModel</name>
+    <message>
+        <location filename="../tooldatabase/toolmodel.cpp" line="153"/>
+        <source>Name|Note</source>
+        <translation>Название|Примечание</translation>
+    </message>
+</context>
+<context>
     <name>ToolPathUtil</name>
     <message>
         <location filename="../forms/toolpathutil.cpp" line="112"/>
         <source>The tool does not fit in the Working items!</source>
         <translation>Инструмент не влезает в выбранные полигоны!</translation>
+    </message>
+    <message>
+        <location filename="../forms/toolpathutil.cpp" line="112"/>
+        <source>Warning</source>
+        <translation>Внимание</translation>
+    </message>
+</context>
+<context>
+    <name>ToolTreeView</name>
+    <message>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="76"/>
+        <source>New Group</source>
+        <translation>Новая группа</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="101"/>
+        <source>New Tool </source>
+        <translation>Новый инструмент </translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="108"/>
+        <source>Warning</source>
+        <translation>Внимание</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooltreeview.cpp" line="108"/>
+        <source>Are you sure you want to delete the item and all content?</source>
+        <translation>Вы уверены, что хотите удалить элемент и весь контент?</translation>
     </message>
 </context>
 <context>
@@ -1898,6 +2067,11 @@ Depth:</source>
         <location filename="../filetree/treeview.cpp" line="192"/>
         <source>&amp;Delete All Toolpaths</source>
         <translation>&amp;Удалить все УП</translation>
+    </message>
+    <message>
+        <location filename="../filetree/treeview.cpp" line="193"/>
+        <source>Really?</source>
+        <translation>В самом деле?</translation>
     </message>
 </context>
 <context>
@@ -1965,9 +2139,25 @@ Depth:</source>
         <translation>Закрыть</translation>
     </message>
     <message>
+        <location filename="../forms/voronoiform.cpp" line="100"/>
+        <location filename="../forms/voronoiform.cpp" line="111"/>
+        <source>Working items from different files!</source>
+        <translation>Рабочие элементы из разных файлов!</translation>
+    </message>
+    <message>
         <location filename="../forms/voronoiform.cpp" line="128"/>
         <source>No selected items for working...</source>
         <translation>Не выбраны полигоны для работы...</translation>
+    </message>
+    <message>
+        <location filename="../forms/voronoiform.cpp" line="128"/>
+        <source>Warning</source>
+        <translation>Внимание</translation>
+    </message>
+    <message>
+        <location filename="../forms/voronoiform.cpp" line="140"/>
+        <source>Voronoi (</source>
+        <translation>Вороной (</translation>
     </message>
 </context>
 </TS>

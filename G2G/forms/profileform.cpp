@@ -148,7 +148,7 @@ void ProfileForm::create()
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", "Working items from different files!");
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
         }
@@ -159,7 +159,7 @@ void ProfileForm::create()
                 boardSide = gi->file()->side();
             }
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", "Working items from different files!");
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
         }
@@ -176,7 +176,7 @@ void ProfileForm::create()
     }
 
     if (wrPaths.isEmpty() && wPaths.isEmpty()) {
-        QMessageBox::warning(this, "Warning", tr("No selected items for working..."));
+        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
 
@@ -189,7 +189,7 @@ void ProfileForm::create()
 
 void ProfileForm::updateName()
 {
-    static const QStringList name = { "Profile On", "Profile Outside", "Profile Inside" };
+    static const QStringList name = { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") };
     ui->leName->setText(name[side] + " (" + tool.name + ")");
     updateBridge();
 }

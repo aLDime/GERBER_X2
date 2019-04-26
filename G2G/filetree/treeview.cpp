@@ -190,7 +190,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
 
     if (m_menuIndex.parent().row() == -1 && m_menuIndex.row() == NodeToolPath && static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount()) {
         a = menu.addAction(Icon(DeleteIcon), tr("&Delete All Toolpaths"), [=] {
-            if (QMessageBox::question(this, "", "Really?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            if (QMessageBox::question(this, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 m_model->removeRows(0, static_cast<AbstractNode*>(m_menuIndex.internalPointer())->childCount(), m_menuIndex);
         });
     }

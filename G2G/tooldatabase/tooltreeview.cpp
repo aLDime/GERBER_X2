@@ -73,7 +73,7 @@ void ToolTreeView::newGroup()
 
     QModelIndex child = m_model->index(0, 0, index);
 
-    m_model->setData(child, "New Group", Qt::EditRole);
+    m_model->setData(child, tr("New Group"), Qt::EditRole);
 
     selectionModel()->setCurrentIndex(m_model->index(0, 0, index), QItemSelectionModel::ClearAndSelect);
     updateActions();
@@ -98,14 +98,14 @@ void ToolTreeView::newTool()
     if (item) {
         item->setIsTool();
         item->tool().type = Tool::EndMill;
-        item->tool().name = "New Tool " + QString::number(item->toolId());
+        item->tool().name = tr("New Tool ") + QString::number(item->toolId());
     }
     updateActions();
 }
 
 void ToolTreeView::deleteItem()
 {
-    if (QMessageBox::question(this, "Warning", "Are you sure you want to delete the item and all content?",
+    if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"),
             QMessageBox::Yes, QMessageBox::No)
         == QMessageBox::No)
         return;

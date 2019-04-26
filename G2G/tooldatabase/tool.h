@@ -53,7 +53,7 @@ public:
     bool isValid();
     QIcon icon();
     QString errorStr();
-    void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, "No valid tool...!!!", errorStr()); }
+    void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
 };
 
 class ToolHolder {

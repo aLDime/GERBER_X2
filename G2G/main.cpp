@@ -37,7 +37,7 @@ int main(int argc, char* argv[])
     QIcon::setThemeName("Breeze");
 
     QTranslator translator;
-    translator.load(QString("g2g_") + QString("ru_RU"));
+    translator.load("g2g_ru_RU");
     app.installTranslator(&translator);
 
     MainWindow* mainWin = new MainWindow;
