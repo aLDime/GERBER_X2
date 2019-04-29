@@ -141,7 +141,6 @@ FORMS += \
     tooldatabase/tooleditdialog.ui \
     tooldatabase/tooleditform.ui \
     tooldatabase/tooldatabase.ui \
-    ../excellon/excellondialog.ui
 
 DISTFILES += \
     translations/g2g_en.ts \

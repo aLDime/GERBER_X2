@@ -114,7 +114,7 @@ void ExcellonDialog::on_pushButton_clicked()
             ++c;
         }
         if (c == 2) {
-            QPointF p(pair.second - pair.first);
+            QPointF p(pair.second - (pair.first - m_tmpFormat.offsetPos));
             if (QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
             ui->dsbxX->setValue(p.x());

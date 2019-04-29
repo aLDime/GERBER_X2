@@ -46,24 +46,45 @@ void File::setFormatForFile(const Format& /*value*/)
     //    }
 }
 
+template <typename T>
+void write(QFile& file, T t)
+{
+    file.write(reinterpret_cast<const char*>(&t), sizeof(T));
+}
+template <typename T>
+void read(QFile& file, T& t)
+{
+    file.read(reinterpret_cast<char*>(&t), sizeof(T));
+}
+
 void File::saveFormat()
 {
-    //    QFile file(m_fileName + ".fmt");
-    //    if (file.open(QFile::WriteOnly)) {
-    //        file.write(reinterpret_cast<const char*>(&m_format), sizeof(Format));
-    //    }
+    QFile file(m_fileName + ".fmt");
+    if (file.open(QFile::WriteOnly)) {
+        qDebug("saveFormat()");
+        write(file, m_format.zeroMode);
+        write(file, m_format.unitMode);
+        write(file, m_format.decimal);
+        write(file, m_format.integer);
+        write(file, m_format.offsetPos.x());
+        write(file, m_format.offsetPos.y());
+    }
 }
 
 void File::restoreFormat()
 {
-    //    QFile file(m_fileName + ".fmt");
-    //    if (file.exists() && file.open(QFile::ReadOnly)) {
-    //        QByteArray format(file.readAll());
-    //        if (format.size() == sizeof(Format)) {
-    //            m_format = *reinterpret_cast<Format*>(format.data());
-    //            m_format = this;
-    //        }
-    //    }
+    QFile file(m_fileName + ".fmt");
+    if (file.exists() && file.open(QFile::ReadOnly)) {
+        double x, y;
+        read(file, m_format.zeroMode);
+        read(file, m_format.unitMode);
+        read(file, m_format.decimal);
+        read(file, m_format.integer);
+        read(file, x);
+        read(file, y);
+        m_format.offsetPos = QPointF(x, y);
+        setFormat(m_format);
+    }
 }
 
 double File::tool(int t) const

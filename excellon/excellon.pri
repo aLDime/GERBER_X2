@@ -11,8 +11,8 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 
 INCLUDEPATH += $$PWD
 
-#FORMS += \
-#    $$PWD/excellondialog.ui
+FORMS += \
+    $$PWD/excellondialog.ui
 
 HEADERS += \
     $$PWD/excellon.h \

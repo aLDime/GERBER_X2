@@ -27,8 +27,8 @@ RawItem::RawItem(Path& path, Gerber::File* file)
 
 QRectF RawItem::boundingRect() const
 {
-    int k = 2.0 / GraphicsView::self->matrix().m11();
-    return m_rect + QMarginsF(k, k, k, k);
+    //int k = 2.0 / GraphicsView::self->matrix().m11();
+    return m_shape.boundingRect(); // m_rect + QMarginsF(k, k, k, k);
 }
 
 void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
@@ -48,7 +48,7 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
         pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
     }
     if (option->state & QStyle::State_MouseOver) {
-        pen.setWidthF(3.0 / GraphicsView::self->matrix().m11());
+        pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
         pen.setDashPattern({ 3.0, 3.0 });
@@ -63,7 +63,18 @@ int RawItem::type() const { return RawItemType; }
 
 Paths RawItem::paths() const { return { m_path }; }
 
-QPainterPath RawItem::shape() const { return m_shape; }
+QPainterPath RawItem::shape() const
+{
+    qDebug() << Q_FUNC_INFO;
+    m_shape = QPainterPath();
+    ClipperOffset offset;
+    Paths tmpPpath;
+    offset.AddPath(m_path, jtSquare, etOpenButt);
+    offset.Execute(tmpPpath, 6 * uScale / GraphicsView::self->matrix().m11());
+    for (const Path& path : tmpPpath)
+        m_shape.addPolygon(toQPolygon(path));
+    return m_shape;
+}
 
 const Gerber::File* RawItem::file() const { return m_file; }
 

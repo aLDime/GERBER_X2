@@ -32,7 +32,7 @@ public:
     virtual Paths paths() const = 0;
     //    void setItemGroup(ItemGroup* itemGroup);
     //    ItemGroup* parentItemGroup() const;
-//    QPointF center() const;
+    //    QPointF center() const;
 
     void setPenColor(QColor& penColor);
     void setBrushColor(QColor& brushColor);

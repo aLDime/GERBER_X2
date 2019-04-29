@@ -25,6 +25,7 @@ private:
     QPolygonF m_polygon;
     const Gerber::File* m_file;
     Path& m_path;
+    mutable QPainterPath m_shape;
 
     // QGraphicsItem interface
 protected:

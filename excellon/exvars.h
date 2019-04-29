@@ -131,6 +131,8 @@ M30
 
 class File;
 
+#pragma pack(push, 1)
+
 struct Format {
     Format(File* file = nullptr);
     ZeroMode zeroMode = LeadingZeros;
@@ -140,6 +142,8 @@ struct Format {
     QPointF offsetPos;
     File* /*const*/ file = nullptr;
 };
+
+#pragma pack(pop)
 
 struct State {
     double currentToolDiameter() const;
