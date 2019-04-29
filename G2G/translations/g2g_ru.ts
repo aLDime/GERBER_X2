@@ -855,6 +855,31 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
+    <name>DrillModel</name>
+    <message>
+        <location filename="../forms/drillmodel.cpp" line="60"/>
+        <location filename="../forms/drillmodel.cpp" line="132"/>
+        <location filename="../forms/drillmodel.cpp" line="135"/>
+        <source>Tool</source>
+        <translation>Инструмент</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillmodel.cpp" line="60"/>
+        <source>Slot</source>
+        <translation>Слот</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillmodel.cpp" line="83"/>
+        <source>Select Tool</source>
+        <translation>Выберите инструмент</translation>
+    </message>
+    <message>
+        <location filename="../forms/drillmodel.cpp" line="130"/>
+        <source>Aperture</source>
+        <translation>Апертура</translation>
+    </message>
+</context>
+<context>
     <name>ExcellonDialog</name>
     <message>
         <location filename="../../excellon/excellondialog.ui" line="14"/>
@@ -930,6 +955,26 @@ Public License instead of this License.  But first, please read
 <context>
     <name>FileModel</name>
     <message>
+        <location filename="../filetree/filemodel.cpp" line="16"/>
+        <source>Gerber Files</source>
+        <translation>Гербера</translation>
+    </message>
+    <message>
+        <location filename="../filetree/filemodel.cpp" line="17"/>
+        <source>Excellon</source>
+        <translation>Сверловки (Excellon)</translation>
+    </message>
+    <message>
+        <location filename="../filetree/filemodel.cpp" line="18"/>
+        <source>Tool Paths</source>
+        <translation>УП</translation>
+    </message>
+    <message>
+        <location filename="../filetree/filemodel.cpp" line="19"/>
+        <source>Special</source>
+        <translation>Графика</translation>
+    </message>
+    <message>
         <location filename="../filetree/filemodel.cpp" line="180"/>
         <source>Name</source>
         <translation>Название</translation>
@@ -946,6 +991,19 @@ Public License instead of this License.  But first, please read
         <location filename="../filetree/gerbernode.cpp" line="104"/>
         <source>Top|Bottom</source>
         <translation>Верх|Низ</translation>
+    </message>
+</context>
+<context>
+    <name>LayerDelegate</name>
+    <message>
+        <location filename="../filetree/layerdelegate.cpp" line="13"/>
+        <source>Top</source>
+        <translation>Верх</translation>
+    </message>
+    <message>
+        <location filename="../filetree/layerdelegate.cpp" line="13"/>
+        <source>Bottom</source>
+        <translation>Низ</translation>
     </message>
 </context>
 <context>
@@ -1063,6 +1121,11 @@ Public License instead of this License.  But first, please read
         <location filename="../mainwindow.cpp" line="236"/>
         <source>Recent...</source>
         <translation>Недавние...</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="245"/>
+        <source>Clear Recent Files</source>
+        <translation>Очистить историю</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="256"/>
@@ -1263,6 +1326,11 @@ Public License instead of this License.  But first, please read
         <location filename="../mainwindow.cpp" line="405"/>
         <source>Ready</source>
         <translation>Готово</translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="424"/>
+        <source>Set Depth</source>
+        <translation>Установить глубину</translation>
     </message>
     <message>
         <location filename="../mainwindow.cpp" line="481"/>
@@ -1549,6 +1617,7 @@ Pass:</source>
         <translation>Внимание</translation>
     </message>
     <message>
+        <location filename="../forms/pocketform.cpp" line="73"/>
         <location filename="../forms/pocketform.cpp" line="229"/>
         <source> - Infinity</source>
         <translation></translation>
@@ -1715,6 +1784,28 @@ Depth:</source>
         <source>No valid tool...!!!</source>
         <translation>Не верные параметры инструмента ...!</translation>
     </message>
+    <message>
+        <location filename="../point.cpp" line="22"/>
+        <source>There is no dedicated data to define boundaries.
+Old data will be used.</source>
+        <translation>Нет выделенных элементов для определения границ.
+Старая граница будет использована.</translation>
+    </message>
+    <message>
+        <location filename="../point.cpp" line="39"/>
+        <source>G-Code Home Point</source>
+        <translation>&quot;Дом&quot; УП</translation>
+    </message>
+    <message>
+        <location filename="../point.cpp" line="43"/>
+        <source>G-Code Zero Point</source>
+        <translation>Ноль УП</translation>
+    </message>
+    <message>
+        <location filename="../point.cpp" line="170"/>
+        <source>Shtift </source>
+        <translation>Штифт </translation>
+    </message>
 </context>
 <context>
     <name>SettingsDialog</name>
@@ -1724,28 +1815,27 @@ Depth:</source>
         <translation>Настройки приложения</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="34"/>
+        <location filename="../settingsdialog.ui" line="44"/>
         <source>Viewer</source>
         <translation>Просмотрщик</translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="40"/>
+        <location filename="../settingsdialog.ui" line="50"/>
         <source>Просмотрщик</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="46"/>
+        <location filename="../settingsdialog.ui" line="56"/>
         <source>Open GL</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="53"/>
+        <location filename="../settingsdialog.ui" line="63"/>
         <source>Сглаживание</source>
         <translation></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="77"/>
-        <location filename="../settingsdialog.ui" line="89"/>
+        <location filename="../settingsdialog.ui" line="76"/>
         <source>Colors</source>
         <translation>Цвета</translation>
     </message>
@@ -1925,44 +2015,55 @@ Depth:</source>
     <message>
         <location filename="../tooldatabase/tooleditform.ui" line="379"/>
         <source>Feed Speeds (Set checkbox for automatic calculation)</source>
-        <translation>Скорости подачи (установите флажок для автоматического расчета)</translation>
+        <translation>Скорости и подачи</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="400"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="403"/>
         <source>Spindle Speed</source>
         <translation>Скорость шпинделя</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="407"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="410"/>
         <source> r.p.m.</source>
         <translation> об/мин</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="423"/>
-        <location filename="../tooldatabase/tooleditform.ui" line="449"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="426"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="455"/>
         <source>If checked then automatic calculate!</source>
         <translation>Если выбрано то авторасчёт!</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="426"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="432"/>
         <source>Feed Rate</source>
         <translation>Скорость подачи</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="433"/>
-        <location filename="../tooldatabase/tooleditform.ui" line="459"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="439"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="468"/>
         <source> mm/sec</source>
         <translation> мм/с</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="452"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="461"/>
         <source>Plunge Rate</source>
         <translation>Погружение</translation>
     </message>
     <message>
-        <location filename="../tooldatabase/tooleditform.ui" line="478"/>
+        <location filename="../tooldatabase/tooleditform.ui" line="487"/>
         <source>Apply</source>
         <translation>Применить</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooleditform.cpp" line="147"/>
+        <source>Pass</source>
+        <translation>Проход за раз</translation>
+    </message>
+    <message>
+        <location filename="../tooldatabase/tooleditform.cpp" line="153"/>
+        <location filename="../tooldatabase/tooleditform.cpp" line="158"/>
+        <source>Depth</source>
+        <translation>Глубина</translation>
     </message>
     <message>
         <location filename="../tooldatabase/tooleditform.cpp" line="347"/>

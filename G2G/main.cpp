@@ -1,5 +1,6 @@
 #include <QApplication>
 #include <QCommandLineParser>
+#include <QDebug>
 #include <QLocale>
 #include <QTranslator>
 
@@ -36,9 +37,26 @@ int main(int argc, char* argv[])
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
 
-    QTranslator translator;
-    translator.load("g2g_ru_RU");
-    app.installTranslator(&translator);
+    QString loc(QLocale().name().left(2));
+    qDebug() << "locale:" << loc;
+    QString trFolder(qApp->applicationDirPath() + "/translations/");
+    QString trFileName(trFolder + qApp->applicationDisplayName() + "_" + loc + ".qm");
+    if (QFile::exists(trFileName)) {
+        QTranslator* translator = new QTranslator();
+        if (translator->load(trFileName))
+            app.installTranslator(translator);
+        else
+            delete translator;
+    }
+    QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
+    qDebug() << baseTrFileName;
+    if (QFile::exists(trFileName)) {
+        QTranslator* baseTranslator = new QTranslator();
+        if (baseTranslator->load(baseTrFileName))
+            app.installTranslator(baseTranslator);
+        else
+            delete baseTranslator;
+    }
 
     MainWindow* mainWin = new MainWindow;
     mainWin->setIconSize({ 24, 24 });

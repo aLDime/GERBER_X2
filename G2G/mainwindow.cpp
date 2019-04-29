@@ -242,7 +242,7 @@ void MainWindow::createActions()
         recentFileActs[i]->setVisible(false);
     }
     recentMenu->addSeparator();
-    recentFileActs[MaxRecentFiles] = recentMenu->addAction("Clear Recent Files", [=] {
+    recentFileActs[MaxRecentFiles] = recentMenu->addAction(tr("Clear Recent Files"), [=] {
         QSettings settings;
         writeRecentFiles({}, settings);
         updateRecentFileActions();
@@ -421,7 +421,7 @@ void MainWindow::createShtifts()
         }
 
         QSettings settings;
-        double depth = QInputDialog::getDouble(this, "", "Set Depth", settings.value("Shtift/depth").toDouble(), 0, 100, 2);
+        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Shtift/depth").toDouble(), 0, 100, 2);
         if (depth == 0.0)
             return;
         settings.setValue("Shtift/depth", depth);
@@ -535,7 +535,7 @@ void MainWindow::openFile(const QString& fileName)
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text)) {
         QMessageBox::warning(this,
-            tr(""),
+            "",
             tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
         return;
     }
@@ -543,10 +543,10 @@ void MainWindow::openFile(const QString& fileName)
     lastPath = fi.absolutePath();
     Excellon::Parser dp;
     if (dp.isDrillFile(fileName)) {
-        Excellon::File* dFile = dp.parseFile(fileName);
-        if (dFile) {
-            FileModel::self->addFile(dFile);
-            prependToRecentFiles(dFile->fileName());
+        Excellon::File* exFile = dp.parseFile(fileName);
+        if (exFile) {
+            FileModel::self->addFile(exFile);
+            prependToRecentFiles(exFile->fileName());
             QTimer::singleShot(100, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }
     } else

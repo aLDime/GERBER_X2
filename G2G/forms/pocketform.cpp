@@ -70,7 +70,7 @@ PocketForm::PocketForm(QWidget* parent)
     ui->pbClose->setIcon(Icon(PuttonCloseIcon));
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
 
-    ui->sbxSteps->setSuffix(" - Infinity");
+    ui->sbxSteps->setSuffix(tr(" - Infinity"));
 
     rb_clicked();
     connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);

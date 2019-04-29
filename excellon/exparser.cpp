@@ -56,10 +56,12 @@ File* Parser::parseFile(const QString& fileName)
             qWarning() << "exeption Q:" << errStr;
             //emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
             delete m_file;
+            return nullptr;
         } catch (...) {
             qWarning() << "exeption S:" << errno;
             //emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
             delete m_file;
+            return nullptr;
         }
     }
     if (m_file->isEmpty()) {

@@ -54,7 +54,7 @@ TreeView::TreeView(QWidget* parent)
 
     header()->setSectionResizeMode(QHeaderView::Stretch);
     header()->setSectionResizeMode(1, QHeaderView::Fixed);
-    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, "Bottom").width() * 1.5);
+    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, "Bottom").width() * 1.7);
     header()->setStretchLastSection(false);
 
     setItemDelegateForColumn(1, new LayerDelegate(this));

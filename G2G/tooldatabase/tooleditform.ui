@@ -380,7 +380,10 @@
      </property>
      <layout class="QFormLayout" name="formLayout_4">
       <property name="labelAlignment">
-       <set>Qt::AlignCenter</set>
+       <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      </property>
+      <property name="formAlignment">
+       <set>Qt::AlignLeading|Qt::AlignLeft|Qt::AlignTop</set>
       </property>
       <property name="leftMargin">
        <number>6</number>
@@ -422,6 +425,9 @@
         <property name="toolTip">
          <string>If checked then automatic calculate!</string>
         </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
+        </property>
         <property name="text">
          <string>Feed Rate</string>
         </property>
@@ -447,6 +453,9 @@
        <widget class="QCheckBox" name="chbxPlungeRate">
         <property name="toolTip">
          <string>If checked then automatic calculate!</string>
+        </property>
+        <property name="layoutDirection">
+         <enum>Qt::RightToLeft</enum>
         </property>
         <property name="text">
          <string>Plunge Rate</string>

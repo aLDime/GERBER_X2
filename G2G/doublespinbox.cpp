@@ -32,24 +32,24 @@ void DoubleSpinBox::setMinimum(double min)
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event)
 {
-    if (event->key() == Qt::Key_Backspace) {
-        QString text(lineEdit()->text());
-        int start = lineEdit()->selectionStart();
-        text.remove(--start, 1);
-        lineEdit()->setText(text);
-        lineEdit()->setSelection(start, 100);
-        return;
-    }
+    //    if (event->key() == Qt::Key_Backspace) {
+    //        QString text(lineEdit()->text());
+    //        int start = lineEdit()->selectionStart();
+    //        text.remove(--start, 1);
+    //        lineEdit()->setText(text);
+    //        lineEdit()->setSelection(start, 100);
+    //        return;
+    //    }
     if (event->text() == '.')
         QDoubleSpinBox::keyPressEvent(new QKeyEvent(event->type(), Qt::Key_Comma, event->modifiers(), ","));
     else
         QDoubleSpinBox::keyPressEvent(event);
-    lineEdit()->setSelection(lineEdit()->cursorPosition(), 100);
+    //    lineEdit()->setSelection(lineEdit()->cursorPosition(), 100);
 }
 
 bool DoubleSpinBox::eventFilter(QObject* watched, QEvent* event)
 {
     if (event->type() == QEvent::MouseButtonRelease)
-        lineEdit()->selectAll();
+        lineEdit()->setSelection(0, lineEdit()->text().length() - suffix().length()); //->selectAll();
     return QDoubleSpinBox::eventFilter(watched, event);
 }

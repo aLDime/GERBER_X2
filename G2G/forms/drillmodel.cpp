@@ -57,17 +57,31 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
             if (m_data[row].isSlot)
-                return QString(m_data[row].name[0]).replace("Tool", "Slot");
+                return QString(m_data[row].name[0]).replace(tr("Tool"), tr("Slot"));
             else
                 return m_data[row].name[0];
         case Qt::DecorationRole: {
-            if (m_data[index.row()].toolId > -1)
+            if (m_data[index.row()].toolId > -1 && m_data[row].isSlot) {
+                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                for (int x = 0; x < 24; ++x)
+                    for (int y = 0; y < 24; ++y)
+                        image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
+                return QIcon(QPixmap::fromImage(image));
+            } else if (m_data[index.row()].toolId > -1) {
                 return m_data[row].icon[0];
-            QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
-            for (int x = 0; x < 24; ++x)
-                for (int y = 0; y < 24; ++y)
-                    image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
-            return QIcon(QPixmap::fromImage(image));
+            } else if (m_data[row].isSlot) {
+                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                for (int x = 0; x < 24; ++x)
+                    for (int y = 0; y < 24; ++y)
+                        image.setPixelColor(x, y, QColor(255, 100, 100, image.pixelColor(x, y).alpha()));
+                return QIcon(QPixmap::fromImage(image));
+            } else {
+                QImage image(m_data[row].icon[0].pixmap(24, 24).toImage());
+                for (int x = 0; x < 24; ++x)
+                    for (int y = 0; y < 24; ++y)
+                        image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
+                return QIcon(QPixmap::fromImage(image));
+            }
         }
         case Qt::UserRole:
             return m_data[row].apToolId;
@@ -80,7 +94,7 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         if (m_data[row].toolId == -1)
             switch (role) {
             case Qt::DisplayRole:
-                return "Select Tool";
+                return tr("Select Tool");
             case Qt::TextAlignmentRole:
                 return Qt::AlignCenter;
             case Qt::UserRole:
@@ -127,12 +141,12 @@ QVariant DrillModel::headerData(int section, Qt::Orientation orientation, int ro
             case 0:
                 switch (m_type) {
                 case tAperture:
-                    return "Aperture";
+                    return tr("Aperture");
                 case tTool:
-                    return "Tool";
+                    return tr("Tool");
                 }
             case 1:
-                return "Tool";
+                return tr("Tool");
             }
 
         } else {

@@ -13,10 +13,10 @@ FileModel::FileModel(QObject* parent)
     , rootItem(new FolderNode("rootItem"))
 {
     self = this;
-    rootItem->append(new FolderNode("Gerber Files"));
-    rootItem->append(new FolderNode("Excellon"));
-    rootItem->append(new FolderNode("Tool Paths"));
-    rootItem->append(new FolderNode("Special"));
+    rootItem->append(new FolderNode(tr("Gerber Files")));
+    rootItem->append(new FolderNode(tr("Excellon")));
+    rootItem->append(new FolderNode(tr("Tool Paths")));
+    rootItem->append(new FolderNode(tr("Special")));
 }
 
 //FileModel::FileModel(Gerber::File* file)

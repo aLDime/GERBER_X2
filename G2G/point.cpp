@@ -19,7 +19,7 @@ bool updateRect()
 {
     QRectF rect(FileHolder::getSelectedBoundingRect());
     if (rect.isEmpty()) {
-        if (QMessageBox::question(nullptr, "", "There is no dedicated data to define boundaries.\nOld data will be used.", QMessageBox::No, QMessageBox::Yes)
+        if (QMessageBox::question(nullptr, "", QObject::tr("There is no dedicated data to define boundaries.\nOld data will be used."), QMessageBox::No, QMessageBox::Yes)
             == QMessageBox::No)
             return false;
         return true;
@@ -36,11 +36,11 @@ Point::Point(int type)
     if (m_type == Home) {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
-        setToolTip("G-Code Home Point");
+        setToolTip(QObject::tr("G-Code Home Point"));
     } else {
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
         m_path.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
-        setToolTip("G-Code Zero Point");
+        setToolTip(QObject::tr("G-Code Zero Point"));
     }
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
@@ -167,7 +167,7 @@ Shtift::Shtift()
     m_shape.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
     m_rect = m_path.boundingRect();
 
-    setToolTip("Штифт " + QString::number(m_shtifts.size() + 1));
+    setToolTip(QObject::tr("Shtift ") + QString::number(m_shtifts.size() + 1));
     setZValue(std::numeric_limits<qreal>::max() - m_shtifts.size());
 
     QSettings settings;
