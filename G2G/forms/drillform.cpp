@@ -164,6 +164,7 @@ DrillForm::DrillForm(QWidget* parent)
 
     updateFiles();
     self = this;
+    parent->setWindowTitle(ui->label->text());
 }
 
 DrillForm::~DrillForm()

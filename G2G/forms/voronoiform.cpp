@@ -32,6 +32,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
     ui->pbClose->setIcon(Icon(PuttonCloseIcon));
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    parent->setWindowTitle(ui->label->text());
 }
 
 VoronoiForm::~VoronoiForm()

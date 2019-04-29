@@ -139,30 +139,53 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
 
         if (steps) {
             groupedPaths(CopperPaths);
-            if (m_side == Inner)
+            if (m_side == Inner) {
                 m_dOffset *= -1;
-            for (Paths paths : m_groupedPaths) {
+                for (Paths paths : m_groupedPaths) {
+                    ClipperOffset offset(uScale);
+                    offset.AddPaths(paths, jtRound, etClosedPolygon);
+                    offset.Execute(paths, m_dOffset);
+                    fillPaths.append(paths);
+
+                    Paths tmpPaths;
+                    int counter = steps;
+                    if (counter > 1) {
+                        do {
+                            if (counter == 1)
+                                fillPaths.append(paths);
+                            tmpPaths.append(paths);
+                            offset.Clear();
+                            offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                            offset.Execute(paths, m_dOffset);
+                        } while (paths.size() && --counter);
+                    } else {
+                        tmpPaths.append(paths);
+                        fillPaths.append(paths);
+                    }
+                    m_returnPaths.append(tmpPaths);
+                }
+            } else {
                 ClipperOffset offset(uScale);
-                offset.AddPaths(paths, jtRound, etClosedPolygon);
+                for (Paths paths : m_groupedPaths) {
+                    offset.AddPaths(paths, jtRound, etClosedPolygon);
+                }
+                Paths paths;
                 offset.Execute(paths, m_dOffset);
                 fillPaths.append(paths);
-
-                Paths tmpPaths;
                 int counter = steps;
                 if (counter > 1) {
                     do {
                         if (counter == 1)
                             fillPaths.append(paths);
-                        tmpPaths.append(paths);
+                        m_returnPaths.append(paths);
                         offset.Clear();
                         offset.AddPaths(paths, jtMiter, etClosedPolygon);
                         offset.Execute(paths, m_dOffset);
                     } while (paths.size() && --counter);
                 } else {
-                    tmpPaths.append(paths);
+                    m_returnPaths.append(paths);
                     fillPaths.append(paths);
                 }
-                m_returnPaths.append(tmpPaths);
             }
         } else {
             switch (m_side) {

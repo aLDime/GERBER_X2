@@ -10,6 +10,8 @@ enum {
 };
 
 class DrillModel : public QAbstractTableModel {
+    Q_OBJECT
+
     typedef struct Row {
         Row(const QString& name, const QIcon& icon, int id)
             : name{ name, "" }

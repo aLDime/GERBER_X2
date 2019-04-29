@@ -70,6 +70,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     connect(ui->rbInside, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbOn, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
+    parent->setWindowTitle(ui->label->text());
 }
 
 ProfileForm::~ProfileForm()

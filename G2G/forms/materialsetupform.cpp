@@ -104,6 +104,7 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
             QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
         }
     });
+    prnt->setWindowTitle(ui->label->text());
     self = this;
 }
 

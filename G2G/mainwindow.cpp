@@ -172,7 +172,7 @@ void MainWindow::closeFiles()
         FileModel::self->closeAllFiles();
         return;
     }
-    if (!FileHolder::size() || QMessageBox::question(this, "", "Do you really want to close all files?", "No", "Yes") == 1) {
+    if (!FileHolder::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
         dockWidget->close();
         FileModel::self->closeAllFiles();
     }
@@ -322,6 +322,7 @@ void MainWindow::createActions()
     toolpathToolBar = addToolBar(tr("Toolpath"));
     toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
+
     //     toolpathToolBar->setMovable(false);
     dockWidget = new DockWidget(this);
     dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
@@ -338,19 +339,19 @@ void MainWindow::createActions()
     //    });
 
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Profile"), [=] {
-        createDockWidget(new ProfileForm(), Profile);
+        createDockWidget(new ProfileForm(dockWidget), Profile);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] {
-        createDockWidget(new PocketForm(), Pocket);
+        createDockWidget(new PocketForm(dockWidget), Pocket);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
-        createDockWidget(new VoronoiForm(), Voronoi);
+        createDockWidget(new VoronoiForm(dockWidget), Voronoi);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
-        createDockWidget(new DrillForm(), Drilling);
+        createDockWidget(new DrillForm(dockWidget), Drilling);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material "), [=] {
-        createDockWidget(new MaterialSetup(), Material);
+        createDockWidget(new MaterialSetup(dockWidget), Material);
     }));
 
     toolpathToolBar->addSeparator();
@@ -672,8 +673,21 @@ void MainWindow::createDockWidget(QWidget* dwContent, int type)
 
     if (dockWidget->widget())
         delete dockWidget->widget();
-
     dockWidget->setWidget(dwContent);
-    dockWidget->setWindowTitle(tr("Create Toolpath"));
+    //    dockWidget->setWindowTitle(tr("Create Toolpath"));
     dockWidget->show();
+}
+
+void MainWindow::contextMenuEvent(QContextMenuEvent* event)
+{
+    QMainWindow::contextMenuEvent(event);
+}
+
+QMenu* MainWindow::createPopupMenu()
+{
+    QMenu* menu = QMainWindow::createPopupMenu();
+    menu->removeAction(dockWidget->toggleViewAction());
+    menu->removeAction(toolpathToolBar->toggleViewAction());
+    menu->removeAction(treeDockWidget->toggleViewAction());
+    return menu;
 }

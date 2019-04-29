@@ -94,6 +94,14 @@ private:
     QToolBar* toolpathToolBar;
     QToolBar* zoomToolBar;
     QVector<QAction*> toolpathActionList;
+
+    // QWidget interface
+protected:
+    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+
+    // QMainWindow interface
+public:
+    virtual QMenu *createPopupMenu() override;
 };
 
 class DockWidget : public QDockWidget {

@@ -79,6 +79,7 @@ PocketForm::PocketForm(QWidget* parent)
     connect(ui->rbOffset, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbOutside, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbRaster, &QRadioButton::clicked, rb_clicked);
+    parent->setWindowTitle(ui->label->text());
 }
 
 PocketForm::~PocketForm()
