@@ -111,7 +111,6 @@ ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent, SideOfM
 ToolPathCreator::~ToolPathCreator()
 {
     self = nullptr;
-    qDebug("ToolPathCreator::~ToolPathCreator()");
 }
 ////////////////////////////////////////////////////////////////
 /// \brief ToolPathCreator::createPocket
@@ -138,31 +137,17 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
 
         Paths fillPaths;
 
-        //        QElapsedTimer t;
-        //        t.start();
-
-        //    if (ex) {
-        switch (m_side) {
-        case Outer:
-            groupedPaths(CutoffPaths, m_toolDiameter + 5);
-            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
-                m_groupedPaths.removeFirst();
-            break;
-        case Inner:
+        if (steps) {
             groupedPaths(CopperPaths);
-            break;
-        }
+            if (m_side == Inner)
+                m_dOffset *= -1;
+            for (Paths paths : m_groupedPaths) {
+                ClipperOffset offset(uScale);
+                offset.AddPaths(paths, jtRound, etClosedPolygon);
+                offset.Execute(paths, m_dOffset);
+                fillPaths.append(paths);
 
-        //        qDebug() << "groupedPaths" << t.elapsed();
-        //        t.start();
-
-        for (Paths paths : m_groupedPaths) {
-            Paths tmpPaths;
-            ClipperOffset offset(uScale, uScale / 1000);
-            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
-            offset.Execute(paths, -m_dOffset);
-            fillPaths.append(paths);
-            if (steps) {
+                Paths tmpPaths;
                 int counter = steps;
                 if (counter > 1) {
                     do {
@@ -171,25 +156,41 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
                         tmpPaths.append(paths);
                         offset.Clear();
                         offset.AddPaths(paths, jtMiter, etClosedPolygon);
-                        offset.Execute(paths, -m_stepOver);
+                        offset.Execute(paths, m_dOffset);
                     } while (paths.size() && --counter);
                 } else {
                     tmpPaths.append(paths);
                     fillPaths.append(paths);
                 }
-            } else {
+                m_returnPaths.append(tmpPaths);
+            }
+        } else {
+            switch (m_side) {
+            case Outer:
+                groupedPaths(CutoffPaths, m_toolDiameter + 5);
+                if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+                    m_groupedPaths.removeFirst();
+                break;
+            case Inner:
+                groupedPaths(CopperPaths);
+                break;
+            }
+            for (Paths paths : m_groupedPaths) {
+                ClipperOffset offset(uScale);
+                offset.AddPaths(paths, jtRound, etClosedPolygon);
+                offset.Execute(paths, -m_dOffset);
+                fillPaths.append(paths);
+
+                Paths tmpPaths;
                 do {
                     tmpPaths.append(paths);
                     offset.Clear();
                     offset.AddPaths(paths, jtMiter, etClosedPolygon);
                     offset.Execute(paths, -m_stepOver);
                 } while (paths.size());
+                m_returnPaths.append(tmpPaths);
             }
-            m_returnPaths.append(tmpPaths);
         }
-
-        //        qDebug() << "offset" << t.elapsed();
-        //        t.start();
 
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
@@ -241,6 +242,168 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
     } catch (...) {
         qDebug() << "catch";
     }
+}
+
+void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
+{
+    QPair<GCodeFile*, GCodeFile*> files{ nullptr, nullptr };
+    //        if (m_side == On)
+    //            return files;
+
+    //        Paths fillPaths;
+
+    //        {
+    //            m_toolDiameter = tool.first.getDiameter(depth) * uScale;
+    //            m_dOffset = m_toolDiameter / 2;
+    //            m_stepOver = tool.first.stepover * uScale;
+
+    //            switch (m_side) {
+    //            case Outer:
+    //                groupedPaths(CutoffPaths, m_toolDiameter + 5);
+    //                if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+    //                    m_groupedPaths.removeFirst();
+    //                break;
+    //            case Inner:
+    //                groupedPaths(CopperPaths);
+    //                break;
+    //            }
+
+    //            for (Paths paths : m_groupedPaths) {
+    //                Paths tmpPaths;
+    //                ClipperOffset offset(uScale, uScale / 1000);
+    //                offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //                offset.Execute(paths, -m_dOffset);
+    //                fillPaths.append(paths);
+
+    //                do {
+    //                    tmpPaths.append(paths);
+    //                    offset.Clear();
+    //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+    //                    offset.Execute(paths, -m_stepOver);
+    //                } while (paths.size());
+
+    //                m_returnPaths.append(tmpPaths);
+    //            }
+
+    //            if (m_returnPaths.size() == 0)
+    //                return files;
+
+    //            Clipper clipper;
+    //            clipper.AddPaths(m_returnPaths, ptSubject, true);
+    //            IntRect r(clipper.GetBounds());
+    //            int k = tool.first.getDiameter(depth) * uScale;
+    //            Path outer = {
+    //                IntPoint(r.left - k, r.bottom + k),
+    //                IntPoint(r.right + k, r.bottom + k),
+    //                IntPoint(r.right + k, r.top - k),
+    //                IntPoint(r.left - k, r.top - k)
+    //            };
+    //            PolyTree polyTree;
+    //            clipper.AddPath(outer, ptSubject, true);
+    //            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+    //            m_returnPaths.clear();
+    //            grouping2(polyTree.GetFirst(), &m_returnPaths);
+    //            ReversePaths(m_returnPaths);
+    //            sortByStratDistance(m_returnPaths);
+    //            // files.first = new GCodeFile(m_returnPaths, tool.first, depth, Pocket, fillPaths);
+    //            m_returnPaths.clear();
+    //        }
+    //        {
+    //            m_toolDiameter = tool.second.getDiameter(depth) * uScale;
+    //            {
+    //                ClipperOffset offset(uScale, uScale / 1000);
+    //                offset.AddPaths(fillPaths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //                offset.Execute(fillPaths, m_dOffset - m_toolDiameter / 2);
+    //                m_dOffset = m_toolDiameter / 2;
+    //                //offset.Clear();
+    //                //offset.AddPaths(m_workingPaths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //                //offset.Execute(m_workingPaths, m_dOffset);
+    //            }
+
+    //            m_stepOver = tool.second.stepover * uScale;
+
+    //            {
+    //                Clipper clipper;
+    //                clipper.AddPaths(m_workingPaths, ptSubject, true);
+    //                ReversePaths(fillPaths);
+    //                clipper.AddPaths(fillPaths, ptClip, true);
+    //                clipper.Execute(ctXor, m_workingPaths, pftNegative);
+    //            }
+    //            //        groupedPaths(CopperPaths);
+    //            m_workingPaths.removeFirst();
+    //            //        if (m_workingPaths.size())
+    //            //            files.second = new GCodeFile(m_workingPaths, tool.second, depth, Pocket, {});
+
+    //            //        ReversePaths(fillPaths);
+    //            //        m_workingPaths.append(fillPaths);
+    //            //        fillPaths.clear();
+    //            //        switch (m_side) {
+    //            //        case Outer:
+    //            //            groupedPaths(CopperPaths);
+    //            //            break;
+    //            //        case Inner:
+    //            //            groupedPaths(CutoffPaths, m_toolDiameter + 5);
+    //            //            if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
+    //            //                m_groupedPaths.removeFirst();
+    //            //            break;
+    //            //        }
+
+    //            {
+    //                Paths paths(m_workingPaths);
+    //                Paths tmpPaths(m_workingPaths);
+    //                ClipperOffset offset(uScale, uScale / 1000);
+    //                offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //                offset.Execute(paths, m_dOffset);
+    //                fillPaths.append(paths);
+    //                int k1 = 100;
+    //                do {
+    //                    tmpPaths.append(paths);
+    //                    offset.Clear();
+    //                    offset.AddPaths(paths, jtMiter, etClosedPolygon);
+    //                    offset.Execute(paths, -m_stepOver);
+    //                } while (paths.size() && --k1);
+    //                m_returnPaths.append(tmpPaths);
+    //            }
+
+    //            //        groupedPaths(CopperPaths);
+    //            //        for (Paths paths : m_groupedPaths) {
+    //            //            Paths tmpPaths;
+    //            //            ClipperOffset offset(uScale, uScale / 1000);
+    //            //            offset.AddPaths(paths, /*jtMiter*/ jtRound, etClosedPolygon);
+    //            //            offset.Execute(paths, -m_dOffset);
+    //            //            fillPaths.append(paths);
+    //            //            int k = 100;
+    //            //            do {
+    //            //                tmpPaths.append(paths);
+    //            //                offset.Clear();
+    //            //                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+    //            //                offset.Execute(paths, -m_stepOver);
+    //            //            } while (paths.size() && --k);
+    //            //            m_returnPaths.append(tmpPaths);
+    //            //        }
+
+    //            if (m_returnPaths.size() == 0)
+    //                return files;
+
+    //            Clipper clipper;
+    //            clipper.AddPaths(m_returnPaths, ptSubject, true);
+    //            IntRect r(clipper.GetBounds());
+    //            int k = tool.second.getDiameter(depth) * uScale;
+    //            Path outer = {
+    //                IntPoint(r.left - k, r.bottom + k),
+    //                IntPoint(r.right + k, r.bottom + k),
+    //                IntPoint(r.right + k, r.top - k),
+    //                IntPoint(r.left - k, r.top - k)
+    //            };
+    //            PolyTree polyTree;
+    //            clipper.AddPath(outer, ptSubject, true);
+    //            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+    //            m_returnPaths.clear();
+    //            grouping2(polyTree.GetFirst(), &m_returnPaths);
+    //            ReversePaths(m_returnPaths);
+    //            sortByStratDistance(m_returnPaths);
+    //            files.second = new GCodeFile(m_returnPaths, tool.second, depth, Pocket, {} /*fillPaths*/);
+    //        }
 }
 
 ////////////////////////////////////////////////////////////////
@@ -524,67 +687,51 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             //            qDebug() << "remove" << (size - m_returnPaths.size());
             //            qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
         } else {
-
             QVector<jcv_point> points;
-            points.reserve(1000000);
+            points.reserve(100000);
+            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+            groupedPaths(CopperPaths);
             int id = 0;
 
-            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+            t.start();
 
-            groupedPaths(CopperPaths);
+            auto condei = [&](IntPoint tmp, IntPoint point) {
+                QLineF line(toQPointF(tmp), toQPointF(point));
+                if (line.length() > k) {
+                    for (int i = 1, total = line.length() / k; i < total; ++i) {
+                        line.setLength(i * k);
+                        IntPoint point(toIntPoint(line.p2()));
+                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                    }
+                }
+            };
+
             for (const Paths& paths : m_groupedPaths) {
                 for (const Path& path : paths) {
                     IntPoint tmp(path.first());
                     for (const IntPoint& point : path) {
-                        QLineF line(toQPointF(tmp), toQPointF(point));
-                        if (line.length() > k) {
-                            for (int i = 1, total = line.length() / k; i < total; ++i) {
-                                line.setLength(i * k);
-                                IntPoint point(toIntPoint(line.p2()));
-                                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                            }
-                        }
+                        condei(tmp, point);
                         points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
                         tmp = point;
                     }
-                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
-                    if (line.length() > k) {
-                        for (int i = 1, total = line.length() / k; i < total; ++i) {
-                            line.setLength(i * k);
-                            IntPoint point(toIntPoint(line.p2()));
-                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                        }
-                    }
+                    condei(tmp, path.first());
                 }
                 ++id;
             }
 
-            if (!m_workingRawPaths.isEmpty()) {
-                for (const Path& path : m_workingRawPaths) {
-                    IntPoint tmp(path.first());
-                    for (const IntPoint& point : path) {
-                        QLineF line(toQPointF(tmp), toQPointF(point));
-                        if (line.length() > k) {
-                            for (int i = 1, total = line.length() / k; i < total; ++i) {
-                                line.setLength(i * k);
-                                IntPoint point(toIntPoint(line.p2()));
-                                points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                            }
-                        }
-                        points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                        tmp = point;
-                    }
-                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
-                    if (line.length() > k) {
-                        for (int i = 1, total = line.length() / k; i < total; ++i) {
-                            line.setLength(i * k);
-                            IntPoint point(toIntPoint(line.p2()));
-                            points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
-                        }
-                    }
-                    ++id;
+            qDebug() << "elapsed" << t.elapsed();
+
+            for (const Path& path : m_workingRawPaths) {
+                IntPoint tmp(path.first());
+                for (const IntPoint& point : path) {
+                    condei(tmp, point);
+                    points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
+                    tmp = point;
                 }
+                condei(tmp, path.first());
+                ++id;
             }
+
             emit progress(3, 1); ////////////////////// progress //////////////////////
             {
                 Clipper clipper;
@@ -598,32 +745,16 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
                 };
 
-                //                QFile file("data.pt");
-                //                if (file.open(QFile::WriteOnly)) {
-                //                    file.write(reinterpret_cast<const char*>(&bounding_box.min.x), sizeof(double));
-                //                    file.write(reinterpret_cast<const char*>(&bounding_box.min.y), sizeof(double));
-                //                    file.write(reinterpret_cast<const char*>(&bounding_box.max.x), sizeof(double));
-                //                    file.write(reinterpret_cast<const char*>(&bounding_box.max.y), sizeof(double));
-                //                    for (const jcv_point& pt : points) {
-                //                        file.write(reinterpret_cast<const char*>(&pt.x), sizeof(double));
-                //                        file.write(reinterpret_cast<const char*>(&pt.y), sizeof(double));
-                //                    }
-                //                }
-
                 Pairss edges;
                 edges.resize(id);
                 {
                     auto toIntPoint = [](const jcv_point& pos) -> const IntPoint {
                         return { static_cast<cInt>(pos.x), static_cast<cInt>(pos.y) };
                     };
-                    QElapsedTimer timer;
-                    timer.start();
+
                     jcv_diagram diagram;
-                    qDebug() << "size" << points.size();
                     jcv_diagram_generate(points.size(), points.data(), &bounding_box, &diagram);
-                    qDebug() << "jcv_diagram_generate" << timer.elapsed();
-                    //                qDebug() << "jcv_diagram_generate" << t.elapsed();
-                    //                t.start();
+
                     const jcv_site* sites = jcv_diagram_get_sites(&diagram);
                     for (int i = 0; i < diagram.numsites; i++) {
                         jcv_graphedge* graph_edge = sites[i].edges;
@@ -644,11 +775,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
 
                 emit progress(3, 2); ////////////////////// progress //////////////////////
 
-                //            qDebug() << "edges" << t.elapsed();
-                //            t.start();
-
                 Pairs tmp;
-
                 for (const Pairs& edge : edges) {
                     for (const Pair& pair1 : edge) {
                         Pair pair2(pair1);
@@ -671,14 +798,15 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                         return;
                     ////////////////////// progress //////////////////////
                 }
+                emit progress(3, 3); ////////////////////// progress //////////////////////
             }
 
-//            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
-//                const cInt r = b.first().Y - a.last().Y;
-//                if (r)
-//                    return r > 0;
-//                return (b.first().X - a.last().X) > 0;
-//            });
+            //            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
+            //                const cInt r = b.first().Y - a.last().Y;
+            //                if (r)
+            //                    return r > 0;
+            //                return (b.first().X - a.last().X) > 0;
+            //            });
             qDebug() << "m_returnPaths" << m_returnPaths.size();
             // merge result toolPaths
             const int max = m_returnPaths.size();
