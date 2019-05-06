@@ -15,6 +15,7 @@ double MaterialSetup::safeZ;
 double MaterialSetup::thickness;
 double MaterialSetup::clearence;
 double MaterialSetup::plunge;
+double MaterialSetup::glue;
 
 MaterialSetup::MaterialSetup(QWidget* prnt)
     : QWidget(prnt)
@@ -36,17 +37,15 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-        [=](double val) { homePoint->setPosX(val); }); //MaterialSetup::homePoint, &Point::setPosX);
+    connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { glue = val; });
 
-    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-        [=](double val) { homePoint->setPosY(val); }); //MaterialSetup::homePoint, &Point::setPosY);
+    connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { homePoint->setPosX(val); });
 
-    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-        [=](double val) { zeroPoint->setPosX(val); }); //MaterialSetup::zeroPoint, &Point::setPosX);
+    connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { homePoint->setPosY(val); });
 
-    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged),
-        [=](double val) { zeroPoint->setPosY(val); }); //MaterialSetup::zeroPoint, &Point::setPosY);
+    connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { zeroPoint->setPosX(val); });
+
+    connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { zeroPoint->setPosY(val); });
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -63,6 +62,7 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
     ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
     ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
     ui->dsbxThickness->setValue(settings.value("dsbxThickness", 1).toDouble());
+    ui->dsbxGlue->setValue(settings.value("dsbxGlue", 0.01).toDouble());
     settings.endGroup();
 
     ui->dsbxHomeX->setValue(homePoint->pos().x());
@@ -121,6 +121,7 @@ MaterialSetup::~MaterialSetup()
     settings.setValue("dsbxClearence", ui->dsbxClearence->value());
     settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
     settings.setValue("dsbxThickness", ui->dsbxThickness->value());
+    settings.setValue("dsbxGlue", ui->dsbxGlue->value());
     settings.endGroup();
 
     safeZ = ui->dsbxSafeZ->value();

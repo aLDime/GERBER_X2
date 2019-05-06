@@ -14,8 +14,7 @@ public:
     virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     virtual int type() const override;
 
-    void setPoint1(const QPointF& point1);
-    void setPoint2(const QPointF& point2);
+    static void setPoint2(const QPointF& point2);
     static Ruler* self;
 
 private:

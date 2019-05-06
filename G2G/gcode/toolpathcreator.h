@@ -40,6 +40,7 @@ public:
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);
+    void createTermal(Gerber::File* file, const Tool& tool, double depth);
     void createVoronoi(const Tool& tool, double depth, const double k, bool test);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);

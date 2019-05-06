@@ -23,6 +23,7 @@ public:
     static double thickness;
     static double clearence;
     static double plunge;
+    static double glue;
     static MaterialSetup* self;
 
 private:

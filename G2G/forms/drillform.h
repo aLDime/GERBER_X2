@@ -15,6 +15,8 @@ class AbstractAperture;
 
 class DrillModel;
 class PreviewItem;
+class QCheckBox;
+class QGridLayout;
 
 class DrillForm : public QWidget {
     Q_OBJECT
@@ -58,6 +60,9 @@ private:
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
     QMap<int, double> m_tools;
     QMap<int, QVector<QSharedPointer<PreviewItem>>> m_sourcePreview;
+
+    QCheckBox* cbx;
+    QGridLayout* lay;
 
     void clear();
 };

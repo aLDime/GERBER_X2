@@ -52,6 +52,9 @@ HEADERS += \
     forms/materialsetupform.h \
     forms/pocketform.h \
     forms/profileform.h \
+    forms/termalform.h \
+    forms/termalmodel.h \
+    forms/termalpreviewitem.h \
     forms/toolpathutil.h \
     forms/voronoiform.h \
     gcode/gcode.h \
@@ -99,6 +102,9 @@ SOURCES += \
     forms/materialsetupform.cpp \
     forms/pocketform.cpp \
     forms/profileform.cpp \
+    forms/termalform.cpp \
+    forms/termalmodel.cpp \
+    forms/termalpreviewitem.cpp \
     forms/toolpathutil.cpp \
     forms/voronoiform.cpp \
     gcode/gcode.cpp \
@@ -135,6 +141,7 @@ FORMS += \
     forms/materialsetupform.ui \
     forms/pocketform.ui \
     forms/profileform.ui \
+    forms/termalform.ui \
     forms/voronoiform.ui \
     mainwindow.ui \
     settingsdialog.ui \

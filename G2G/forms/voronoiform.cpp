@@ -24,9 +24,9 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 
     updateName();
 
-    QSettings settings;
-    settings.beginGroup("ProfileForm");
-    settings.endGroup();
+    //    QSettings settings;
+    //    settings.beginGroup("VoronoiForm");
+    //    settings.endGroup();
 
     ui->pbEdit->setIcon(Icon(PuttonEditIcon));
     ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
@@ -37,9 +37,9 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 
 VoronoiForm::~VoronoiForm()
 {
-    QSettings settings;
-    settings.beginGroup("ProfileForm");
-    settings.endGroup();
+    //    QSettings settings;
+    //    settings.beginGroup("VoronoiForm");
+    //    settings.endGroup();
     delete ui;
 }
 
@@ -72,8 +72,7 @@ void VoronoiForm::on_pbCreate_clicked()
 
 void VoronoiForm::on_pbClose_clicked()
 {
-    if (parent())
-        static_cast<QWidget*>(parent())->close();
+    static_cast<QWidget*>(parent())->close();
 }
 
 void VoronoiForm::create()

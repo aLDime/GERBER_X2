@@ -79,6 +79,8 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
                 return Icon(PathPocketIcon);
             case Voronoi:
                 return Icon(PathVoronoiIcon);
+            case Termal:
+                return Icon(PathTermalIcon);
             case Drilling:
                 return Icon(PathDrillIcon);
             default:

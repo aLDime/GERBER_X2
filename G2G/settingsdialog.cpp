@@ -129,7 +129,12 @@ void SettingsDialog::writeSettings()
     QSettings settings;
     settings.beginGroup("Viewer");
     if (settings.value("OpenGl").toBool() != chbOpenGl->isChecked()) {
-        GraphicsView::self->setViewport(chbOpenGl->isChecked() ? new QGLWidget(QGLFormat(QGL::SampleBuffers)) : new QWidget);
+        GraphicsView::self->setViewport(chbOpenGl->isChecked()
+                ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
+                : new QWidget);
+//        chbOpenGl->isChecked()
+//            ? GraphicsView::self->setViewportUpdateMode(QGraphicsView::FullViewportUpdate)
+//            : GraphicsView::self->setViewportUpdateMode(QGraphicsView::SmartViewportUpdate);
         GraphicsView::self->viewport()->setObjectName("viewport");
         GraphicsView::self->setRenderHint(QPainter::Antialiasing, chbAntialiasing->isChecked());
         settings.setValue("OpenGl", chbOpenGl->isChecked());

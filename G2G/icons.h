@@ -7,6 +7,7 @@ enum Id {
     PathDrillIcon,
     PathPocketIcon,
     PathVoronoiIcon,
+    PathTermalIcon,
     PathProfileIcon,
 
     MaterialIcon,
@@ -29,7 +30,7 @@ enum Id {
     ZoomInIcon,
     ZoomOutIcon,
     ZoomToSelectedIcon,
-    SelectAll,
+    SelectAllIcon,
 
     PuttonAddBridgeIcon,
     PuttonCloseIcon,
@@ -59,6 +60,8 @@ static QIcon Icon(Id id)
         return QIcon::fromTheme("stroke-to-path");
     case PathVoronoiIcon:
         return QIcon::fromTheme("path-reverse");
+    case PathTermalIcon:
+        return QIcon::fromTheme("escape-direction-all");
     case PathProfileIcon:
         return QIcon::fromTheme("object-to-path");
     case MaterialIcon:
@@ -95,7 +98,7 @@ static QIcon Icon(Id id)
     case ZoomOutIcon:
         return QIcon::fromTheme("zoom-out");
     case ZoomToSelectedIcon:
-    case SelectAll:
+    case SelectAllIcon:
         return QIcon::fromTheme("edit-select-all");
 
     case PuttonAddBridgeIcon:

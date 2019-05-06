@@ -16,7 +16,7 @@ public:
     static Scene* self;
     QRectF itemsBoundingRect();
 
-    bool drawPdf() const;
+    static bool drawPdf() ;
 
 private:
     bool m_drawPdf;

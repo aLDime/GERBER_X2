@@ -11,14 +11,21 @@
 #include <gi/ruler.h>
 #include <mainwindow.h>
 
+#ifdef ANIM
+enum {
+    DURATION = 300,
+    INTERVAL = 30
+};
+#endif
+
 GraphicsView* GraphicsView::self = nullptr;
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
 {
-    setCacheMode(CacheBackground);
+    setCacheMode(/*CacheBackground*/ CacheNone);
     setOptimizationFlags(DontSavePainterState | DontClipPainter | DontAdjustForAntialiasing);
-    setViewportUpdateMode(SmartViewportUpdate);
+    setViewportUpdateMode(FullViewportUpdate /*NoViewportUpdate*/);
     setDragMode(RubberBandDrag);
     setInteractive(true);
     ////////////////////////////////////
@@ -47,15 +54,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     gridLayout->addWidget(vRuler, 0, 0);
     gridLayout->addWidget(viewport(), 0, 1);
 
-    //    gridLayout->addWidget(vRuler, 0, 0);
-    //    gridLayout->addWidget(viewport(), 0, 1);
-    //    gridLayout->addWidget(corner, 1, 0);
-    //    gridLayout->addWidget(hRuler, 1, 1);
-    //    gridLayout->addWidget(horizontalScrollBar(), 2, 0, 2, 0);
-    //    gridLayout->addWidget(verticalScrollBar(), 0, 2, 0, 2);
-    // finally set layout
-    //setLayout(gridLayout);
-
     connect(horizontalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::UpdateRuler);
 
@@ -64,12 +62,22 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     QSettings settings;
     settings.beginGroup("Viewer");
-    setViewport(settings.value("OpenGl").toBool() ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)) : new QWidget);
+    setViewport(settings.value("OpenGl").toBool()
+            ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba))
+            : new QWidget);
     setRenderHint(QPainter::Antialiasing, settings.value("Antialiasing", false).toBool());
     viewport()->setObjectName("viewport");
     settings.endGroup();
+
     setScene(new Scene(this));
     setStyleSheet("QGraphicsView { background: black }");
+
+    //    QTimer* t = new QTimer(this);
+    //    connect(t, &QTimer::timeout, [=] {
+    //        qDebug("timeout");
+    //        updateSceneRect(QRectF());
+    //    });
+    //    t->start(16);
 
     self = this;
 }
@@ -104,17 +112,20 @@ void GraphicsView::zoomToSelected()
     }
     if (rect.isEmpty())
         return;
+
+    const double k = 5.0 / transform().m11();
+    rect += QMarginsF(k, k, k, k);
     fitInView(rect, Qt::KeepAspectRatio);
 
 #ifdef ANIM
     numScheduledScalings -= 1;
     QTimeLine* anim = new QTimeLine(DURATION, this);
     anim->setUpdateInterval(INTERVAL);
-    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
-    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    connect(anim, &QTimeLine::valueChanged, this, &GraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &GraphicsView::AnimFinished);
     anim->start();
 #else
-    scale(0.9, 0.9);
+    //scale(0.9, 0.9);
     UpdateRuler();
 #endif
 }
@@ -134,12 +145,6 @@ void GraphicsView::zoom100()
     scale(x, y);
     UpdateRuler();
 }
-#ifdef ANIM
-enum {
-    DURATION = 300,
-    INTERVAL = 30
-};
-#endif
 
 void GraphicsView::zoomIn()
 {
@@ -149,8 +154,8 @@ void GraphicsView::zoomIn()
     numScheduledScalings += 1;
     QTimeLine* anim = new QTimeLine(DURATION, this);
     anim->setUpdateInterval(INTERVAL);
-    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
-    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    connect(anim, &QTimeLine::valueChanged, this, &GraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &GraphicsView::AnimFinished);
     anim->start();
 #else
     scale(zoomFactor, zoomFactor);
@@ -166,8 +171,8 @@ void GraphicsView::zoomOut()
     numScheduledScalings -= 1;
     QTimeLine* anim = new QTimeLine(DURATION, this);
     anim->setUpdateInterval(INTERVAL);
-    connect(anim, &QTimeLine::valueChanged, this, &MyGraphicsView::ScalingTime);
-    connect(anim, &QTimeLine::finished, this, &MyGraphicsView::AnimFinished);
+    connect(anim, &QTimeLine::valueChanged, this, &GraphicsView::ScalingTime);
+    connect(anim, &QTimeLine::finished, this, &GraphicsView::AnimFinished);
     anim->start();
 #else
     scale(1.0 / zoomFactor, 1.0 / zoomFactor);
@@ -175,55 +180,81 @@ void GraphicsView::zoomOut()
 #endif
 }
 
+#ifdef ANIM
+void GraphicsView::AnimFinished()
+{
+    if (numScheduledScalings > 0)
+        numScheduledScalings--;
+    else
+        numScheduledScalings++;
+
+    sender()->~QObject();
+    UpdateRuler();
+}
+
+void GraphicsView::ScalingTime(qreal x)
+{
+    qreal factor = 1.0 + qreal(numScheduledScalings) / 100 * x;
+
+    if (numScheduledScalings < 0 && factor > 10000.0)
+        return;
+    if (numScheduledScalings > 0 && factor < 1.0)
+        return;
+
+    scale(factor, factor);
+}
+#endif
+
 void GraphicsView::wheelEvent(QWheelEvent* event)
 {
-    if (1)
-        switch (event->modifiers()) {
-        case Qt::ControlModifier:
-            if (abs(event->delta()) == 120) {
-                if (event->delta() > 0)
-                    zoomIn();
-                else
-                    zoomOut();
-            }
-            break;
-        case Qt::ShiftModifier:
-            if (!event->angleDelta().x())
-                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-            break;
-        case Qt::NoModifier:
-            if (!event->angleDelta().x())
-                QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-            //            else
-            //                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-            break;
-        default:
-            QGraphicsView::wheelEvent(event);
-            return;
-        }
-    else
-        switch (event->modifiers()) {
-        case Qt::ControlModifier:
-            if (event->angleDelta().x() != 0)
-                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+
+    reinterpret_cast<QGLWidget*>(viewport());
+    switch (event->modifiers()) {
+    case Qt::ControlModifier:
+        if (abs(event->delta()) == 120) {
+            if (event->delta() > 0)
+                zoomIn();
             else
-                QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
-            break;
-        case Qt::ShiftModifier:
-            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
-            break;
-        case Qt::NoModifier:
-            if (abs(event->delta()) == 120) {
-                if (event->delta() > 0)
-                    zoomIn();
-                else
-                    zoomOut();
-            }
-            break;
-        default:
-            QGraphicsView::wheelEvent(event);
-            return;
+                zoomOut();
         }
+        break;
+    case Qt::ShiftModifier:
+        if (!event->angleDelta().x())
+            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        break;
+    case Qt::NoModifier:
+        if (!event->angleDelta().x())
+            QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+        //            else
+        //                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+        break;
+    default:
+        QGraphicsView::wheelEvent(event);
+        return;
+    }
+
+    //        switch (event->modifiers()) {
+    //        case Qt::ControlModifier:
+    //            if (event->angleDelta().x() != 0)
+    //                QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+    //            else
+    //                QAbstractScrollArea::verticalScrollBar()->setValue(QAbstractScrollArea::verticalScrollBar()->value() - (event->delta()));
+    //            break;
+    //        case Qt::ShiftModifier:
+    //            QAbstractScrollArea::horizontalScrollBar()->setValue(QAbstractScrollArea::horizontalScrollBar()->value() - (event->delta()));
+    //            break;
+    //        case Qt::NoModifier:
+    //            if (abs(event->delta()) == 120) {
+    //                if (event->delta() > 0)
+    //                    zoomIn();
+    //                else
+    //                    zoomOut();
+    //            }
+    //            break;
+    //        default:
+    //            QGraphicsView::wheelEvent(event);
+    //            return;
+    //        }
     event->accept();
 }
 
@@ -284,6 +315,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         setInteractive(false);
+        //Ruler
         scene()->addItem(new Ruler(mapToScene(event->pos())));
         QGraphicsView::mousePressEvent(event);
     } else {
@@ -305,8 +337,8 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
-        if (Ruler::self)
-            delete Ruler::self;
+        //Ruler
+        delete Ruler::self;
     } else {
         QGraphicsView::mouseReleaseEvent(event);
     }
@@ -322,8 +354,9 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event)
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
     mouseMove(mapToScene(event->pos()));
-    if (event->buttons() == Qt::RightButton && Ruler::self) {
-        Ruler::self->setPoint2(mapToScene(event->pos()));
-    }
+    //Ruler
+    if (event->buttons() == Qt::RightButton)
+        Ruler::setPoint2(mapToScene(event->pos()));
+
     QGraphicsView::mouseMoveEvent(event);
 }

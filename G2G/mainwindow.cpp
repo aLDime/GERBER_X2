@@ -5,6 +5,8 @@
 #include "forms/materialsetupform.h"
 #include "forms/pocketform.h"
 #include "forms/profileform.h"
+#include "forms/termalform.h"
+#include "forms/voronoiform.h"
 #include "gi/bridgeitem.h"
 #include "settingsdialog.h"
 #include "tooldatabase/tooldatabase.h"
@@ -15,7 +17,6 @@
 #include <QToolBar>
 #include <excellondialog.h>
 #include <exparser.h>
-#include <forms/voronoiform.h>
 #include <gbrparser.h>
 
 MainWindow* MainWindow::self = nullptr;
@@ -297,7 +298,7 @@ void MainWindow::createActions()
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
     //     s->setMovable(false);
-    action = s->addAction(Icon(SelectAll), tr("Select all"), this, &MainWindow::selectAll);
+    action = s->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
     //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     //        QList<QGraphicsItem*> list;
@@ -347,10 +348,13 @@ void MainWindow::createActions()
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
         createDockWidget(new VoronoiForm(dockWidget), Voronoi);
     }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathTermalIcon), tr("Termal"), [=] {
+        createDockWidget(new TermalForm(dockWidget), Termal);
+    }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
         createDockWidget(new DrillForm(dockWidget), Drilling);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material "), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material"), [=] {
         createDockWidget(new MaterialSetup(dockWidget), Material);
     }));
 
@@ -359,7 +363,7 @@ void MainWindow::createActions()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(10, [=] { toolpathActionList[Voronoi]->trigger(); });
+    QTimer::singleShot(2000, [=] { toolpathActionList[Termal]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif

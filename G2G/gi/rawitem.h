@@ -26,6 +26,7 @@ private:
     const Gerber::File* m_file;
     Path& m_path;
     mutable QPainterPath m_shape;
+    mutable double m_scale = 0.0;
 
     // QGraphicsItem interface
 protected:

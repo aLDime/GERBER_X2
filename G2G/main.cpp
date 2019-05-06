@@ -1,6 +1,7 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QGLWidget>
 #include <QLocale>
 #include <QTranslator>
 
@@ -36,6 +37,11 @@ int main(int argc, char* argv[])
 
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
+
+    QGLFormat glf = QGLFormat::defaultFormat();
+    glf.setSampleBuffers(true);
+    glf.setSamples(16);
+    QGLFormat::setDefaultFormat(glf);
 
     QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;

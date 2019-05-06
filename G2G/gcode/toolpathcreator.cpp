@@ -580,6 +580,128 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
     }
 }
 
+void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double depth)
+{
+
+    try {
+        self = this;
+
+        emit progress(1, 0); ////////////////////// progress //////////////////////
+
+        m_toolDiameter = tool.getDiameter(depth);
+
+        // calc offset
+        const double dOffset = (m_side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+
+        // execute offset
+        ClipperOffset offset;
+        offset.AddPaths(m_workingPaths, jtRound, etClosedPolygon);
+        offset.Execute(m_returnPaths, dOffset);
+
+        //        if (!m_workingRawPaths.isEmpty()) {
+        //            ClipperOffset offset;
+        //            offset.AddPaths(m_workingRawPaths, jtRound, etOpenRound);
+        //            offset.Execute(m_workingRawPaths, dOffset);
+        //        }
+        //        if (!m_workingRawPaths.isEmpty())
+        //            m_returnPaths.append(m_workingRawPaths);
+
+        // fix direction
+        if (m_side == Outer && !m_convent)
+            ReversePaths(m_returnPaths);
+        else if (m_side == Inner && m_convent)
+            ReversePaths(m_returnPaths);
+
+        for (Path& path : m_returnPaths)
+            path.append(path.first());
+
+        if (m_returnPaths.isEmpty()) {
+            emit progress(0, 0); ////////////////////// progress //////////////////////
+            return;
+        }
+        // create frame
+        Paths framePaths;
+        {
+            ClipperOffset offset;
+            offset.AddPaths(m_returnPaths, jtMiter, etClosedLine);
+            offset.Execute(framePaths, +m_toolDiameter * uScale * 0.1);
+
+            Clipper clipper;
+            clipper.AddPaths(framePaths, ptSubject, true);
+            {
+                ClipperOffset offset;
+                for (const Gerber::GraphicObject& go : *file) {
+                    if (go.state.type() == Gerber::Line && go.state.imgPolarity() == Gerber::Positive) {
+                        offset.AddPaths(go.paths, jtMiter, etClosedPolygon);
+                    }
+                }
+                offset.Execute(framePaths, dOffset - 0.005*uScale);
+            }
+            clipper.AddPaths(framePaths, ptClip, true);
+
+            clipper.Execute(ctIntersection, framePaths, pftPositive);
+        }
+
+        // create termal
+
+        for (int index = 0, size = m_returnPaths.size(); index < size; ++index) {
+            Path& path = m_returnPaths[index];
+
+            Paths tmpPaths;
+            // cut toolPath
+            {
+                Clipper clipper;
+                clipper.AddPath(path, ptSubject, false);
+                clipper.AddPaths(framePaths, ptClip, true);
+                PolyTree polytree;
+                clipper.Execute(ctDifference, polytree, pftPositive);
+                PolyTreeToPaths(polytree, tmpPaths);
+            }
+            // merge result toolPaths
+            for (int i = 0; i < tmpPaths.size(); ++i) {
+                for (int j = 0; j < tmpPaths.size(); ++j) {
+                    if (i == j)
+                        continue;
+                    if (tmpPaths[i].last() == tmpPaths[j].first()) {
+                        tmpPaths[j].removeFirst();
+                        tmpPaths[i].append(tmpPaths[j]);
+                        tmpPaths.remove(j--);
+                        continue;
+                    }
+                    if (tmpPaths[i].first() == tmpPaths[j].last()) {
+                        tmpPaths[i].removeFirst();
+                        tmpPaths[j].append(tmpPaths[i]);
+                        tmpPaths.remove(i--);
+                        break;
+                    }
+                    if (tmpPaths[i].last() == tmpPaths[j].last()) {
+                        ReversePath(tmpPaths[j]);
+                        tmpPaths[j].removeFirst();
+                        tmpPaths[i].append(tmpPaths[j]);
+                        tmpPaths.remove(j--);
+                        continue;
+                    }
+                }
+            }
+
+            --size;
+            m_returnPaths.remove(index--);
+            m_returnPaths.append(tmpPaths);
+        }
+
+        if (m_returnPaths.isEmpty()) {
+            emit fileReady(nullptr);
+            emit progress(0, 0); ////////////////////// progress //////////////////////
+        } else {
+            m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Termal);
+            emit fileReady(m_file);
+            emit progress(0, 0); ////////////////////// progress //////////////////////
+        }
+    } catch (...) {
+        qDebug() << "catch";
+    }
+}
+
 using Pair = QPair<IntPoint, IntPoint>;
 using Pairs = QSet<Pair>;
 using Pairss = QVector<Pairs>;
@@ -966,7 +1088,7 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
 
     qDebug() << rawPaths.size();
 
-    const double glueLen = 0.1 * uScale;
+    const double glueLen = MaterialSetup::glue * uScale;
     Paths paths;
 
     do {
