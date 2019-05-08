@@ -9,9 +9,7 @@ QMap<int, QSharedPointer<AbstractFile>> FileHolder::m_files;
 int FileHolder::m_id = 0;
 QMutex FileHolder::m_mutex;
 
-FileHolder::FileHolder()
-{
-}
+FileHolder::FileHolder() {}
 
 bool FileHolder::isEmpty()
 {

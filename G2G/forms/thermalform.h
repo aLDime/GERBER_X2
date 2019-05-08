@@ -1,30 +1,30 @@
-#ifndef TERMALFORM_H
-#define TERMALFORM_H
+#ifndef THERMALFORM_H
+#define THERMALFORM_H
 
 #include "toolpathutil.h"
 
 #include <QItemSelection>
 
 namespace Ui {
-class TermalForm;
+class ThermalForm;
 }
 
 class QCheckBox;
 class QGridLayout;
-class TermalModel;
-class TermalPreviewItem;
+class ThermalModel;
+class ThermalPreviewItem;
 
-class TermalForm : public ToolPathUtil {
+class ThermalForm : public ToolPathUtil {
     Q_OBJECT
 
 public:
-    explicit TermalForm(QWidget* parent = nullptr);
-    ~TermalForm();
+    explicit ThermalForm(QWidget* parent = nullptr);
+    ~ThermalForm();
 
     void updateFiles();
 
 signals:
-    void createTermal(Gerber::File* file, const Tool& tool, double depth);
+    void createThermal(Gerber::File* file, const Tool& tool, double depth);
 
 private slots:
     void on_pbSelect_clicked();
@@ -35,18 +35,21 @@ private slots:
 
     void on_cbxFileCurrentIndexChanged(int index);
 
+    void on_dsbxDepth_valueChanged(double arg1);
+
 private:
-    Ui::TermalForm* ui;
+    Ui::ThermalForm* ui;
 
     void setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value);
-    QVector<QSharedPointer<TermalPreviewItem>> m_sourcePreview;
+    QVector<QSharedPointer<ThermalPreviewItem>> m_sourcePreview;
     QMap<int, QSharedPointer<Gerber::AbstractAperture>> m_apertures;
-    TermalModel* model;
-    void on_currentChanged(const QModelIndex& current, const QModelIndex& previous);
-    void on_selectionChanged(const QItemSelection &selected, const QItemSelection &deselected);
+    ThermalModel* model;
+    void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     QCheckBox* cbx;
     QGridLayout* lay;
+    double m_depth;
+    inline void redraw();
 
     // ToolPathUtil interface
 protected:
@@ -54,4 +57,4 @@ protected:
     void updateName() override;
 };
 
-#endif // TERMALFORM_H
+#endif // THERMALFORM_H

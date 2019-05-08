@@ -1,12 +1,12 @@
-#include "termalform.h"
-#include "ui_termalform.h"
+#include "thermalform.h"
+#include "ui_thermalform.h"
 
 #include "filetree/fileholder.h"
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
 #include "materialsetupform.h"
-#include "termalmodel.h"
-#include "termalpreviewitem.h"
+#include "thermalmodel.h"
+#include "thermalpreviewitem.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QCheckBox>
@@ -54,15 +54,13 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
     return QIcon(pixmap);
 }
 
-TermalForm::TermalForm(QWidget* parent)
-    : ToolPathUtil("TermalForm", parent)
-    , ui(new Ui::TermalForm)
+ThermalForm::ThermalForm(QWidget* parent)
+    : ToolPathUtil("ThermalForm", parent)
+    , ui(new Ui::ThermalForm)
 {
     ui->setupUi(this);
 
     ui->treeView->setIconSize(QSize(Size, Size));
-    ui->treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Fixed);
 
     ui->lblToolName->setText(tool.name);
     ui->dsbxDepth->setValue(MaterialSetup::thickness);
@@ -93,7 +91,7 @@ TermalForm::TermalForm(QWidget* parent)
     //    connect(ui->pbClose, &QPushButton::clicked, parent, &QWidget::close);
 }
 
-TermalForm::~TermalForm()
+ThermalForm::~ThermalForm()
 {
     m_sourcePreview.clear();
     //    QSettings settings;
@@ -102,9 +100,9 @@ TermalForm::~TermalForm()
     delete ui;
 }
 
-void TermalForm::updateFiles()
+void ThermalForm::updateFiles()
 {
-    disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TermalForm::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 
     ui->cbxFile->clear();
 
@@ -126,20 +124,21 @@ void TermalForm::updateFiles()
     } else
         on_cbxFileCurrentIndexChanged(0);
 
-    connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &TermalForm::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, QOverload<int>::of(&QComboBox::currentIndexChanged), this, &ThermalForm::on_cbxFileCurrentIndexChanged);
 }
 
-void TermalForm::on_pbSelect_clicked()
+void ThermalForm::on_pbSelect_clicked()
 {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
         tool = tdb.tool();
         ui->lblToolName->setText(tool.name);
         updateName();
+        redraw();
     }
 }
 
-void TermalForm::on_pbEdit_clicked()
+void ThermalForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
     d.toolEdit->setTool(tool);
@@ -148,25 +147,26 @@ void TermalForm::on_pbEdit_clicked()
         tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
+        redraw();
     }
 }
 
-void TermalForm::on_pbCreate_clicked()
+void ThermalForm::on_pbCreate_clicked()
 {
     create();
 }
 
-void TermalForm::on_pbClose_clicked()
+void ThermalForm::on_pbClose_clicked()
 {
     static_cast<QWidget*>(parent())->close();
 }
 
-void TermalForm::on_leName_textChanged(const QString& arg1)
+void ThermalForm::on_leName_textChanged(const QString& arg1)
 {
     m_fileName = arg1;
 }
 
-void TermalForm::create()
+void ThermalForm::create()
 {
     //    Scene* scene = Scene::self;
 
@@ -176,10 +176,13 @@ void TermalForm::create()
     }
 
     Paths wPaths;
-    //    Paths wRawPaths;
+    Pathss wBridgePaths;
 
-    for (QSharedPointer<TermalPreviewItem> item : m_sourcePreview) {
-        wPaths.append(item->paths());
+    for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview) {
+        if (item->flags() & QGraphicsItem::ItemIsSelectable) {
+            wPaths.append(item->paths());
+            wBridgePaths.append(item->bridge());
+        }
     }
 
     //    for (QGraphicsItem* item : scene->selectedItems()) {
@@ -223,102 +226,100 @@ void TermalForm::create()
     //    }
 
     ToolPathCreator* tps = toolPathCreator(wPaths, true, side);
-    //    tps->addRawPaths(wRawPaths);
-    connect(this, &TermalForm::createTermal, tps, &ToolPathCreator::createTermal);
-    emit createTermal(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>()), tool, ui->dsbxDepth->value());
+    tps->addSupportPaths(wBridgePaths);
+    connect(this, &ThermalForm::createThermal, tps, &ToolPathCreator::createThermal);
+    emit createThermal(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>()), tool, ui->dsbxDepth->value());
+    progress(1, 0);
 }
 
-void TermalForm::updateName()
+void ThermalForm::updateName()
 {
-    ui->leName->setText(tr("Termal (") + tool.name + ")");
+    ui->leName->setText(tr("Thermal (") + tool.name + ")");
 }
 
-void TermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
+void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
     setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
 }
 
-void TermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
+void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAperture>>* value)
 {
     m_sourcePreview.clear();
 
     m_apertures = *value;
-    model = new TermalModel(this);
+    model = new ThermalModel(this);
     const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
 
     QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
     for (apertureIt = m_apertures.begin(); apertureIt != m_apertures.end(); ++apertureIt) {
         if (apertureIt.value()->isFlashed()) {
             QString name(apertureIt.value()->name());
-            TermalNode* termalNode = model->appendRow(drawApertureIcon(apertureIt.value().data()), name);
+            ThermalNode* thermalNode = model->appendRow(drawApertureIcon(apertureIt.value().data()), name);
             for (const Gerber::GraphicObject& go : *file) {
                 if (go.state.dCode() == Gerber::D03 && go.state.aperture() == apertureIt.key()) {
-                    TermalPreviewItem* item = new TermalPreviewItem(go, tool);
-                    m_sourcePreview.append(QSharedPointer<TermalPreviewItem>(item));
+                    ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+                    m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
                     Scene::self->addItem(item);
-                    termalNode->append(new TermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state.curPos(), item));
+                    thermalNode->append(new ThermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state.curPos(), item));
                 }
             }
         }
     }
 
-    TermalNode* termalNode = model->appendRow(QIcon(), "Region");
+    ThermalNode* thermalNode = model->appendRow(QIcon(), "Region");
     for (const Gerber::GraphicObject& go : *file) {
         if (go.state.type() == Gerber::Region) {
-            TermalPreviewItem* item = new TermalPreviewItem(go, tool);
-            m_sourcePreview.append(QSharedPointer<TermalPreviewItem>(item));
+            ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+            m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
             Scene::self->addItem(item);
-            termalNode->append(new TermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
+            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
         }
     }
     //    updateCreateButton();
 
     delete ui->treeView->model();
     ui->treeView->setModel(model);
-    //    ui->treeView->resizeColumnsToContents();
-    //    ui->treeView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    connect(ui->treeView->selectionModel(), &QItemSelectionModel::currentChanged, this, &TermalForm::on_currentChanged);
-    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &TermalForm::on_selectionChanged);
+    ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::on_selectionChanged);
 }
 
-void TermalForm::on_currentChanged(const QModelIndex& current, const QModelIndex& previous)
-{
-    //    deselectAll();
-    //    if (previous.isValid() && previous.row() != current.row()) {
-    //        int apertureId = model->apertureId(previous.row());
-    //        setSelected(apertureId, false);
-    //    }
-
-    //    const QModelIndexList selectedIndexes(ui->treeView->selectionModel()->selectedIndexes());
-    //    for (const QModelIndex& index : selectedIndexes) {
-    //        m_sourcePreview[index.row()]->setSelected(true);
-    //    }
-
-    //    if (previous.isValid())
-    //        m_sourcePreview[previous.row()]->setSelected(false);
-    //    if (current.isValid())
-    //        m_sourcePreview[current.row()]->setSelected(true);
-
-    //    if (previous.isValid() && previous.row() != current.row()) {
-    //        int apertureId = model->apertureId(current.row());
-    //        setSelected(apertureId, true);
-    //    }
-    //    zoonToSelected();
-    //    updateCreateButton();
-}
-
-void TermalForm::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
+void ThermalForm::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
     for (QModelIndex index : selected.indexes()) {
-        TermalPreviewItem* item = reinterpret_cast<TermalNode*>(index.internalPointer())->item();
+        ThermalNode* node = reinterpret_cast<ThermalNode*>(index.internalPointer());
+        ThermalPreviewItem* item = node->item();
         if (item)
             item->setSelected(true);
+        else {
+            for (int i = 0; i < node->childCount(); ++i) {
+                ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Select | QItemSelectionModel::Rows);
+            }
+        }
     }
     for (QModelIndex index : deselected.indexes()) {
-        TermalPreviewItem* item = reinterpret_cast<TermalNode*>(index.internalPointer())->item();
+        ThermalNode* node = reinterpret_cast<ThermalNode*>(index.internalPointer());
+        ThermalPreviewItem* item = node->item();
         if (item)
             item->setSelected(false);
+        else {
+            for (int i = 0; i < node->childCount(); ++i) {
+                ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Clear | QItemSelectionModel::Rows);
+            }
+        }
     }
+}
+
+void ThermalForm::redraw()
+{
+    for (QSharedPointer<ThermalPreviewItem> item : m_sourcePreview) {
+        item->redraw();
+    }
+}
+
+void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
+{
+    m_depth = arg1;
+    redraw();
 }

@@ -27,8 +27,6 @@ public:
         return static_cast<T*>(m_files.value(id).data());
     }
 
-    static void deleteFile(int id);
-
     template <typename T>
     static int addFile(T* file)
     {
@@ -39,6 +37,18 @@ public:
         return id;
     }
 
+    template <typename T>
+    static bool replaceFile(int id, T* file)
+    {
+        QMutexLocker locker(&m_mutex);
+        if (m_files.contains(id)) {
+            m_files[id] = QSharedPointer<AbstractFile>(file);
+            return true;
+        }
+        return false;
+    }
+
+    static void deleteFile(int id);
     static bool isEmpty();
     static int size();
 

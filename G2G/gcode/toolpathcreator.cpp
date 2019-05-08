@@ -101,9 +101,9 @@ bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
 /// \param value
 /// \param convent
 ///
-ToolPathCreator::ToolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
+ToolPathCreator::ToolPathCreator(const Paths& workingPaths, const bool convent, SideOfMilling side)
     : m_side(side)
-    , m_workingPaths(value)
+    , m_workingPaths(workingPaths)
     , m_convent(convent)
 {
 }
@@ -129,7 +129,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
         if (m_side == On)
             return;
 
-        emit progress(1, 0); ////////////////////// progress //////////////////////
+        // emit progress(1, 0); // progress
 
         m_toolDiameter = tool.getDiameter(depth) * uScale;
         m_dOffset = m_toolDiameter / 2;
@@ -141,7 +141,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
             groupedPaths(CopperPaths);
             if (m_side == Inner) {
                 m_dOffset *= -1;
-                for (Paths paths : m_groupedPaths) {
+                for (Paths paths : m_groupedPathss) {
                     ClipperOffset offset(uScale);
                     offset.AddPaths(paths, jtRound, etClosedPolygon);
                     offset.Execute(paths, m_dOffset);
@@ -166,7 +166,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
                 }
             } else {
                 ClipperOffset offset(uScale);
-                for (Paths paths : m_groupedPaths) {
+                for (Paths paths : m_groupedPathss) {
                     offset.AddPaths(paths, jtRound, etClosedPolygon);
                 }
                 Paths paths;
@@ -191,14 +191,14 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
             switch (m_side) {
             case Outer:
                 groupedPaths(CutoffPaths, m_toolDiameter + 5);
-                if (m_groupedPaths.size() > 1 && m_groupedPaths.first().size() == 2)
-                    m_groupedPaths.removeFirst();
+                if (m_groupedPathss.size() > 1 && m_groupedPathss.first().size() == 2)
+                    m_groupedPathss.removeFirst();
                 break;
             case Inner:
                 groupedPaths(CopperPaths);
                 break;
             }
-            for (Paths paths : m_groupedPaths) {
+            for (Paths paths : m_groupedPathss) {
                 ClipperOffset offset(uScale);
                 offset.AddPaths(paths, jtRound, etClosedPolygon);
                 offset.Execute(paths, -m_dOffset);
@@ -217,7 +217,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
 
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
             return;
         }
 
@@ -256,11 +256,11 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
 
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         } else {
             m_file = new GCodeFile(m_returnPaths, tool, depth, Pocket, fillPaths);
             emit fileReady(m_file);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         }
     } catch (...) {
         qDebug() << "catch";
@@ -441,7 +441,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
     try {
         self = this;
 
-        emit progress(1, 0); ////////////////////// progress //////////////////////
+        // emit progress(1, 0); // progress
 
         m_toolDiameter = tool.getDiameter(depth);
         // execute offset
@@ -489,7 +489,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
         }
 
         if (m_returnPaths.isEmpty()) {
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
             return;
         }
 
@@ -569,42 +569,28 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
 
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         } else {
             m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
             emit fileReady(m_file);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         }
     } catch (...) {
         qDebug() << "catch";
     }
 }
 
-void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double depth)
+void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double depth)
 {
-
     try {
         self = this;
-
-        emit progress(1, 0); ////////////////////// progress //////////////////////
-
         m_toolDiameter = tool.getDiameter(depth);
-
-        // calc offset
-        const double dOffset = (m_side == Outer) ? +m_toolDiameter * uScale * 0.5 : -m_toolDiameter * uScale * 0.5;
+        const double dOffset = m_toolDiameter * uScale * 0.5;
 
         // execute offset
         ClipperOffset offset;
         offset.AddPaths(m_workingPaths, jtRound, etClosedPolygon);
         offset.Execute(m_returnPaths, dOffset);
-
-        //        if (!m_workingRawPaths.isEmpty()) {
-        //            ClipperOffset offset;
-        //            offset.AddPaths(m_workingRawPaths, jtRound, etOpenRound);
-        //            offset.Execute(m_workingRawPaths, dOffset);
-        //        }
-        //        if (!m_workingRawPaths.isEmpty())
-        //            m_returnPaths.append(m_workingRawPaths);
 
         // fix direction
         if (m_side == Outer && !m_convent)
@@ -616,16 +602,18 @@ void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double 
             path.append(path.first());
 
         if (m_returnPaths.isEmpty()) {
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            emit fileReady(nullptr); // emit progress(0, 0); // progress
             return;
         }
+
         // create frame
         Paths framePaths;
         {
             ClipperOffset offset;
-            offset.AddPaths(m_returnPaths, jtMiter, etClosedLine);
-            offset.Execute(framePaths, +m_toolDiameter * uScale * 0.1);
 
+            offset.AddPaths(m_returnPaths, jtMiter, etClosedLine);
+
+            offset.Execute(framePaths, +m_toolDiameter * uScale * 0.1);
             Clipper clipper;
             clipper.AddPaths(framePaths, ptSubject, true);
             {
@@ -635,17 +623,27 @@ void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double 
                         offset.AddPaths(go.paths, jtMiter, etClosedPolygon);
                     }
                 }
-                offset.Execute(framePaths, dOffset - 0.005*uScale);
+                offset.Execute(framePaths, dOffset - 0.005 * uScale);
+            }
+            for (const Paths& paths : m_supportPathss) {
+                clipper.AddPaths(paths, ptClip, true);
             }
             clipper.AddPaths(framePaths, ptClip, true);
-
             clipper.Execute(ctIntersection, framePaths, pftPositive);
         }
 
-        // create termal
+        // create thermal
 
         for (int index = 0, size = m_returnPaths.size(); index < size; ++index) {
             Path& path = m_returnPaths[index];
+            //            {
+            //                ClipperOffset offset;
+            //                offset.AddPaths(paths, jtRound, etClosedPolygon);
+            //                offset.Execute(paths, dOffset);
+            //                for (Path& path : paths) {
+            //                    path.append(path.last());
+            //                }
+            //            }
 
             Paths tmpPaths;
             // cut toolPath
@@ -653,6 +651,7 @@ void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double 
                 Clipper clipper;
                 clipper.AddPath(path, ptSubject, false);
                 clipper.AddPaths(framePaths, ptClip, true);
+                //                clipper.AddPaths(m_supportPathss[index], ptClip, true);
                 PolyTree polytree;
                 clipper.Execute(ctDifference, polytree, pftPositive);
                 PolyTreeToPaths(polytree, tmpPaths);
@@ -691,11 +690,11 @@ void ToolPathCreator::createTermal(Gerber::File* file, const Tool& tool, double 
 
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         } else {
-            m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Termal);
+            m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Thermal);
             emit fileReady(m_file);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
+            // emit progress(0, 0); // progress
         }
     } catch (...) {
         qDebug() << "catch";
@@ -714,7 +713,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
 {
     try {
         qDebug() << "";
-        emit progress(3, 0); ////////////////////// progress //////////////////////
+        // emit progress(3, 0); // progress
         QElapsedTimer t;
         t.start();
         if (test) {
@@ -749,7 +748,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             //                }
             //                ++id;
             //            }
-            //            emit progress(3, 1); ////////////////////// progress //////////////////////
+            //            // emit progress(3, 1); // progress
             //            {
             //                Clipper clipper;
             //                for (const Paths& paths : m_groupedPaths) {
@@ -779,7 +778,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             //                }
             //                qDebug() << "m_returnPaths" << m_returnPaths.size();
             //                delete diagram;
-            //                emit progress(3, 2); ////////////////////// progress //////////////////////
+            //                // emit progress(3, 2); // progress
             //            }
 
             //            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
@@ -793,10 +792,10 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             //            const int max = m_returnPaths.size();
             //            for (int k = 0; k < 10; ++k) {
             //                for (int i = 0; i < m_returnPaths.size(); ++i) {
-            //                    ////////////////////// progress //////////////////////
+            //                    // progress
             //                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
             //                        return;
-            //                    ////////////////////// progress //////////////////////
+            //                    // progress
             //                    for (int j = 0; j < m_returnPaths.size(); ++j) {
             //                        if (i == j)
             //                            continue;
@@ -851,7 +850,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 }
             };
 
-            for (const Paths& paths : m_groupedPaths) {
+            for (const Paths& paths : m_groupedPathss) {
                 for (const Path& path : paths) {
                     IntPoint tmp(path.first());
                     for (const IntPoint& point : path) {
@@ -877,10 +876,10 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 ++id;
             }
 
-            emit progress(3, 1); ////////////////////// progress //////////////////////
+            progressOrCancel(3, 1); // progress
             {
                 Clipper clipper;
-                for (const Paths& paths : m_groupedPaths) {
+                for (const Paths& paths : m_groupedPathss) {
                     clipper.AddPaths(paths, ptClip, true);
                 }
                 clipper.AddPaths(m_workingRawPaths, ptClip, true);
@@ -918,7 +917,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     jcv_diagram_free(&diagram);
                 }
 
-                emit progress(3, 2); ////////////////////// progress //////////////////////
+                progressOrCancel(3, 2); // progress
 
                 Pairs tmp;
                 for (const Pairs& edge : edges) {
@@ -927,10 +926,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                         std::swap(pair2.first, pair2.second);
                         if (!tmp.contains(pair1) && !tmp.contains(pair2)) {
                             tmp.insert(pair1);
-                            ////////////////////// progress //////////////////////
-                            if (progressOrCancel(edges.size() * edge.size(), tmp.size(), 10000))
-                                return;
-                            ////////////////////// progress //////////////////////
+                            progressOrCancel(edges.size() * edge.size(), tmp.size()); // progress
                         }
                     }
                 }
@@ -938,12 +934,9 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 m_returnPaths.reserve(tmp.size());
                 for (const Pair& path : tmp) {
                     m_returnPaths.append(Path{ path.first, path.second });
-                    ////////////////////// progress //////////////////////
-                    if (progressOrCancel(tmp.size(), m_returnPaths.size(), 10000))
-                        return;
-                    ////////////////////// progress //////////////////////
+                    progressOrCancel(tmp.size(), m_returnPaths.size() /*, 10000*/); // progress
                 }
-                emit progress(3, 3); ////////////////////// progress //////////////////////
+                progressOrCancel(3, 3); // progress
             }
 
             //            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
@@ -952,15 +945,13 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             //                    return r > 0;
             //                return (b.first().X - a.last().X) > 0;
             //            });
+
             qDebug() << "m_returnPaths" << m_returnPaths.size();
             // merge result toolPaths
             const int max = m_returnPaths.size();
             for (int k = 0; k < 10; ++k) {
                 for (int i = 0; i < m_returnPaths.size(); ++i) {
-                    ////////////////////// progress //////////////////////
-                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
-                        return;
-                    ////////////////////// progress //////////////////////
+                    progressOrCancel(max, max - m_returnPaths.size()); // progress
                     for (int j = 0; j < m_returnPaths.size(); ++j) {
                         if (i == j)
                             continue;
@@ -980,10 +971,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             qDebug() << "createVoronoi 1" << t.elapsed() << m_returnPaths.size();
             for (int k = 0; k < 10; ++k) {
                 for (int i = 0; i < m_returnPaths.size(); ++i) {
-                    ////////////////////// progress //////////////////////
-                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
-                        return;
-                    ////////////////////// progress //////////////////////
+                    progressOrCancel(max, max - m_returnPaths.size()); // progress
                     for (int j = 0; j < m_returnPaths.size(); ++j) {
                         if (i == j)
                             continue;
@@ -1036,16 +1024,13 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < 0.1 * uScale)
                     m_returnPaths.remove(i--);
             }
-            //            qDebug() << "remove" << (size - m_returnPaths.size());
             qDebug() << "createVoronoi 3" << t.elapsed() << m_returnPaths.size();
         }
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
         } else {
             m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Voronoi);
             emit fileReady(m_file);
-            emit progress(0, 0); ////////////////////// progress //////////////////////
         }
     } catch (...) {
         qDebug() << "catch";
@@ -1069,8 +1054,8 @@ Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
         ReversePath(outer);
     clipper.AddPath(outer, ptSubject, true);
     clipper.Execute(ctUnion, polyTree, pftNonZero);
-    grouping(polyTree.GetFirst(), &m_groupedPaths, group);
-    return m_groupedPaths;
+    grouping(polyTree.GetFirst(), &m_groupedPathss, group);
+    return m_groupedPathss;
 }
 ////////////////////////////////////////////////////////////////
 /// \brief ToolPathCreator::addRawPaths
@@ -1133,6 +1118,11 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
     paths.takeFirst();
     qDebug() << paths.size();
     m_workingPaths.append(paths);
+}
+
+void ToolPathCreator::addSupportPaths(Pathss supportPaths)
+{
+    m_supportPathss.append(supportPaths);
 }
 
 void ToolPathCreator::addPaths(const Paths& paths)
@@ -1225,28 +1215,36 @@ void ToolPathCreator::grouping2(PolyNode* node, Paths* paths, bool fl)
     }
 }
 
-bool ToolPathCreator::progressOrCancel(int max, int value, int skipKey)
+void ToolPathCreator::progressOrCancel(int progressMax, int progressValue)
 {
-    if (!(value % skipKey)) {
-        emit progress(max, value + 1);
-        return QThread::currentThread()->isInterruptionRequested();
+    m_progressValue = progressValue;
+    m_progressMax = progressMax;
+    if (!(progressValue % 100)) {
+        if (QThread::currentThread()->isInterruptionRequested())
+            throw true;
     }
-    return false;
 }
 
 void ToolPathCreator::progressOrCancel()
 {
     if (!ToolPathCreator::self)
         return;
-
-    if (!(++self->value % 10000)) {
-        if (self->max == self->value)
-            self->max += 1000000;
-        emit self->progress(self->max, self->value);
+    if (!(++self->m_progressValue % 1000)) {
+        if (self->m_progressMax == self->m_progressValue)
+            self->m_progressMax += 1000000;
+        //        emit self->progress(self->m_progressMax, self->m_progressValue);
         if (QThread::currentThread()->isInterruptionRequested())
             throw true;
     }
 }
+
+int ToolPathCreator::progressValue() const
+{
+    if (QThread::currentThread()->isInterruptionRequested())
+        throw true;
+    return m_progressValue;
+}
+int ToolPathCreator::progressMax() const { return m_progressMax; }
 
 //void ToolPathCreator::DoOffset(const Paths& paths, Pathss& pathss, QVector<bool> flags)
 //{

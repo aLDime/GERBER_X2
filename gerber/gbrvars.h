@@ -210,22 +210,24 @@ public:
 };
 
 struct GraphicObject {
-    GraphicObject(
+    explicit GraphicObject(
+        int id,
         const State& state,
         const Paths& paths,
-        File* gFile,
+        const File* gFile,
         const Path& path = Path())
-        : state(state)
+        : id(id)
+        , state(state)
         , paths(paths)
         , gFile(gFile)
         , path(path)
     {
     }
-
-    State state;
-    Paths paths;
-    File* gFile = nullptr;
-    Path path;
+    const int id;
+    const State state;
+    const Paths paths;
+    const File* gFile;
+    const Path path;
 };
 
 } // namespace Gerber

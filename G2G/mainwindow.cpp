@@ -5,7 +5,7 @@
 #include "forms/materialsetupform.h"
 #include "forms/pocketform.h"
 #include "forms/profileform.h"
-#include "forms/termalform.h"
+#include "forms/thermalform.h"
 #include "forms/voronoiform.h"
 #include "gi/bridgeitem.h"
 #include "settingsdialog.h"
@@ -348,8 +348,8 @@ void MainWindow::createActions()
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
         createDockWidget(new VoronoiForm(dockWidget), Voronoi);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathTermalIcon), tr("Termal"), [=] {
-        createDockWidget(new TermalForm(dockWidget), Termal);
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("Thermal"), [=] {
+        createDockWidget(new ThermalForm(dockWidget), Thermal);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
         createDockWidget(new DrillForm(dockWidget), Drilling);
@@ -363,7 +363,7 @@ void MainWindow::createActions()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(2000, [=] { toolpathActionList[Termal]->trigger(); });
+    QTimer::singleShot(2000, [=] { toolpathActionList[Thermal]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif

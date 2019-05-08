@@ -1,20 +1,18 @@
-#ifndef TERMALMODEL_H
-#define TERMALMODEL_H
+#ifndef THERMALMODEL_H
+#define THERMALMODEL_H
 
-#include "termalpreviewitem.h"
+#include "thermalpreviewitem.h"
 
 #include <QAbstractItemModel>
 #include <QIcon>
 #include <myclipper.h>
 
-//class TermalPreviewItem;
-
-class TermalNode {
-    TermalNode(const TermalNode&) = delete;
-    TermalNode& operator=(const TermalNode&) = delete;
+class ThermalNode {
+    ThermalNode(const ThermalNode&) = delete;
+    ThermalNode& operator=(const ThermalNode&) = delete;
 
 public:
-    TermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, TermalPreviewItem* item)
+    ThermalNode(const QIcon& icon, const QString& name, double angle, double tickness, int count, const IntPoint& pos, ThermalPreviewItem* item)
         : container(false)
         , icon(icon)
         , name(name)
@@ -25,7 +23,7 @@ public:
         , m_item(item)
     {
     }
-    TermalNode(const QIcon& icon, const QString& name)
+    ThermalNode(const QIcon& icon, const QString& name)
         : container(true)
         , icon(icon)
         , name(name)
@@ -35,17 +33,17 @@ public:
     {
     }
 
-    ~TermalNode()
+    ~ThermalNode()
     {
         childItems.clear();
     }
 
-    TermalNode* child(int row) const
+    ThermalNode* child(int row) const
     {
         return childItems.value(row).data();
     }
 
-    TermalNode* parentItem()
+    ThermalNode* parentItem()
     {
         return m_parentItem;
     }
@@ -64,10 +62,10 @@ public:
         return 0;
     }
 
-    void append(TermalNode* item)
+    void append(ThermalNode* item)
     {
         item->m_parentItem = this;
-        childItems.append(QSharedPointer<TermalNode>(item));
+        childItems.append(QSharedPointer<ThermalNode>(item));
     }
     void remove(int row) { childItems.removeAt(row); }
 
@@ -81,19 +79,19 @@ public:
                 case 1:
                     return false;
                 case 2:
-                    for (QSharedPointer<TermalNode> item : childItems) {
+                    for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
                     return m_angle = value.toDouble();
                     return true;
                 case 3:
-                    for (QSharedPointer<TermalNode> item : childItems) {
+                    for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
                     return m_tickness = value.toDouble();
                     return true;
                 case 4:
-                    for (QSharedPointer<TermalNode> item : childItems) {
+                    for (QSharedPointer<ThermalNode> item : childItems) {
                         item->setData(index, value, role);
                     }
                     return m_count = value.toInt();
@@ -129,7 +127,7 @@ public:
                         m_item->setFlag(QGraphicsItem::ItemIsSelectable, value.toBool());
                     }
                 }
-                for (QSharedPointer<TermalNode> item : childItems) {
+                for (QSharedPointer<ThermalNode> item : childItems) {
                     item->setData(index, value, role);
                 }
                 return true;
@@ -210,7 +208,7 @@ public:
     double tickness() const { return m_tickness; }
     int count() const { return m_count; }
     IntPoint pos() const { return m_pos; }
-    TermalPreviewItem* item() const { return m_item; }
+    ThermalPreviewItem* item() const { return m_item; }
     bool create() const { return m_checkState == Qt::Checked && !container; }
 
 private:
@@ -222,16 +220,17 @@ private:
     int m_count;
     const IntPoint m_pos;
 
-    TermalPreviewItem* m_item = nullptr;
+    ThermalPreviewItem* m_item = nullptr;
     bool selected = false;
 
-    TermalNode* m_parentItem = nullptr;
-    QList<QSharedPointer<TermalNode>> childItems;
+    ThermalNode* m_parentItem = nullptr;
+    QList<QSharedPointer<ThermalNode>> childItems;
     Qt::CheckState m_checkState = Qt::Checked;
 };
 
-class TermalModel : public QAbstractItemModel {
+class ThermalModel : public QAbstractItemModel {
     Q_OBJECT
+    friend class ThermalForm;
 
     //    typedef struct Row {
     //        Row(const QString& name, const QIcon& icon)
@@ -247,14 +246,15 @@ class TermalModel : public QAbstractItemModel {
 
     QIcon repaint(QColor color, const QIcon& icon) const;
 
-    TermalNode* rootItem = nullptr;
-    QList<TermalNode*> m_data;
+    ThermalNode* rootItem = nullptr;
+    QList<ThermalNode*> m_data;
 
 public:
-    explicit TermalModel(QObject* parent = nullptr);
-    ~TermalModel();
+    explicit ThermalModel(QObject* parent = nullptr);
+    ~ThermalModel();
 
-    TermalNode* appendRow(const QIcon& icon, const QString& name);
+    ThermalNode* appendRow(const QIcon& icon, const QString& name);
+    //QModelIndex createIndex2(int arow, int acolumn, quintptr aid) const { return createIndex(arow, acolumn, aid); }
 
     //signals:
     //public slots:
@@ -279,7 +279,7 @@ public:
     bool removeRows(int row, int count, const QModelIndex& parent) override;
 
 private:
-    TermalNode* getItem(const QModelIndex& index) const;
+    ThermalNode* getItem(const QModelIndex& index) const;
 };
 
-#endif // TERMALMODEL_H
+#endif // THERMALMODEL_H

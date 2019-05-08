@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>TermalForm</class>
- <widget class="QWidget" name="TermalForm">
+ <class>ThermalForm</class>
+ <widget class="QWidget" name="ThermalForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -50,7 +50,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Termal Toolpath</string>
+         <string>Thermal Toolpath</string>
         </property>
        </widget>
       </item>

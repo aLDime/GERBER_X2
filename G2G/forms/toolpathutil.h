@@ -33,14 +33,20 @@ protected:
     ToolPathCreator* toolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
     QString m_fileName;
 
+    void progress(int max, int value);
+
 private:
     const QString m_name;
     QThread thread;
     GCodeFile* m_file;
-    void progress(int max, int value);
     void cancel();
     ToolPathCreator* m_tps = nullptr;
     QProgressDialog* pd = nullptr;
+    int m_timerId = 0;
+
+    // QObject interface
+protected:
+    virtual void timerEvent(QTimerEvent* event) override;
 };
 
 #endif // TOOLPATHUTIL_H

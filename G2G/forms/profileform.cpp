@@ -186,6 +186,7 @@ void ProfileForm::create()
 
     connect(this, &ProfileForm::createProfile, tpc, &ToolPathCreator::createProfile);
     emit createProfile(tool, ui->dsbxDepth->value());
+    progress(1, 0);
 }
 
 void ProfileForm::updateName()

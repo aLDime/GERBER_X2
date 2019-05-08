@@ -58,6 +58,7 @@ private:
     QString m_currentGerbLine;
 
     int m_lineNum = 0;
+    int m_goId = 0;
 
     struct {
         void reset()

@@ -10,7 +10,7 @@ class File;
 class RawItem : /*public QObject, */ public GraphicsItem {
     //Q_OBJECT
 public:
-    RawItem(Path& path, Gerber::File* file);
+    RawItem(const Path& path, Gerber::File* file);
 
     const Gerber::File* file() const;
 
@@ -24,7 +24,7 @@ public:
 private:
     QPolygonF m_polygon;
     const Gerber::File* m_file;
-    Path& m_path;
+    const Path& m_path;
     mutable QPainterPath m_shape;
     mutable double m_scale = 0.0;
 

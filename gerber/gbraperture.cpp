@@ -533,7 +533,7 @@ void ApMacro::drawThermal(const QList<double>& mod)
     };
 
     if (mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
-        throw QObject::tr("Bad termal macro!");
+        throw QObject::tr("Bad thermal macro!");
 
     cInt outer = mod[OuterDiameter] * uScale;
     cInt inner = mod[InnerDiameter] * uScale;

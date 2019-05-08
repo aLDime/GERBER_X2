@@ -35,38 +35,46 @@ class ToolPathCreator : public QObject {
 
 public:
     static ToolPathCreator* self;
-    ToolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
+    ToolPathCreator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~ToolPathCreator();
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);
-    void createTermal(Gerber::File* file, const Tool& tool, double depth);
+    void createThermal(Gerber::File* file, const Tool& tool, double depth);
     void createVoronoi(const Tool& tool, double depth, const double k, bool test);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);
+    void addSupportPaths(Pathss supportPaths);
     void addPaths(const Paths& paths);
 
     GCodeFile* file() const;
 
+    int progressMax() const;
+
+    int progressValue() const;
+    void setProgressValue(int progressValue);
+
 signals:
     void fileReady(GCodeFile* file);
-    void progress(int max, int value);
+    //    void progress(int, int);
 
 private:
     GCodeFile* m_file = nullptr;
     Paths m_workingPaths;
     Paths m_workingRawPaths;
     Paths m_returnPaths;
-    Pathss m_groupedPaths;
+    Pathss m_supportPathss;
+    Pathss m_groupedPathss;
     void grouping(PolyNode* node, Pathss* pathss, Grouping group);
 
     Path& fixPath(PolyNode* node);
     void grouping2(PolyNode* node, Paths* addRawPaths, bool fl = false);
 
-    inline bool progressOrCancel(int max, int value, int skipKey);
+    inline void progressOrCancel(int progressMax, int progressValue /*, int skipKey*/);
     static void progressOrCancel();
-    int max = 1000000;
-    int value = 0;
+
+    int m_progressMax = 1000000;
+    int m_progressValue = 0;
     //    void DoOffset(const Paths& addRawPaths, Pathss& pathss)
     //    {
     //        if (paths.isEmpty())

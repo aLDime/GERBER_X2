@@ -84,7 +84,6 @@ PocketForm::PocketForm(QWidget* parent)
 
 PocketForm::~PocketForm()
 {
-    qDebug("~PocketForm()");
     QSettings settings;
     settings.beginGroup("PocketForm");
     settings.setValue("rbClimb", ui->rbClimb->isChecked());
@@ -222,6 +221,7 @@ void PocketForm::create()
     } else {
         connect(this, &PocketForm::createPocket, tps, &ToolPathCreator::createPocket);
         emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
+        progress(1, 0);
     }
 }
 

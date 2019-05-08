@@ -9,7 +9,7 @@
 
 #include "forms/materialsetupform.h"
 
-RawItem::RawItem(Path& path, Gerber::File* file)
+RawItem::RawItem(const Path &path, Gerber::File* file)
     : m_file(file)
     , m_path(path)
 {

@@ -1,23 +1,21 @@
-#ifndef TermalPreviewItem_H
-#define TermalPreviewItem_H
+#ifndef ThermalPreviewItem_H
+#define ThermalPreviewItem_H
 
 #include "gi/graphicsitem.h"
 #include "tooldatabase/tool.h"
 #include <gbrvars.h>
 #include <myclipper.h>
 
-class TermalPreviewItem : public QGraphicsItem {
-    static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id);
+class ThermalPreviewItem : public QGraphicsItem {
     static QPainterPath drawPoly(const Gerber::GraphicObject& go);
 
 public:
-    //    explicit TermalPreviewItem(const Gerber::GraphicObject& go, int id);
-    explicit TermalPreviewItem(const Gerber::GraphicObject& go, Tool& tool);
+    explicit ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& tool, double& depth);
 
-    ~TermalPreviewItem();
+    ~ThermalPreviewItem();
 
     enum Type {
-        Termal = ShtiftType + 1,
+        Thermal = ShtiftType + 1,
     };
 
     // QGraphicsItem interface
@@ -26,9 +24,9 @@ public:
 
     //////////////////////////////////////////
     int type() const override;
-    //    void setToolId(int toolId);
     IntPoint pos() const;
     Paths paths() const;
+    Paths bridge() const;
     void redraw();
 
     double angle() const;
@@ -42,17 +40,20 @@ public:
 
 private:
     Tool& tool;
+    double& m_depth;
+
     const Gerber::GraphicObject* const grob = nullptr;
 
     const QPainterPath m_sourcePath;
     QPainterPath m_toolPath;
-    const Type m_type;
     QPen m_pen;
     QBrush m_brush;
+
+    Paths m_bridge;
 
     double m_angle = 0.0;
     double m_tickness = 0.5;
     int m_count = 4;
 };
 
-#endif // TermalPreviewItem_H
+#endif // ThermalPreviewItem_H

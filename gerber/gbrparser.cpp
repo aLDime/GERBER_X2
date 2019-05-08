@@ -389,13 +389,13 @@ void Parser::addPath()
         m_state.setType(Region);
         switch (m_abSrIdStack.top().first) {
         case Normal:
-            m_file->append(GraphicObject(m_state, createPolygon(), m_file, m_path));
+            m_file->append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
             break;
         case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_state, createPolygon(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
             break;
         case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createPolygon(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
             break;
         }
         break;
@@ -403,13 +403,13 @@ void Parser::addPath()
         m_state.setType(Line);
         switch (m_abSrIdStack.top().first) {
         case Normal:
-            m_file->append(GraphicObject(m_state, createLine(), m_file, m_path));
+            m_file->append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
             break;
         case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_state, createLine(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
             break;
         case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, createLine(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
             break;
         }
         break;
@@ -432,13 +432,13 @@ void Parser::addFlash()
 
     switch (m_abSrIdStack.top().first) {
     case Normal:
-        m_file->append(GraphicObject(m_state, paths, m_file));
+        m_file->append(GraphicObject(m_goId++, m_state, paths, m_file));
         break;
     case StepRepeat:
-        m_stepRepeat.storage.append(GraphicObject(m_state, paths, m_file));
+        m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, paths, m_file));
         break;
     case ApertureBlock:
-        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_state, paths, m_file));
+        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, paths, m_file));
         break;
     }
     resetStep();
@@ -454,6 +454,7 @@ void Parser::reset(const QString& fileName)
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ Normal, 0 });
     m_stepRepeat.reset();
+    m_goId = 0;
 }
 
 void Parser::resetStep()
@@ -713,11 +714,12 @@ void Parser::closeStepRepeat()
     qDebug() << "sr" << m_stepRepeat.x << m_stepRepeat.y;
     for (int y = 0; y < m_stepRepeat.y; ++y) {
         for (int x = 0; x < m_stepRepeat.x; ++x) {
-            for (GraphicObject go : m_stepRepeat.storage) {
-                for (Path& path : go.paths) {
+            for (const GraphicObject& go : m_stepRepeat.storage) {
+                Paths paths(go.paths);
+                for (Path& path : paths) {
                     TranslatePath(path, IntPoint(m_stepRepeat.i * x, m_stepRepeat.j * y));
                 }
-                m_file->append(go);
+                m_file->append(GraphicObject(m_goId++, go.state, paths, go.gFile, go.path));
             }
         }
     }

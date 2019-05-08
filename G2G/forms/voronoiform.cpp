@@ -133,6 +133,7 @@ void VoronoiForm::create()
     tps->addRawPaths(wRawPaths);
     connect(this, &VoronoiForm::createVoronoi, tps, &ToolPathCreator::createVoronoi);
     emit createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value(), ui->checkBox->isChecked());
+    progress(1, 0);
 }
 
 void VoronoiForm::updateName()
