@@ -106,55 +106,24 @@ Paths File::merge() const
     QElapsedTimer t;
     t.start();
     m_mergedPaths.clear();
-    Paths tmpPaths;
-    int i = 0, exp = -1;
+    int i = 0;
     while (i < size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddPaths(m_mergedPaths, ptSubject, true);
-        exp = at(i).state.imgPolarity();
+
+        const int exp = at(i).state.imgPolarity();
 
         Paths workingPaths;
 
         do {
-            tmpPaths = at(i++).paths;
+            Paths paths(at(i++).paths);
             //SimplifyPolygons(tmpPaths, pftNonZero);
-            workingPaths.append(tmpPaths);
+            workingPaths.append(paths);
         } while (i < size() && exp == at(i).state.imgPolarity());
 
         if (at(i - 1).state.imgPolarity() == Positive) {
-            if (0) {
-                QSemaphore semaphore;
-                const int threadCount = QThread::idealThreadCount();
-                QVector<Union*> unionThreads;
-                //                for (int i = 0; i < threadCount; ++i) {
-                //                    unionThreads.append(new Union(&semaphore, {}));
-                //                }
-                //                int i = 0;
-                //                while (workingPaths.size()) {
-                //                    for (int j = 0; j < 500 && workingPaths.size(); ++j) {
-                //                        unionThreads[i]->paths().append(workingPaths.takeLast());
-                //                    }
-                //                    (++i == 4) ? i = 0 : i = i;
-                //                }
-                for (int i = 0, j = workingPaths.size() / threadCount; i < threadCount; ++i) {
-                    if (i == threadCount - 1)
-                        unionThreads.append(new Union(&semaphore, workingPaths.mid(i * j)));
-                    else
-                        unionThreads.append(new Union(&semaphore, workingPaths.mid(i * j, j)));
-                    unionThreads.last()->start();
-                    //                    unionThreads[i]->start();
-                }
-                if (semaphore.tryAcquire(threadCount, 3600000)) {
-                    for (Union* unionThread : unionThreads) {
-                        clipper.AddPaths(unionThread->paths(), ptClip, true);
-                    }
-                    clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
-                }
-                qDeleteAll(unionThreads);
-            } else {
-                clipper.AddPaths(workingPaths, ptClip, true);
-                clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
-            }
+            clipper.AddPaths(workingPaths, ptClip, true);
+            clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
         } else {
             clipper.AddPaths(workingPaths, ptClip, true);
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
@@ -300,4 +269,12 @@ void File::setItemType(File::ItemsType type)
 Paths& Union::paths()
 {
     return m_paths;
+}
+
+void Gerber::File::save() const
+{
+}
+
+void Gerber::File::open() const
+{
 }

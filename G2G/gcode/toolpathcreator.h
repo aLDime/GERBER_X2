@@ -31,7 +31,8 @@ void fixBegin(Path& path);
 class ToolPathCreator : public QObject {
     Q_OBJECT
 
-    friend class Clipper;
+    // friend class Clipper; // clipper.c:1619 ‘static void ToolPathCreator::progressOrCancel()’ is private within this context
+    friend class ClipperLib::Clipper;
 
 public:
     static ToolPathCreator* self;

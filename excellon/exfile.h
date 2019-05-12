@@ -30,6 +30,11 @@ public:
 
 protected:
     Paths merge() const override;
+
+    // AbstractFile interface
+public:
+    virtual void save() const override;
+    virtual void open() const override;
 };
 } // namespace Excellon
 

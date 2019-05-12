@@ -43,6 +43,8 @@ public:
     };
 
     virtual FileType type() const = 0;
+    virtual void save() const = 0;
+    virtual void open() const = 0;
 
     Side side() const;
     void setSide(Side side);

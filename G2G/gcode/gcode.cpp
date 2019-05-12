@@ -367,3 +367,12 @@ void GCodeFile::endFile()
     }
     file.close();
 }
+
+
+void GCodeFile::save() const
+{
+}
+
+void GCodeFile::open() const
+{
+}

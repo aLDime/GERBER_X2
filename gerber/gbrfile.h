@@ -14,7 +14,7 @@ class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    File(const QString& shortFileName = "");
+    File(const QString& fileName = "");
     ~File();
 
     enum Group {
@@ -82,9 +82,16 @@ private:
             break;
         }
     }
-};
 
-Q_DECLARE_METATYPE(File)
+    // AbstractFile interface
+public:
+    virtual void save() const override;
+    virtual void open() const override;
+};
+// specialization of ‘template<class T> struct QMetaTypeId’ in different namespace
+//Q_DECLARE_METATYPE(Gerber::File)
 }
+
+Q_DECLARE_METATYPE(Gerber::File)
 
 #endif // GFILE_H

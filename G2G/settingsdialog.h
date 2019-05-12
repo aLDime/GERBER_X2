@@ -43,7 +43,8 @@ private:
     void onScrollBarValueChanged(int value);
     void onListCategoriesCurrentRowChanged(int currentRow);
 
-    static QColor m_color[Colors::Count];
+    //static QColor m_color[Colors::Count]; // size of array ‘m_color’ has non-integral type ‘Colors’
+    static QColor m_color[(size_t)Colors::Count];
 };
 
 #endif // SETTINGSDIALOG_H

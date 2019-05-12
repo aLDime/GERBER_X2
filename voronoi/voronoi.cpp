@@ -1,6 +1,9 @@
 #include "voronoi.h"
 #include <QElapsedTimer>
 #include <QElapsedTimer>
+#include <cmath> // sqrt(), floor()
+
+
 namespace Vrn {
 Voronoi::Voronoi()
 {

@@ -1,6 +1,7 @@
 #include "excellondialog.h"
 #include "exfile.h"
 #include "ui_excellondialog.h"
+#include <cmath> // pow()
 #include <graphicsview.h>
 #include <scene.h>
 

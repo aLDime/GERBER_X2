@@ -19,7 +19,7 @@ double AbstractAperture::drillDiameter() const
 
 Paths AbstractAperture::draw(const State& state)
 {
-    if (state.dCode() == D03)
+    if (state.dCode() == D03 && state.imgPolarity() == Positive)
         m_isFlashed = true;
     if (m_size == 0)
         draw();
@@ -360,7 +360,7 @@ void ApMacro::draw()
             items.push_back({ exposure, polygon });
         }
     } catch (...) {
-        qWarning() << "GAMacro draw error";
+        qWarning() << "Macro draw error";
         throw;
     }
 

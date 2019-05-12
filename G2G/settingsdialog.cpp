@@ -7,7 +7,8 @@
 
 const int gridColor = 100;
 
-const QColor defaultColor[Colors::Count]{
+//const QColor defaultColor[Colors::Count]{ // size of array ‘defaultColor’ has non-integral type ‘Colors’
+const QColor defaultColor[(size_t)Colors::Count] {
     QColor(), //Background
     QColor(255, 255, 0, 120), //Shtift
     QColor(Qt::gray), //CutArea
@@ -21,7 +22,8 @@ const QColor defaultColor[Colors::Count]{
     QColor(Qt::red) //G0
 };
 
-const QString colorName[Colors::Count]{
+//const QString colorName[Colors::Count]{ // size of array ‘colorName’ has non-integral type ‘Colors’
+const QString colorName[(size_t)Colors::Count]{
     "Background",
     "Shtift",
     "CutArea",
@@ -35,7 +37,8 @@ const QString colorName[Colors::Count]{
     "G0",
 };
 
-QColor SettingsDialog::m_color[Colors::Count]{
+//QColor SettingsDialog::m_color[Colors::Count]{ // size of array ‘SettingsDialog::m_color’ has non-integral type ‘Colors’
+QColor SettingsDialog::m_color[(size_t)Colors::Count]{
     QColor(), //Background
     QColor(255, 255, 0, 120), //Shtift
     QColor(Qt::gray), //CutArea

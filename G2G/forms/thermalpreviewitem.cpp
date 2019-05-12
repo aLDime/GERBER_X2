@@ -40,6 +40,8 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
         m_pen.setColor(Qt::darkGray);
         m_brush.setColor(QColor(255, 255, 255, 100));
     }
+    if (!(flags() & ItemIsSelectable))
+        m_brush.setColor(QColor(0, 0, 0, 0));
     painter->setPen(m_pen);
     painter->setBrush(m_brush);
     painter->drawPath(m_sourcePath);

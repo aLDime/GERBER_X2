@@ -1,5 +1,7 @@
 #include "halfedge.h"
 #include <QObject>
+#include <cmath> // std::atan2()
+
 namespace Vrn {
 Halfedge::Halfedge(Edge* edge, Vertex* lSite, Vertex* rSite)
 {

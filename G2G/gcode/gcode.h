@@ -81,6 +81,11 @@ private:
 
 protected:
     virtual Paths merge() const { return m_toolPaths; }
+
+    // AbstractFile interface
+public:
+    virtual void save() const override;
+    virtual void open() const override;
 };
 
 #endif // GCODE_H

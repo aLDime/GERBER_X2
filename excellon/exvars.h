@@ -202,7 +202,11 @@ public:
     {
     }
 
-    const File* const file = nullptr;
+    // QList<T>::node_construct() -> *reinterpret_cast<T*>(n) = t; uses operator=(const Hole&),
+    // but it's deleted, because field "file" is "const",
+    // so, remove "const"
+    //const File* const file = nullptr;
+    File* file = nullptr;
     State state;
     DrillItem* item = nullptr;
 };

@@ -115,3 +115,12 @@ Paths Excellon::File::merge() const
     return m_mergedPaths;
 }
 } //  namespace Excellon
+
+
+void Excellon::File::save() const
+{
+}
+
+void Excellon::File::open() const
+{
+}

@@ -1,4 +1,4 @@
-#include "FileHolder.h"
+#include "fileholder.h" // filename case-sensitive
 
 //QMap<int, QSharedPointer<Drill>> FileHolder::m_drlFiles;
 //QMap<int, QSharedPointer<G::File>> FileHolder::m_gerberFiles;

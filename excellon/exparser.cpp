@@ -2,6 +2,7 @@
 #include "exfile.h"
 
 #include <QFile>
+#include <cmath> // pow()
 
 using namespace Excellon;
 
@@ -50,7 +51,7 @@ File* Parser::parseFile(const QString& fileName)
             if (parsePos(line))
                 continue;
 
-            qWarning() << "херня какаято:" << line;
+            qWarning() << "фигня какаято:" << line;
 
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
