@@ -42,7 +42,7 @@ public:
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);
     void createThermal(Gerber::File* file, const Tool& tool, double depth);
-    void createVoronoi(const Tool& tool, double depth, const double k, bool test);
+    void createVoronoi(const Tool& tool, double depth, const double k);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);
     void addSupportPaths(Pathss supportPaths);

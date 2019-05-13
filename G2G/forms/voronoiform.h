@@ -15,7 +15,7 @@ public:
     ~VoronoiForm();
 
 signals:
-    GCodeFile* createVoronoi(const Tool& tool, double depth, const double k, bool);
+    GCodeFile* createVoronoi(const Tool& tool, double depth, const double k);
 
 private slots:
     void on_pbSelect_clicked();

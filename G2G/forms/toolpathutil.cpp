@@ -71,7 +71,6 @@ ToolPathCreator* ToolPathUtil::toolPathCreator(const Paths& value, const bool co
     return m_tps;
 }
 
-
 void ToolPathUtil::progress(int max, int value)
 {
     //qDebug() << "progress" << max << value;
@@ -118,9 +117,10 @@ void ToolPathUtil::cancel()
 void ToolPathUtil::setFile(GCodeFile* file)
 {
     if (pd)
-        pd->canceled();
-    thread.quit();
-    thread.wait();
+        cancel();
+    //pd->canceled();
+    //    thread.quit();
+    //    thread.wait();
     if (file == nullptr) {
         QMessageBox::information(this, tr("Warning"), tr("The tool does not fit in the Working items!"));
         return;

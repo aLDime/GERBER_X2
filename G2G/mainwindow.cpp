@@ -363,7 +363,7 @@ void MainWindow::createActions()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(2000, [=] { toolpathActionList[Thermal]->trigger(); });
+    QTimer::singleShot(2000, [=] { toolpathActionList[Voronoi]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
 #endif
