@@ -33,7 +33,7 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 
     qreal scale = (double)Size / qMax(rect.width(), rect.height());
 
-    double ky = -rect.top() * scale;
+    double ky = rect.bottom() * scale;
     double kx = rect.left() * scale;
     if (rect.width() > rect.height())
         ky += (Size - rect.height() * scale) / 2;
@@ -49,7 +49,7 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
     painter.setBrush(Qt::black);
     //    painter.translate(tr);
     painter.translate(-kx, ky);
-    painter.scale(scale, scale);
+    painter.scale(scale, -scale);
     painter.drawPath(painterPath);
     return QIcon(pixmap);
 }
@@ -268,7 +268,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
 
     ThermalNode* thermalNode = model->appendRow(QIcon(), "Region");
     for (const Gerber::GraphicObject& go : *file) {
-        if (go.state.type() == Gerber::Region) {
+        if (go.state.type() == Gerber::Region && go.state.imgPolarity() == Gerber::Positive) {
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
             Scene::self->addItem(item);
