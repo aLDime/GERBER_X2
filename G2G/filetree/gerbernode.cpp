@@ -81,14 +81,16 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         case Qt::DecorationRole: {
             QColor color(FileHolder::file(m_id)->color());
             color.setAlpha(255);
-            QPixmap pixmap(16, 16);
-            pixmap.fill(color);
+            QPixmap pixmap(22, 22);
+            pixmap.fill(Qt::transparent);
+            QPainter p(&pixmap);
+            p.setBrush(color);
+            p.drawRect(3, 3, 15, 15);
             if (FileHolder::file<Gerber::File>(m_id)->itemsType() == Gerber::File::Raw) {
                 QFont f;
                 f.setBold(true);
-                QPainter p(&pixmap);
                 p.setFont(f);
-                p.drawText(QRect(0, 0, 16, 16), Qt::AlignCenter, "R");
+                p.drawText(QRect(0, 0, 22, 22), Qt::AlignCenter, "R");
             }
             return pixmap;
         }

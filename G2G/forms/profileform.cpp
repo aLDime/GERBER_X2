@@ -64,6 +64,10 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
     ui->pbAddBridge->setIcon(Icon(PuttonAddBridgeIcon));
 
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->setIconSize({ 16, 16 });
+    }
+
     rb_clicked();
     connect(ui->rbClimb, &QRadioButton::clicked, rb_clicked);
     connect(ui->rbConventional, &QRadioButton::clicked, rb_clicked);

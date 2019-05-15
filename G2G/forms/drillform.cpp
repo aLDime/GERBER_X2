@@ -159,7 +159,9 @@ DrillForm::DrillForm(QWidget* parent)
 
     ui->pbClose->setIcon(Icon(PuttonCloseIcon));
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
-
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->setIconSize({16,16});
+    }
     updateState();
 
     updateFiles();

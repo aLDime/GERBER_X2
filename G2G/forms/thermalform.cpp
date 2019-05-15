@@ -88,6 +88,10 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->pbClose->setIcon(Icon(PuttonCloseIcon));
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
     parent->setWindowTitle(ui->label->text());
+
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->setIconSize({16,16});
+    }
     //    connect(ui->pbClose, &QPushButton::clicked, parent, &QWidget::close);
 }
 

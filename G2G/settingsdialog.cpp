@@ -57,19 +57,19 @@ SettingsDialog::SettingsDialog(QWidget* parent)
 {
     setupUi(this);
 
-    for (QGroupBox* box : this->findChildren<QGroupBox*>()) {
-        listCategories->addItem(box->title());
-        listCategories->item(listCategories->count() - 1)->setData(Qt::UserRole, box->objectName());
-    }
+//    for (QGroupBox* box : this->findChildren<QGroupBox*>()) {
+//        listCategories->addItem(box->title());
+//        listCategories->item(listCategories->count() - 1)->setData(Qt::UserRole, box->objectName());
+//    }
 
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
         formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_color[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
 
-    listCategories->item(0)->setSelected(true);
-    //connect(scrollSettings->verticalScrollBar(), &QScrollBar::valueChanged, this, &SettingsDialog::onScrollBarValueChanged);
-    connect(listCategories, &QListWidget::currentRowChanged, this, &SettingsDialog::onListCategoriesCurrentRowChanged);
+//    listCategories->item(0)->setSelected(true);
+//    //connect(scrollSettings->verticalScrollBar(), &QScrollBar::valueChanged, this, &SettingsDialog::onScrollBarValueChanged);
+//    connect(listCategories, &QListWidget::currentRowChanged, this, &SettingsDialog::onListCategoriesCurrentRowChanged);
     readSettings();
 }
 
@@ -79,19 +79,19 @@ SettingsDialog::~SettingsDialog()
 
 void SettingsDialog::onScrollBarValueChanged(int value)
 {
-    Q_UNUSED(value)
+//    Q_UNUSED(value)
 
-    // Search for first full visible groupbox
-    for (int i = 0; i < listCategories->count(); i++) {
-        QGroupBox* box = this->findChild<QGroupBox*>(listCategories->item(i)->data(Qt::UserRole).toString());
-        if (box) {
-            if (!box->visibleRegion().isEmpty() && box->visibleRegion().boundingRect().y() == 0) {
-                // Select corresponding item in categories list
-                listCategories->setCurrentRow(i);
-                return;
-            }
-        }
-    }
+//    // Search for first full visible groupbox
+//    for (int i = 0; i < listCategories->count(); i++) {
+//        QGroupBox* box = this->findChild<QGroupBox*>(listCategories->item(i)->data(Qt::UserRole).toString());
+//        if (box) {
+//            if (!box->visibleRegion().isEmpty() && box->visibleRegion().boundingRect().y() == 0) {
+//                // Select corresponding item in categories list
+//                listCategories->setCurrentRow(i);
+//                return;
+//            }
+//        }
+//    }
 }
 
 void SettingsDialog::onListCategoriesCurrentRowChanged(int /*currentRow*/)

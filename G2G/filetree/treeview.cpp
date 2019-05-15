@@ -58,6 +58,7 @@ TreeView::TreeView(QWidget* parent)
     header()->setStretchLastSection(false);
 
     setItemDelegateForColumn(1, new LayerDelegate(this));
+    setIconSize(QSize(22, 22));
 }
 
 TreeView::~TreeView()

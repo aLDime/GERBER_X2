@@ -25,6 +25,7 @@ MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , gerberParser(new Gerber::Parser)
 {
+
     setupUi(this);
     setToolTipDuration(0);
 
@@ -202,17 +203,10 @@ void MainWindow::createActions()
     fileMenu->setObjectName(QStringLiteral("fileMenu"));
 
     fileToolBar = addToolBar(tr("File"));
-    fileToolBar->setIconSize(QSize(24, 24));
+    //fileToolBar->setIconSize(QSize(24, 24));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     //     fileToolBar->setMovable(false);
-    connect(fileToolBar, &QToolBar::customContextMenuRequested,
-        [=](const QPoint& pos) {
-            QMenu menu(this);
-            menu.addAction(tr("Icon size = 24"), [=]() { fileToolBar->setIconSize(QSize(24, 24)); });
-            menu.addAction(tr("Icon size = 48"), [=]() { fileToolBar->setIconSize(QSize(48, 48)); });
-            menu.addAction(tr("Icon size = 72"), [=]() { fileToolBar->setIconSize(QSize(72, 72)); });
-            menu.exec(fileToolBar->mapToGlobal(pos));
-        });
+
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
 
     action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
@@ -280,7 +274,7 @@ void MainWindow::createActions()
 
     //==================== zoomToolBar ====================
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
-    zoomToolBar->setIconSize(QSize(22, 22));
+    //zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
     //     zoomToolBar->setMovable(false);
     action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
@@ -321,7 +315,7 @@ void MainWindow::createActions()
 
     //==================== toolpathToolBar ====================
     toolpathToolBar = addToolBar(tr("Toolpath"));
-    toolpathToolBar->setIconSize(QSize(24, 24));
+    //toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
 
     //     toolpathToolBar->setMovable(false);
@@ -693,5 +687,8 @@ QMenu* MainWindow::createPopupMenu()
     menu->removeAction(dockWidget->toggleViewAction());
     menu->removeAction(toolpathToolBar->toggleViewAction());
     menu->removeAction(treeDockWidget->toggleViewAction());
+    menu->addAction(tr("Icon size = 24"), [=]() { setIconSize(QSize(24, 24)); });
+    menu->addAction(tr("Icon size = 48"), [=]() { setIconSize(QSize(48, 48)); });
+    menu->addAction(tr("Icon size = 72"), [=]() { setIconSize(QSize(72, 72)); });
     return menu;
 }

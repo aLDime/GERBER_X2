@@ -35,6 +35,10 @@ int main(int argc, char* argv[])
     app.setOrganizationName("XrSoft");
     app.setApplicationVersion("0.7.3");
 
+    QFont f;
+    f.setPixelSize(14);
+    app.setFont(f);
+
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
 

@@ -106,6 +106,10 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
     });
     prnt->setWindowTitle(ui->label->text());
     self = this;
+
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->setIconSize({16,16});
+    }
 }
 
 MaterialSetup::~MaterialSetup()

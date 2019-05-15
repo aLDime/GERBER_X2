@@ -70,6 +70,10 @@ PocketForm::PocketForm(QWidget* parent)
     ui->pbClose->setIcon(Icon(PuttonCloseIcon));
     ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
 
+    for (QPushButton* button : findChildren<QPushButton*>()) {
+        button->setIconSize({16,16});
+    }
+
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
 
     rb_clicked();

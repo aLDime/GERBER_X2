@@ -61,7 +61,7 @@ static QIcon Icon(Id id)
     case PathVoronoiIcon:
         return QIcon::fromTheme("path-reverse");
     case PathThermalIcon:
-        return QIcon::fromTheme("escape-direction-all");
+        return QIcon::fromTheme("thermal");
     case PathProfileIcon:
         return QIcon::fromTheme("object-to-path");
     case MaterialIcon:
@@ -98,6 +98,7 @@ static QIcon Icon(Id id)
     case ZoomOutIcon:
         return QIcon::fromTheme("zoom-out");
     case ZoomToSelectedIcon:
+        return QIcon::fromTheme("zoom-to-selected");
     case SelectAllIcon:
         return QIcon::fromTheme("edit-select-all");
 
