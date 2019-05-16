@@ -396,6 +396,7 @@ DISTFILES += \
     ../icons/breeze/index.theme \
     ../icons/breeze/places/16/folder.svg \
     ../icons/colors.txt \
+    ../tools.dat \
     translations/g2g_en.ts \
     translations/g2g_ru.ts
 

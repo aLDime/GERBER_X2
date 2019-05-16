@@ -105,7 +105,8 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
         itemGroup()->append(item);
         break;
     case Pocket:
-        if (0) { //fast rendeer
+        if (0) {
+            //fast rendeer
             //            Paths tmpPaths;
             //            Pathss pathss;
             //            Clipper clipper;
@@ -207,6 +208,7 @@ void GCodeFile::save(const QString& name)
     case Profile:
     case Pocket:
     case Voronoi:
+    case Thermal:
         saveProfilePocket();
         break;
     case Drilling:
@@ -367,7 +369,6 @@ void GCodeFile::endFile()
     }
     file.close();
 }
-
 
 void GCodeFile::save() const
 {

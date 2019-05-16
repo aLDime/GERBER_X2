@@ -1447,7 +1447,7 @@ Public License instead of this License.  But first, please read
     <message>
         <location filename="../forms/materialsetupform.ui" line="244"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
-        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Размещение &quot;Домй&quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
+        <translation>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Размещение &quot;Домой&quot;&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</translation>
     </message>
     <message>
         <location filename="../forms/materialsetupform.ui" line="267"/>
@@ -2201,7 +2201,7 @@ Old data will be used.</source>
     <message>
         <location filename="../forms/voronoiform.ui" line="65"/>
         <source>Voronoi Toolpath</source>
-        <translation>фрезеровка  &quot;Вороной&quot;</translation>
+        <translation>Фрезеровка  &quot;Вороной&quot;</translation>
     </message>
     <message>
         <location filename="../forms/voronoiform.ui" line="105"/>
