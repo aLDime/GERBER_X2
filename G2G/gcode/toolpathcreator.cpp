@@ -714,7 +714,15 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
     }
 }
 
-using Pair = QPair<IntPoint, IntPoint>;
+struct Pair {
+    IntPoint first;
+    IntPoint second;
+    int id;
+    bool operator==(const Pair& b) const
+    {
+        return first == b.first && second == b.second;
+    }
+};
 using Pairs = QSet<Pair>;
 using Pairss = QVector<Pairs>;
 inline uint qHash(const Pair& tag, uint seed = 0)
@@ -762,7 +770,9 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         qDebug() << "";
         // emit progress(3, 0); // progress
         QElapsedTimer t;
+        QElapsedTimer t2;
         t.start();
+        t2.start();
 
         //            QVector<Vrn::Vertex*> points;
         //            points.reserve(1000000);
@@ -954,8 +964,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 for (int i = 0; i < diagram.numsites; i++) {
                     jcv_graphedge* graph_edge = sites[i].edges;
                     while (graph_edge) {
-                        const Pair pair1{ toIntPoint(graph_edge->pos[0]), toIntPoint(graph_edge->pos[1]) };
-                        const Pair pair2{ toIntPoint(graph_edge->pos[1]), toIntPoint(graph_edge->pos[0]) };
+                        const Pair pair1{ toIntPoint(graph_edge->pos[0]), toIntPoint(graph_edge->pos[1]), sites[i].p.id };
+                        const Pair pair2{ toIntPoint(graph_edge->pos[1]), toIntPoint(graph_edge->pos[0]), sites[i].p.id };
                         if (edges[sites[i].p.id].contains(pair1))
                             edges[sites[i].p.id].remove(pair1);
                         else if (edges[sites[i].p.id].contains(pair2))
@@ -982,7 +992,10 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 }
             }
 
-            for (const Pair& path : tmp) {
+            QList<Pair> tmp2(tmp.toList());
+            std::sort(tmp2.begin(), tmp2.end(), [](const Pair& a, const Pair& b) { return a.id > b.id; });
+
+            for (const Pair& path : tmp2) {
                 OrdPath* pt1 = new OrdPath;
                 OrdPath* pt2 = new OrdPath;
                 pt1->Pt = path.first;
@@ -995,6 +1008,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                 merge.append(pt1);
                 progressOrCancel(tmp.size(), merge.size()); // progress
             }
+
             progressOrCancel(3, 3); // progress
             qDebug() << "GENERATE" << t.elapsed();
             t.start();
@@ -1034,7 +1048,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             t.start();
         }
         const int max = m_returnPaths.size();
-        for (int k = 0; k < 10; ++k) {
+        for (int k = 0; k < 3; ++k) {
             for (int i = 0; i < m_returnPaths.size(); ++i) {
                 progressOrCancel(max, max - m_returnPaths.size()); // progress
                 for (int j = 0; j < m_returnPaths.size(); ++j) {
@@ -1101,8 +1115,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         QVector<QSet<int>> intersect(m_returnPaths.size());
         for (int i = 0; i < m_returnPaths.size(); ++i) {
             Path& path = m_returnPaths[i];
+            progressOrCancel(m_returnPaths.size(), i); // progress
             for (int pi = 0; pi < path.size(); ++pi) {
-                progressOrCancel(path.size(), pi); // progress
                 for (int j = 0; j < m_returnPaths.size(); ++j) {
                     Path& iPath = m_returnPaths[j];
                     if (abs(path[pi].X - iPath.first().X) < (k * 0.001 * uScale)
@@ -1147,8 +1161,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         }
 
         qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
-        t.start();
-
+        qDebug() << "elapsed" << t2.elapsed();
         m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
         emit fileReady(m_file);
 
