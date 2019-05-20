@@ -1,6 +1,6 @@
 #include "point.h"
 #include "filetree/fileholder.h"
-#include "forms/materialsetupform.h"
+#include "forms/gcodepropertiesform.h"
 #include "gi/graphicsitem.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -123,8 +123,8 @@ void Point::setPosY(double y)
 
 void Point::updateMatSetForm()
 {
-    if (MaterialSetup::self)
-        MaterialSetup::self->updatePosDsbxs();
+    if (GCodePropertiesForm::self)
+        GCodePropertiesForm::self->updatePosDsbxs();
 
     QSettings settings;
     settings.beginGroup("Points");

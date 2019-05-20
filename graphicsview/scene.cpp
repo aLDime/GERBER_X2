@@ -96,11 +96,10 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
 
 void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 {
-
     if (m_drawPdf)
         return;
 
-    double scale = views().at(0)->matrix().m11();
+    double scale = views().first()->matrix().m11();
     if (qFuzzyIsNull(scale))
         return;
 
@@ -111,41 +110,61 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     QMap<long, long> vGrid;
 
     const QColor color[3]{
-        SettingsDialog::color(Colors::Grid1), //QColor(с, с, с, 50),
-        SettingsDialog::color(Colors::Grid5), //QColor(с, с, с, 100),
-        SettingsDialog::color(Colors::Grid10), //QColor(с, с, с, 200)
+        SettingsDialog::color(Colors::Grid1),
+        SettingsDialog::color(Colors::Grid5),
+        SettingsDialog::color(Colors::Grid10),
     };
 
     const long k = 10000;
     const double invK = 1.0 / k;
 
-    double gridStep = qPow(10.0, qCeil(log10((7.0 / scale)))); //decimal = 0.1;
-    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k; hPos < right; hPos += step)
+    double gridStep = qPow(10.0, qCeil(log10((8.0 / scale)))); // 0.1;
+    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
+         hPos < right;
+         hPos += step) {
         hGrid[hPos] = 0;
-    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k; vPos < bottom; vPos += step)
+    }
+    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
+         vPos < bottom;
+         vPos += step) {
         vGrid[vPos] = 0;
+    }
 
-    gridStep *= 5; //half = 0.5;
-    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k; hPos < right; hPos += step)
+    gridStep *= 5; // 0.5;
+    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
+         hPos < right;
+         hPos += step) {
         hGrid[hPos] = 1;
-    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k; vPos < bottom; vPos += step)
+    }
+    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
+         vPos < bottom;
+         vPos += step) {
         vGrid[vPos] = 1;
+    }
 
-    gridStep *= 2; //integer = 1.0;
-    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k; hPos < right; hPos += step)
+    gridStep *= 2; // 1.0;
+    for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
+         hPos < right;
+         hPos += step) {
         hGrid[hPos] = 2;
-    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k; vPos < bottom; vPos += step)
+    }
+    for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
+         vPos < bottom;
+         vPos += step) {
         vGrid[vPos] = 2;
+    }
 
     for (int i = 0; i < 3; ++i) {
         painter->setPen(QPen(color[i], 1.0 / scale));
         for (long hPos : hGrid.keys(i)) {
-            if (hPos)
+            if (hPos) {
                 painter->drawLine(QLineF(hPos * invK, rect.top(), hPos * invK, rect.bottom()));
+            }
         }
         for (long vPos : vGrid.keys(i)) {
-            if (vPos)
+            if (vPos) {
                 painter->drawLine(QLineF(rect.left(), vPos * invK, rect.right(), vPos * invK));
+            }
         }
     }
 

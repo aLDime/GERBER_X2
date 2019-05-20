@@ -20,7 +20,6 @@ public:
     void setPen(const QPen& pen);
     void setZValue(qreal z);
 
-
 private:
     bool m_visible = true;
     QPen m_pen;

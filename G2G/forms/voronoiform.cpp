@@ -3,7 +3,7 @@
 
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
-#include "materialsetupform.h"
+#include "gcodepropertiesform.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -20,7 +20,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     ui->setupUi(this);
 
     ui->lblToolName->setText(tool.name);
-    ui->dsbxDepth->setValue(MaterialSetup::thickness);
+    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     updateName();
 
@@ -28,10 +28,10 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     //    settings.beginGroup("VoronoiForm");
     //    settings.endGroup();
 
-    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
-    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
-    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
-    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
+    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
+    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
+    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {

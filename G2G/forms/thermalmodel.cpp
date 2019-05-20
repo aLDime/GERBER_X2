@@ -36,7 +36,7 @@ int ThermalModel::rowCount(const QModelIndex& parent) const
     return getItem(parent)->childCount();
 }
 
-int ThermalModel::columnCount(const QModelIndex& parent) const
+int ThermalModel::columnCount(const QModelIndex& /*parent*/) const
 {
     return 5;
 }

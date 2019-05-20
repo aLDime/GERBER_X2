@@ -41,11 +41,12 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
 
 Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
 {
+    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case 0:
-        return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+        return itemFlag | Qt::ItemIsUserCheckable;
     default:
-        return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+        return itemFlag;
     }
 }
 
@@ -67,8 +68,6 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case 1:
-        return QVariant();
     default:
         return QVariant();
     }

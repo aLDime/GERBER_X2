@@ -69,6 +69,9 @@ void FileModel::addFile(Gerber::File* file)
     self->beginInsertRows(index, rowCount, rowCount);
     item->append(new GerberNode(file));
     self->endInsertRows();
+
+    QModelIndex selectIndex = self->createIndex(rowCount, 0, item->child(rowCount));
+    emit self->select(selectIndex);
 }
 
 void FileModel::addFile(Excellon::File* file)
@@ -81,6 +84,9 @@ void FileModel::addFile(Excellon::File* file)
     self->beginInsertRows(index, rowCount, rowCount);
     item->append(new DrillNode(file));
     self->endInsertRows();
+
+    QModelIndex selectIndex = self->createIndex(rowCount, 0, item->child(rowCount));
+    emit self->select(selectIndex);
 }
 
 void FileModel::addFile(GCodeFile* file)
@@ -93,6 +99,9 @@ void FileModel::addFile(GCodeFile* file)
     self->beginInsertRows(index, rowCount, rowCount);
     item->append(new GcodeNode(file));
     self->endInsertRows();
+
+    QModelIndex selectIndex = self->createIndex(rowCount, 0, item->child(rowCount));
+    emit self->select(selectIndex);
 }
 
 void FileModel::closeAllFiles()
@@ -180,6 +189,8 @@ QVariant FileModel::headerData(int section, Qt::Orientation orientation, int rol
             return tr("Name");
         case 1:
             return tr("Side");
+        case 2:
+            return tr("C");
         default:
             return QString("");
         }

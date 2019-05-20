@@ -70,6 +70,18 @@ public:
         return rfiles;
     }
 
+    template <typename T>
+    static QVector<T*> count()
+    {
+        QMutexLocker locker(&m_mutex);
+        int count;
+        for (const QSharedPointer<AbstractFile>& sp : m_files) {
+            if (dynamic_cast<T*>(sp.data()))
+                ++count;
+        }
+        return count;
+    }
+
     static bool contains(AbstractFile* file)
     {
         return m_files.values().contains(QSharedPointer<AbstractFile>(file));

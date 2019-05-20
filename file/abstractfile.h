@@ -52,7 +52,10 @@ public:
     QColor color() const;
     void setColor(const QColor& color);
 
+    int id() const;
+
 protected:
+    int m_id;
     virtual Paths merge() const = 0;
 
     QSharedPointer<ItemGroup> m_itemGroup;

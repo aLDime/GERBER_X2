@@ -59,7 +59,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Thermal Toolpath</string>
+         <string>Thermal Insulation Toolpath</string>
         </property>
        </widget>
       </item>

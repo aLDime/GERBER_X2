@@ -55,6 +55,7 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
+    setIconSize({ 24, 24 });
 }
 
 ToolTreeView::~ToolTreeView()

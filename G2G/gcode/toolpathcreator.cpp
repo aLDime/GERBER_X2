@@ -1,5 +1,5 @@
 #include "toolpathcreator.h"
-#include "forms/materialsetupform.h"
+#include "forms/gcodepropertiesform.h"
 #include "toolpathcreator.h"
 #include "voroni/jc_voronoi.h"
 #include <QCoreApplication>
@@ -39,7 +39,7 @@ void fixBegin(Path& path)
 
 Paths& sortByStratDistance(Paths& src)
 {
-    IntPoint startPt(toIntPoint(MaterialSetup::homePoint->pos() + MaterialSetup::zeroPoint->pos()));
+    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -59,7 +59,7 @@ Paths& sortByStratDistance(Paths& src)
 
 Paths& sortByStratDistance2(Paths& src)
 {
-    IntPoint startPt(toIntPoint(MaterialSetup::homePoint->pos() + MaterialSetup::zeroPoint->pos()));
+    IntPoint startPt(toIntPoint(GCodePropertiesForm::homePoint->pos() + GCodePropertiesForm::zeroPoint->pos()));
     for (int firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         int swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -280,7 +280,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
     }
 }
 
-void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
+void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& /*tool*/, double /*depth*/)
 {
     QPair<GCodeFile*, GCodeFile*> files{ nullptr, nullptr };
     //        if (m_side == On)
@@ -1206,7 +1206,7 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
 
     qDebug() << rawPaths.size();
 
-    const double glueLen = MaterialSetup::glue * uScale;
+    const double glueLen = GCodePropertiesForm::glue * uScale;
     Paths paths;
 
     do {

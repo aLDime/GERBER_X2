@@ -1,5 +1,5 @@
-#include "materialsetupform.h"
-#include "ui_materialsetupform.h"
+#include "gcodepropertiesform.h"
+#include "ui_gcodepropertiesform.h"
 
 #include <QDockWidget>
 #include <QSettings>
@@ -7,19 +7,19 @@
 #include <mainwindow.h>
 #include <scene.h>
 
-MaterialSetup* MaterialSetup::self = nullptr;
+GCodePropertiesForm* GCodePropertiesForm::self = nullptr;
 
-Point* MaterialSetup::homePoint = nullptr;
-Point* MaterialSetup::zeroPoint = nullptr;
-double MaterialSetup::safeZ;
-double MaterialSetup::thickness;
-double MaterialSetup::clearence;
-double MaterialSetup::plunge;
-double MaterialSetup::glue;
+Point* GCodePropertiesForm::homePoint = nullptr;
+Point* GCodePropertiesForm::zeroPoint = nullptr;
+double GCodePropertiesForm::safeZ;
+double GCodePropertiesForm::thickness;
+double GCodePropertiesForm::clearence;
+double GCodePropertiesForm::plunge;
+double GCodePropertiesForm::glue;
 
-MaterialSetup::MaterialSetup(QWidget* prnt)
+GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     : QWidget(prnt)
-    , ui(new Ui::MaterialSetupForm)
+    , ui(new Ui::GCodePropertiesForm)
 {
     ui->setupUi(this);
 
@@ -108,11 +108,11 @@ MaterialSetup::MaterialSetup(QWidget* prnt)
     self = this;
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({16,16});
+        button->setIconSize({ 16, 16 });
     }
 }
 
-MaterialSetup::~MaterialSetup()
+GCodePropertiesForm::~GCodePropertiesForm()
 {
     self = nullptr;
 
@@ -136,7 +136,7 @@ MaterialSetup::~MaterialSetup()
     delete ui;
 }
 
-void MaterialSetup::updatePosDsbxs()
+void GCodePropertiesForm::updatePosDsbxs()
 {
     ui->dsbxHomeX->setValue(homePoint->pos().x());
     ui->dsbxHomeY->setValue(homePoint->pos().y());

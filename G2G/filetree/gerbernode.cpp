@@ -49,6 +49,14 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         default:
             return false;
         }
+    case 2:
+        switch (role) {
+        case Qt::CheckStateRole:
+            m_current = value.value<Qt::CheckState>();
+            return true;
+        default:
+            return false;
+        }
     default:
         return false;
     }
@@ -57,13 +65,16 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
 
 Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 {
+    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case 0:
-        return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+        return itemFlag | Qt::ItemIsUserCheckable;
     case 1:
-        return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+        return itemFlag | Qt::ItemIsEditable;
+    case 2:
+        return itemFlag | Qt::ItemIsUserCheckable;
     default:
-        return Qt::ItemIsEnabled | Qt::ItemNeverHasChildren;
+        return itemFlag;
     }
 }
 
@@ -90,7 +101,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
-                p.drawText(QRect(0, 0, 22, 22), Qt::AlignCenter, "R");
+                p.drawText(QRect(0, 0, 22, 20), Qt::AlignCenter, "R");
             }
             return pixmap;
         }
@@ -108,6 +119,13 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
             return static_cast<bool>(FileHolder::file(m_id)->side());
         case Qt::UserRole:
             return m_id;
+        default:
+            return QVariant();
+        }
+    case 2:
+        switch (role) {
+        case Qt::CheckStateRole:
+            return m_current;
         default:
             return QVariant();
         }

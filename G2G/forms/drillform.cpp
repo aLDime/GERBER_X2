@@ -4,7 +4,7 @@
 #include "drillmodel.h"
 #include "filetree/fileholder.h"
 #include "filetree/filemodel.h"
-#include "materialsetupform.h"
+#include "gcodepropertiesform.h"
 #include "previewitem.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QCheckBox>
@@ -99,7 +99,7 @@ DrillForm::DrillForm(QWidget* parent)
 {
     ui->setupUi(this);
     ui->toolTable->setIconSize(QSize(Size, Size));
-    ui->dsbxDepth->setValue(MaterialSetup::thickness);
+    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     ui->toolTable->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(ui->toolTable, &QTableView::customContextMenuRequested, this, &DrillForm::on_customContextMenuRequested);
@@ -124,7 +124,7 @@ DrillForm::DrillForm(QWidget* parent)
     ui->rb_drilling->setChecked(true);
 
     auto updateState = [=] {
-        m_worckType = ui->rb_drilling->isChecked() ? Drilling : (ui->rb_profile->isChecked() ? Profile : Pocket);
+        m_worckType = ui->rb_drilling->isChecked() ? Drill : (ui->rb_profile->isChecked() ? Profile : Pocket);
         ui->grbxSide->setEnabled(m_worckType == Profile);
         ui->grbxDirection->setEnabled(m_worckType == Profile || m_worckType == Pocket);
         m_side = ui->rb_on->isChecked() ? On : (ui->rb_out->isChecked() ? Outer : Inner);
@@ -157,8 +157,8 @@ DrillForm::DrillForm(QWidget* parent)
     connect(ui->rb_pocket, &QRadioButton::clicked, updateState);
     connect(ui->rb_profile, &QRadioButton::clicked, updateState);
 
-    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
-    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
+    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({16,16});
     }
@@ -402,7 +402,7 @@ void DrillForm::on_pbCreate_clicked()
                             model->setCreate(row, false);
                         }
                         break;
-                    case Drilling:
+                    case Drill:
                         if (ToolHolder::tools[toolId].type != Tool::Engraving) {
                             pathsMap[toolId].drillPath.append(item->pos());
                             model->setCreate(row, false);
@@ -422,7 +422,7 @@ void DrillForm::on_pbCreate_clicked()
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
             if (!pathsMap[toolId].drillPath.isEmpty()) {
                 Path& path = pathsMap[toolId].drillPath;
-                IntPoint point1(toIntPoint(MaterialSetup::homePoint->pos()));
+                IntPoint point1(toIntPoint(GCodePropertiesForm::homePoint->pos()));
                 int counter = 0;
                 { // sort by distance
                     while (counter < path.size()) {
@@ -439,7 +439,7 @@ void DrillForm::on_pbCreate_clicked()
                         point1 = path[counter++];
                     }
                 }
-                GCodeFile* gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drilling);
+                GCodeFile* gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drill);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
                 FileModel::addFile(gcode);

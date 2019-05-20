@@ -2,7 +2,7 @@
 #include "aboutform.h"
 #include "filetree/fileholder.h"
 #include "forms/drillform.h"
-#include "forms/materialsetupform.h"
+#include "forms/gcodepropertiesform.h"
 #include "forms/pocketform.h"
 #include "forms/profileform.h"
 #include "forms/thermalform.h"
@@ -29,16 +29,16 @@ MainWindow::MainWindow(QWidget* parent)
     setupUi(this);
     setToolTipDuration(0);
 
-    MaterialSetup::homePoint = new Point(Point::Home);
-    MaterialSetup::zeroPoint = new Point(Point::Zero);
+    GCodePropertiesForm::homePoint = new Point(Point::Home);
+    GCodePropertiesForm::zeroPoint = new Point(Point::Zero);
 
     new Shtift();
     new Shtift();
     new Shtift();
     new Shtift();
 
-    Scene::self->addItem(MaterialSetup::homePoint);
-    Scene::self->addItem(MaterialSetup::zeroPoint);
+    Scene::self->addItem(GCodePropertiesForm::homePoint);
+    Scene::self->addItem(GCodePropertiesForm::zeroPoint);
 
     init();
 
@@ -342,14 +342,14 @@ void MainWindow::createActions()
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
         createDockWidget(new VoronoiForm(dockWidget), Voronoi);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("Thermal"), [=] {
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("Thermal Insulation"), [=] {
         createDockWidget(new ThermalForm(dockWidget), Thermal);
     }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
-        createDockWidget(new DrillForm(dockWidget), Drilling);
+        createDockWidget(new DrillForm(dockWidget), Drill);
     }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(MaterialIcon), tr("Setup Material"), [=] {
-        createDockWidget(new MaterialSetup(dockWidget), Material);
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(GCodePropertiesIcon), tr("G-Code Properties"), [=] {
+        createDockWidget(new GCodePropertiesForm(dockWidget), GCodeProperties);
     }));
 
     toolpathToolBar->addSeparator();
@@ -359,7 +359,7 @@ void MainWindow::createActions()
 #ifdef QT_DEBUG
     QTimer::singleShot(2000, [=] { toolpathActionList[Voronoi]->trigger(); });
 #else
-    QTimer::singleShot(10, [=] { toolpathActionList[Material]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[GCodeProperties]->trigger(); });
 #endif
 
     toolpathToolBar->addAction(Icon(ToolDatabaseIcon), tr("Tool Base"), [=] {
@@ -375,8 +375,8 @@ void MainWindow::createActions()
                 item->setSelected(true);
         }
 
-        MaterialSetup::homePoint->resetPos();
-        MaterialSetup::zeroPoint->resetPos();
+        GCodePropertiesForm::homePoint->resetPos();
+        GCodePropertiesForm::zeroPoint->resetPos();
         Shtift::shtifts().first()->resetPos();
         for (QGraphicsItem* item : Scene::self->items())
             item->setSelected(selected.takeFirst());
@@ -425,7 +425,7 @@ void MainWindow::createShtifts()
             return;
         settings.setValue("Shtift/depth", depth);
 
-        GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drilling);
+        GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drill);
         gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id) + ")");
         FileModel::addFile(gcode);
     }
@@ -525,6 +525,9 @@ void MainWindow::openFile(const QString& fileName)
 {
     static QMutex mutex;
     QMutexLocker locker(&mutex);
+
+    if (fileName.endsWith(".fmt"))
+        return;
 
     if (FileHolder::fileNames().contains(fileName)) {
         QMessageBox::warning(this, "", tr("The document is open."));

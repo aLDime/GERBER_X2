@@ -42,17 +42,18 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
 
 Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
 {
+    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case 0:
-        return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable | Qt::ItemIsSelectable | Qt::ItemNeverHasChildren;
+        return itemFlag | Qt::ItemIsUserCheckable;
     case 1: {
         if (FileHolder::file(m_id)->shortFileName().contains(".tap"))
-            return Qt::ItemNeverHasChildren;
+            return itemFlag;
         else
-            return Qt::ItemIsEnabled | Qt::ItemIsEditable | Qt::ItemNeverHasChildren;
+            return itemFlag | Qt::ItemIsEditable;
     }
     default:
-        return 0;
+        return itemFlag;
     }
 }
 
@@ -72,20 +73,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            switch (FileHolder::file<GCodeFile>(m_id)->gtype()) {
-            case Profile:
-                return Icon(PathProfileIcon);
-            case Pocket:
-                return Icon(PathPocketIcon);
-            case Voronoi:
-                return Icon(PathVoronoiIcon);
-            case Thermal:
-                return Icon(PathThermalIcon);
-            case Drilling:
-                return Icon(PathDrillIcon);
-            default:
-                return Icon(PathDrillIcon);
-            }
+            return Icon(FileHolder::file<GCodeFile>(m_id)->gtype());
         case Qt::UserRole:
             return m_id;
         default:
@@ -95,7 +83,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return QStringList({ "Top", "Bottom" })[FileHolder::file(m_id)->side()];
+            return QStringList({ QObject::tr("Top"), QObject::tr("Bottom") })[FileHolder::file(m_id)->side()];
         case Qt::EditRole:
             return static_cast<bool>(FileHolder::file(m_id)->side());
         default:

@@ -59,3 +59,8 @@ void AbstractFile::setSide(Side side) { m_side = side; }
 QColor AbstractFile::color() const { return m_color; }
 
 void AbstractFile::setColor(const QColor& color) { m_color = color; }
+
+int AbstractFile::id() const
+{
+    return m_id;
+}

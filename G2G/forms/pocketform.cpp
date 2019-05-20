@@ -1,5 +1,5 @@
 #include "pocketform.h"
-#include "materialsetupform.h"
+#include "gcodepropertiesform.h"
 #include "ui_pocketform.h"
 
 #include "filetree/filemodel.h"
@@ -26,7 +26,7 @@ PocketForm::PocketForm(QWidget* parent)
     ui->lblToolName->setText(tool.name);
     ui->lblToolName_2->setText(tool2.name);
 
-    ui->dsbxDepth->setValue(MaterialSetup::thickness);
+    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     auto rb_clicked = [&] {
         if (ui->rbOffset->isChecked())
@@ -63,12 +63,12 @@ PocketForm::PocketForm(QWidget* parent)
     on_chbxUseTwoTools_clicked(settings.value("chbxUseTwoTools").toBool());
     settings.endGroup();
 
-    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
-    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
-    ui->pbEdit_2->setIcon(Icon(PuttonEditIcon));
-    ui->pbSelect_2->setIcon(Icon(PuttonSelectIcon));
-    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
-    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
+    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
+    ui->pbEdit_2->setIcon(Icon(ButtonEditIcon));
+    ui->pbSelect_2->setIcon(Icon(ButtonSelectIcon));
+    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
+    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({16,16});

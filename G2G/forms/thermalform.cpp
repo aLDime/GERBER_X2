@@ -4,7 +4,7 @@
 #include "filetree/fileholder.h"
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
-#include "materialsetupform.h"
+#include "gcodepropertiesform.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tooldatabase.h"
@@ -63,7 +63,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     ui->treeView->setIconSize(QSize(Size, Size));
 
     ui->lblToolName->setText(tool.name);
-    ui->dsbxDepth->setValue(MaterialSetup::thickness);
+    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     updateName();
 
@@ -83,10 +83,10 @@ ThermalForm::ThermalForm(QWidget* parent)
 
     updateFiles();
 
-    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
-    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
-    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
-    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
+    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
+    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
+    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
+    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {

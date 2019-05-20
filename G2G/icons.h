@@ -4,13 +4,13 @@
 #include <QIcon>
 
 enum Id {
-    PathDrillIcon,
+    PathProfileIcon,
     PathPocketIcon,
     PathVoronoiIcon,
     PathThermalIcon,
-    PathProfileIcon,
+    PathDrillIcon,
 
-    MaterialIcon,
+    GCodePropertiesIcon,
     AutoRefpointsIcon,
 
     FolderIcon,
@@ -32,15 +32,20 @@ enum Id {
     ZoomToSelectedIcon,
     SelectAllIcon,
 
-    PuttonAddBridgeIcon,
-    PuttonCloseIcon,
-    PuttonCreateIcon,
-    PuttonEditIcon,
-    PuttonSelectIcon,
+    ButtonAddBridgeIcon,
+    ButtonCloseIcon,
+    ButtonCreateIcon,
+    ButtonEditIcon,
+    ButtonSelectIcon,
 
     OpenFileIcon,
     RemoveIcon,
     DeleteIcon,
+
+    CopyIcon,
+    NewToolIcon,
+    NewGroupIcon,
+
     CloseAllIcon,
     CloseIcon,
     PrintIcon,
@@ -51,20 +56,20 @@ enum Id {
 
 };
 
-static QIcon Icon(Id id)
+static QIcon Icon(int id)
 {
     switch (id) {
-    case PathDrillIcon:
-        return QIcon::fromTheme("roll");
+    case PathProfileIcon:
+        return QIcon::fromTheme("object-to-path");
     case PathPocketIcon:
         return QIcon::fromTheme("stroke-to-path");
     case PathVoronoiIcon:
         return QIcon::fromTheme("path-reverse");
     case PathThermalIcon:
         return QIcon::fromTheme("thermal");
-    case PathProfileIcon:
-        return QIcon::fromTheme("object-to-path");
-    case MaterialIcon:
+    case PathDrillIcon:
+        return QIcon::fromTheme("roll");
+    case GCodePropertiesIcon:
         return QIcon::fromTheme("node");
     case AutoRefpointsIcon:
         return QIcon::fromTheme("snap-nodes-cusp");
@@ -102,15 +107,15 @@ static QIcon Icon(Id id)
     case SelectAllIcon:
         return QIcon::fromTheme("edit-select-all");
 
-    case PuttonAddBridgeIcon:
+    case ButtonAddBridgeIcon:
         return QIcon::fromTheme("edit-cut");
-    case PuttonCloseIcon:
+    case ButtonCloseIcon:
         return QIcon::fromTheme("window-close");
-    case PuttonCreateIcon:
+    case ButtonCreateIcon:
         return QIcon::fromTheme("document-export");
-    case PuttonEditIcon:
+    case ButtonEditIcon:
         return QIcon::fromTheme("document-edit");
-    case PuttonSelectIcon:
+    case ButtonSelectIcon:
         return QIcon::fromTheme("view-form");
         //return QIcon::fromTheme("tools-wizard");
 
@@ -120,6 +125,12 @@ static QIcon Icon(Id id)
         return QIcon::fromTheme("list-remove");
     case DeleteIcon:
         return QIcon::fromTheme("edit-delete");
+    case CopyIcon:
+        return QIcon::fromTheme("edit-copy");
+    case NewToolIcon:
+        return QIcon::fromTheme("list-add");
+    case NewGroupIcon:
+        return QIcon::fromTheme("folder-add");
     case CloseAllIcon:
         return QIcon::fromTheme("list-remove");
     case CloseIcon:

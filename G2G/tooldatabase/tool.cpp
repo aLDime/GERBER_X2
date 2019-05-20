@@ -8,6 +8,12 @@ int toolId = qRegisterMetaType<Tool>("Tool");
 
 Tool::Tool()
     : name("Name")
+    , angle(0.0)
+    , diameter(1.0)
+    , oneTurnCut(0.1)
+    , passDepth(1.0)
+    , spindleSpeed(12000)
+    , stepover(50.0)
 {
 }
 

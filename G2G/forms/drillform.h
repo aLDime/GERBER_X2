@@ -37,7 +37,7 @@ private slots:
     void on_pbCreate_clicked();
 
 private:
-    GCodeType m_worckType = Drilling;
+    GCodeType m_worckType = Drill;
     SideOfMilling m_side = Inner;
 
     void on_cbxFileCurrentIndexChanged(int index);

@@ -14,8 +14,8 @@ enum GCodeType {
     Pocket,
     Voronoi,
     Thermal,
-    Drilling,
-    Material
+    Drill,
+    GCodeProperties
 };
 
 class GCodeFile : public AbstractFile {
@@ -23,7 +23,7 @@ public:
     GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
 
     Paths getPaths() const;
-    void save(const QString& name /*= QString()*/);
+    void save(const QString& name);
 
     GCodeType gtype() const;
 

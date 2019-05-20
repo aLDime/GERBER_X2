@@ -24,7 +24,10 @@ TreeView::TreeView(QWidget* parent)
     connect(m_model, &FileModel::rowsInserted, this, &TreeView::updateTree);
     connect(m_model, &FileModel::rowsRemoved, this, &TreeView::updateTree);
     connect(m_model, &FileModel::updateActions, this, &TreeView::updateTree);
-    //    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::on_selectionChanged);
+    connect(m_model, &FileModel::select, [=](const QModelIndex& index) {
+        selectionModel()->select(index, QItemSelectionModel::Rows | QItemSelectionModel::ClearAndSelect);
+    });
+    connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::onSelectionChanged);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
 
@@ -52,12 +55,14 @@ TreeView::TreeView(QWidget* parent)
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
 
-    header()->setSectionResizeMode(QHeaderView::Stretch);
-    header()->setSectionResizeMode(1, QHeaderView::Fixed);
-    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, "Bottom").width() * 1.7);
+    header()->setSectionResizeMode(QHeaderView::Fixed);
+    header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
+    setColumnWidth(2, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(2, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
     header()->setStretchLastSection(false);
 
     setItemDelegateForColumn(1, new LayerDelegate(this));
+    setItemDelegateForColumn(2, new RadioDelegate(this));
     setIconSize(QSize(22, 22));
 }
 
@@ -91,24 +96,30 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
     }
 }
 
-void TreeView::on_selectionChanged(const QItemSelection& /*selected*/, const QItemSelection& /*deselected*/)
+void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    //    if (!selected.indexes().isEmpty() && selected.indexes().first().parent().row() == NODE_GERBER_FILES) {
-    //        QModelIndex& index = selected.indexes().first();
-    //        if (index.isValid()) {
-    //            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-    //            int id = FileHolder::gerberFiles().key(file);
-    //            file->itemGroup()->setZValue(id);
-    //        }
-    //    }
-    //    if (!deselected.indexes().isEmpty() && deselected.indexes().first().parent().row() == NODE_GERBER_FILES) {
-    //        QModelIndex& index = deselected.indexes().first();
-    //        if (index.isValid()) {
-    //            G::File* file = static_cast<G::File*>(index.data(Qt::UserRole).value<void*>());
-    //            int id = FileHolder::gerberFiles().key(file);
-    //            file->itemGroup()->setZValue(-id);
-    //        }
-    //    }
+    if (!selected.indexes().isEmpty()) {
+        QModelIndex& index = selected.indexes().first();
+        const int row = index.parent().row();
+        if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
+            if (index.isValid()) {
+                const int id = index.data(Qt::UserRole).toInt();
+                AbstractFile* file = FileHolder::file(id);
+                file->itemGroup()->setZValue(id);
+            }
+        }
+    }
+    if (!deselected.indexes().isEmpty()) {
+        QModelIndex& index = deselected.indexes().first();
+        const int row = index.parent().row();
+        if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
+            if (index.isValid()) {
+                const int id = index.data(Qt::UserRole).toInt();
+                AbstractFile* file = FileHolder::file(id);
+                file->itemGroup()->setZValue(-id);
+            }
+        }
+    }
 }
 
 void TreeView::hideOther()

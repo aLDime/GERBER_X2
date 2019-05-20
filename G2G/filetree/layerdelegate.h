@@ -1,10 +1,9 @@
 #ifndef LAYERDELEGATE_H
 #define LAYERDELEGATE_H
 
-#include <QComboBox>
-#include <QItemDelegate>
+#include <QStyledItemDelegate>
 
-class LayerDelegate : public QItemDelegate {
+class LayerDelegate : public QStyledItemDelegate {
     Q_OBJECT
 public:
     LayerDelegate(QObject* parent = nullptr);
@@ -18,4 +17,22 @@ public:
     void emitCommitData();
 };
 
+class RadioDelegate : public QStyledItemDelegate {
+    Q_OBJECT
+public:
+    RadioDelegate(QObject* parent = nullptr);
+    virtual ~RadioDelegate();
+
+    // QAbstractItemDelegate interface
+public:
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override;
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override;
+
+    void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+    QSize sizeHint(const QStyleOptionViewItem& option, const QModelIndex& index) const override;
+
+private slots:
+    void commitAndCloseEditor();
+};
 #endif // LAYERDELEGATE_H

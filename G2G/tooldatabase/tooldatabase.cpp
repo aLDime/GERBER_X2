@@ -45,6 +45,11 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
             }
         }
     });
+
+    ui->pbCopy->setIcon(Icon(CopyIcon));
+    ui->pbDelete->setIcon(Icon(DeleteIcon));
+    ui->pbNew->setIcon(Icon(NewToolIcon));
+    ui->pbNewGroup->setIcon(Icon(NewGroupIcon));
 }
 
 ToolDatabase::~ToolDatabase()

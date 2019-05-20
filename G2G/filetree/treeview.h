@@ -23,7 +23,7 @@ private:
     FileModel* m_model;
 
     void on_doubleClicked(const QModelIndex& index);
-    void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
+    void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
 
     void hideOther();
     ExcellonDialog* m_exFormatDialog = nullptr;

@@ -4,7 +4,7 @@
 #include "filetree/filemodel.h"
 #include "gcode/gcode.h"
 #include "gi/bridgeitem.h"
-#include "materialsetupform.h"
+#include "gcodepropertiesform.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -22,7 +22,7 @@ ProfileForm::ProfileForm(QWidget* parent)
     ui->setupUi(this);
 
     ui->lblToolName->setText(tool.name);
-    ui->dsbxDepth->setValue(MaterialSetup::thickness);
+    ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     auto rb_clicked = [&] {
         if (ui->rbOn->isChecked())
@@ -58,11 +58,11 @@ ProfileForm::ProfileForm(QWidget* parent)
 
     // ui->gridLayout->addWidget(ui->labelPixmap, 0, 1, 2, 1, Qt::AlignHCenter);
 
-    ui->pbEdit->setIcon(Icon(PuttonEditIcon));
-    ui->pbSelect->setIcon(Icon(PuttonSelectIcon));
-    ui->pbClose->setIcon(Icon(PuttonCloseIcon));
-    ui->pbCreate->setIcon(Icon(PuttonCreateIcon));
-    ui->pbAddBridge->setIcon(Icon(PuttonAddBridgeIcon));
+    ui->pbEdit->setIcon(Icon(ButtonEditIcon));
+    ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
+    ui->pbClose->setIcon(Icon(ButtonCloseIcon));
+    ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
+    ui->pbAddBridge->setIcon(Icon(ButtonAddBridgeIcon));
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });

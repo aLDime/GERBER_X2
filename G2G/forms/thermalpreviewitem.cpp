@@ -24,6 +24,7 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(QColor(255, 255, 255, 100))
 {
+    setZValue(std::numeric_limits<double>::max());
     setFlag(ItemIsSelectable, true);
     redraw();
 }

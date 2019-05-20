@@ -27,14 +27,11 @@ class FileModel : public QAbstractItemModel {
 
 signals:
     void updateActions();
+    void select(const QModelIndex&);
 
 public:
     static FileModel* self;
     explicit FileModel(QObject* parent = nullptr);
-
-    //    FileModel(Gerber::File* file);
-    //    FileModel(Excellon::File* file);
-    //    FileModel(GCodeFile* file);
     ~FileModel();
 
     static void addFile(Gerber::File* file);

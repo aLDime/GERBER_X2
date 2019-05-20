@@ -27,7 +27,7 @@ private:
     const Path& m_path;
     mutable QPainterPath m_shape;
     mutable double m_scale = 0.0;
-
+    mutable QRectF m_boundingRect;
     // QGraphicsItem interface
 protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;

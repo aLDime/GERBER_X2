@@ -1,6 +1,6 @@
 #include "gcode.h"
 
-#include "forms/materialsetupform.h"
+#include "forms/gcodepropertiesform.h"
 #include <QFile>
 #include <QPainter>
 #include <QTextStream>
@@ -181,7 +181,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             itemGroup()->append(item);
         }
         break;
-    case Drilling:
+    case Drill:
         for (const IntPoint& point : m_toolPaths.first()) {
             item = new DrillItem(tool.diameter);
             item->setPos(toQPointF(point));
@@ -211,7 +211,7 @@ void GCodeFile::save(const QString& name)
     case Thermal:
         saveProfilePocket();
         break;
-    case Drilling:
+    case Drill:
         saveDrill();
         break;
     default:
@@ -233,7 +233,7 @@ void GCodeFile::saveDrill()
     }
 
     for (QPointF& point : path)
-        point -= MaterialSetup::zeroPoint->pos();
+        point -= GCodePropertiesForm::zeroPoint->pos();
 
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size();
@@ -265,7 +265,7 @@ void GCodeFile::saveProfilePocket()
     }
     for (QPolygonF& path : paths) {
         for (QPointF& point : path) {
-            point -= MaterialSetup::zeroPoint->pos();
+            point -= GCodePropertiesForm::zeroPoint->pos();
         }
     }
 
@@ -332,19 +332,19 @@ GCodeType GCodeFile::gtype() const
 void GCodeFile::startPath(const QPointF& point)
 {
     sl.append(g0() + x(point.x()) + y(point.y())); //start xy
-    sl.append(g0() + z(MaterialSetup::plunge)); //start z
+    sl.append(g0() + z(GCodePropertiesForm::plunge)); //start z
 }
 
 void GCodeFile::endPath()
 {
-    sl.append(QString(g0() + "Z%1").arg(format(MaterialSetup::clearence)));
+    sl.append(QString(g0() + "Z%1").arg(format(GCodePropertiesForm::clearence)));
 }
 
 void GCodeFile::statFile()
 {
     sl.clear();
     sl.append("G21 G17 G90"); //G17 XY plane
-    sl.append(g0() + z(MaterialSetup::safeZ)); //HomeZ
+    sl.append(g0() + z(GCodePropertiesForm::safeZ)); //HomeZ
 
     //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
@@ -353,9 +353,9 @@ void GCodeFile::statFile()
 
 void GCodeFile::endFile()
 {
-    sl.append(g0() + z(MaterialSetup::safeZ)); //HomeZ
+    sl.append(g0() + z(GCodePropertiesForm::safeZ)); //HomeZ
 
-    QPointF home(MaterialSetup::homePoint->pos() - MaterialSetup::zeroPoint->pos());
+    QPointF home(GCodePropertiesForm::homePoint->pos() - GCodePropertiesForm::zeroPoint->pos());
     sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
 
     sl.append("M30");

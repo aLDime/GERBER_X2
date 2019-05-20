@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MaterialSetupForm</class>
- <widget class="QWidget" name="MaterialSetupForm">
+ <class>GCodePropertiesForm</class>
+ <widget class="QWidget" name="GCodePropertiesForm">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -88,7 +88,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Material Setup</string>
+         <string>G-Code Properties</string>
         </property>
        </widget>
       </item>
@@ -121,8 +121,14 @@
       </property>
       <item row="0" column="0" colspan="2">
        <widget class="QLabel" name="label_2">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Material&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Material</string>
         </property>
        </widget>
       </item>
@@ -130,6 +136,9 @@
        <widget class="QLabel" name="thicknessLabel">
         <property name="text">
          <string>Thickness</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -151,15 +160,21 @@
       </item>
       <item row="3" column="0" colspan="2">
        <widget class="QLabel" name="label_3">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Rapid z gaps above Material&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Rapid gaps above Material</string>
         </property>
        </widget>
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="clearenceLabel">
         <property name="text">
-         <string>Clearence</string>
+         <string>Clearence Z</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -169,7 +184,7 @@
       <item row="5" column="0">
        <widget class="QLabel" name="plungeLabel">
         <property name="text">
-         <string>Plunge</string>
+         <string>Plunge Z</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -197,12 +212,18 @@
         <property name="text">
          <string>X</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
       <item row="9" column="0">
        <widget class="QLabel" name="homeYLabel">
         <property name="text">
          <string>Y</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -240,8 +261,14 @@
       </item>
       <item row="7" column="0" colspan="2">
        <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Home Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Home Position</string>
         </property>
        </widget>
       </item>
@@ -263,8 +290,14 @@
       </item>
       <item row="11" column="0" colspan="2">
        <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Zero Position&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Zero Position</string>
         </property>
        </widget>
       </item>
@@ -272,6 +305,9 @@
        <widget class="QLabel" name="zeroXLabel">
         <property name="text">
          <string>X</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -312,6 +348,9 @@
         <property name="text">
          <string>Y</string>
         </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+        </property>
        </widget>
       </item>
       <item row="14" column="0" colspan="2">
@@ -326,8 +365,17 @@
       </item>
       <item row="15" column="0">
        <widget class="QLabel" name="label_6">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Safe Z&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Safe Z</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
@@ -402,6 +450,9 @@
         </property>
         <property name="text">
          <string>Glue</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>

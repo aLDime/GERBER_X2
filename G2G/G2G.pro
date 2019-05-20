@@ -49,7 +49,7 @@ HEADERS += \
     filetree/treeview.h \
     forms/drillform.h \
     forms/drillmodel.h \
-    forms/materialsetupform.h \
+    forms/gcodepropertiesform.h \
     forms/pocketform.h \
     forms/profileform.h \
     forms/thermalform.h \
@@ -99,7 +99,7 @@ SOURCES += \
     filetree/treeview.cpp \
     forms/drillform.cpp \
     forms/drillmodel.cpp \
-    forms/materialsetupform.cpp \
+    forms/gcodepropertiesform.cpp \
     forms/pocketform.cpp \
     forms/profileform.cpp \
     forms/thermalform.cpp \
@@ -138,7 +138,7 @@ FORMS += \
     aboutform.ui \
     colorselector.ui \
     forms/drillform.ui \
-    forms/materialsetupform.ui \
+    forms/gcodepropertiesform.ui \
     forms/pocketform.ui \
     forms/profileform.ui \
     forms/thermalform.ui \

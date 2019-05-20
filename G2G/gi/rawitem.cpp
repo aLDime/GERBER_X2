@@ -7,9 +7,9 @@
 #include <graphicsview.h>
 #include <myclipper.h>
 
-#include "forms/materialsetupform.h"
+#include "forms/gcodepropertiesform.h"
 
-RawItem::RawItem(const Path &path, Gerber::File* file)
+RawItem::RawItem(const Path& path, Gerber::File* file)
     : m_file(file)
     , m_path(path)
 {
@@ -21,11 +21,12 @@ RawItem::RawItem(const Path &path, Gerber::File* file)
     offset.Execute(tmpPpath, 0.01 * uScale);
     for (const Path& path : tmpPpath)
         m_shape.addPolygon(toQPolygon(path));
+    m_boundingRect = m_shape.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
-QRectF RawItem::boundingRect() const { return m_shape.boundingRect(); }
+QRectF RawItem::boundingRect() const { return m_boundingRect; }
 
 void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 
@@ -70,6 +71,7 @@ QPainterPath RawItem::shape() const
         offset.Execute(tmpPpath, 6 * uScale / m_scale);
         for (const Path& path : tmpPpath)
             m_shape.addPolygon(toQPolygon(path));
+        m_boundingRect = m_shape.boundingRect();
     }
     return m_shape;
 }
@@ -80,7 +82,7 @@ void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
     if (event->modifiers() & Qt::ShiftModifier) {
-        const double glueLen = MaterialSetup::glue * uScale;
+        const double glueLen = GCodePropertiesForm::glue * uScale;
         IntPoint dest(m_path.last());
         IntPoint init(m_path.last());
         QList<int> skip;
