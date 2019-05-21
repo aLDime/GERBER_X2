@@ -1611,7 +1611,7 @@ Depth:</source>
     <message>
         <location filename="../forms/pocketform.ui" line="279"/>
         <source>Conventional</source>
-        <translation>Встресное</translation>
+        <translation>Встречное</translation>
     </message>
     <message>
         <location filename="../forms/pocketform.ui" line="289"/>
@@ -1801,7 +1801,7 @@ Depth:</source>
     <message>
         <location filename="../forms/profileform.ui" line="261"/>
         <source>Conventional</source>
-        <translation>Встресное</translation>
+        <translation>Встречное</translation>
     </message>
     <message>
         <location filename="../forms/profileform.ui" line="286"/>

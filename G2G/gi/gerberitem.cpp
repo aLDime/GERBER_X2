@@ -36,6 +36,12 @@ QPainterPath GerberItem::shape() const { return m_shape; }
 
 void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/)
 {
+    if (Scene::drawPdf()) {
+        painter->setBrush(Qt::black);
+        painter->setPen(Qt::NoPen);
+        painter->drawPath(m_shape);
+        return;
+    }
     if (m_penColor)
         m_pen.setColor(*m_penColor);
     if (m_brushColor)

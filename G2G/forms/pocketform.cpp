@@ -169,7 +169,6 @@ void PocketForm::create()
     }
 
     Paths wPaths;
-    Side boardSide = NullSide;
 
     Gerber::File const* file = nullptr;
 

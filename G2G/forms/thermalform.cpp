@@ -3,8 +3,8 @@
 
 #include "filetree/fileholder.h"
 #include "gcode/gcode.h"
-#include "gi/bridgeitem.h"
 #include "gcodepropertiesform.h"
+#include "gi/bridgeitem.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tooldatabase.h"
@@ -90,7 +90,7 @@ ThermalForm::ThermalForm(QWidget* parent)
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({16,16});
+        button->setIconSize({ 16, 16 });
     }
     //    connect(ui->pbClose, &QPushButton::clicked, parent, &QWidget::close);
 }
@@ -253,6 +253,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
     m_apertures = *value;
     model = new ThermalModel(this);
     const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
+    boardSide = file->side();
 
     QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
     for (apertureIt = m_apertures.begin(); apertureIt != m_apertures.end(); ++apertureIt) {

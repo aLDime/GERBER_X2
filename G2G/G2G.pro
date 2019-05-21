@@ -1,4 +1,4 @@
-QT += core gui opengl widgets
+QT += core gui opengl widgets printsupport
 
 TARGET = Getber2Gcode
 TEMPLATE = app

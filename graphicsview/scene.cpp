@@ -69,7 +69,9 @@ QRectF Scene::itemsBoundingRect()
 
 bool Scene::drawPdf()
 {
-    return self->m_drawPdf;
+    if (self)
+        return self->m_drawPdf;
+    return false;
 }
 
 void Scene::drawBackground(QPainter* painter, const QRectF& rect)

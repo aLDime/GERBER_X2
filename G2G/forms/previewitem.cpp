@@ -43,6 +43,7 @@ PreviewItem::PreviewItem(const Gerber::GraphicObject& go, int id)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
+    setZValue(std::numeric_limits<double>::max()-10);
     setFlag(ItemIsSelectable, true);
 }
 
@@ -54,6 +55,7 @@ PreviewItem::PreviewItem(const Excellon::Hole& hole)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
+    setZValue(std::numeric_limits<double>::max()-10);
     setFlag(ItemIsSelectable, true);
 }
 

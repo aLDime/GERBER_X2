@@ -12,6 +12,8 @@
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
 #include <QInputDialog>
+#include <QPrintPreviewDialog>
+#include <QPrinter>
 #include <QProgressDialog>
 #include <QTableView>
 #include <QToolBar>
@@ -253,6 +255,40 @@ void MainWindow::createActions()
     closeAllAct->setShortcuts(QKeySequence::Close);
     closeAllAct->setStatusTip(tr("Close all files"));
     closeAllAct->setEnabled(false);
+
+    fileMenu->addSeparator();
+    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), [=] {
+        QPrinter printer(QPrinter::HighResolution);
+        QPrintPreviewDialog preview(&printer, this);
+        connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* printer) {
+            Scene::self->m_drawPdf = true;
+            QRectF rect;
+            for (QGraphicsItem* item : Scene::self->items())
+                if (item->isVisible() && !item->boundingRect().isNull())
+                    rect |= item->boundingRect();
+            QSizeF size(rect.size());
+
+            printer->setPageSizeMM(size);
+            printer->setMargins({ 0, 0, 0, 0 });
+            printer->setResolution(2400);
+
+            QPainter painter(printer);
+            painter.setTransform(QTransform().scale(1.0, -1.0));
+            painter.translate(0, -(printer->resolution() / 25.4) * size.height());
+            Scene::self->render(&painter, QRectF(0, 0, printer->width(), printer->height()), rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
+            Scene::self->m_drawPdf = false;
+
+            //            QPainter painter(printer);
+            //            QRectF r(Scene::self->itemsBoundingRect());
+            //            painter
+            //            painter.setWindow(r.left() * 25.4, r.top() * 25.4, r.width() * 25.4, r.height() * 25.4);
+            //            Scene::self->render(&painter);
+        });
+        preview.exec();
+    });
+    action->setShortcuts(QKeySequence::Print);
+    action->setStatusTip(tr("Print"));
+    fileMenu->addSeparator();
 
     action = fileMenu->addAction(Icon(ExitIcon), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);

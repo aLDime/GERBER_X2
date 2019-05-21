@@ -11,6 +11,7 @@ Ruler::Ruler(const QPointF& point)
     : m_pt1(point)
     , m_pt2(point)
 {
+    setZValue(std::numeric_limits<double>::max());
     qDebug("Ruler()");
     m_font.setPixelSize(16);
     self = this;

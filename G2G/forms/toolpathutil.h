@@ -47,6 +47,7 @@ private:
     // QObject interface
 protected:
     virtual void timerEvent(QTimerEvent* event) override;
+
 };
 
 #endif // TOOLPATHUTIL_H

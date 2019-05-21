@@ -5,8 +5,7 @@
 #include <QGraphicsScene>
 
 class Scene : public QGraphicsScene {
-    friend class Point;
-    friend class Shtift;
+    friend class MainWindow;
 
 public:
     explicit Scene(QObject* parent);
@@ -16,7 +15,7 @@ public:
     static Scene* self;
     QRectF itemsBoundingRect();
 
-    static bool drawPdf() ;
+    static bool drawPdf();
 
 private:
     bool m_drawPdf;

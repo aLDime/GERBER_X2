@@ -3,8 +3,8 @@
 
 #include "filetree/filemodel.h"
 #include "gcode/gcode.h"
-#include "gi/bridgeitem.h"
 #include "gcodepropertiesform.h"
+#include "gi/bridgeitem.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -141,7 +141,6 @@ void ProfileForm::create()
 
     Paths wPaths;
     Paths wrPaths;
-    Side boardSide = Top;
 
     Gerber::File const* file = nullptr;
 
