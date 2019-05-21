@@ -38,7 +38,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 {
     if (Scene::drawPdf()) {
         painter->setBrush(Qt::black);
-        painter->setPen(Qt::NoPen);
+        painter->setPen(QPen(Qt::black, 0.0));
         painter->drawPath(m_shape);
         return;
     }

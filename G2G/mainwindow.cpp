@@ -267,12 +267,12 @@ void MainWindow::createActions()
                 if (item->isVisible() && !item->boundingRect().isNull())
                     rect |= item->boundingRect();
             QSizeF size(rect.size());
-
-            printer->setPageSizeMM(size);
-            printer->setMargins({ 0, 0, 0, 0 });
+            printer->setPageSizeMM(size + QSizeF(printer->margins().left + printer->margins().right, printer->margins().top + printer->margins().bottom));
+            //printer->setMargins({ 0, 0, 0, 0 });
             printer->setResolution(2400);
 
             QPainter painter(printer);
+            painter.setRenderHint(QPainter::HighQualityAntialiasing);
             painter.setTransform(QTransform().scale(1.0, -1.0));
             painter.translate(0, -(printer->resolution() / 25.4) * size.height());
             Scene::self->render(&painter, QRectF(0, 0, printer->width(), printer->height()), rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
