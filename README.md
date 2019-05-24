@@ -1,9 +1,9 @@
 # GERBER_X2
 V0.7.3
 
-Программа для подготовки Г-кода для фрезеровки плат на ЧПУ.
+Программа для подготовки Г-кода из файлов Gerbre для фрезеровки плат на ЧПУ.
 
-Future program to prepare for the G-code for milling PCB boards on CNC.
+Program for preparing G-code from Gerbre files for CNC milling.
 
 ![Window](https://github.com/XRay3D/GERBER_X2/blob/master/gerber_x2/Window.PNG)
 
