@@ -1,6 +1,7 @@
 #include "settingsdialog.h"
 #include "colorselector.h"
 
+#include <QApplication>
 #include <QGLWidget>
 #include <QtWidgets>
 #include <graphicsview.h>
@@ -58,6 +59,12 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_color[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
+    connect(cbxFontSize, &QComboBox::currentTextChanged, [=](const QString& fontSize) {
+        QFont f;
+        f.setPointSize(fontSize.toInt());
+        qApp->setFont(f);
+        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + fontSize));
+    });
 
     readSettings();
 }
@@ -77,6 +84,18 @@ void SettingsDialog::readSettings()
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
         m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
     }
+    settings.endGroup();
+
+    settings.beginGroup("Application");
+    const QString fontSize(settings.value("FontSize", "8").toString());
+    qApp->setStyleSheet(/*a.styleSheet() +*/ "QWidget {font-size: " + fontSize + "pt}");
+    cbxFontSize->setCurrentText(fontSize);
+    settings.endGroup();
+
+    settings.beginGroup("SettingsDialog");
+    if (isVisible())
+        settings.setValue("geometry", saveGeometry());
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
     settings.endGroup();
 }
 
@@ -106,12 +125,14 @@ void SettingsDialog::writeSettings()
         settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
     }
     settings.endGroup();
-}
 
-void SettingsDialog::showEvent(QShowEvent* event)
-{
-    Q_UNUSED(event)
-    //    scrollSettings->updateMinimumWidth();
+    settings.beginGroup("Application");
+    settings.setValue("FontSize", cbxFontSize->currentText());
+    settings.endGroup();
+
+    settings.beginGroup("SettingsDialog");
+    settings.setValue("geometry", saveGeometry());
+    settings.endGroup();
 }
 
 void SettingsDialog::reject()
@@ -122,7 +143,6 @@ void SettingsDialog::reject()
 
 void SettingsDialog::accept()
 {
-    //qDebug() << "accept";
     writeSettings();
     QDialog::accept();
 }

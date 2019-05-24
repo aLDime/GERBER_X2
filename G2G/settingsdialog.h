@@ -33,8 +33,6 @@ public slots:
     void reject() override;
     void accept() override;
 
-protected:
-    void showEvent(QShowEvent* event) override;
 
 private:
     static QColor m_color[(size_t)Colors::Count];

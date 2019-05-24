@@ -284,9 +284,9 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
 
     delete ui->treeView->model();
     ui->treeView->setModel(model);
-    ui->treeView->header()->setSectionResizeMode(QHeaderView::Stretch);
-    ui->treeView->header()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
-    ui->treeView->header()->setSectionResizeMode(1, QHeaderView::Fixed);
+    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->treeView->header()->setStretchLastSection(false);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::on_selectionChanged);
 }
 

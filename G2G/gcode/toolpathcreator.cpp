@@ -647,7 +647,10 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
 
         // create thermal
 
+        //self = nullptr;
+
         for (int index = 0, size = m_returnPaths.size(); index < size; ++index) {
+            //progressOrCancel(size, index); // progress
             Path& path = m_returnPaths[index];
             //            {
             //                ClipperOffset offset;

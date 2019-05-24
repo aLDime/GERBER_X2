@@ -195,8 +195,8 @@ public:
                 return m_checkState;
             return QVariant();
         case Qt::TextAlignmentRole:
-            //            if (index.column())
-            //                return Qt::AlignCenter;
+            if (index.column())
+                return Qt::AlignCenter;
             return QVariant();
         default:
             break;

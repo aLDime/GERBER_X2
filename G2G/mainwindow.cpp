@@ -223,7 +223,6 @@ void MainWindow::createActions()
 
     exportPdfAct = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
     fileToolBar->addAction(exportPdfAct);
-    exportPdfAct->setShortcuts(QKeySequence::Print);
     exportPdfAct->setStatusTip(tr("Export to PDF file"));
     exportPdfAct->setEnabled(false);
 
@@ -267,9 +266,9 @@ void MainWindow::createActions()
                 if (item->isVisible() && !item->boundingRect().isNull())
                     rect |= item->boundingRect();
             QSizeF size(rect.size());
+            printer->setMargins({ 10, 10, 10, 10 });
             printer->setPageSizeMM(size + QSizeF(printer->margins().left + printer->margins().right, printer->margins().top + printer->margins().bottom));
-            //printer->setMargins({ 0, 0, 0, 0 });
-            printer->setResolution(2400);
+            printer->setResolution(4800);
 
             QPainter painter(printer);
             painter.setRenderHint(QPainter::HighQualityAntialiasing);
@@ -277,12 +276,6 @@ void MainWindow::createActions()
             painter.translate(0, -(printer->resolution() / 25.4) * size.height());
             Scene::self->render(&painter, QRectF(0, 0, printer->width(), printer->height()), rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
             Scene::self->m_drawPdf = false;
-
-            //            QPainter painter(printer);
-            //            QRectF r(Scene::self->itemsBoundingRect());
-            //            painter
-            //            painter.setWindow(r.left() * 25.4, r.top() * 25.4, r.width() * 25.4, r.height() * 25.4);
-            //            Scene::self->render(&painter);
         });
         preview.exec();
     });
@@ -470,10 +463,9 @@ void MainWindow::createShtifts()
 void MainWindow::readSettings()
 {
     QSettings settings;
-    if (isHidden()) {
-        restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
-        restoreState(settings.value("state", QByteArray()).toByteArray());
-    }
+    settings.beginGroup("MainWindow");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    restoreState(settings.value("state", QByteArray()).toByteArray());
 
     lastPath = settings.value("lastPath").toString();
 
@@ -481,15 +473,18 @@ void MainWindow::readSettings()
         openFile(file);
 
     SettingsDialog().readSettings();
+    settings.endGroup();
 }
 
 void MainWindow::writeSettings()
 {
     QSettings settings;
+    settings.beginGroup("MainWindow");
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
     settings.setValue("files", FileHolder::fileNames());
+    settings.endGroup();
 }
 
 void MainWindow::selectAll()

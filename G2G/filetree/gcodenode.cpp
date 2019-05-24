@@ -69,7 +69,8 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
                 return FileHolder::file(m_id)->shortFileName() + QStringList({ "(Top)", "(Bot)" })[FileHolder::file(m_id)->side()];
         }
         case Qt::ToolTipRole:
-            return FileHolder::file(m_id)->fileName();
+            return FileHolder::file(m_id)->shortFileName() + "\n"
+                + FileHolder::file(m_id)->fileName();
         case Qt::CheckStateRole:
             return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:

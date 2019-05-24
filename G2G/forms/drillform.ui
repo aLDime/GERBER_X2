@@ -154,7 +154,11 @@
          </widget>
         </item>
         <item row="2" column="1">
-         <widget class="QComboBox" name="cbxFile"/>
+         <widget class="QComboBox" name="cbxFile">
+          <property name="sizeAdjustPolicy">
+           <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
+          </property>
+         </widget>
         </item>
        </layout>
       </item>
@@ -180,7 +184,7 @@
             <number>6</number>
            </property>
            <property name="topMargin">
-            <number>6</number>
+            <number>9</number>
            </property>
            <property name="rightMargin">
             <number>6</number>
@@ -222,7 +226,7 @@
             <number>6</number>
            </property>
            <property name="topMargin">
-            <number>6</number>
+            <number>9</number>
            </property>
            <property name="rightMargin">
             <number>6</number>
@@ -260,7 +264,7 @@
             <number>6</number>
            </property>
            <property name="topMargin">
-            <number>6</number>
+            <number>9</number>
            </property>
            <property name="rightMargin">
             <number>6</number>

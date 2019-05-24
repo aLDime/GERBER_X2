@@ -754,72 +754,72 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="164"/>
+        <location filename="../forms/drillform.ui" line="168"/>
         <source>Zoom To Selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="176"/>
+        <location filename="../forms/drillform.ui" line="180"/>
         <source>Side</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="194"/>
+        <location filename="../forms/drillform.ui" line="198"/>
         <source>In</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="201"/>
+        <location filename="../forms/drillform.ui" line="205"/>
         <source>Out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="208"/>
+        <location filename="../forms/drillform.ui" line="212"/>
         <source>On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="218"/>
+        <location filename="../forms/drillform.ui" line="222"/>
         <source>Direction</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="236"/>
+        <location filename="../forms/drillform.ui" line="240"/>
         <source>Conventional</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="243"/>
+        <location filename="../forms/drillform.ui" line="247"/>
         <source>Climb</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="256"/>
+        <location filename="../forms/drillform.ui" line="260"/>
         <source>Work Type</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="274"/>
+        <location filename="../forms/drillform.ui" line="278"/>
         <source>Only drilling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="281"/>
+        <location filename="../forms/drillform.ui" line="285"/>
         <source>Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="288"/>
+        <location filename="../forms/drillform.ui" line="292"/>
         <source>Pocket</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="306"/>
+        <location filename="../forms/drillform.ui" line="310"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/drillform.ui" line="313"/>
+        <location filename="../forms/drillform.ui" line="317"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -880,79 +880,6 @@ Public License instead of this License.  But first, please read
     </message>
 </context>
 <context>
-    <name>ExcellonDialog</name>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="14"/>
-        <source>Excellon Format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="35"/>
-        <source>Units</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="53"/>
-        <source>Inches</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="60"/>
-        <source>Millimeters</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="70"/>
-        <source>Format</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="107"/>
-        <source>:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="130"/>
-        <source>Zeroes</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="148"/>
-        <source>Leading</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="155"/>
-        <source>Trailing</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="165"/>
-        <source>Offset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="171"/>
-        <source>X:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="194"/>
-        <source>Y:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="217"/>
-        <source>x1.0</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../../excellon/excellondialog.ui" line="224"/>
-        <source>Flatten by selected</source>
-        <translation type="unfinished"></translation>
-    </message>
-</context>
-<context>
     <name>FileModel</name>
     <message>
         <location filename="../filetree/filemodel.cpp" line="16"/>
@@ -975,17 +902,17 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="180"/>
+        <location filename="../filetree/filemodel.cpp" line="189"/>
         <source>Name</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="182"/>
+        <location filename="../filetree/filemodel.cpp" line="191"/>
         <source>Side</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/filemodel.cpp" line="184"/>
+        <location filename="../filetree/filemodel.cpp" line="193"/>
         <source>C</source>
         <translation type="unfinished"></translation>
     </message>
@@ -998,82 +925,82 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="91"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="77"/>
         <source>G-Code Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="131"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="117"/>
         <source>Material</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="138"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="124"/>
         <source>Thickness</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="145"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="194"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="224"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="240"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="305"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="321"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="399"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="412"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="441"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="134"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="181"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="204"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="236"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="283"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="309"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="356"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="382"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="417"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="167"/>
-        <source>Rapid gaps above Material</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="174"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="171"/>
         <source>Clearence Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="184"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="194"/>
         <source>Plunge Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="210"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="298"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="273"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="346"/>
         <source>X</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="217"/>
-        <location filename="../forms/gcodepropertiesform.ui" line="337"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="299"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="372"/>
         <source>Y</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="262"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="255"/>
         <source>Home Position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="291"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="328"/>
         <source>Zero Position</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="360"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="226"/>
         <source>Safe Z</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="434"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="150"/>
+        <source>G0 Properties</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../forms/gcodepropertiesform.ui" line="407"/>
         <source>Glue</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/gcodepropertiesform.ui" line="476"/>
+        <location filename="../forms/gcodepropertiesform.ui" line="442"/>
         <source>Ok</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1081,7 +1008,7 @@ Public License instead of this License.  But first, please read
 <context>
     <name>GerberNode</name>
     <message>
-        <location filename="../filetree/gerbernode.cpp" line="117"/>
+        <location filename="../filetree/gerbernode.cpp" line="118"/>
         <source>Top|Bottom</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1112,356 +1039,366 @@ Public License instead of this License.  But first, please read
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="119"/>
+        <location filename="../mainwindow.cpp" line="121"/>
         <source>Do you really want to quit the program?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="119"/>
-        <location filename="../mainwindow.cpp" line="177"/>
+        <location filename="../mainwindow.cpp" line="121"/>
+        <location filename="../mainwindow.cpp" line="179"/>
         <source>No</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="119"/>
-        <location filename="../mainwindow.cpp" line="177"/>
+        <location filename="../mainwindow.cpp" line="121"/>
+        <location filename="../mainwindow.cpp" line="179"/>
         <source>Yes</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="140"/>
+        <location filename="../mainwindow.cpp" line="142"/>
         <source>Open File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="140"/>
+        <location filename="../mainwindow.cpp" line="142"/>
         <source>Files (*.gbr *.*)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="154"/>
+        <location filename="../mainwindow.cpp" line="156"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="156"/>
+        <location filename="../mainwindow.cpp" line="158"/>
         <source>GCode (*.tap)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="166"/>
+        <location filename="../mainwindow.cpp" line="168"/>
         <source>No selected toolpath files.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="177"/>
+        <location filename="../mainwindow.cpp" line="179"/>
         <source>Do you really want to close all files?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="202"/>
+        <location filename="../mainwindow.cpp" line="204"/>
         <source>&amp;File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="205"/>
+        <location filename="../mainwindow.cpp" line="207"/>
         <source>File</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="345"/>
+        <location filename="../mainwindow.cpp" line="381"/>
         <source>Thermal Insulation</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="693"/>
+        <location filename="../mainwindow.cpp" line="731"/>
         <source>Icon size = 24</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="694"/>
+        <location filename="../mainwindow.cpp" line="732"/>
         <source>Icon size = 48</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="695"/>
+        <location filename="../mainwindow.cpp" line="733"/>
         <source>Icon size = 72</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="212"/>
+        <location filename="../mainwindow.cpp" line="214"/>
         <source>&amp;Open...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="215"/>
+        <location filename="../mainwindow.cpp" line="217"/>
         <source>Open an existing file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="217"/>
+        <location filename="../mainwindow.cpp" line="219"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="220"/>
+        <location filename="../mainwindow.cpp" line="222"/>
         <source>Save selected toolpaths to one directory</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="222"/>
+        <location filename="../mainwindow.cpp" line="224"/>
         <source>&amp;Export PDF...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="225"/>
+        <location filename="../mainwindow.cpp" line="227"/>
         <source>Export to PDF file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="231"/>
+        <location filename="../mainwindow.cpp" line="233"/>
         <source>Recent...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="240"/>
+        <location filename="../mainwindow.cpp" line="242"/>
         <source>Clear Recent Files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="251"/>
+        <location filename="../mainwindow.cpp" line="253"/>
         <source>&amp;Close all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="254"/>
+        <location filename="../mainwindow.cpp" line="256"/>
         <source>Close all files</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="257"/>
+        <location filename="../mainwindow.cpp" line="260"/>
+        <source>P&amp;rint</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="290"/>
+        <source>Print</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../mainwindow.cpp" line="293"/>
         <source>E&amp;xit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="259"/>
+        <location filename="../mainwindow.cpp" line="295"/>
         <source>Exit the application</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="262"/>
+        <location filename="../mainwindow.cpp" line="298"/>
         <source>&amp;Service</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="263"/>
+        <location filename="../mainwindow.cpp" line="299"/>
         <source>&amp;Settings</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="265"/>
+        <location filename="../mainwindow.cpp" line="301"/>
         <source>Show the application&apos;s settings box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="268"/>
+        <location filename="../mainwindow.cpp" line="304"/>
         <source>&amp;Help</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="269"/>
+        <location filename="../mainwindow.cpp" line="305"/>
         <source>&amp;About</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="270"/>
+        <location filename="../mainwindow.cpp" line="306"/>
         <source>Show the application&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="272"/>
+        <location filename="../mainwindow.cpp" line="308"/>
         <source>About &amp;Qt</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="273"/>
+        <location filename="../mainwindow.cpp" line="309"/>
         <source>Show the Qt library&apos;s About box</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="276"/>
+        <location filename="../mainwindow.cpp" line="312"/>
         <source>Zoom ToolBar</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="280"/>
+        <location filename="../mainwindow.cpp" line="316"/>
         <source>Fit best</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="282"/>
+        <location filename="../mainwindow.cpp" line="318"/>
         <source>100%</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="283"/>
+        <location filename="../mainwindow.cpp" line="319"/>
         <source>Ctrl+0</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="284"/>
+        <location filename="../mainwindow.cpp" line="320"/>
         <source>Zoom in</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="286"/>
+        <location filename="../mainwindow.cpp" line="322"/>
         <source>Zoom out</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="289"/>
+        <location filename="../mainwindow.cpp" line="325"/>
         <source>Zoom to selected</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="292"/>
+        <location filename="../mainwindow.cpp" line="328"/>
         <source>Selection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="295"/>
+        <location filename="../mainwindow.cpp" line="331"/>
         <source>Select all</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="317"/>
+        <location filename="../mainwindow.cpp" line="353"/>
         <source>Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="336"/>
+        <location filename="../mainwindow.cpp" line="372"/>
         <source>Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="339"/>
+        <location filename="../mainwindow.cpp" line="375"/>
         <source>Pocket</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="342"/>
+        <location filename="../mainwindow.cpp" line="378"/>
         <source>Voronoi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="348"/>
+        <location filename="../mainwindow.cpp" line="384"/>
         <source>Drilling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="351"/>
+        <location filename="../mainwindow.cpp" line="387"/>
         <source>G-Code Properties</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="365"/>
+        <location filename="../mainwindow.cpp" line="401"/>
         <source>Tool Base</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="370"/>
+        <location filename="../mainwindow.cpp" line="406"/>
         <source>Autoplace All Refpoints</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="386"/>
+        <location filename="../mainwindow.cpp" line="422"/>
         <source>Graphics Items</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="390"/>
+        <location filename="../mainwindow.cpp" line="426"/>
         <source>Rect</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="391"/>
+        <location filename="../mainwindow.cpp" line="427"/>
         <source>line</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="392"/>
+        <location filename="../mainwindow.cpp" line="428"/>
         <source>Elipse</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="393"/>
+        <location filename="../mainwindow.cpp" line="429"/>
         <source>Arc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="394"/>
+        <location filename="../mainwindow.cpp" line="430"/>
         <source>Text</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="396"/>
+        <location filename="../mainwindow.cpp" line="432"/>
         <source>union</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="397"/>
+        <location filename="../mainwindow.cpp" line="433"/>
         <source>difference</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="398"/>
+        <location filename="../mainwindow.cpp" line="434"/>
         <source>exclusion</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="399"/>
+        <location filename="../mainwindow.cpp" line="435"/>
         <source>intersection</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="404"/>
+        <location filename="../mainwindow.cpp" line="440"/>
         <source>Ready</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="423"/>
+        <location filename="../mainwindow.cpp" line="459"/>
         <source>Set Depth</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="480"/>
+        <location filename="../mainwindow.cpp" line="518"/>
         <source>&amp;Create path for Shtifts</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="481"/>
-        <location filename="../mainwindow.cpp" line="490"/>
+        <location filename="../mainwindow.cpp" line="519"/>
+        <location filename="../mainwindow.cpp" line="528"/>
         <source>Fixed</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="533"/>
+        <location filename="../mainwindow.cpp" line="571"/>
         <source>The document is open.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="541"/>
+        <location filename="../mainwindow.cpp" line="579"/>
         <source>Cannot read file %1:
 %2.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="617"/>
+        <location filename="../mainwindow.cpp" line="655"/>
         <source>&amp;%1 %2</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../mainwindow.cpp" line="640"/>
+        <location filename="../mainwindow.cpp" line="678"/>
         <source>document%1.txt</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1610,33 +1547,33 @@ Pass:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="183"/>
+        <location filename="../forms/pocketform.cpp" line="182"/>
         <source>Working items from different files!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="201"/>
+        <location filename="../forms/pocketform.cpp" line="200"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="201"/>
+        <location filename="../forms/pocketform.cpp" line="200"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../forms/pocketform.cpp" line="77"/>
-        <location filename="../forms/pocketform.cpp" line="234"/>
+        <location filename="../forms/pocketform.cpp" line="233"/>
         <source> - Infinity</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="239"/>
+        <location filename="../forms/pocketform.cpp" line="238"/>
         <source>Pocket Offset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/pocketform.cpp" line="239"/>
+        <location filename="../forms/pocketform.cpp" line="238"/>
         <source>Pocket Raster</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1746,33 +1683,33 @@ Depth:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="156"/>
-        <location filename="../forms/profileform.cpp" line="167"/>
+        <location filename="../forms/profileform.cpp" line="155"/>
+        <location filename="../forms/profileform.cpp" line="166"/>
         <source>Working items from different files!</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="184"/>
+        <location filename="../forms/profileform.cpp" line="183"/>
         <source>No selected items for working...</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="184"/>
+        <location filename="../forms/profileform.cpp" line="183"/>
         <source>Warning</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="198"/>
+        <location filename="../forms/profileform.cpp" line="197"/>
         <source>Profile On</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="198"/>
+        <location filename="../forms/profileform.cpp" line="197"/>
         <source>Profile Outside</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/profileform.cpp" line="198"/>
+        <location filename="../forms/profileform.cpp" line="197"/>
         <source>Profile Inside</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1813,12 +1750,12 @@ Old data will be used.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/gcodenode.cpp" line="86"/>
+        <location filename="../filetree/gcodenode.cpp" line="87"/>
         <source>Top</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/gcodenode.cpp" line="86"/>
+        <location filename="../filetree/gcodenode.cpp" line="87"/>
         <source>Bottom</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1832,26 +1769,72 @@ Old data will be used.</source>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="46"/>
-        <source>Viewer</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
         <location filename="../settingsdialog.ui" line="64"/>
-        <source>Просмотрщик</source>
+        <source>UI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
         <location filename="../settingsdialog.ui" line="82"/>
+        <source>Font Size</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="96"/>
+        <source>7</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="101"/>
+        <source>8</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="106"/>
+        <source>9</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="111"/>
+        <source>10</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="116"/>
+        <source>11</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="121"/>
+        <source>12</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="126"/>
+        <source>13</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="131"/>
+        <source>14</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="142"/>
+        <source>Viewer</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="167"/>
+        <source>Anti aliasing</source>
+        <translation type="unfinished"></translation>
+    </message>
+    <message>
+        <location filename="../settingsdialog.ui" line="160"/>
         <source>Open GL</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../settingsdialog.ui" line="89"/>
-        <source>Сглаживание</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="../settingsdialog.ui" line="105"/>
+        <location filename="../settingsdialog.ui" line="183"/>
         <source>Colors</source>
         <translation type="unfinished"></translation>
     </message>
@@ -1874,43 +1857,43 @@ Old data will be used.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="141"/>
+        <location filename="../forms/thermalform.ui" line="145"/>
         <source>Name:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="167"/>
+        <location filename="../forms/thermalform.ui" line="171"/>
         <source>File:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="179"/>
+        <location filename="../forms/thermalform.ui" line="183"/>
         <source>Select</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="186"/>
+        <location filename="../forms/thermalform.ui" line="190"/>
         <source>Edit</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="208"/>
+        <location filename="../forms/thermalform.ui" line="212"/>
         <source> mm</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="236"/>
+        <location filename="../forms/thermalform.ui" line="240"/>
         <source>Cutting
 Depth:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="250"/>
+        <location filename="../forms/thermalform.ui" line="254"/>
         <source>Create</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../forms/thermalform.ui" line="257"/>
+        <location filename="../forms/thermalform.ui" line="261"/>
         <source>Close</source>
         <translation type="unfinished"></translation>
     </message>
@@ -2213,55 +2196,55 @@ Depth:</source>
 <context>
     <name>TreeView</name>
     <message>
-        <location filename="../filetree/treeview.cpp" line="146"/>
+        <location filename="../filetree/treeview.cpp" line="152"/>
         <source>Save GCode file</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="148"/>
+        <location filename="../filetree/treeview.cpp" line="154"/>
         <source>GCode (*.tap)</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="175"/>
-        <location filename="../filetree/treeview.cpp" line="186"/>
+        <location filename="../filetree/treeview.cpp" line="181"/>
+        <location filename="../filetree/treeview.cpp" line="192"/>
         <source>&amp;Close</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="176"/>
-        <location filename="../filetree/treeview.cpp" line="187"/>
+        <location filename="../filetree/treeview.cpp" line="182"/>
         <location filename="../filetree/treeview.cpp" line="193"/>
+        <location filename="../filetree/treeview.cpp" line="199"/>
         <source>&amp;Hide other</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="178"/>
+        <location filename="../filetree/treeview.cpp" line="184"/>
         <source>&amp;Raw Lines</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="189"/>
+        <location filename="../filetree/treeview.cpp" line="195"/>
         <source>&amp;Edit Format</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="192"/>
+        <location filename="../filetree/treeview.cpp" line="198"/>
         <source>&amp;Delete Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="194"/>
+        <location filename="../filetree/treeview.cpp" line="200"/>
         <source>&amp;Save Toolpath</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="201"/>
+        <location filename="../filetree/treeview.cpp" line="207"/>
         <source>&amp;Delete All Toolpaths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="../filetree/treeview.cpp" line="202"/>
+        <location filename="../filetree/treeview.cpp" line="208"/>
         <source>Really?</source>
         <translation type="unfinished"></translation>
     </message>

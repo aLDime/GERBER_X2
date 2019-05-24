@@ -55,10 +55,13 @@ TreeView::TreeView(QWidget* parent)
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
 
-    header()->setSectionResizeMode(QHeaderView::Fixed);
+    //    header()->setSectionResizeMode(QHeaderView::Fixed);
+    //    header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    //    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
+    //    setColumnWidth(2, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(2, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
+    //    header()->setStretchLastSection(false);
+    header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
-    setColumnWidth(2, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(2, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
     header()->setStretchLastSection(false);
 
     setItemDelegateForColumn(1, new LayerDelegate(this));

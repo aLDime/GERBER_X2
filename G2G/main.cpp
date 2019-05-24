@@ -3,6 +3,7 @@
 #include <QDebug>
 #include <QGLWidget>
 #include <QLocale>
+#include <QSettings>
 #include <QTranslator>
 
 #include "application.h"
@@ -35,9 +36,16 @@ int main(int argc, char* argv[])
     app.setOrganizationName("XrSoft");
     app.setApplicationVersion("0.7.3");
 
-    QFont f;
-    f.setPixelSize(14);
-    app.setFont(f);
+//    {
+//        QSettings settings;
+//        settings.beginGroup("Application");
+//        const int fontSize = settings.value("FontSize", 0).toInt();
+//        if (fontSize) {
+//            QFont f;
+//            f.setPointSize(fontSize);
+//            app.setFont(f);
+//        }
+//    }
 
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");
