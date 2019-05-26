@@ -63,6 +63,7 @@ private:
 
     QCheckBox* cbx;
     QGridLayout* lay;
+    AbstractFile* file = nullptr;
 
     void clear();
 };

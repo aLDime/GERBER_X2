@@ -8,10 +8,10 @@ QTimer GerberNode::m_repaintTimer;
 GerberNode::GerberNode(Gerber::File* file)
     : m_id(FileHolder::addFile(file))
 {
-    FileHolder::file(m_id)->itemGroup()->addToTheScene();
-    FileHolder::file(m_id)->itemGroup()->setZValue(-m_id);
-    FileHolder::file<Gerber::File>(m_id)->rawItemGroup()->addToTheScene();
-    FileHolder::file<Gerber::File>(m_id)->rawItemGroup()->setZValue(-m_id);
+    file->itemGroup()->addToTheScene();
+    file->itemGroup()->setZValue(-m_id);
+    file->rawItemGroup()->addToTheScene();
+    file->rawItemGroup()->setZValue(-m_id);
     //MainWindow::self->closeAllAct->setEnabled(true);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
@@ -33,7 +33,7 @@ GerberNode::~GerberNode()
 bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int role)
 {
     switch (index.column()) {
-    case 0:
+    case Name:
         switch (role) {
         case Qt::CheckStateRole:
             FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -41,7 +41,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         default:
             return false;
         }
-    case 1:
+    case Layer:
         switch (role) {
         case Qt::EditRole:
             FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
@@ -49,7 +49,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
         default:
             return false;
         }
-    case 2:
+    case Other:
         switch (role) {
         case Qt::CheckStateRole:
             m_current = value.value<Qt::CheckState>();
@@ -67,11 +67,11 @@ Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 {
     int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
-    case 0:
+    case Name:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case 1:
+    case Layer:
         return itemFlag | Qt::ItemIsEditable;
-    case 2:
+    case Other:
         return itemFlag | Qt::ItemIsUserCheckable;
     default:
         return itemFlag;
@@ -81,7 +81,7 @@ Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 QVariant GerberNode::data(const QModelIndex& index, int role) const
 {
     switch (index.column()) {
-    case 0:
+    case Name:
         switch (role) {
         case Qt::DisplayRole:
             return FileHolder::file(m_id)->shortFileName();
@@ -111,7 +111,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case 1:
+    case Layer:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -123,7 +123,7 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         default:
             return QVariant();
         }
-    case 2:
+    case Other:
         switch (role) {
         case Qt::CheckStateRole:
             return m_current;

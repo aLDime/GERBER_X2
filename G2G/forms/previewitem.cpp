@@ -39,7 +39,7 @@ PreviewItem::PreviewItem(const Gerber::GraphicObject& go, int id)
     , grob(&go)
     , m_sourcePath(drawApetrure(go, id))
     , m_sourceDiameter(go.gFile->apertures()->value(id)->drillDiameter() ? go.gFile->apertures()->value(id)->drillDiameter() : go.gFile->apertures()->value(id)->minSize())
-    , m_type(Apetrure)
+    , m_type(ApetrureType)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -51,7 +51,7 @@ PreviewItem::PreviewItem(const Excellon::Hole& hole)
     : hole(&hole)
     , m_sourcePath(hole.state.path.isEmpty() ? drawDrill(hole) : drawSlot(hole))
     , m_sourceDiameter(hole.state.currentToolDiameter())
-    , m_type(hole.state.path.isEmpty() ? Drill : Slot)
+    , m_type(hole.state.path.isEmpty() ? DrillType : SlotType)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
@@ -102,7 +102,7 @@ void PreviewItem::setToolId(int toolId)
         m_toolPath = QPainterPath();
         const double diameter = ToolHolder::tools[m_toolId].diameter;
         switch (m_type) {
-        case Slot: {
+        case SlotType: {
             Paths tmpPpath;
             ClipperOffset offset;
             offset.AddPath(hole->item->paths().first(), jtRound, etOpenRound);
@@ -125,14 +125,14 @@ void PreviewItem::setToolId(int toolId)
                 }
             }
         } break;
-        case Drill:
+        case DrillType:
             m_toolPath.addEllipse(hole->state.offsetedPos(), diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(0.0, diameter * 0.7));
             m_toolPath.moveTo(hole->state.offsetedPos() - QPointF(diameter * 0.7, 0.0));
             m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(diameter * 0.7, 0.0));
             break;
-        case Apetrure:
+        case ApetrureType:
             m_toolPath.addEllipse(toQPointF(grob->state.curPos()), diameter * 0.5, diameter * 0.5);
             m_toolPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, diameter * 0.7));
             m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, diameter * 0.7));
@@ -147,11 +147,11 @@ void PreviewItem::setToolId(int toolId)
 IntPoint PreviewItem::pos() const
 {
     switch (m_type) {
-    case Slot:
+    case SlotType:
         return toIntPoint(hole->state.offsetedPos());
-    case Drill:
+    case DrillType:
         return toIntPoint(hole->state.offsetedPos());
-    case Apetrure:
+    case ApetrureType:
         return grob->state.curPos();
     }
     return IntPoint();
@@ -160,13 +160,13 @@ IntPoint PreviewItem::pos() const
 Paths PreviewItem::paths() const
 {
     switch (m_type) {
-    case Slot:
+    case SlotType:
         return hole->item->paths();
-    case Drill: {
+    case DrillType: {
         Paths paths(hole->item->paths());
         return ReversePaths(paths);
     }
-    case Apetrure:
+    case ApetrureType:
         return grob->paths;
     }
     return Paths();
@@ -175,10 +175,10 @@ Paths PreviewItem::paths() const
 bool PreviewItem::fit(double depth)
 {
     switch (m_type) {
-    case Slot:
-    case Drill:
+    case SlotType:
+    case DrillType:
         return m_sourceDiameter > ToolHolder::tools[m_toolId].getDiameter(depth);
-    case Apetrure:
+    case ApetrureType:
         return grob->gFile->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
     }
     return false;

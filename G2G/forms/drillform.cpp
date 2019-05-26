@@ -87,8 +87,6 @@ QIcon drawDrillIcon()
     return QIcon(pixmap);
 }
 
-
-
 /////////////////////////////////////////////
 /// \brief DrillForm::DrillForm
 /// \param parent
@@ -160,7 +158,7 @@ DrillForm::DrillForm(QWidget* parent)
     ui->pbClose->setIcon(Icon(ButtonCloseIcon));
     ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({16,16});
+        button->setIconSize({ 16, 16 });
     }
     updateState();
 
@@ -276,6 +274,12 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
+    for (Excellon::File* file : FileHolder::files<Excellon::File>()) {
+        ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
+        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, Icon(PathDrillIcon), Qt::DecorationRole);
+        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
+    }
+
     for (Gerber::File* file : FileHolder::files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
@@ -286,12 +290,6 @@ void DrillForm::updateFiles()
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QIcon(pixmap), Qt::DecorationRole);
             ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
         }
-    }
-
-    for (Excellon::File* file : FileHolder::files<Excellon::File>()) {
-        ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, Icon(PathDrillIcon), Qt::DecorationRole);
-        ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 
     if (!ui->cbxFile->count()) {
@@ -329,7 +327,7 @@ void DrillForm::on_pbCreate_clicked()
                 int apertureId = model->apertureId(row);
                 pathsMap[selectedToolId].toolsApertures.append(apertureId);
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                    if (item->type() == PreviewItem::Slot) {
+                    if (item->type() == PreviewItemType::SlotType) {
                         if (item->fit(ui->dsbxDepth->value())) {
                             for (Path& path : offset(item->paths().first(), item->sourceDiameter() - ToolHolder::tools[item->toolId()].diameter)) {
                                 pathsMap[selectedToolId].paths.append(path);
@@ -342,7 +340,7 @@ void DrillForm::on_pbCreate_clicked()
                     }
                 }
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                    if (item->type() != PreviewItem::Slot)
+                    if (item->type() != PreviewItemType::SlotType)
                         model->setCreate(row, true);
                 }
             }
@@ -357,7 +355,7 @@ void DrillForm::on_pbCreate_clicked()
             if (!pathsMap[selectedToolId].paths.isEmpty()) {
                 GCodeFile* gcode = new GCodeFile(pathsMap[selectedToolId].paths, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name + " - T(" + indexes + ')');
-                gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
+                gcode->setSide(file->side());
                 FileModel::addFile(gcode);
             }
         }
@@ -376,7 +374,7 @@ void DrillForm::on_pbCreate_clicked()
                 const int apertureId = model->apertureId(row);
                 pathsMap[toolId].toolsApertures.append(apertureId);
                 for (QSharedPointer<PreviewItem>& item : m_sourcePreview[apertureId]) {
-                    if (item->type() == PreviewItem::Slot)
+                    if (item->type() == PreviewItemType::SlotType)
                         continue;
                     switch (m_worckType) {
                     case Profile:
@@ -441,7 +439,7 @@ void DrillForm::on_pbCreate_clicked()
                 }
                 GCodeFile* gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drill);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name + (m_type ? " - T(" : " - D(") + indexes + ')');
-                gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
+                gcode->setSide(file->side());
                 FileModel::addFile(gcode);
             }
             if (!pathsMap[toolId].paths.isEmpty()) {
@@ -467,7 +465,7 @@ void DrillForm::on_pbCreate_clicked()
                 if (!gcode)
                     continue;
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[toolId].name + " - T(" + indexes + ')');
-                gcode->setSide(static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->side());
+                gcode->setSide(file->side());
                 FileModel::addFile(gcode);
             }
         }
@@ -479,10 +477,11 @@ void DrillForm::on_pbCreate_clicked()
 
 void DrillForm::on_cbxFileCurrentIndexChanged(int /*index*/)
 {
-    if (static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->type() == FileType::Gerber)
-        setApertures(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>())->apertures());
+    file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
+    if (file->type() == FileType::Gerber)
+        setApertures(static_cast<Gerber::File*>(file)->apertures());
     else
-        setHoles(static_cast<Excellon::File*>(ui->cbxFile->currentData().value<void*>())->tools());
+        setHoles(static_cast<Excellon::File*>(file)->tools());
 }
 
 void DrillForm::on_clicked(const QModelIndex& index)

@@ -22,6 +22,7 @@ public:
         , m_pos(pos)
         , m_item(item)
     {
+        item->m_node = this;
     }
     ThermalNode(const QIcon& icon, const QString& name)
         : container(true)
@@ -210,6 +211,19 @@ public:
     IntPoint pos() const { return m_pos; }
     ThermalPreviewItem* item() const { return m_item; }
     bool create() const { return m_checkState == Qt::Checked && !container; }
+    void disable()
+    {
+        m_checkState = Qt::Unchecked;
+        selected = false;
+        m_item->setFlag(QGraphicsItem::ItemIsSelectable, false);
+    }
+    void enable()
+    {
+        m_checkState = Qt::Checked;
+        selected = true;
+        m_item->setFlag(QGraphicsItem::ItemIsSelectable, true);
+        m_item->setSelected(true);
+    }
 
 private:
     bool container = false;

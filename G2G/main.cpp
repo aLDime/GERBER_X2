@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
 
     app.setApplicationName("G2G");
     app.setOrganizationName("XrSoft");
-    app.setApplicationVersion("0.7.3");
+    app.setApplicationVersion("0.7.5");
 
 //    {
 //        QSettings settings;

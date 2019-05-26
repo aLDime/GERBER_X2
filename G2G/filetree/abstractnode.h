@@ -26,6 +26,12 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
 
+    enum {
+        Name,
+        Layer,
+        Other
+    };
+
 protected:
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;

@@ -11,10 +11,10 @@ RESOURCES += \
 DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-VERSION = 0.7.3
+VERSION = 0.7.5
 VER_MAJ = 0
 VER_MIN = 7
-VER_PAT = 3
+VER_PAT = 5
 
 ICON = 256.png
 
@@ -279,7 +279,16 @@ DISTFILES += \
     ../icons/breeze/places/22/folder.svg \
     ../icons/colors.txt \
     translations/g2g_en.ts \
-    translations/g2g_ru.ts
+    translations/g2g_ru.ts\
+    G2G_TR.pro
+
+#SUBDIRS += \
+#    ../file/file.pri \
+#    ../clipper/clipper.pri \
+#    ../excellon/excellon.pri \
+#    ../gerber/gerber.pri \
+#    ../graphicsview/mygraphicsview.pri \
+#    ../voronoi/voronoi.pri \
 
 include(../file/file.pri)
 include(../clipper/clipper.pri)

@@ -6,6 +6,12 @@
 #include <gbrvars.h>
 #include <myclipper.h>
 
+enum PreviewItemType {
+    SlotType = ShtiftType + 1,
+    DrillType,
+    ApetrureType
+};
+
 class PreviewItem : public QGraphicsItem {
     static QPainterPath drawApetrure(const Gerber::GraphicObject& go, int id);
     static QPainterPath drawDrill(const Excellon::Hole& hole);
@@ -16,12 +22,6 @@ public:
     explicit PreviewItem(const Excellon::Hole& hole);
 
     ~PreviewItem();
-
-    enum Type {
-        Slot = ShtiftType + 1,
-        Drill,
-        Apetrure
-    };
 
     // QGraphicsItem interface
     virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -46,7 +46,7 @@ private:
 
     const double m_sourceDiameter;
     int m_toolId = -1;
-    const Type m_type;
+    const PreviewItemType m_type;
 
     QPen m_pen;
     QBrush m_brush;

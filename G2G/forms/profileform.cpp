@@ -27,9 +27,9 @@ ProfileForm::ProfileForm(QWidget* parent)
     auto rb_clicked = [&] {
         if (ui->rbOn->isChecked())
             side = On;
-        if (ui->rbOutside->isChecked())
+        else if (ui->rbOutside->isChecked())
             side = Outer;
-        if (ui->rbInside->isChecked())
+        else if (ui->rbInside->isChecked())
             side = Inner;
 
         if (ui->rbClimb->isChecked())
@@ -195,7 +195,7 @@ void ProfileForm::create()
 void ProfileForm::updateName()
 {
     static const QStringList name = { tr("Profile On"), tr("Profile Outside"), tr("Profile Inside") };
-    ui->leName->setText(name[side] + " (" + tool.name + ")");
+    ui->leName->setText(name[side]);
     updateBridge();
 }
 

@@ -92,7 +92,6 @@ ThermalForm::ThermalForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
-    //    connect(ui->pbClose, &QPushButton::clicked, parent, &QWidget::close);
 }
 
 ThermalForm::~ThermalForm()
@@ -238,7 +237,7 @@ void ThermalForm::create()
 
 void ThermalForm::updateName()
 {
-    ui->leName->setText(tr("Thermal (") + tool.name + ")");
+    ui->leName->setText(tr("Thermal"));
 }
 
 void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/)
@@ -254,6 +253,16 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
     model = new ThermalModel(this);
     const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
     boardSide = file->side();
+
+    ThermalNode* thermalNode = model->appendRow(QIcon(), "Region");
+    for (const Gerber::GraphicObject& go : *file) {
+        if (go.state.type() == Gerber::Region && go.state.imgPolarity() == Gerber::Positive) {
+            ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+            m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
+            Scene::self->addItem(item);
+            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
+        }
+    }
 
     QMap<int, QSharedPointer<Gerber::AbstractAperture>>::const_iterator apertureIt;
     for (apertureIt = m_apertures.begin(); apertureIt != m_apertures.end(); ++apertureIt) {
@@ -271,15 +280,6 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
         }
     }
 
-    ThermalNode* thermalNode = model->appendRow(QIcon(), "Region");
-    for (const Gerber::GraphicObject& go : *file) {
-        if (go.state.type() == Gerber::Region && go.state.imgPolarity() == Gerber::Positive) {
-            ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
-            m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-            Scene::self->addItem(item);
-            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
-        }
-    }
     //    updateCreateButton();
 
     delete ui->treeView->model();
@@ -327,4 +327,13 @@ void ThermalForm::on_dsbxDepth_valueChanged(double arg1)
 {
     m_depth = arg1;
     redraw();
+}
+
+void ThermalForm::on_pbExclude_clicked()
+{
+    for (const QSharedPointer<ThermalPreviewItem>& item : m_sourcePreview) {
+        if (item->node() && !item->isSelected())
+            item->node()->disable();
+    }
+    ui->treeView->update();
 }

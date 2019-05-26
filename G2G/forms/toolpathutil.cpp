@@ -60,6 +60,7 @@ void ToolPathUtil::writeTools(const QVector<Tool*>& tool) const
 
 ToolPathCreator* ToolPathUtil::toolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
 {
+    fileCount = 1;
     thread.wait();
     m_tps = new ToolPathCreator(value, convent, side);
     m_tps->moveToThread(&thread);
@@ -116,16 +117,16 @@ void ToolPathUtil::cancel()
 
 void ToolPathUtil::setFile(GCodeFile* file)
 {
-    if (pd)
+    if (pd && !(--fileCount))
         cancel();
-    //pd->canceled();
-    //    thread.quit();
-    //    thread.wait();
+
     if (file == nullptr) {
         QMessageBox::information(this, tr("Warning"), tr("The tool does not fit in the Working items!"));
         return;
     }
-    file->setFileName(m_fileName);
+
+    file->setFileName(m_fileName + " (" + file->fileName() + ")");
+
     file->setSide(boardSide);
     FileModel::addFile(file);
 }

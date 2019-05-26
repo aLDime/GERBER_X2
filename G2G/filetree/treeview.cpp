@@ -31,11 +31,11 @@ TreeView::TreeView(QWidget* parent)
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
 
+    //QTimer::singleShot(100, Qt::CoarseTimer, [=] {
     int w = indentation();
     int h = rowHeight(m_model->index(1, 0, QModelIndex()));
-
     QImage image(w, h, QImage::Format_ARGB32);
-
+    qDebug() << w << h << image;
     QPainter painter(&image);
     painter.setPen(QColor(128, 128, 128));
 
@@ -54,12 +54,8 @@ TreeView::TreeView(QWidget* parent)
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
+    //});
 
-    //    header()->setSectionResizeMode(QHeaderView::Fixed);
-    //    header()->setSectionResizeMode(0, QHeaderView::Stretch);
-    //    setColumnWidth(1, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(1, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
-    //    setColumnWidth(2, QFontMetrics(font()).size(Qt::TextSingleLine, m_model->headerData(2, Qt::Horizontal, Qt::DisplayRole).toString() + "  ").width());
-    //    header()->setStretchLastSection(false);
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
     header()->setStretchLastSection(false);

@@ -6,17 +6,20 @@
 #include <gbrvars.h>
 #include <myclipper.h>
 
+enum {
+    ThermalType = ShtiftType + 1,
+};
+
+class ThermalNode;
+
 class ThermalPreviewItem : public QGraphicsItem {
     static QPainterPath drawPoly(const Gerber::GraphicObject& go);
+    friend class ThermalNode;
 
 public:
     explicit ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& tool, double& depth);
 
     ~ThermalPreviewItem();
-
-    enum Type {
-        Thermal = ShtiftType + 1,
-    };
 
     // QGraphicsItem interface
     virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -38,6 +41,8 @@ public:
     int count() const;
     void setCount(int count);
 
+    ThermalNode* node() const;
+
 private:
     Tool& tool;
     double& m_depth;
@@ -54,6 +59,7 @@ private:
     double m_angle = 0.0;
     double m_tickness = 0.5;
     int m_count = 4;
+    ThermalNode* m_node = nullptr;
 };
 
 #endif // ThermalPreviewItem_H

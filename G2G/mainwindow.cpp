@@ -509,19 +509,25 @@ void MainWindow::on_customContextMenuRequested(const QPoint& pos)
 
     if (item->type() == ShtiftType) {
         a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Shtifts"), this, &MainWindow::createShtifts);
-        a = menu.addAction(tr("Fixed"));
-        a->setCheckable(true);
-        a->setChecked(!(Shtift::shtifts()[0]->flags() & QGraphicsItem::ItemIsMovable));
-        connect(a, &QAction::toggled, [](bool fl) {
+        a = menu.addAction(tr("Fixed"), [](bool fl) {
             for (Shtift* item : Shtift::shtifts())
                 item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
         });
-    }
-    if (dynamic_cast<Point*>(item)) {
-        a = menu.addAction(tr("Fixed"));
+        a->setCheckable(true);
+        a->setChecked(!(Shtift::shtifts()[0]->flags() & QGraphicsItem::ItemIsMovable));
+    } else if (dynamic_cast<Point*>(item)) {
+        a = menu.addAction(tr("Fixed"), [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
         a->setCheckable(true);
         a->setChecked(!(item->flags() & QGraphicsItem::ItemIsMovable));
-        connect(a, &QAction::toggled, [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
+    } else if (item->type() == ThermalType) {
+        if (item->flags() & QGraphicsItem::ItemIsSelectable)
+            a = menu.addAction(Icon(CloseAllIcon), tr("Exclude from the calculation"), [=] {
+                reinterpret_cast<ThermalPreviewItem*>(item)->node()->disable();
+            });
+        else
+            a = menu.addAction(Icon(NewToolIcon), tr("Include in the calculation"), [=] {
+                reinterpret_cast<ThermalPreviewItem*>(item)->node()->enable();
+            });
     }
     if (a)
         menu.exec(graphicsView->mapToGlobal(pos + QPoint(24, 0)));

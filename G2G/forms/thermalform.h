@@ -3,6 +3,8 @@
 
 #include "toolpathutil.h"
 
+#include "forms/thermalmodel.h"
+#include "forms/thermalpreviewitem.h"
 #include <QItemSelection>
 
 namespace Ui {
@@ -11,8 +13,8 @@ class ThermalForm;
 
 class QCheckBox;
 class QGridLayout;
-class ThermalModel;
-class ThermalPreviewItem;
+//class ThermalModel;
+//class ThermalPreviewItem;
 
 class ThermalForm : public ToolPathUtil {
     Q_OBJECT
@@ -34,8 +36,9 @@ private slots:
     void on_leName_textChanged(const QString& arg1);
 
     void on_cbxFileCurrentIndexChanged(int index);
-
     void on_dsbxDepth_valueChanged(double arg1);
+
+    void on_pbExclude_clicked();
 
 private:
     Ui::ThermalForm* ui;

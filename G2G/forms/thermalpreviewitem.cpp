@@ -65,7 +65,7 @@ void ThermalPreviewItem::paint(QPainter* painter, const QStyleOptionGraphicsItem
 
 QRectF ThermalPreviewItem::boundingRect() const { return m_sourcePath.boundingRect().united(m_toolPath.boundingRect()); }
 
-int ThermalPreviewItem::type() const { return Thermal; }
+int ThermalPreviewItem::type() const { return ThermalType; }
 
 IntPoint ThermalPreviewItem::pos() const { return grob->state.curPos(); }
 
@@ -153,4 +153,9 @@ void ThermalPreviewItem::setCount(int count)
 {
     m_count = count;
     redraw();
+}
+
+ThermalNode *ThermalPreviewItem::node() const
+{
+    return m_node;
 }

@@ -2,8 +2,8 @@
 #include "ui_voronoiform.h"
 
 #include "gcode/gcode.h"
-#include "gi/bridgeitem.h"
 #include "gcodepropertiesform.h"
+#include "gi/bridgeitem.h"
 #include "tooldatabase/tooldatabase.h"
 #include "tooldatabase/tooleditdialog.h"
 #include <QDockWidget>
@@ -35,7 +35,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     parent->setWindowTitle(ui->label->text());
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({16,16});
+        button->setIconSize({ 16, 16 });
     }
 }
 
@@ -142,7 +142,7 @@ void VoronoiForm::create()
 
 void VoronoiForm::updateName()
 {
-    ui->leName->setText(tr("Voronoi (") + tool.name + ")");
+    ui->leName->setText(tr("Voronoi"));
 }
 
 void VoronoiForm::on_leName_textChanged(const QString& arg1)

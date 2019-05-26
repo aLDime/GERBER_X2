@@ -13,6 +13,8 @@
 #include <scene.h>
 #include <tooldatabase/tooleditdialog.h>
 
+const int QPairID = qRegisterMetaType<QPair<Tool, Tool>>("QPair<Tool,Tool>");
+
 enum {
     Offset,
     Raster,
@@ -29,6 +31,11 @@ PocketForm::PocketForm(QWidget* parent)
     ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     auto rb_clicked = [&] {
+        if (ui->rbOutside->isChecked())
+            side = Outer;
+        else if (ui->rbInside->isChecked())
+            side = Inner;
+
         if (ui->rbOffset->isChecked())
             type = Offset;
         else if (ui->rbRaster->isChecked())
@@ -71,7 +78,7 @@ PocketForm::PocketForm(QWidget* parent)
     ui->pbCreate->setIcon(Icon(ButtonCreateIcon));
 
     for (QPushButton* button : findChildren<QPushButton*>()) {
-        button->setIconSize({16,16});
+        button->setIconSize({ 16, 16 });
     }
 
     ui->sbxSteps->setSuffix(tr(" - Infinity"));
@@ -105,17 +112,29 @@ void PocketForm::on_pbSelect_clicked()
 {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
-        tool = tdb.tool();
-        ui->lblToolName->setText(tool.name);
-        updateName();
+        //        tool = tdb.tool();
+        //        ui->lblToolName->setText(tool.name);
+        //        updateName();
+        Tool mpTool(tdb.tool());
+        if (ui->chbxUseTwoTools->isChecked() && tool2.id > -1 && tool2.diameter <= mpTool.diameter) {
+            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
+        } else {
+            tool = mpTool;
+            ui->lblToolName->setText(tool.name);
+        }
     }
 }
 void PocketForm::on_pbSelect_2_clicked()
 {
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
-        tool2 = tdb.tool();
-        ui->lblToolName_2->setText(tool2.name);
+        Tool mpTool(tdb.tool());
+        if (tool.id > -1 && tool.diameter >= mpTool.diameter) {
+            QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
+        } else {
+            tool2 = mpTool;
+            ui->lblToolName_2->setText(tool2.name);
+        }
     }
 }
 
@@ -125,7 +144,7 @@ void PocketForm::on_pbEdit_clicked()
     d.toolEdit->setTool(tool);
     if (d.exec()) {
         tool = d.toolEdit->tool();
-        tool.id = -1;
+        tool.id = -2;
         ui->lblToolName->setText(tool.name);
         updateName();
     }
@@ -137,7 +156,7 @@ void PocketForm::on_pbEdit_2_clicked()
     d.toolEdit->setTool(tool2);
     if (d.exec()) {
         tool2 = d.toolEdit->tool();
-        tool2.id = -1;
+        tool2.id = -2;
         ui->lblToolName_2->setText(tool2.name);
         updateName();
     }
@@ -175,19 +194,13 @@ void PocketForm::create()
     for (QGraphicsItem* item : scene->selectedItems()) {
         if (item->type() == GerberItemType) {
             GerberItem* gi = static_cast<GerberItem*>(item);
-            //            if (boardSide == NullSide) {
             if (!file)
                 file = gi->file();
             if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
                 return;
             }
             boardSide = gi->file()->side();
-            //            }
-            //            if (boardSide != gi->file()->side()) {
-            //                QMessageBox::warning(this, "", "Working items from different sides!");
-            //                return;
-            //            }
         }
         if (item->type() == GerberItemType || item->type() == DrillItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
@@ -201,26 +214,12 @@ void PocketForm::create()
         return;
     }
 
-    ToolPathCreator* tps = toolPathCreator(wPaths, ui->rbConventional->isChecked(), ui->rbOutside->isChecked() ? Outer : Inner);
+    ToolPathCreator* tps = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
     if (ui->chbxUseTwoTools->isChecked()) {
-        //        QPair<GCodeFile*, GCodeFile*> files = tpc.createPocket2({ tool2, tool }, ui->dsbxDepth->value());
-
-        //        if (files.first) {
-        //            files.first->setFileName(ui->leName->text() + "1");
-        //            files.first->setSide(boardSide);
-        //            FileModel::addFile(files.first);
-        //        } else {
-        //            //QMessageBox::information(this, "Warning", tr("The tool does not fit in the allocated region!"));
-        //        }
-
-        //        if (files.second) {
-        //            files.second->setFileName(ui->leName->text() + "2");
-        //            files.second->setSide(boardSide);
-        //            FileModel::addFile(files.second);
-        //        } else {
-        //            //QMessageBox::information(this, "Warning", tr("The tool does not fit in the allocated region!"));
-        //        }
-
+        fileCount = 2;
+        connect(this, &PocketForm::createPocket2, tps, &ToolPathCreator::createPocket2);
+        emit createPocket2({ tool, tool2 }, ui->dsbxDepth->value());
+        progress(1, 0);
     } else {
         connect(this, &PocketForm::createPocket, tps, &ToolPathCreator::createPocket);
         emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
@@ -235,8 +234,8 @@ void PocketForm::on_sbxSteps_valueChanged(int arg1)
 
 void PocketForm::updateName()
 {
-    QStringList name = { tr("Pocket Offset"), tr("Pocket Raster") };
-    ui->leName->setText(name[type] + " (" + tool.name + ")");
+    static const QStringList name = { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside") };
+    ui->leName->setText(name[side]);
 }
 
 void PocketForm::on_chbxUseTwoTools_clicked(bool checked)

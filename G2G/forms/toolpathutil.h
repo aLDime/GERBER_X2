@@ -24,6 +24,7 @@ protected:
 
     void setFile(GCodeFile* file);
 
+    int fileCount;
     Tool tool;
     Tool tool2;
     Direction direction = Climb;
@@ -47,7 +48,6 @@ private:
     // QObject interface
 protected:
     virtual void timerEvent(QTimerEvent* event) override;
-
 };
 
 #endif // TOOLPATHUTIL_H
