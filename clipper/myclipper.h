@@ -13,7 +13,7 @@
 #define M_PI (3.1415926535897932384626433832795)
 #endif
 
-enum { MinStepsPerCircle = 36 /*72*/ };
+//enum { MinStepsPerCircle = 36 /*72*/ };
 
 using namespace ClipperLib;
 

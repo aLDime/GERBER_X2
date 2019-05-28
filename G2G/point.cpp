@@ -3,7 +3,7 @@
 #include "forms/gcodepropertiesform.h"
 #include "gi/graphicsitem.h"
 #include "mainwindow.h"
-#include "settingsdialog.h"
+#include "settings.h"
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
@@ -71,7 +71,7 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if (Scene::drawPdf())
         return;
 
-    QColor c(m_type == Home ? SettingsDialog::color(Colors::Home) : SettingsDialog ::color(Colors::Zero));
+    QColor c(m_type == Home ? Settings::color(Colors::Home) : Settings ::color(Colors::Zero));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
@@ -100,7 +100,7 @@ void Point::resetPos()
             setPos(Shtift::worckRect.bottomRight());
         else
             setPos(Shtift::worckRect.topLeft());
-    updateMatSetForm();
+    updateGCPForm();
 }
 
 void Point::setPosX(double x)
@@ -121,11 +121,9 @@ void Point::setPosY(double y)
     setPos(point);
 }
 
-void Point::updateMatSetForm()
+void Point::updateGCPForm()
 {
-    if (GCodePropertiesForm::self)
-        GCodePropertiesForm::self->updatePosDsbxs();
-
+    GCodePropertiesForm::updatePosDsbxs();
     QSettings settings;
     settings.beginGroup("Points");
     settings.setValue("pos" + QString::number(m_type), pos());
@@ -134,7 +132,7 @@ void Point::updateMatSetForm()
 void Point::mouseMoveEvent(QGraphicsSceneMouseEvent* event)
 {
     QGraphicsItem::mouseMoveEvent(event);
-    updateMatSetForm();
+    updateGCPForm();
 }
 
 void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
@@ -142,7 +140,10 @@ void Point::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event)
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
-    updateMatSetForm();
+    //    QMatrix matrix(scene()->views().first()->matrix());
+    //    matrix.translate(-pos().x(), pos().y());
+    //    scene()->views().first()->setMatrix(matrix);
+    updateGCPForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
@@ -186,7 +187,7 @@ Shtift::~Shtift()
     settings.beginGroup("Shtift");
     settings.setValue("pos" + QString::number(m_shtifts.indexOf(this)), pos());
     if (!m_shtifts.indexOf(this)) {
-        SettingsDialog().writeSettings();
+        //Settings().writeSettings();
         settings.setValue("fixed", bool(flags() & QGraphicsItem::ItemIsMovable));
         settings.setValue("worckRect", worckRect);
     }
@@ -204,7 +205,7 @@ void Shtift::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if (Scene::drawPdf())
         return;
 
-    QColor c(SettingsDialog::color(Colors::Shtift));
+    QColor c(Settings::color(Colors::Shtift));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))

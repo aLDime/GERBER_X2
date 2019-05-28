@@ -7,6 +7,7 @@
 #include <QMutex>
 #include <QTextStream>
 #include <QThread>
+#include <settings.h>
 
 namespace Gerber {
 
@@ -491,11 +492,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     const double da_sign[4] = { 0, 0, -1.0, +1.0 };
     Path points;
 
-    const double length = 0.5; // mm
-    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
-    int intSteps = MinStepsPerCircle;
-    while (intSteps < destSteps)
-        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
+    const int intSteps = Settings::circleSegments(radius * dScale); //MinStepsPerCircle;
 
     if (m_state.interpolation() == ClockwiseCircular && stop >= start)
         stop -= 2.0 * M_PI;

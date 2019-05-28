@@ -34,7 +34,7 @@ private:
     QPainterPath m_path;
     QPainterPath m_shape;
     int m_type = Null;
-    void updateMatSetForm();
+    void updateGCPForm();
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;

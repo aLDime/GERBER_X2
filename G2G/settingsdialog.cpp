@@ -36,20 +36,6 @@ const QString colorName[(size_t)Colors::Count]{
     "G0",
 };
 
-QColor SettingsDialog::m_color[(size_t)Colors::Count]{
-    QColor(), //Background
-    QColor(255, 255, 0, 120), //Shtift
-    QColor(Qt::gray), //CutArea
-    QColor(gridColor, gridColor, gridColor, 50), //Grid1
-    QColor(gridColor, gridColor, gridColor, 100), //Grid5
-    QColor(gridColor, gridColor, gridColor, 200), //Grid10
-    QColor(), //Hole
-    QColor(0, 255, 0, 120), //Home
-    QColor(Qt::black), //ToolPath
-    QColor(255, 0, 0, 120), //Zero
-    QColor(Qt::red) //G0
-};
-
 SettingsDialog::SettingsDialog(QWidget* parent)
     : QDialog(parent)
 {
@@ -66,6 +52,8 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + fontSize));
     });
 
+    //    sbxMinCircleSegments;
+    //    dsbxMinCircleSegmentLenght;
     readSettings();
 }
 
@@ -80,10 +68,20 @@ void SettingsDialog::readSettings()
     chbOpenGl->setChecked(settings.value("OpenGl").toBool());
     chbAntialiasing->setChecked(settings.value("Antialiasing").toBool());
     settings.endGroup();
+
     settings.beginGroup("Color");
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
         m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
     }
+    settings.endGroup();
+
+    settings.beginGroup("Circle");
+    sbxMinCircleSegments->setValue(settings.value("MinCircleSegments", 36).toInt());
+    dsbxMinCircleSegmentLenght->setValue(settings.value("MinCircleSegmentLenght", 0.5).toDouble());
+    chbxCleanPolygons->setChecked(settings.value("MinCircleSegmentLenght", true).toBool());
+    m_minCircleSegments = sbxMinCircleSegments->value();
+    m_minCircleSegmentLenght = dsbxMinCircleSegmentLenght->value();
+    m_cleanPolygons = chbxCleanPolygons->isChecked();
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -124,6 +122,13 @@ void SettingsDialog::writeSettings()
     for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
         settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
     }
+    settings.endGroup();
+
+    settings.beginGroup("Circle");
+    settings.setValue("MinCircleSegments", (m_minCircleSegments = sbxMinCircleSegments->value()));
+    settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLenght = dsbxMinCircleSegmentLenght->value()));
+    settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
+
     settings.endGroup();
 
     settings.beginGroup("Application");

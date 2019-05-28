@@ -47,6 +47,7 @@
 #include <gbrvars.h>
 #include <gcode/toolpathcreator.h>
 #include <ostream>
+#include <settings.h>
 #include <stdexcept>
 #include <vector>
 
@@ -3845,8 +3846,6 @@ void ClipperOffset::Execute(PolyTree& solution, double delta)
     }
 }
 //------------------------------------------------------------------------------
-#include "myclipper.h"
-#include <gcode/toolpathcreator.h>
 
 void ClipperOffset::DoOffset(double delta)
 {
@@ -3885,12 +3884,7 @@ void ClipperOffset::DoOffset(double delta)
         if (steps > std::fabs(delta) * pi)
             steps = std::fabs(delta) * pi; //ie excessive precision check
     } else {
-        const double length = 0.5; // mm
-        const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (delta * dScale)));
-        int intSteps = MinStepsPerCircle; //32 aka 10 degres
-        while (intSteps < destSteps)
-            intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
-        steps = intSteps;
+        steps = Settings::circleSegments(delta * dScale);
     }
 
     m_sin = std::sin(two_pi / steps);

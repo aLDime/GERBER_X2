@@ -330,6 +330,7 @@ void ToolEditForm::setTool(const Tool& tool)
     ui->dsbxPassDepth->setValue(tool.passDepth);
     ui->dsbxSpindleSpeed->setValue(tool.spindleSpeed);
     ui->dsbxStepover->setValue(tool.stepover);
+    ui->dsbxOneTurnCut->setValue(tool.oneTurnCut);
 
     ui->cbxToolType->setCurrentIndex(tool.type);
     ui->leName->setText(tool.name);

@@ -15,7 +15,7 @@ public:
     explicit GCodePropertiesForm(QWidget* prnt = nullptr);
     ~GCodePropertiesForm();
 
-    void updatePosDsbxs();
+    static void updatePosDsbxs();
 
     static Point* homePoint;
     static Point* zeroPoint;

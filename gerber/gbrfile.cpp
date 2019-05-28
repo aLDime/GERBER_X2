@@ -2,6 +2,7 @@
 #include <QElapsedTimer>
 #include <QSemaphore>
 #include <QThread>
+#include <settings.h>
 
 using namespace Gerber;
 
@@ -129,7 +130,8 @@ Paths File::merge() const
             clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);
         }
     }
-    CleanPolygons(m_mergedPaths, 0.0005 * uScale);
+    if (Settings::cleanPolygons())
+        CleanPolygons(m_mergedPaths, 0.0005 * uScale);
 #ifdef QT_DEBUG
     qDebug() << shortFileName() << t.elapsed();
 #endif

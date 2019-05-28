@@ -9,7 +9,7 @@
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
-#include <settingsdialog.h>
+#include <settings.h>
 
 Scene* Scene::self = nullptr;
 
@@ -79,7 +79,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
     if (m_drawPdf)
         return;
 
-    painter->fillRect(rect, SettingsDialog::color(Colors::Background));
+    painter->fillRect(rect, Settings::color(Colors::Background));
 
     //    if (qFuzzyIsNull(itemsBoundingRect().width()) || qFuzzyIsNull(itemsBoundingRect().height()))
     //        return;
@@ -107,14 +107,15 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
+    //painter->setCompositionMode(QPainter::CompositionMode_Plus);
 
     QMap<long, long> hGrid;
     QMap<long, long> vGrid;
 
     const QColor color[3]{
-        SettingsDialog::color(Colors::Grid1),
-        SettingsDialog::color(Colors::Grid5),
-        SettingsDialog::color(Colors::Grid10),
+        Settings::color(Colors::Grid1),
+        Settings::color(Colors::Grid5),
+        Settings::color(Colors::Grid10),
     };
 
     const long k = 10000;

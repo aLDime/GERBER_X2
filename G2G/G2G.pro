@@ -81,7 +81,8 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     icons.h \
     forms/previewitem.h \
-    voroni/jc_voronoi.h
+    voroni/jc_voronoi.h \
+    settings.h
 
 
 SOURCES += \
@@ -130,7 +131,8 @@ SOURCES += \
     tooldatabase/toolmodel.cpp \
     tooldatabase/tooltreeview.cpp \
     forms/previewitem.cpp \
-    voroni/jc_voronoi.cpp
+    voroni/jc_voronoi.cpp \
+    settings.cpp
 
 
 

@@ -362,7 +362,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
                     {
                         ClipperOffset offset(uScale);
                         offset.AddPaths(tmpPaths, jtRound, etClosedPolygon);
-                        offset.Execute(tmpPaths, (dOffset - m_toolDiameter) * 1.01);
+                        offset.Execute(tmpPaths, dOffset - m_toolDiameter * 0.95);
                     }
                     if (m_side != Inner)
                         ReversePaths(tmpPaths);

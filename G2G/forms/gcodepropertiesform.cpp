@@ -138,8 +138,10 @@ GCodePropertiesForm::~GCodePropertiesForm()
 
 void GCodePropertiesForm::updatePosDsbxs()
 {
-    ui->dsbxHomeX->setValue(homePoint->pos().x());
-    ui->dsbxHomeY->setValue(homePoint->pos().y());
-    ui->dsbxZeroX->setValue(zeroPoint->pos().x());
-    ui->dsbxZeroY->setValue(zeroPoint->pos().y());
+    if (!self)
+        return;
+    self->ui->dsbxHomeX->setValue(homePoint->pos().x());
+    self->ui->dsbxHomeY->setValue(homePoint->pos().y());
+    self->ui->dsbxZeroX->setValue(zeroPoint->pos().x());
+    self->ui->dsbxZeroY->setValue(zeroPoint->pos().y());
 }

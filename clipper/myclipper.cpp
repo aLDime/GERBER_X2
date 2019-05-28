@@ -2,6 +2,7 @@
 #include <QElapsedTimer>
 #include <QLineF>
 #include <qmath.h>
+#include <settings.h>
 
 Path toPath(const QPolygonF& p)
 {
@@ -80,13 +81,8 @@ Path CirclePath(double diametr, const IntPoint& center)
     if (diametr == 0.0)
         return Path();
 
-    const double radius = diametr / 2.0;
-    const double length = 0.5; // mm
-    const int destSteps = M_PI / asin((length * 0.5) / (radius * dScale));
-    int intSteps = MinStepsPerCircle;
-    while (intSteps < destSteps)
-        intSteps <<= 1; // aka *= 2 // Aiming for 0.5 mm rib length
-
+    const double radius = diametr * 0.5;
+    const int intSteps = Settings::circleSegments(radius * dScale); // MinStepsPerCircle;
     Path poligon(intSteps);
     for (int i = 0; i < intSteps; ++i) {
         poligon[i] = IntPoint(
