@@ -237,14 +237,14 @@
            </widget>
           </item>
           <item row="1" column="0">
-           <widget class="QLabel" name="minimumCircleSegmentLenghtLabel">
+           <widget class="QLabel" name="minimumCircleSegmentLengthLabel">
             <property name="text">
-             <string>Minimum Circle Segment Lenght</string>
+             <string>Minimum Circle Segment Length</string>
             </property>
            </widget>
           </item>
           <item row="1" column="1">
-           <widget class="DoubleSpinBox" name="dsbxMinCircleSegmentLenght">
+           <widget class="DoubleSpinBox" name="dsbxMinCircleSegmentLength">
             <property name="suffix">
              <string> mm</string>
             </property>

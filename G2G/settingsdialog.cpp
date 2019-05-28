@@ -77,10 +77,10 @@ void SettingsDialog::readSettings()
 
     settings.beginGroup("Circle");
     sbxMinCircleSegments->setValue(settings.value("MinCircleSegments", 36).toInt());
-    dsbxMinCircleSegmentLenght->setValue(settings.value("MinCircleSegmentLenght", 0.5).toDouble());
+    dsbxMinCircleSegmentLength->setValue(settings.value("MinCircleSegmentLenght", 0.5).toDouble());
     chbxCleanPolygons->setChecked(settings.value("MinCircleSegmentLenght", true).toBool());
     m_minCircleSegments = sbxMinCircleSegments->value();
-    m_minCircleSegmentLenght = dsbxMinCircleSegmentLenght->value();
+    m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value();
     m_cleanPolygons = chbxCleanPolygons->isChecked();
     settings.endGroup();
 
@@ -126,7 +126,7 @@ void SettingsDialog::writeSettings()
 
     settings.beginGroup("Circle");
     settings.setValue("MinCircleSegments", (m_minCircleSegments = sbxMinCircleSegments->value()));
-    settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLenght = dsbxMinCircleSegmentLenght->value()));
+    settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
     settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
 
     settings.endGroup();

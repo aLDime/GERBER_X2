@@ -21,8 +21,7 @@ enum class Colors : int {
 class Settings {
 public:
     Settings();
-    static double minCircleSegmentLenght();
-    static int minCircleSegments();
+
     static int circleSegments(double radius);
     static QColor& color(Colors id);
     static bool cleanPolygons();
@@ -30,7 +29,7 @@ public:
 protected:
     static QColor m_color[(size_t)Colors::Count];
     static int m_minCircleSegments;
-    static double m_minCircleSegmentLenght;
+    static double m_minCircleSegmentLength;
     static bool m_cleanPolygons;
 };
 

@@ -18,19 +18,16 @@ QColor Settings::m_color[(size_t)Colors::Count]{
     QColor(Qt::red) //G0
 };
 int Settings::m_minCircleSegments = 36;
-double Settings::m_minCircleSegmentLenght = 0.5;
+double Settings::m_minCircleSegmentLength = 0.5;
 bool Settings::m_cleanPolygons = true;
 
 Settings::Settings() {}
 
-double Settings::minCircleSegmentLenght() { return m_minCircleSegmentLenght; }
-int Settings::minCircleSegments() { return m_minCircleSegments; }
-
 int Settings::circleSegments(double radius)
 {
-    const double length = Settings::minCircleSegmentLenght(); // 0.5; // mm
+    const double length = m_minCircleSegmentLength; // 0.5; // mm
     const int destSteps = static_cast<int>(M_PI / asin((length * 0.5) / (radius)));
-    int intSteps = Settings::minCircleSegments(); //MinStepsPerCircle; //32 aka 10 degres
+    int intSteps = m_minCircleSegments; //MinStepsPerCircle; //32 aka 10 degres
     while (intSteps < destSteps)
         intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
     return intSteps;
