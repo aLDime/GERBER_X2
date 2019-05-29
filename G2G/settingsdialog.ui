@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>775</width>
-    <height>537</height>
+    <width>405</width>
+    <height>536</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -205,7 +205,7 @@
      </widget>
      <widget class="QWidget" name="tab_2">
       <attribute name="title">
-       <string>Gerber &amp; G-Code</string>
+       <string>Gerber \ G-Code</string>
       </attribute>
       <layout class="QVBoxLayout" name="verticalLayout">
        <item>
@@ -232,14 +232,14 @@
           <item row="0" column="0">
            <widget class="QLabel" name="minimumCircleSegmentsLabel">
             <property name="text">
-             <string>Minimum Circle Segments</string>
+             <string>Minimum number of circle segments</string>
             </property>
            </widget>
           </item>
           <item row="1" column="0">
            <widget class="QLabel" name="minimumCircleSegmentLengthLabel">
             <property name="text">
-             <string>Minimum Circle Segment Length</string>
+             <string>The minimum length of a segment of a circle</string>
             </property>
            </widget>
           </item>
@@ -278,12 +278,67 @@
           <item row="2" column="0">
            <widget class="QLabel" name="cleanPolygonsLabel">
             <property name="text">
-             <string>Clean Polygons</string>
+             <string>Cleaning Polygons</string>
             </property>
            </widget>
           </item>
           <item row="2" column="1">
            <widget class="QCheckBox" name="chbxCleanPolygons"/>
+          </item>
+         </layout>
+        </widget>
+       </item>
+       <item>
+        <widget class="QGroupBox" name="groupBox_3">
+         <property name="title">
+          <string>G-Code</string>
+         </property>
+         <layout class="QVBoxLayout" name="verticalLayout_3">
+          <property name="leftMargin">
+           <number>6</number>
+          </property>
+          <property name="rightMargin">
+           <number>6</number>
+          </property>
+          <property name="bottomMargin">
+           <number>6</number>
+          </property>
+          <item>
+           <widget class="QCheckBox" name="chbxInfo">
+            <property name="text">
+             <string>Add a comment with parameters to the beginning of the G-code</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label">
+            <property name="text">
+             <string>Start with:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="pteStart"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_2">
+            <property name="text">
+             <string>Finish with:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QPlainTextEdit" name="pteEnd"/>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_3">
+            <property name="text">
+             <string>The format of the line with the coordinates:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <widget class="QLineEdit" name="leFormat"/>
           </item>
          </layout>
         </widget>

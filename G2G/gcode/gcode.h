@@ -49,22 +49,25 @@ private:
     };
 
     GCode m_gCode = G_null;
+
     inline QString g0()
     {
-        if (m_gCode != G00) {
-            m_gCode = G00;
-            return "G0";
-        }
-        return "";
+        //        if (m_gCode != G00) {
+        m_gCode = G00;
+        return "G0";
+        //        }
+        //        return "";
     }
+
     inline QString g1()
     {
-        if (m_gCode != G01) {
-            m_gCode = G01;
-            return "G1";
-        }
-        return "";
+        //        if (m_gCode != G01) {
+        m_gCode = G01;
+        return "G1";
+        //        }
+        //        return "";
     }
+
     inline QString x(double val) { return "X" + format(val); }
     inline QString y(double val) { return "Y" + format(val); }
     inline QString z(double val) { return "Z" + format(val); }
@@ -76,6 +79,30 @@ private:
     void endPath();
     void statFile();
     void endFile();
+
+    QString formated(const QList<QString> data);
+
+    enum {
+        AlwaysG,
+        AlwaysX,
+        AlwaysY,
+        AlwaysZ,
+        AlwaysF,
+        AlwaysS,
+
+        SpaceG,
+        SpaceX,
+        SpaceY,
+        SpaceZ,
+        SpaceF,
+        SpaceS,
+
+        Size
+    };
+
+    bool FormatFlags[Size];
+
+    QString lastValues[6];
 
     QList<QString> sl;
 

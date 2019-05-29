@@ -36,16 +36,8 @@ int main(int argc, char* argv[])
     app.setOrganizationName("XrSoft");
     app.setApplicationVersion("0.7.5");
 
-//    {
-//        QSettings settings;
-//        settings.beginGroup("Application");
-//        const int fontSize = settings.value("FontSize", 0).toInt();
-//        if (fontSize) {
-//            QFont f;
-//            f.setPointSize(fontSize);
-//            app.setFont(f);
-//        }
-//    }
+    QSettings::setDefaultFormat(QSettings::IniFormat);
+    QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());
 
     QIcon::setThemeSearchPaths({ "../icons/breeze/", "icons/breeze/" });
     QIcon::setThemeName("Breeze");

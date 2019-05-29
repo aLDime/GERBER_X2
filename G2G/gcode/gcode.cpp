@@ -196,6 +196,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     default:
         break;
     }
+    save(fileName() + ".tap");
 }
 
 Paths GCodeFile::getPaths() const { return m_toolPaths; }
@@ -239,10 +240,10 @@ void GCodeFile::saveDrill()
         qDebug() << "saveDrill" << point << path.size();
         startPath(point);
         for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
-            sl.append(g1() + z(-m_tool.passDepth * i) + feed(m_tool.plungeRate));
-            sl.append(QString(g0() + "Z0"));
+            sl.append(formated({ g1(), z(-m_tool.passDepth * i), feed(m_tool.plungeRate) }));
+            sl.append(formated({ g0(), "Z0" }));
         }
-        sl.append(g1() + z(-m_depth) + feed(m_tool.plungeRate));
+        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate) }));
         endPath();
     }
     endFile();
@@ -251,6 +252,7 @@ void GCodeFile::saveDrill()
 void GCodeFile::saveProfilePocket()
 {
     statFile();
+
     QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
 
     const double k = Shtift::min() + Shtift::max();
@@ -269,54 +271,30 @@ void GCodeFile::saveProfilePocket()
         }
     }
 
-    QPointF lastPoint;
-
     for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
-        for (QPolygonF& path : paths) {
-            QPointF point(path.first());
-
-            startPath(point);
-
-            sl.append(g1() + z(-m_tool.passDepth * i) + feed(m_tool.plungeRate)); //start z
-
-            bool fl = true;
-            for (QPointF& point : path) {
-                QString str(g1());
-                if (!qFuzzyCompare(lastPoint.x(), point.x()))
-                    str += x(point.x());
-                if (!qFuzzyCompare(lastPoint.y(), point.y()))
-                    str += y(point.y());
-                if (fl) {
-                    str += feed(m_tool.feedRate);
-                    fl = false;
-                }
-                sl.append(str);
-                lastPoint = point;
+        for (const QPolygonF& path : paths) {
+            startPath(path.first());
+            sl.append(formated({ g1(), z(-m_tool.passDepth * i), feed(m_tool.plungeRate) })); //start z
+            bool skip = true;
+            for (const QPointF& point : path) {
+                if (skip)
+                    skip = false;
+                else
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate) }));
             }
             endPath();
         }
     }
 
-    for (QPolygonF& path : paths) {
-        QPointF point(path.first());
-
-        startPath(point);
-
-        sl.append(g1() + z(-m_depth) + feed(m_tool.plungeRate)); //start z
-
-        bool fl = true;
-        for (QPointF& point : path) {
-            QString str(g1());
-            if (!qFuzzyCompare(lastPoint.x(), point.x()))
-                str += x(point.x());
-            if (!qFuzzyCompare(lastPoint.y(), point.y()))
-                str += y(point.y());
-            if (fl) {
-                str += feed(m_tool.feedRate);
-                fl = false;
-            }
-            sl.append(str);
-            lastPoint = point;
+    for (const QPolygonF& path : paths) {
+        startPath(path.first());
+        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate) })); //start z
+        bool skip = true;
+        for (const QPointF& point : path) {
+            if (skip)
+                skip = false;
+            else
+                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate) }));
         }
         endPath();
     }
@@ -331,43 +309,76 @@ GCodeType GCodeFile::gtype() const
 
 void GCodeFile::startPath(const QPointF& point)
 {
-    sl.append(g0() + x(point.x()) + y(point.y())); //start xy
-    sl.append(g0() + z(GCodePropertiesForm::plunge)); //start z
+    sl.append(formated({ g0(), x(point.x()), y(point.y()), s(m_tool.spindleSpeed) })); //start xy
+    sl.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
+    lastValues[AlwaysF].clear();
 }
 
 void GCodeFile::endPath()
 {
-    sl.append(QString(g0() + "Z%1").arg(format(GCodePropertiesForm::clearence)));
+    sl.append(formated({ g0(), z(GCodePropertiesForm::clearence) }));
 }
 
 void GCodeFile::statFile()
 {
     sl.clear();
-    sl.append("G21 G17 G90"); //G17 XY plane
-    sl.append(g0() + z(GCodePropertiesForm::safeZ)); //HomeZ
+    sl.append(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
+
+    const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    for (bool& fl : FormatFlags) {
+        fl = false;
+    }
+    const QString formaZ(Settings::gCodeFormat());
+    for (int i = 0; i < cl.size(); ++i) {
+        const int index = formaZ.indexOf(cl[i], 0, Qt::CaseInsensitive);
+        if (index != -1) {
+            FormatFlags[i + AlwaysG] = formaZ[index + 1] == '+';
+            FormatFlags[i + SpaceG] = formaZ[index + 2] == ' ';
+        }
+    }
 
     //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
-    sl.append(s(m_tool.spindleSpeed) + "M3"); //HomeXY
+
+    sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
+
+    //    sl.append(s(m_tool.spindleSpeed) + " M3"); //HomeXY
 }
 
 void GCodeFile::endFile()
 {
-    sl.append(g0() + z(GCodePropertiesForm::safeZ)); //HomeZ
-
+    sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
     QPointF home(GCodePropertiesForm::homePoint->pos() - GCodePropertiesForm::zeroPoint->pos());
-    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
+    sl.append(formated({ g0(), x(home.x()), y(home.y()) })); //HomeXY
+    //    sl.append("M5"); //HomeXY
+    sl.append(Settings::endGCode());
 
-    sl.append("M30");
     QFile file(m_fileName);
     //    QString str(m_fileName);
     //    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out(&file);
         for (QString& s : sl)
-            out << s << endl;
+            if (!s.isEmpty())
+                out << s << endl;
     }
     file.close();
+}
+
+QString GCodeFile::formated(const QList<QString> data)
+{
+    static const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
+    QString ret;
+    for (const QString& str : data) {
+        const int index = cl.indexOf(str.front().toUpper());
+        if (index != -1) {
+            if (lastValues[index] != str || FormatFlags[AlwaysG + index]) {
+                lastValues[index] = str;
+                ret += str + (FormatFlags[SpaceG + index] ? " " : "");
+            }
+        }
+    }
+    return ret.trimmed();
 }
 
 void GCodeFile::save() const

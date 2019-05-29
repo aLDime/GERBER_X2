@@ -18,6 +18,7 @@ AboutForm::AboutForm(QWidget* parent)
     ui->lblAbout->setText(ui->lblAbout->text().arg(/*qApp->applicationVersion()*/ str));
     connect(ui->cmdOk_2, &QPushButton::clicked, this, &AboutForm::accept);
     connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) { QDesktopServices::openUrl(link); });
+
 }
 
 AboutForm::~AboutForm()

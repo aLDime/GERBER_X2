@@ -84,6 +84,15 @@ void SettingsDialog::readSettings()
     m_cleanPolygons = chbxCleanPolygons->isChecked();
     settings.endGroup();
 
+    settings.beginGroup("GCode");
+    leFormat->setText(settings.value("GCodeFormat", "G?X?Y?Z?F?S?").toString());
+    m_GCode = leFormat->text();
+    pteStart->setPlainText(settings.value("GCodeStart", "G21 G17 G90|M3").toString().replace('|', '\n'));
+    m_startGCode = pteStart->toPlainText();
+    pteEnd->setPlainText(settings.value("GCodeEnd", "M5|M30").toString().replace('|', '\n'));
+    m_endGCode = pteEnd->toPlainText();
+    settings.endGroup();
+
     settings.beginGroup("Application");
     const QString fontSize(settings.value("FontSize", "8").toString());
     qApp->setStyleSheet(/*a.styleSheet() +*/ "QWidget {font-size: " + fontSize + "pt}");
@@ -128,7 +137,15 @@ void SettingsDialog::writeSettings()
     settings.setValue("MinCircleSegments", (m_minCircleSegments = sbxMinCircleSegments->value()));
     settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
     settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
+    settings.endGroup();
 
+    settings.beginGroup("GCode");
+    m_GCode = leFormat->text();
+    settings.setValue("GCodeFormat", m_GCode);
+    m_startGCode = pteStart->toPlainText();
+    settings.setValue("GCodeStart", pteStart->toPlainText().replace('\n', '|'));
+    m_endGCode = pteEnd->toPlainText();
+    settings.setValue("GCodeEnd", pteEnd->toPlainText().replace('\n', '|'));
     settings.endGroup();
 
     settings.beginGroup("Application");

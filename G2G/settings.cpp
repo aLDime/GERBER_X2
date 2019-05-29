@@ -21,6 +21,10 @@ int Settings::m_minCircleSegments = 36;
 double Settings::m_minCircleSegmentLength = 0.5;
 bool Settings::m_cleanPolygons = true;
 
+QString Settings::m_startGCode = "G21 G17 G90";
+QString Settings::m_endGCode = "M30";
+QString Settings::m_GCode =  "G?X?Y?Z?F?S?";
+
 Settings::Settings() {}
 
 int Settings::circleSegments(double radius)
@@ -34,3 +38,10 @@ int Settings::circleSegments(double radius)
 }
 QColor& Settings::color(Colors id) { return m_color[static_cast<int>(id)]; }
 bool Settings::cleanPolygons() { return m_cleanPolygons; }
+
+QString Settings::startGCode() { return m_startGCode; }
+
+QString Settings::endGCode() { return m_endGCode; }
+
+QString Settings::gCodeFormat() { return m_GCode; }
+
