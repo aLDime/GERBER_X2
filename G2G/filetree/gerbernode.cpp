@@ -65,7 +65,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
 
 Qt::ItemFlags GerberNode::flags(const QModelIndex& index) const
 {
-    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
+    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case Name:
         return itemFlag | Qt::ItemIsUserCheckable;

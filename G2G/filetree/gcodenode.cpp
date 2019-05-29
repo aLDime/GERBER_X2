@@ -42,7 +42,7 @@ bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int rol
 
 Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
 {
-    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
+    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;

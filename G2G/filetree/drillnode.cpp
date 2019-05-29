@@ -48,7 +48,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
 
 Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
 {
-    int itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
+    Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch (index.column()) {
     case Name:
         return itemFlag | Qt::ItemIsUserCheckable;
