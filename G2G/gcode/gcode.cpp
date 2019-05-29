@@ -161,8 +161,9 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
             //            itemGroup()->append(item);
         } else {
             item = new GerberItem(m_pocketPaths, nullptr);
-            item->setPen(QPen(Settings::color(Colors::CutArea), tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-            item->setBrush(Settings::color(Colors::CutArea));
+            item->setPen(QPen(Qt::black, tool.getDiameter(depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+            item->setPenColor(Settings::color(Colors::CutArea));
+            item->setBrushColor(Settings::color(Colors::CutArea));
             item->setAcceptHoverEvents(false);
             item->setFlag(QGraphicsItem::ItemIsSelectable, false);
             itemGroup()->append(item);

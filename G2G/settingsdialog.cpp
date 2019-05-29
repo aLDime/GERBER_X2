@@ -45,15 +45,14 @@ SettingsDialog::SettingsDialog(QWidget* parent)
         formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector(m_color[i], defaultColor[i], gbxColor));
         formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel(colorName[i] + ":", gbxColor));
     }
+
     connect(cbxFontSize, &QComboBox::currentTextChanged, [=](const QString& fontSize) {
-        QFont f;
-        f.setPointSize(fontSize.toInt());
-        qApp->setFont(f);
+        //        QFont f;
+        //        f.setPointSize(fontSize.toInt());
+        //        qApp->setFont(f);
         qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegExp("font-size:\\s*\\d+"), "font-size: " + fontSize));
     });
 
-    //    sbxMinCircleSegments;
-    //    dsbxMinCircleSegmentLenght;
     readSettings();
 }
 
@@ -70,9 +69,8 @@ void SettingsDialog::readSettings()
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
+    for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
         m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
-    }
     settings.endGroup();
 
     settings.beginGroup("Circle");
@@ -95,7 +93,7 @@ void SettingsDialog::readSettings()
 
     settings.beginGroup("Application");
     const QString fontSize(settings.value("FontSize", "8").toString());
-    qApp->setStyleSheet(/*a.styleSheet() +*/ "QWidget {font-size: " + fontSize + "pt}");
+    qApp->setStyleSheet("QWidget {font-size: " + fontSize + "pt}");
     cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
@@ -128,9 +126,8 @@ void SettingsDialog::writeSettings()
     settings.endGroup();
 
     settings.beginGroup("Color");
-    for (int i = 0; i < static_cast<int>(Colors::Count); ++i) {
+    for (int i = 0; i < static_cast<int>(Colors::Count); ++i)
         settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
-    }
     settings.endGroup();
 
     settings.beginGroup("Circle");

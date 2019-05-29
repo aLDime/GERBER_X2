@@ -260,7 +260,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
             emit fileReady(m_file);
         }
     } catch (...) {
-        qDebug() << "catch";
+        //qDebug() << "catch";
     }
 }
 
@@ -419,7 +419,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
             }
         }
     } catch (...) {
-        qDebug() << "catch";
+        //qDebug() << "catch";
     }
 }
 
@@ -569,7 +569,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
             emit fileReady(m_file);
         }
     } catch (...) {
-        qDebug() << "catch";
+        //qDebug() << "catch";
     }
 }
 
@@ -692,7 +692,7 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
             emit fileReady(m_file);
         }
     } catch (...) {
-        qDebug() << "catch";
+        //qDebug() << "catch";
     }
 }
 
@@ -700,61 +700,35 @@ struct Pair {
     IntPoint first;
     IntPoint second;
     int id;
-    bool operator==(const Pair& b) const
-    {
-        return first == b.first && second == b.second;
-    }
+    bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
 };
+
 using Pairs = QSet<Pair>;
 using Pairss = QVector<Pairs>;
-inline uint qHash(const Pair& tag, uint seed = 0)
-{
-    return qHash(tag.first.X * tag.second.X, seed ^ 0xa317a317) ^ qHash(tag.first.Y * tag.second.Y, seed ^ 0x17a317a3);
-}
+inline uint qHash(const Pair& tag, uint seed = 0) { return qHash(tag.first.X * tag.second.X, seed ^ 0xa317a317) ^ qHash(tag.first.Y * tag.second.Y, seed ^ 0x17a317a3); }
 
 struct OrdPath {
     IntPoint Pt;
     OrdPath* Next = nullptr;
     OrdPath* Prev = nullptr;
     OrdPath* Last = nullptr;
-
     inline void append(OrdPath* opt)
     {
         Last->Next = opt;
         Last = opt->Prev->Last;
         opt->Prev = this;
-        //        OrdPath* next = this;
-        //        do {
-        //            if (next->Next)
-        //                next = next->Next;
-        //            else {
-        //                next->Next = opt;
-        //                Last = opt->Prev->Last;
-        //                opt->Prev = this;
-        //                //                OrdPath* next = opt;
-        //                //                do {
-        //                //                    if (next->Next)
-        //                //                        next = next->Next;
-        //                //                    else {
-        //                //                        Last = next;
-        //                //                        return;
-        //                //                    }
-        //                //                } while (next);
-        //                return;
-        //            }
-        //        } while (1);
     }
 };
 
 void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k)
 {
     try {
-        qDebug() << "";
+        //qDebug() << "";
         // emit progress(3, 0); // progress
-        QElapsedTimer t;
-        QElapsedTimer t2;
-        t.start();
-        t2.start();
+        //        QElapsedTimer t;
+        //        QElapsedTimer t2;
+        //t.start();
+        //        t2.start();
 
         //            QVector<Vrn::Vertex*> points;
         //            points.reserve(1000000);
@@ -801,10 +775,10 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         //                bounding_box.setLeft(r.left * dScale - 1);
         //                bounding_box.setRight(r.right * dScale + 1);
         //                bounding_box.setTop(r.top * dScale - 1);
-        //                qDebug() << "size" << points.size();
+        //                //qDebug() << "size" << points.size();
         //                Vrn::Voronoi voronoi;
         //                Vrn::Diagram* diagram = voronoi.compute(points, bounding_box);
-        //                qDebug() << "Voronoi.compute" << diagram->execTime;
+        //                //qDebug() << "Voronoi.compute" << diagram->execTime;
 
         //                m_returnPaths.reserve(diagram->edges.size());
         //                for (Vrn::Edge* edge : diagram->edges) {
@@ -815,7 +789,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         //                    else if (!edge->rSite)
         //                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
         //                }
-        //                qDebug() << "m_returnPaths" << m_returnPaths.size();
+        //                //qDebug() << "m_returnPaths" << m_returnPaths.size();
         //                delete diagram;
         //                // emit progress(3, 2); // progress
         //            }
@@ -867,8 +841,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         //                    continue;
         //                }
         //            }
-        //            qDebug() << "remove" << (size - m_returnPaths.size());
-        //            qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
+        //            //qDebug() << "remove" << (size - m_returnPaths.size());
+        //            //qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
 
         QVector<jcv_point> points;
         points.reserve(100000);
@@ -876,7 +850,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         groupedPaths(CopperPaths);
         int id = 0;
 
-        t.start();
+        //t.start();
 
         auto condei = [&](IntPoint tmp, IntPoint point) {
             QLineF line(toQPointF(tmp), toQPointF(point));
@@ -902,8 +876,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             ++id;
         }
 
-        qDebug() << "DATA PREPARE" << t.elapsed();
-        t.start();
+        //qDebug() << "DATA PREPARE" << t.elapsed();
+        //t.start();
 
         for (const Path& path : m_workingRawPaths) {
             IntPoint tmp(path.first());
@@ -992,8 +966,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             }
 
             progressOrCancel(3, 3); // progress
-            qDebug() << "GENERATE" << t.elapsed();
-            t.start();
+            //qDebug() << "GENERATE" << t.elapsed();
+            //t.start();
         }
         {
             const int max = merge.size();
@@ -1026,8 +1000,8 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     Next = Next->Next;
                 }
             }
-            qDebug() << "MERGE_1" << t.elapsed() << "size" << m_returnPaths.size();
-            t.start();
+            //qDebug() << "MERGE_1" << t.elapsed() << "size" << m_returnPaths.size();
+            //t.start();
         }
         const int max = m_returnPaths.size();
         for (int k = 0; k < 3; ++k) {
@@ -1037,40 +1011,40 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
                     if (i == j)
                         continue;
                     if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
-                        //qDebug("1 f f");
+                        ////qDebug("1 f f");
                         ReversePath(m_returnPaths[j]);
                         m_returnPaths[j].append(m_returnPaths[i].mid(1));
                         m_returnPaths.remove(i--);
                         break;
                     }
                     if (m_returnPaths[i].last() == m_returnPaths[j].last()) {
-                        //qDebug("2 l l");
+                        ////qDebug("2 l l");
                         ReversePath(m_returnPaths[j]);
                         m_returnPaths[i].append(m_returnPaths[j].mid(1));
                         m_returnPaths.remove(j--);
                         break;
                     }
                     if (Length(m_returnPaths[i].last(), m_returnPaths[j].last()) < 0.001 * uScale) {
-                        //qDebug("3 l l l");
+                        ////qDebug("3 l l l");
                         ReversePath(m_returnPaths[j]);
                         m_returnPaths[i].append(m_returnPaths[j].mid(1));
                         m_returnPaths.remove(j--);
                         break;
                     }
                     if (Length(m_returnPaths[i].last(), m_returnPaths[j].first()) < 0.001 * uScale) {
-                        //qDebug("4 l f l");
+                        ////qDebug("4 l f l");
                         m_returnPaths[i].append(m_returnPaths[j].mid(1));
                         m_returnPaths.remove(j--);
                         break;
                     }
                     if (Length(m_returnPaths[i].first(), m_returnPaths[j].last()) < 0.001 * uScale) {
-                        //qDebug("5 f l l");
+                        ////qDebug("5 f l l");
                         m_returnPaths[j].append(m_returnPaths[i].mid(1));
                         m_returnPaths.remove(i--);
                         break;
                     }
                     if (Length(m_returnPaths[i].first(), m_returnPaths[j].first()) < 0.001 * uScale) {
-                        //qDebug("6 f f l");
+                        ////qDebug("6 f f l");
                         ReversePath(m_returnPaths[j]);
                         m_returnPaths[j].append(m_returnPaths[i].mid(1));
                         m_returnPaths.remove(i--);
@@ -1080,16 +1054,16 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             }
         }
 
-        qDebug() << "MERGE_2" << t.elapsed() << "size" << m_returnPaths.size();
-        t.start();
+        //qDebug() << "MERGE_2" << t.elapsed() << "size" << m_returnPaths.size();
+        //t.start();
 
         for (int i = 0; i < m_returnPaths.size(); ++i) {
             if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < k * 0.5 * uScale)
                 m_returnPaths.remove(i--);
         }
 
-        qDebug() << "CLEAR" << t.elapsed() << "size" << m_returnPaths.size();
-        t.start();
+        //qDebug() << "CLEAR" << t.elapsed() << "size" << m_returnPaths.size();
+        //t.start();
 
         //        m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
         //        emit fileReady(m_file);
@@ -1142,14 +1116,13 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
             size2 += m_returnPaths[i].size();
         }
 
-        qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
-        qDebug() << "elapsed" << t2.elapsed();
+        //qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
+        //qDebug() << "elapsed" << t2.elapsed();
         m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
         m_file->setFileName(tool.name);
         emit fileReady(m_file);
-
     } catch (...) {
-        qDebug() << "catch";
+        //qDebug() << "catch";
     }
 }
 
@@ -1187,7 +1160,7 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
         return;
     }
 
-    qDebug() << rawPaths.size();
+    //qDebug() << rawPaths.size();
 
     const double glueLen = GCodePropertiesForm::glue * uScale;
     Paths paths;
@@ -1232,7 +1205,7 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
     clipper.AddPath(outer, ptClip, true);
     clipper.Execute(ctXor, paths, pftEvenOdd);
     paths.takeFirst();
-    qDebug() << paths.size();
+    //qDebug() << paths.size();
     m_workingPaths.append(paths);
 }
 
@@ -1367,11 +1340,11 @@ int ToolPathCreator::progressMax() const { return m_progressMax; }
 //    if (paths.isEmpty())
 //        return;
 //    static bool fl = false;
-//    qDebug() << flags;
+//    //qDebug() << flags;
 //    QVector<bool> flags2;
 //    Paths wPaths;
 //    if (flags.contains(false)) {
-//        qDebug() << "NNN";
+//        //qDebug() << "NNN";
 //        ClipperOffset offset;
 //        offset.AddPaths(paths, fl ? jtMiter : jtRound, etClosedPolygon);
 //        offset.Execute(wPaths, -m_stepOver);
@@ -1395,26 +1368,26 @@ int ToolPathCreator::progressMax() const { return m_progressMax; }
 //                    fl = PointInPolygon(pathss.last()[i][0], tmp[i]);
 //            }
 //            if (fl) {
-//                qDebug() << "append";
+//                //qDebug() << "append";
 //                for (int i = 0; i < tmp.size(); ++i)
 //                    pathss.last()[i].append(tmp[i]);
 //                DoOffset(wPaths, pathss, flags2);
 //                flags = flags2;
 //            } else {
-//                qDebug() << "insert";
+//                //qDebug() << "insert";
 //                pathss.append(tmp);
 //                DoOffset(wPaths, pathss, flags2);
 //                flags = flags2;
 //            }
 //        } else {
-//            qDebug() << "insert";
+//            //qDebug() << "insert";
 //            pathss.append(tmp);
 //            DoOffset(wPaths, pathss, flags2);
 //            flags = flags2;
 //        }
 //    } else {
 //        for (const Path& path : paths) {
-//            qDebug() << "111";
+//            //qDebug() << "111";
 //            ClipperOffset offset;
 //            offset.AddPath(path, fl ? jtMiter : jtRound, etClosedPolygon);
 //            offset.Execute(wPaths, -m_stepOver);
@@ -1429,7 +1402,7 @@ int ToolPathCreator::progressMax() const { return m_progressMax; }
 //                    ReversePath(path);
 //            }
 //            if (wPaths.size() == 1) {
-//                qDebug() << "append";
+//                //qDebug() << "append";
 //                if (PointInPolygon(tmp[0][0], pathss.last()[0]))
 //                    pathss.last()[0].append(tmp[0]);
 //                else
@@ -1438,7 +1411,7 @@ int ToolPathCreator::progressMax() const { return m_progressMax; }
 //                flags = flags2;
 //            } else {
 //                for (int i = 0; i < tmp.size(); ++i) {
-//                    qDebug() << "insert";
+//                    //qDebug() << "insert";
 //                    pathss.append({ tmp[i] });
 //                    DoOffset({ wPaths[i] }, pathss, flags2);
 //                    flags = flags2;

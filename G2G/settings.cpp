@@ -17,13 +17,18 @@ QColor Settings::m_color[(size_t)Colors::Count]{
     QColor(255, 0, 0, 120), //Zero
     QColor(Qt::red) //G0
 };
+
 int Settings::m_minCircleSegments = 36;
+
 double Settings::m_minCircleSegmentLength = 0.5;
+
 bool Settings::m_cleanPolygons = true;
 
 QString Settings::m_startGCode = "G21 G17 G90";
+
 QString Settings::m_endGCode = "M30";
-QString Settings::m_GCode =  "G?X?Y?Z?F?S?";
+
+QString Settings::m_GCode = "G?X?Y?Z?F?S?";
 
 Settings::Settings() {}
 
@@ -36,7 +41,9 @@ int Settings::circleSegments(double radius)
         intSteps <<= 1; // aka *= 2 // resize to desination 0.5 mm rib length
     return intSteps;
 }
+
 QColor& Settings::color(Colors id) { return m_color[static_cast<int>(id)]; }
+
 bool Settings::cleanPolygons() { return m_cleanPolygons; }
 
 QString Settings::startGCode() { return m_startGCode; }
@@ -44,4 +51,3 @@ QString Settings::startGCode() { return m_startGCode; }
 QString Settings::endGCode() { return m_endGCode; }
 
 QString Settings::gCodeFormat() { return m_GCode; }
-

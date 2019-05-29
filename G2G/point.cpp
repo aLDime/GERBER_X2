@@ -71,7 +71,7 @@ void Point::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if (Scene::drawPdf())
         return;
 
-    QColor c(m_type == Home ? Settings::color(Colors::Home) : Settings ::color(Colors::Zero));
+    QColor c(m_type == Home ? Settings::color(Colors::Home) : Settings::color(Colors::Zero));
     if (option->state & QStyle ::State_MouseOver)
         c.setAlpha(255);
     if (!(flags() & QGraphicsItem::ItemIsMovable))

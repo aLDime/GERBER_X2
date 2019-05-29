@@ -22,7 +22,7 @@ class Settings {
 public:
     Settings();
 
-    static int circleSegments(double radius) ;
+    static int circleSegments(double radius);
     static QColor& color(Colors id);
     static bool cleanPolygons();
 
