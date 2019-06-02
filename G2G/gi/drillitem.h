@@ -10,7 +10,7 @@ class Hole;
 
 class DrillItem : public GraphicsItem {
 public:
-    DrillItem(Excellon::Hole* hole);
+    DrillItem(Excellon::Hole* hole ,Excellon::File* file );
     DrillItem(double diameter);
 
     QRectF boundingRect() const override;
@@ -23,7 +23,12 @@ public:
     void setDiameter(double diameter);
     void updateHole();
 
-    const Excellon::File* file() const;
+    //    const Excellon::File* file() const
+    //    {
+    //        if (m_hole)
+    //            return m_hole->file;
+    //        return nullptr;
+    //    }
 
     // GraphicsItem interface
     Paths paths() const override;

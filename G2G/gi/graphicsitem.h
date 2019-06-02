@@ -5,6 +5,7 @@
 #include <QPen>
 
 #include <myclipper.h>
+
 using namespace ClipperLib;
 
 enum {
@@ -19,17 +20,29 @@ enum {
     ShtiftType,
 };
 
-//class ItemGroup;
+class AbstractFile;
+
+namespace Gerber {
+class Parser;
+}
+namespace Excellon {
+class File;
+}
 
 class GraphicsItem : public QGraphicsItem {
+    friend class Gerber::Parser;
+    friend class Excellon::File;
+
 public:
-    GraphicsItem();
+    explicit GraphicsItem(AbstractFile* file = nullptr);
     ~GraphicsItem();
+
     QBrush brush() const;
     QPen pen() const;
     void setBrush(const QBrush& brush);
     void setPen(const QPen& pen);
     virtual Paths paths() const = 0;
+
     //    void setItemGroup(ItemGroup* itemGroup);
     //    ItemGroup* parentItemGroup() const;
     //    QPointF center() const;
@@ -37,7 +50,14 @@ public:
     void setPenColor(QColor& penColor);
     void setBrushColor(QColor& brushColor);
 
+    const AbstractFile* file() const;
+    template <typename T>
+    const T* typedFile() const { return dynamic_cast<const T* const>(m_file); }
+
+    int id() const;
+
 protected:
+    int m_id = -1;
     QPen m_pen;
     QBrush m_brush;
     QColor* m_penColor = nullptr;
@@ -45,6 +65,7 @@ protected:
 
     QPainterPath m_shape;
     QRectF m_rect;
+    const AbstractFile* m_file;
 
     //private:
     //    ItemGroup* m_ig = nullptr;

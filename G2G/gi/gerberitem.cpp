@@ -7,7 +7,7 @@
 #include <scene.h>
 
 GerberItem::GerberItem(Paths& paths, Gerber::File* file)
-    : m_file(file)
+    : GraphicsItem(file)
     , m_paths(paths)
 {
     for (Path path : m_paths) {
@@ -82,5 +82,3 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
 int GerberItem::type() const { return GerberItemType; }
 
 Paths GerberItem::paths() const { return m_paths; }
-
-const Gerber::File* GerberItem::file() const { return m_file; }

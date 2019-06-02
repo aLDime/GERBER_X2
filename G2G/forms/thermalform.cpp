@@ -1,10 +1,10 @@
 #include "thermalform.h"
 #include "ui_thermalform.h"
 
-#include "filetree/fileholder.h"
 #include "gcode/gcode.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
+#include "project.h"
 #include "thermalmodel.h"
 #include "thermalpreviewitem.h"
 #include "tooldatabase/tooldatabase.h"
@@ -55,7 +55,7 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 }
 
 ThermalForm::ThermalForm(QWidget* parent)
-    : ToolPathUtil("ThermalForm", parent)
+    : FormsUtil("ThermalForm", parent)
     , ui(new Ui::ThermalForm)
 {
     ui->setupUi(this);
@@ -109,7 +109,7 @@ void ThermalForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (Gerber::File* file : FileHolder::files<Gerber::File>()) {
+    for (Gerber::File* file : Project::files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
@@ -144,9 +144,9 @@ void ThermalForm::on_pbSelect_clicked()
 void ThermalForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
-    d.toolEdit->setTool(tool);
+    d.setTool(tool);
     if (d.exec()) {
-        tool = d.toolEdit->tool();
+        tool = d.tool();
         tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
@@ -154,20 +154,11 @@ void ThermalForm::on_pbEdit_clicked()
     }
 }
 
-void ThermalForm::on_pbCreate_clicked()
-{
-    create();
-}
+void ThermalForm::on_pbCreate_clicked() { create(); }
 
-void ThermalForm::on_pbClose_clicked()
-{
-    static_cast<QWidget*>(parent())->close();
-}
+void ThermalForm::on_pbClose_clicked() { static_cast<QWidget*>(parent())->close(); }
 
-void ThermalForm::on_leName_textChanged(const QString& arg1)
-{
-    m_fileName = arg1;
-}
+void ThermalForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
 void ThermalForm::create()
 {
@@ -232,7 +223,8 @@ void ThermalForm::create()
     tps->addSupportPaths(wBridgePaths);
     connect(this, &ThermalForm::createThermal, tps, &ToolPathCreator::createThermal);
     emit createThermal(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>()), tool, ui->dsbxDepth->value());
-    progress(1, 0);
+    showProgress();
+    //progress(1, 0);
 }
 
 void ThermalForm::updateName()
@@ -254,13 +246,25 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
     const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
     boardSide = file->side();
 
-    ThermalNode* thermalNode = model->appendRow(QIcon(), "Region");
+    ThermalNode* thermalNode = model->appendRow(QIcon(), "Regions");
     for (const Gerber::GraphicObject& go : *file) {
         if (go.state.type() == Gerber::Region && go.state.imgPolarity() == Gerber::Positive) {
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+            item->setToolTip("Region");
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
             Scene::self->addItem(item);
             thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
+        }
+    }
+
+    thermalNode = model->appendRow(QIcon(), "Lines");
+    for (const Gerber::GraphicObject& go : *file) {
+        if (go.state.type() == Gerber::Line && go.state.imgPolarity() == Gerber::Positive && go.path.size() == 2 && Length(go.path.first(), go.path.last()) * dScale * 0.3 < m_apertures[go.state.aperture()]->minSize()) {
+            ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+            item->setToolTip("Line");
+            m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
+            Scene::self->addItem(item);
+            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Line", 0.0, 0.5, 4, go.state.curPos(), item));
         }
     }
 
@@ -272,6 +276,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
             for (const Gerber::GraphicObject& go : *file) {
                 if (go.state.dCode() == Gerber::D03 && go.state.aperture() == apertureIt.key()) {
                     ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
+                    item->setToolTip(name);
                     m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
                     Scene::self->addItem(item);
                     thermalNode->append(new ThermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state.curPos(), item));
@@ -336,4 +341,8 @@ void ThermalForm::on_pbExclude_clicked()
             item->node()->disable();
     }
     ui->treeView->update();
+}
+
+void ThermalForm::editFile(GCodeFile* file)
+{
 }

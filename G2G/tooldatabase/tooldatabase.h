@@ -16,14 +16,11 @@ public:
     explicit ToolDatabase(QWidget* parent = nullptr, QVector<Tool::Type> types = QVector<Tool::Type>{ Tool::Drill, Tool::EndMill, Tool::Engraving });
     ~ToolDatabase();
 
-private:
-    Ui::ToolDatabase* ui;
-
 public:
     Tool tool() const;
-    void setTool(const Tool& tool);
 
 private:
+    Ui::ToolDatabase* ui;
     Tool m_tool;
     ToolItem* m_item;
     const QVector<Tool::Type> m_types;

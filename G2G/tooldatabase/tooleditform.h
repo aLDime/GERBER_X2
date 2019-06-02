@@ -14,6 +14,7 @@ class QDoubleSpinBox;
 
 class ToolEditForm : public QWidget {
     Q_OBJECT
+    friend class ToolEditDialog;
 
 public:
     explicit ToolEditForm(QWidget* parent = nullptr);
@@ -21,28 +22,20 @@ public:
 
     void setItem(ToolItem* item);
     void setTool(const Tool& tool);
-    Tool tool() const;
     void setDialog() /*const*/;
 
 signals:
     void itemChanged(ToolItem* item);
-
-private slots:
-
-    void on_cbxFeedSpeeds_currentIndexChanged(int index);
-    void on_cbxToolType_currentIndexChanged(int index);
-
-    void on_leName_textChanged(const QString& arg1);
-    void on_teNote_textChanged();
-
-    void calculate(int index, double value);
-    void valueChanged(double value);
+    void toolChanged(const Tool& item);
 
 public slots:
     void on_pbApply_clicked();
 
 private:
     Ui::ToolEditForm* ui;
+
+    void calculate(int index, double value);
+    void valueChanged(double value);
 
     ToolItem* m_item = nullptr;
     Tool m_tool;
@@ -54,6 +47,7 @@ private:
     void setRedReset();
     void flicker(QDoubleSpinBox* dsbx);
     void setVisibleWidgets(bool visible);
+    QVector<QObject*> set;
 };
 
 #endif // TOOLEDITFORM_H

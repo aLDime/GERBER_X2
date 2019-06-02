@@ -15,7 +15,7 @@
 #include <scene.h>
 
 ProfileForm::ProfileForm(QWidget* parent)
-    : ToolPathUtil("ProfileForm", parent)
+    : FormsUtil("ProfileForm", parent)
     , ui(new Ui::ProfileForm)
 
 {
@@ -110,9 +110,9 @@ void ProfileForm::on_pbSelect_clicked()
 void ProfileForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
-    d.toolEdit->setTool(tool);
+    d.setTool(tool);
     if (d.exec()) {
-        tool = d.toolEdit->tool();
+        tool = d.tool();
         tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
@@ -132,7 +132,7 @@ void ProfileForm::on_pbClose_clicked()
 
 void ProfileForm::create()
 {
-    Scene* scene = Scene::self;
+    m_used.clear();
 
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -141,42 +141,33 @@ void ProfileForm::create()
 
     Paths wPaths;
     Paths wrPaths;
+    AbstractFile const* file = nullptr;
 
-    Gerber::File const* file = nullptr;
-
-    for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == GerberItemType) {
-            GerberItem* gi = static_cast<GerberItem*>(item);
+    for (QGraphicsItem* item : Scene::selectedItems()) {
+        GraphicsItem* gi = static_cast<GraphicsItem*>(item);
+        switch (item->type()) {
+        case GerberItemType:
+        case RawItemType:
             if (!file) {
                 file = gi->file();
-                boardSide = gi->file()->side();
-            }
-            if (file != gi->file()) {
+                boardSide = file->side();
+            } else if (file != gi->file()) {
                 QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
-        }
-        if (item->type() == RawItemType) {
-            RawItem* gi = static_cast<RawItem*>(item);
-            if (!file) {
-                file = gi->file();
-                boardSide = gi->file()->side();
-            }
-            if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
-                return;
-            }
-        }
-        if (item->type() == GerberItemType)
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
-        if (item->type() == DrillItemType) {
-            if (static_cast<DrillItem*>(item)->isSlot())
-                wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            if (item->type() == GerberItemType)
+                wPaths.append(gi->paths());
             else
-                wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+                wrPaths.append(gi->paths());
+            m_used[gi->file()->id()].append(gi->id());
+            break;
+        case DrillItemType:
+            wPaths.append(gi->paths());
+            m_used[gi->file()->id()].append(gi->id());
+            break;
+        default:
+            break;
         }
-        if (item->type() == RawItemType)
-            wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
     if (wrPaths.isEmpty() && wPaths.isEmpty()) {
@@ -186,10 +177,9 @@ void ProfileForm::create()
 
     ToolPathCreator* tpc = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
     tpc->addRawPaths(wrPaths);
-
     connect(this, &ProfileForm::createProfile, tpc, &ToolPathCreator::createProfile);
     emit createProfile(tool, ui->dsbxDepth->value());
-    progress(1, 0);
+    showProgress();
 }
 
 void ProfileForm::updateName()
@@ -251,3 +241,7 @@ void ProfileForm::updatePixmap()
 }
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+
+void ProfileForm::editFile(GCodeFile* file)
+{
+}

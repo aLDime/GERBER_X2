@@ -1,5 +1,5 @@
 #include "abstractnode.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include <QDebug>
 #include <mainwindow.h>
 
@@ -14,8 +14,8 @@ AbstractNode::AbstractNode()
 AbstractNode::~AbstractNode()
 {
     if (MainWindow::self) {
-        MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
-        MainWindow::self->exportPdfAct->setEnabled(FileHolder::isEmpty());
+        MainWindow::self->closeAllAct->setEnabled(Project::isEmpty());
+        MainWindow::self->exportPdfAct->setEnabled(Project::isEmpty());
     }
     childItems.clear();
 }

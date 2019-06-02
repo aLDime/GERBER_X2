@@ -22,23 +22,22 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
 
     connect(ui->toolEdit, &ToolEditForm::itemChanged, [=](ToolItem* item) {
         if (item->isTool())
-            setTool(item->tool());
+            m_tool = item->tool();
         ui->treeView->updateItem();
     });
 
     connect(ui->treeView, &ToolTreeView::itemSelected, [=](ToolItem* item) {
         if (item->isTool())
-            setTool(item->tool());
+            m_tool = item->tool();
         ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && m_types.contains(item->tool().type)) || m_types.isEmpty());
         ui->toolEdit->setItem(item);
     });
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [=](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-
         if ((item->isTool() && m_types.contains(item->tool().type))) {
             if (item->tool().isValid()) {
-                setTool(item->tool());
+                m_tool = item->tool();
                 accept();
             } else {
                 QMessageBox ::information(this, tr("Invalid tool"), item->tool().errorStr());
@@ -46,26 +45,19 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
         }
     });
 
-    ui->pbCopy->setIcon(Icon(CopyIcon));
+    ui->pbCopy->setIcon(Icon(CopyIcon_));
     ui->pbDelete->setIcon(Icon(DeleteIcon));
     ui->pbNew->setIcon(Icon(NewToolIcon));
     ui->pbNewGroup->setIcon(Icon(NewGroupIcon));
+
+    ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
+    ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
+    ui->treeView->header()->setStretchLastSection(false);
 }
 
-ToolDatabase::~ToolDatabase()
-{
-    delete ui;
-}
+ToolDatabase::~ToolDatabase() { delete ui; }
 
-Tool ToolDatabase::tool() const
-{
-    return m_tool;
-}
-
-void ToolDatabase::setTool(const Tool& tool)
-{
-    m_tool = tool;
-}
+Tool ToolDatabase::tool() const { return m_tool; }
 
 void ToolDatabase::keyPressEvent(QKeyEvent* evt)
 {

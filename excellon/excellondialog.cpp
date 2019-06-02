@@ -88,14 +88,14 @@ void ExcellonDialog::acceptFormat()
 void ExcellonDialog::rejectFormat()
 {
     GraphicsView::self->zoomFit();
-    //if (FileHolder::contains(m_file))
+    //if (Project::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
 }
 
 void ExcellonDialog::closeEvent(QCloseEvent* event)
 {
-    //if (FileHolder::contains(m_file))
+    //if (Project::contains(m_file))
     m_file->setFormat(m_format);
     deleteLater();
     QDialog::closeEvent(event);

@@ -30,8 +30,6 @@ void fixBegin(Path& path);
 
 class ToolPathCreator : public QObject {
     Q_OBJECT
-
-    // friend class Clipper; // clipper.c:1619 ‘static void ToolPathCreator::progressOrCancel()’ is private within this context
     friend class ClipperLib::Clipper;
 
 public:
@@ -51,13 +49,10 @@ public:
     GCodeFile* file() const;
 
     int progressMax() const;
-
     int progressValue() const;
-    void setProgressValue(int progressValue);
 
 signals:
     void fileReady(GCodeFile* file);
-    //    void progress(int, int);
 
 private:
     GCodeFile* m_file = nullptr;
@@ -71,7 +66,7 @@ private:
     Path& fixPath(PolyNode* node);
     void grouping2(PolyNode* node, Paths* addRawPaths, bool fl = false);
 
-    inline void progressOrCancel(int progressMax, int progressValue /*, int skipKey*/);
+    inline void progressOrCancel(int progressMax, int progressValue);
     static void progressOrCancel();
 
     int m_progressMax = 1000000;

@@ -73,7 +73,7 @@ bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int cou
 
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const
 {
-    return 2;
+    return 3;
 }
 
 int ToolModel::rowCount(const QModelIndex& parent) const
@@ -113,44 +113,50 @@ QModelIndex ToolModel::parent(const QModelIndex& child) const
 {
     if (!child.isValid())
         return QModelIndex();
-
-    ToolItem* childItem = static_cast<ToolItem*>(child.internalPointer());
-    ToolItem* parentItem = childItem->parent();
-
+    ToolItem* parentItem = static_cast<ToolItem*>(child.internalPointer())->parent();
     if (parentItem == rootItem)
         return QModelIndex();
-
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
 Qt::ItemFlags ToolModel::flags(const QModelIndex& index) const
 {
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (!item)
-        item = rootItem;
-    return item->flags();
+    if (!index.isValid())
+        return rootItem->flags(index);
+    return getItem(index)->flags(index);
+
+    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+    //    if (!item)
+    //        item = rootItem;
+    //    return item->flags(index);
 }
 
 bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int role)
 {
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (!item)
-        item = rootItem;
-    return item->setData(index, value, role);
+    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+    //    if (!item)
+    //        item = rootItem;
+    //    return item->setData(index, value, role);
+    return getItem(index)->setData(index, value, role);
 }
 
 QVariant ToolModel::data(const QModelIndex& index, int role) const
 {
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (!item)
-        item = rootItem;
-    return item->data(index, role);
+    if (!index.isValid())
+        return QVariant();
+    //    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+    //    if (!item)
+    //        item = rootItem;
+    //    return item->data(index, role);
+    return getItem(index)->data(index, role);
 }
 
 QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const
 {
     if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return tr("Name|Note").split('|')[section];
+        return tr("Name|Note|Id").split('|')[section];
+    if (role == Qt::TextAlignmentRole && orientation == Qt::Horizontal)
+        return Qt::AlignHCenter;
     return QVariant();
 }
 
@@ -246,34 +252,25 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     return true;
 }
 
-Qt::DropActions ToolModel::supportedDragActions() const
-{
-    return Qt::MoveAction | Qt::TargetMoveAction;
-}
+Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
-Qt::DropActions ToolModel::supportedDropActions() const
-{
-    return Qt::MoveAction | Qt::TargetMoveAction;
-}
+Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
 QString ToolModel::myModelMimeType() { return QStringLiteral("application/ToolItem"); }
 
 void ToolModel::exportTools()
 {
-
     QFile file(QStringLiteral("../tools.dat"));
-    if (file.exists()) {
-        if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << file.errorString();
-            return;
-        }
-    } else {
+    do {
+        if (file.exists() && file.open(QIODevice::WriteOnly))
+            break;
+        qWarning() << file.errorString();
         file.setFileName(QStringLiteral("tools.dat"));
-        if (!file.open(QIODevice::WriteOnly)) {
-            qWarning() << file.errorString();
-            return;
-        }
-    }
+        if (file.open(QIODevice::WriteOnly))
+            break;
+        qWarning() << file.errorString();
+        return;
+    } while (1);
 
     QJsonObject jsonObject;
     //rootItem->write(treeObject);
@@ -325,23 +322,19 @@ void ToolModel::exportTools()
 
 void ToolModel::importTools()
 {
-
     QFile file(QStringLiteral("../tools.dat"));
-    if (file.exists()) {
-        if (!file.open(QIODevice::ReadOnly)) {
-            qWarning() << file.errorString();
-            return;
-        }
-    } else {
+    do {
+        if (file.open(QIODevice::ReadOnly))
+            break;
+        qWarning() << file.errorString();
         file.setFileName(QStringLiteral("tools.dat"));
-        if (!file.open(QIODevice::ReadOnly)) {
-            qWarning() << file.errorString();
-            return;
-        }
-    }
+        if (file.open(QIODevice::ReadOnly))
+            break;
+        qWarning() << file.errorString();
+        return;
+    } while (1);
 
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(file.readAll()));
-    //    rootItem->read(loadDoc.object());
     ToolHolder::readTools(loadDoc.object());
 
     QList<ToolItem*> parentsStack;

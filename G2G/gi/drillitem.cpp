@@ -1,20 +1,19 @@
 #include "drillitem.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <exfile.h>
 #include <exvars.h>
 #include <graphicsview.h>
 
 using namespace ClipperLib;
-using namespace Excellon;
 
-DrillItem::DrillItem(Hole* hole)
-    : m_hole(hole)
+DrillItem::DrillItem(Excellon::Hole* hole, Excellon::File* file)
+    : GraphicsItem(file)
+    , m_hole(hole)
     , m_diameter(hole->state.currentToolDiameter())
 {
     setAcceptHoverEvents(true);
-    //    setCacheMode(DeviceCoordinateCache);
     setFlag(ItemIsSelectable, true);
-    //    m_paths = { toPath(hole->state.path) };
     create();
 }
 
@@ -75,13 +74,6 @@ void DrillItem::setDiameter(double diameter)
 
     create();
     update(m_rect);
-}
-
-const File* DrillItem::file() const
-{
-    if (m_hole)
-        return m_hole->file;
-    return nullptr;
 }
 
 Paths DrillItem::paths() const

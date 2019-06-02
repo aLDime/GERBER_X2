@@ -1,6 +1,6 @@
 #include "treeview.h"
 #include "abstractnode.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
 #include "layerdelegate.h"
@@ -10,7 +10,6 @@
 #include <QHeaderView>
 #include <QMenu>
 #include <QPainter>
-#include <QSettings>
 #include <excellondialog.h>
 
 TreeView::TreeView(QWidget* parent)
@@ -103,7 +102,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
             if (index.isValid()) {
                 const int id = index.data(Qt::UserRole).toInt();
-                AbstractFile* file = FileHolder::file(id);
+                AbstractFile* file = Project::file(id);
                 file->itemGroup()->setZValue(id);
             }
         }
@@ -114,7 +113,7 @@ void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSel
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
             if (index.isValid()) {
                 const int id = index.data(Qt::UserRole).toInt();
-                AbstractFile* file = FileHolder::file(id);
+                AbstractFile* file = Project::file(id);
                 file->itemGroup()->setZValue(-id);
             }
         }
@@ -144,24 +143,23 @@ void TreeView::closeFile()
 
 void TreeView::saveGcodeFile()
 {
-    QSettings settings;
+    GCodeFile* file = Project::file<GCodeFile>(m_menuIndex.data(Qt::UserRole).toInt());
+
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        QString(settings.value("LastGCodeDir").toString()).append(m_menuIndex.data().toString()),
+        GCodeFile::getLastDir().append(m_menuIndex.data().toString()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
         tr("GCode (*.tap)")));
 
     if (name.isEmpty())
         return;
 
-    settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
-    GCodeFile* gcp = FileHolder::file<GCodeFile>(m_menuIndex.data(Qt::UserRole).toInt());
-    gcp->save(name);
+    file->save(name);
 }
 
 void TreeView::showExcellonDialog()
 {
     if (DrillForm::self)
         DrillForm::self->on_pbClose_clicked();
-    m_exFormatDialog = new ExcellonDialog(FileHolder::file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
+    m_exFormatDialog = new ExcellonDialog(Project::file<Excellon::File>(m_menuIndex.data(Qt::UserRole).toInt()));
     connect(m_exFormatDialog, &ExcellonDialog::destroyed, [&] { m_exFormatDialog = nullptr; });
     m_exFormatDialog->show();
 }
@@ -176,7 +174,7 @@ void TreeView::contextMenuEvent(QContextMenuEvent* event)
     case NodeGerberFiles: {
         menu.addAction(Icon(CloseIcon), tr("&Close"), this, &TreeView::closeFile);
         menu.addAction(Icon(HideOtherIcon), tr("&Hide other"), this, &TreeView::hideOther);
-        Gerber::File* file = FileHolder::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
+        Gerber::File* file = Project::file<Gerber::File>(m_menuIndex.data(Qt::UserRole).toInt());
         a = menu.addAction(/*QIcon::fromTheme("layer-visible-off"),*/ tr("&Raw Lines"), [=](bool checked) {
             if (file)
                 file->setItemType(static_cast<Gerber::File::ItemsType>(checked));

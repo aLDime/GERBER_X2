@@ -149,35 +149,43 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         {
             m_file->setItemGroup(new ItemGroup);
             for (Paths& paths : m_file->groupedPaths()) {
-                m_file->itemGroup()->append(new GerberItem(paths, m_file));
+                GraphicsItem* item = new GerberItem(paths, m_file);
+                item->m_id = m_file->itemGroup()->size();
+                m_file->itemGroup()->append(item);
             }
         }
         {
             m_file->setRawItemGroup(new ItemGroup);
-            //            QList<Path> checkList;
+            QList<Path> checkList;
             for (GraphicObject& go : *m_file) {
                 if (go.path.size() > 1) { // skip empty
-                    //                    bool contains = false;
-                    //                    for (const Path& path : checkList) { // find copy
-                    //                        int counter = 0;
-                    //                        for (const IntPoint& p1 : path) {
-                    //                            for (const IntPoint& p2 : go.path) {
-                    //                                const double k = 0.001 * uScale;
-                    //                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k) && ++counter > 2) {
-                    //                                    contains = true;
-                    //                                    break;
-                    //                                }
-                    //                            }
-                    //                            if (contains)
-                    //                                break;
-                    //                        }
-                    //                        if (contains)
-                    //                            break;
-                    //                    }
-                    //                    if (contains) // skip dublicates
-                    //                        continue;
-                    //                    checkList.append(go.path);
-                    m_file->rawItemGroup()->append(new RawItem(go.path, m_file));
+                    bool contains = false;
+                    for (const Path& path : checkList) { // find copy
+                        int counter = 0;
+                        if (path.size() == go.path.size()) {
+                            for (const IntPoint& p1 : path) {
+                                for (const IntPoint& p2 : go.path) {
+                                    const double k = 0.001 * uScale;
+                                    if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                                        ++counter;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (counter == go.path.size()) {
+                            contains = true;
+                            break;
+                        }
+                    }
+
+                    if (contains) // skip dublicates
+                        continue;
+                    checkList.append(go.path);
+
+                    GraphicsItem* item = new RawItem(go.path, m_file);
+                    item->m_id = m_file->rawItemGroup()->size();
+                    m_file->rawItemGroup()->append(item);
                 }
             }
             m_file->rawItemGroup()->setVisible(false);

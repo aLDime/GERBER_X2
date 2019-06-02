@@ -28,34 +28,35 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(1, QHeaderView::Stretch);
     setMinimumWidth(400);
-
-    //    QFile file(":/QTreeView.qss");
-    //    file.open(QFile::ReadOnly);
-    //    setStyleSheet(file.readAll());
-
-    //    int w = indentation();
-    //    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
-
-    //    QImage i(w, h, QImage::Format_ARGB32);
-    //    i.fill(Qt::transparent);
-    //    for (int y = 0; y < h; ++y)
-    //        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    //    i.save("vline.png", "PNG");
-
-    //    for (int x = w / 2; x < w; ++x)
-    //        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    //    i.save("branch-more.png", "PNG");
-
-    //    i.fill(Qt::transparent);
-    //    for (int y = 0; y < h / 2; ++y)
-    //        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
-    //    for (int x = w / 2; x < w; ++x)
-    //        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
-    //    i.save("branch-end.png", "PNG");
-    QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-    file.open(QFile::ReadOnly);
-    setStyleSheet(file.readAll());
     setIconSize({ 24, 24 });
+
+    QFile brFile(":/QTreeView.qss");
+    brFile.open(QFile::ReadOnly);
+    setStyleSheet(brFile.readAll());
+
+    int w = indentation();
+    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
+
+    QImage i(w, h, QImage::Format_ARGB32);
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    i.save("vline.png", "PNG");
+
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-more.png", "PNG");
+
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h / 2; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-end.png", "PNG");
+
+    QFile ssFile(":/qtreeviewstylesheet/QTreeView.qss");
+    ssFile.open(QFile::ReadOnly);
+    setStyleSheet(ssFile.readAll());
 }
 
 ToolTreeView::~ToolTreeView()
@@ -65,49 +66,43 @@ ToolTreeView::~ToolTreeView()
 void ToolTreeView::newGroup()
 {
     QModelIndex index = selectionModel()->currentIndex();
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (item == nullptr || item->isTool())
+    if (index.data(Qt::UserRole).toInt())
         index = index.parent();
-
     if (!m_model->insertRows(0, 1, index))
         return;
-
-    QModelIndex child = m_model->index(0, 0, index);
-
-    m_model->setData(child, tr("New Group"), Qt::EditRole);
-
-    selectionModel()->setCurrentIndex(m_model->index(0, 0, index), QItemSelectionModel::ClearAndSelect);
+    index = m_model->index(0, 0, index);
+    m_model->setData(index, tr("New Group"), Qt::EditRole);
+    selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     updateActions();
 }
 
 void ToolTreeView::newTool()
 {
     QModelIndex index = selectionModel()->currentIndex();
-    ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-    if (item && item->isTool()) {
+    if (index.data(Qt::UserRole).toInt())
         index = index.parent();
-        item = static_cast<ToolItem*>(index.internalPointer());
-        if (!m_model->insertRows(item->childCount(), 1, index))
-            return;
-    } else {
-        if (!m_model->insertRows(item->childCount(), 1, index))
-            return;
-    }
+    if (!m_model->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
+        return;
+    ToolItem* item = nullptr;
 
-    item = static_cast<ToolItem*>(index.internalPointer());
-    item = item->child(item->childCount() - 1);
+    if (!index.isValid())
+        item = static_cast<ToolItem*>(m_model->index(0, 0, index).internalPointer());
+    else
+        item = static_cast<ToolItem*>(index.internalPointer())->lastChild();
+
     if (item) {
         item->setIsTool();
-        item->tool().type = Tool::EndMill;
         item->tool().name = tr("New Tool ") + QString::number(item->toolId());
+        index = m_model->createIndex(item->row(), 0, item);
+        selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }
     updateActions();
 }
 
 void ToolTreeView::deleteItem()
 {
-    if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"),
-            QMessageBox::Yes, QMessageBox::No)
+    if (QMessageBox::question(this, tr("Warning"),
+            tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No)
         == QMessageBox::No)
         return;
     QModelIndex index = selectionModel()->currentIndex();
@@ -135,15 +130,12 @@ void ToolTreeView::updateActions()
 {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-
     m_buttons[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
-    m_buttons[New]->setEnabled(index.isValid());
     if (item) {
         m_buttons[Copy]->setEnabled(item->isTool());
         emit itemSelected(item);
     } else
         m_buttons[Copy]->setEnabled(false);
-
     expandAll();
 }
 

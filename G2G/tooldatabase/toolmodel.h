@@ -7,7 +7,7 @@ class ToolItem;
 
 class ToolModel : public QAbstractItemModel {
     Q_OBJECT
-    //friend class ToolItem;
+    friend class ToolTreeView;
     ToolItem* rootItem;
 
 public:
@@ -41,6 +41,15 @@ public:
 private:
     void exportTools();
     void importTools();
+    ToolItem* getItem(const QModelIndex& index) const
+    {
+        if (index.isValid()) {
+            ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
+            if (item)
+                return item;
+        }
+        return rootItem;
+    }
 };
 
 #endif // MYMODEL_H

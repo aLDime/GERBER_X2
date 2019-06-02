@@ -1,13 +1,13 @@
 #ifndef PROFILEFORM_H
 #define PROFILEFORM_H
 
-#include "toolpathutil.h"
+#include "formsutil.h"
 
 namespace Ui {
 class ProfileForm;
 }
 
-class ProfileForm : public ToolPathUtil {
+class ProfileForm : public FormsUtil {
     Q_OBJECT
 
 public:
@@ -22,7 +22,6 @@ private slots:
     void on_pbAddBridge_clicked();
     void on_dsbxBridgeLenght_valueChanged(double arg1);
     void on_dsbxDepth_valueChanged(double arg1);
-
     void on_leName_textChanged(const QString& arg1);
 
 signals:
@@ -35,15 +34,18 @@ private:
     void updateBridge();
     void updatePixmap();
 
-    // ToolPathUtil interface
-protected:
-    void create() override;
-    void updateName() override;
-
     // QWidget interface
 protected:
     virtual void resizeEvent(QResizeEvent* event) override;
     virtual void showEvent(QShowEvent* event) override;
+
+    // FormsUtil interface
+protected:
+    void create() override;
+    void updateName() override;
+
+public:
+    virtual void editFile(GCodeFile* file) override;
 };
 
 #endif // PROFILEFORM_H

@@ -27,6 +27,9 @@ File* Parser::parseFile(const QString& fileName)
         m_file->lines().append(line);
         ++m_state.line;
         try {
+            if (line == "%")
+                continue;
+
             if (parseComment(line))
                 continue;
 
@@ -71,7 +74,7 @@ File* Parser::parseFile(const QString& fileName)
     } else {
         m_file->setItemGroup(new ItemGroup);
         for (Hole& hole : *m_file) {
-            DrillItem* item = new DrillItem(&hole);
+            DrillItem* item = new DrillItem(&hole, m_file);
             hole.item = item;
             m_file->itemGroup()->append(item);
         }
@@ -217,7 +220,6 @@ bool Parser::parsePos(const QString& line)
                   "(?:Y([+-]?\\d*\\.?\\d+))?"
                   ".*$");
     if (match.exactMatch(line)) {
-
         if (!match.cap(2).isEmpty())
             m_state.rawPos.first = match.cap(2);
         if (!match.cap(3).isEmpty())
@@ -228,7 +230,6 @@ bool Parser::parsePos(const QString& line)
 
         if (!(m_state.mCode == M15 || m_state.mCode == M16)
             && !(m_state.gCode == G00 || m_state.gCode == G01)) {
-
             m_file->append(Hole(m_state, m_file));
         }
         return true;
@@ -373,6 +374,8 @@ bool Parser::parseNumber(QString Str, double& val)
         }
         if (m_file->m_format.unitMode == Inches)
             val *= 25.4;
+        if (abs(val) > 1000.0)
+            val = 1000.0;
         return true;
     }
     return flag;

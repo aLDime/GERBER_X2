@@ -6,11 +6,11 @@
 #include <QSettings>
 #include <QTranslator>
 
-#include "application.h"
+//#include "application.h"
 #include "mainwindow.h"
-
+#include "tooldatabase/tooldatabase.h"
 #ifndef linux
-#include <qt_windows.h>
+//#include <qt_windows.h>
 #endif
 
 int main(int argc, char* argv[])
@@ -47,9 +47,9 @@ int main(int argc, char* argv[])
     glf.setSamples(16);
     QGLFormat::setDefaultFormat(glf);
 
-    QString loc(QLocale().name().left(2));
+    const QString loc(QLocale().name().left(2));
     qDebug() << "locale:" << loc;
-    QString trFolder(qApp->applicationDirPath() + "/translations/");
+    const QString trFolder(qApp->applicationDirPath() + "/translations/");
     QString trFileName(trFolder + qApp->applicationDisplayName() + "_" + loc + ".qm");
     if (QFile::exists(trFileName)) {
         QTranslator* translator = new QTranslator();
@@ -59,7 +59,6 @@ int main(int argc, char* argv[])
             delete translator;
     }
     QString baseTrFileName(trFolder + "qtbase_" + loc + ".qm");
-    qDebug() << baseTrFileName;
     if (QFile::exists(trFileName)) {
         QTranslator* baseTranslator = new QTranslator();
         if (baseTranslator->load(baseTrFileName))
@@ -68,18 +67,20 @@ int main(int argc, char* argv[])
             delete baseTranslator;
     }
 
-    MainWindow* mainWin = new MainWindow;
-    mainWin->setIconSize({ 24, 24 });
-    mainWin->show();
+    ToolDatabase d;
+    d.show();
 
-    QCommandLineParser parser;
-    parser.setApplicationDescription(QCoreApplication::applicationName());
-    parser.addHelpOption();
-    parser.addVersionOption();
-    parser.addPositionalArgument("file", "The file(s) to open.");
-    parser.process(app);
-    for (const QString& file : parser.positionalArguments()) {
-        mainWin->openFile(file);
-    }
+    //    MainWindow* mainWin = new MainWindow;
+    //    mainWin->setIconSize({ 24, 24 });
+    //    mainWin->show();
+    //    QCommandLineParser parser;
+    //    parser.setApplicationDescription(QCoreApplication::applicationName());
+    //    parser.addHelpOption();
+    //    parser.addVersionOption();
+    //    parser.addPositionalArgument("file", "The file(s) to open.");
+    //    parser.process(app);
+    //    for (const QString& file : parser.positionalArguments()) {
+    //        mainWin->openFile(file);
+    //    }
     return app.exec();
 }

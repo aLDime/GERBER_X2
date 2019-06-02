@@ -1,13 +1,13 @@
 #ifndef POCKETFORM_H
 #define POCKETFORM_H
 
-#include "toolpathutil.h"
+#include "formsutil.h"
 
 namespace Ui {
 class PocketForm;
 }
 
-class PocketForm : public ToolPathUtil {
+class PocketForm : public FormsUtil {
     Q_OBJECT
 
 public:
@@ -36,15 +36,16 @@ private:
     int type = 0;
     void updatePixmap();
 
-    // ToolPathUtil interface
-protected:
-    void create() override;
-    void updateName() override;
-
     // QWidget interface
 protected:
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
+
+    // FormsUtil interface
+protected:
+    void create() override;
+    void updateName() override;
+  public:  virtual void editFile(GCodeFile* file) override;
 };
 
 #endif // POCKETFORM_H

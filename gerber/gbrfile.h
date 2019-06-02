@@ -47,49 +47,13 @@ private:
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
     ItemsType m_itemsType = Normal;
     QSharedPointer<ItemGroup> m_rawItemGroup;
-    void grouping(PolyNode* node, Pathss* pathss, Group group)
-    {
-        Path path;
-        Paths paths;
-        switch (group) {
-        case CutoffGroup:
-            if (!node->IsHole()) {
-                path = node->Contour;
-                paths.push_back(path);
-                for (int var = 0; var < node->ChildCount(); ++var) {
-                    path = node->Childs[var]->Contour;
-                    paths.push_back(path);
-                }
-                pathss->push_back(paths);
-            }
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                grouping(node->Childs[var], pathss, group);
-            }
-            break;
-        case CopperGroup:
-            if (node->IsHole()) {
-                path = node->Contour;
-                paths.push_back(path);
-                for (int var = 0; var < node->ChildCount(); ++var) {
-                    path = node->Childs[var]->Contour;
-                    paths.push_back(path);
-                }
-                pathss->push_back(paths);
-            }
-            for (int var = 0; var < node->ChildCount(); ++var) {
-                grouping(node->Childs[var], pathss, group);
-            }
-            break;
-        }
-    }
+    void grouping(PolyNode* node, Pathss* pathss, Group group);
 
     // AbstractFile interface
 public:
     virtual void save() const override;
     virtual void open() const override;
 };
-// specialization of ‘template<class T> struct QMetaTypeId’ in different namespace
-//Q_DECLARE_METATYPE(Gerber::File)
 }
 
 Q_DECLARE_METATYPE(Gerber::File)

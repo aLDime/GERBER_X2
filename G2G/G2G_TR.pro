@@ -40,7 +40,7 @@ HEADERS += \
     doublespinbox.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
-    filetree/fileholder.h \
+    filetree/Project.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
     filetree/gcodenode.h \
@@ -115,7 +115,7 @@ SOURCES += \
     doublespinbox.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
-    filetree/fileholder.cpp \
+    filetree/Project.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
     filetree/gcodenode.cpp \

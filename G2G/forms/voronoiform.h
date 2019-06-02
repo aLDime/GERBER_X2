@@ -1,13 +1,13 @@
 #ifndef VORONOIFORM_H
 #define VORONOIFORM_H
 
-#include "toolpathutil.h"
+#include "formsutil.h"
 
 namespace Ui {
 class VoronoiForm;
 }
 
-class VoronoiForm : public ToolPathUtil {
+class VoronoiForm : public FormsUtil {
     Q_OBJECT
 
 public:
@@ -30,10 +30,11 @@ private:
     double m_size = 0.0;
     double m_lenght = 0.0;
 
-    // ToolPathUtil interface
+    // FormsUtil interface
 protected:
     void create() override;
     void updateName() override;
+  public:  virtual void editFile(GCodeFile* file) override;
 };
 
 #endif // VORONOIFORM_H

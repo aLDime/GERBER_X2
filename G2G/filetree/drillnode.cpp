@@ -1,20 +1,20 @@
 #include "drillnode.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include "gerbernode.h"
 #include <QFileInfo>
 #include <exfile.h>
 #include <mainwindow.h>
 
 DrillNode::DrillNode(Excellon::File* file)
-    : m_id(FileHolder::addFile(file))
+    : m_id(Project::addFile(file))
 {
-    FileHolder::file(m_id)->itemGroup()->addToTheScene();
+    Project::file(m_id)->itemGroup()->addToTheScene();
 }
 
 DrillNode::~DrillNode()
 {
     qDebug("~DrillNode()");
-    FileHolder::deleteFile(m_id);
+    Project::deleteFile(m_id);
     if (Scene::self) {
         Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
         Scene::self->update();
@@ -27,7 +27,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case Name:
         switch (role) {
         case Qt::CheckStateRole:
-            FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            Project::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -35,7 +35,7 @@ bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int rol
     case Layer:
         switch (role) {
         case Qt::EditRole:
-            FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            Project::file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -65,12 +65,12 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
     case Name:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file(m_id)->shortFileName();
+            return Project::file(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file(m_id)->shortFileName() + "\n"
-                + FileHolder::file(m_id)->fileName();
+            return Project::file(m_id)->shortFileName() + "\n"
+                + Project::file(m_id)->fileName();
         case Qt::CheckStateRole:
-            return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
             return Icon(PathDrillIcon);
         case Qt::UserRole:
@@ -82,9 +82,9 @@ QVariant DrillNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return tr("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
+            return tr("Top|Bottom").split('|')[Project::file(m_id)->side()];
         case Qt::EditRole:
-            return static_cast<bool>(FileHolder::file(m_id)->side());
+            return static_cast<bool>(Project::file(m_id)->side());
         case Qt::UserRole:
             return m_id;
         default:

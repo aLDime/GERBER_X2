@@ -9,16 +9,17 @@
 
 class QProgressDialog;
 
-class ToolPathUtil : public QWidget {
+class FormsUtil : public QWidget {
     Q_OBJECT
 
 public:
-    ToolPathUtil(const QString& name, QWidget* parent = nullptr);
-    ~ToolPathUtil();
+    FormsUtil(const QString& name, QWidget* parent = nullptr);
+    ~FormsUtil();
+    virtual void editFile(GCodeFile* file) = 0;
 
 protected:
-    void readTools(const QVector<Tool*>& tool) const;
-    void writeTools(const QVector<Tool*>& tool) const;
+    void readTools(const QVector<Tool*>& tools) const;
+    void writeTools(const QVector<Tool*>& tools) const;
     virtual void create() = 0;
     virtual void updateName() = 0;
 
@@ -34,7 +35,10 @@ protected:
     ToolPathCreator* toolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
     QString m_fileName;
 
-    void progress(int max, int value);
+    void showProgress();
+
+    QMap<int, QVector<int>> m_used;
+    bool m_editMode = false;
 
 private:
     const QString m_name;

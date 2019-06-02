@@ -1,6 +1,5 @@
 #include "mainwindow.h"
 #include "aboutform.h"
-#include "filetree/fileholder.h"
 #include "forms/drillform.h"
 #include "forms/gcodepropertiesform.h"
 #include "forms/pocketform.h"
@@ -8,6 +7,7 @@
 #include "forms/thermalform.h"
 #include "forms/voronoiform.h"
 #include "gi/bridgeitem.h"
+#include "project.h"
 #include "settingsdialog.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QFileDialog>
@@ -46,7 +46,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
-    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self, QOverload<Gerber::File*>::of(&FileModel::addFile));
+    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
         prependToRecentFiles(file->fileName());
         QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
@@ -113,25 +113,16 @@ void MainWindow::closeEvent(QCloseEvent* event)
     if (QFile("ui_mainwindow.h").exists()) {
         writeSettings();
         dockWidget->close();
-        FileModel::self->closeAllFiles();
+        FileModel::closeAllFiles();
         qApp->closeAllWindows();
         event->accept();
         return;
     }
-    if (!FileHolder::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
+    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
         qApp->closeAllWindows();
         writeSettings();
-        //        closeFiles();
         dockWidget->close();
-        FileModel::self->closeAllFiles();
-
-        //        disconnect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
-        //        disconnect(gerberParser, &G::Parser::fileReady, FileModel::self, &FileModel::addGerberFile);
-        //        disconnect(gerberParser, &G::Parser::fileProgress, this, &MainWindow::fileProgress);
-        //        disconnect(gerberParser, &G::Parser::fileError, this, &MainWindow::fileError);
-        //        disconnect(this, &MainWindow::parseFile, gerberParser, &G::Parser::parseFile);
-        //        if (gerberThread.isRunning())
-        //            gerberThread.terminate();
+        FileModel::closeAllFiles();
         event->accept();
     } else
         event->ignore();
@@ -148,19 +139,15 @@ void MainWindow::open()
 void MainWindow::saveSelectedToolpaths()
 {
     bool isEmpty = true;
-    for (GCodeFile* file : FileHolder::files<GCodeFile>()) {
+    for (GCodeFile* file : Project::files<GCodeFile>()) {
         if (!file->itemGroup()->isVisible())
             continue;
         isEmpty = false;
-        QSettings settings;
         QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-            QString(settings.value("LastGCodeDir").toString()).append(file->shortFileName()),
+            GCodeFile::getLastDir().append(file->shortFileName()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
             tr("GCode (*.tap)")));
-
         if (name.isEmpty())
             return;
-
-        settings.setValue("LastGCodeDir", name.left(name.lastIndexOf('/') + 1));
         file->save(name);
         file->itemGroup()->setVisible(false);
     }
@@ -173,12 +160,12 @@ void MainWindow::closeFiles()
 {
     if (QFile("ui_mainwindow.h").exists()) {
         dockWidget->close();
-        FileModel::self->closeAllFiles();
+        FileModel::closeAllFiles();
         return;
     }
-    if (!FileHolder::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
+    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
         dockWidget->close();
-        FileModel::self->closeAllFiles();
+        FileModel::closeAllFiles();
     }
 }
 
@@ -323,6 +310,8 @@ void MainWindow::createActions()
     //     s->setMovable(false);
     action = s->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
+    action = s->addAction(Icon(CloseIcon), tr("Redo"), this, &MainWindow::redo);
+    action->setShortcut(QKeySequence::Redo);
     //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     //        QList<QGraphicsItem*> list;
     //        for (QGraphicsItem* item : MyScene::self->items())
@@ -362,31 +351,19 @@ void MainWindow::createActions()
     //        }
     //    });
 
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Profile"), [=] {
-        createDockWidget(new ProfileForm(dockWidget), Profile);
-    }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] {
-        createDockWidget(new PocketForm(dockWidget), Pocket);
-    }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] {
-        createDockWidget(new VoronoiForm(dockWidget), Voronoi);
-    }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("Thermal Insulation"), [=] {
-        createDockWidget(new ThermalForm(dockWidget), Thermal);
-    }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] {
-        createDockWidget(new DrillForm(dockWidget), Drill);
-    }));
-    toolpathActionList.append(toolpathToolBar->addAction(Icon(GCodePropertiesIcon), tr("G-Code Properties"), [=] {
-        createDockWidget(new GCodePropertiesForm(dockWidget), GCodeProperties);
-    }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Profile"), [=] { createDockWidget(new ProfileForm(dockWidget), Profile); }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] { createDockWidget(new PocketForm(dockWidget), Pocket); }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathVoronoiIcon), tr("Voronoi"), [=] { createDockWidget(new VoronoiForm(dockWidget), Voronoi); }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathThermalIcon), tr("Thermal Insulation"), [=] { createDockWidget(new ThermalForm(dockWidget), Thermal); }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(PathDrillIcon), tr("Drilling"), [=] { createDockWidget(new DrillForm(dockWidget), Drill); }));
+    toolpathActionList.append(toolpathToolBar->addAction(Icon(GCodePropertiesIcon), tr("G-Code Properties"), [=] { createDockWidget(new GCodePropertiesForm(dockWidget), GCodeProperties); }));
 
     toolpathToolBar->addSeparator();
     for (QAction* action : toolpathActionList)
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(2000, [=] { toolpathActionList[Voronoi]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[GCodeProperties]->trigger(); });
 #endif
@@ -438,15 +415,18 @@ void MainWindow::createShtifts()
     ToolDatabase tdb(this, { Tool::Drill });
     if (tdb.exec()) {
         Tool tool(tdb.tool());
-        Path dst;
+
+        QPolygonF dst;
 
         for (Shtift* item : Shtift::shtifts()) {
             item->setFlag(QGraphicsItem::ItemIsMovable, false);
-            IntPoint point(item->pos().x() * uScale, item->pos().y() * uScale);
+            QPointF point(item->pos());
             if (dst.contains(point))
                 continue;
             dst.append(point);
         }
+
+        qDebug() << dst.size();
 
         QSettings settings;
         double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Shtift/depth").toDouble(), 0, 100, 2);
@@ -454,7 +434,7 @@ void MainWindow::createShtifts()
             return;
         settings.setValue("Shtift/depth", depth);
 
-        GCodeFile* gcode = new GCodeFile({ dst }, tool, depth, Drill);
+        GCodeFile* gcode = new GCodeFile({ toPath(dst) }, tool, depth, Drill);
         gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id) + ")");
         FileModel::addFile(gcode);
     }
@@ -483,19 +463,24 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
-    settings.setValue("files", FileHolder::fileNames());
+    settings.setValue("files", Project::fileNames());
     settings.endGroup();
 }
 
 void MainWindow::selectAll()
 {
-    if (focusWidget()->objectName() == "toolTable") {
+    if (focusWidget() && focusWidget()->objectName() == "toolTable") {
         static_cast<QTableView*>(focusWidget())->selectAll();
         return;
+    } else {
+        for (QGraphicsItem* item : Scene::self->items())
+            if (item->isVisible())
+                item->setSelected(true);
     }
-    for (QGraphicsItem* item : Scene::self->items())
-        if (item->isVisible())
-            item->setSelected(true);
+}
+
+void MainWindow::redo()
+{
 }
 
 void MainWindow::on_customContextMenuRequested(const QPoint& pos)
@@ -566,7 +551,7 @@ void MainWindow::openFile(const QString& fileName)
     if (fileName.endsWith(".fmt"))
         return;
 
-    if (FileHolder::fileNames().contains(fileName)) {
+    if (Project::fileNames().contains(fileName)) {
         QMessageBox::warning(this, "", tr("The document is open."));
         return;
     }
@@ -584,7 +569,7 @@ void MainWindow::openFile(const QString& fileName)
     if (dp.isDrillFile(fileName)) {
         Excellon::File* exFile = dp.parseFile(fileName);
         if (exFile) {
-            FileModel::self->addFile(exFile);
+            FileModel::addFile(exFile);
             prependToRecentFiles(exFile->fileName());
             QTimer::singleShot(100, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }

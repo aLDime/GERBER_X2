@@ -9,6 +9,8 @@
 #include <point.h>
 #include <settings.h>
 
+QString GCodeFile::lastDir;
+
 ///////////////////////////////////////////////
 void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
 {
@@ -197,13 +199,13 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     default:
         break;
     }
-    save(fileName() + ".tap");
 }
 
 Paths GCodeFile::getPaths() const { return m_toolPaths; }
 
 void GCodeFile::save(const QString& name)
 {
+    setLastDir(name);
     if (!name.isEmpty())
         m_fileName = name;
     switch (m_type) {
@@ -224,6 +226,7 @@ void GCodeFile::save(const QString& name)
 void GCodeFile::saveDrill()
 {
     statFile();
+
     QPolygonF path(toQPolygon(m_toolPaths.first()));
 
     const double k = Shtift::min() + Shtift::max();
@@ -242,7 +245,7 @@ void GCodeFile::saveDrill()
         startPath(point);
         for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
             sl.append(formated({ g1(), z(-m_tool.passDepth * i), feed(m_tool.plungeRate) }));
-            sl.append(formated({ g0(), "Z0" }));
+            sl.append(formated({ g0(), z(0.0) }));
         }
         sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate) }));
         endPath();
@@ -308,6 +311,25 @@ GCodeType GCodeFile::gtype() const
     return m_type;
 }
 
+QString GCodeFile::getLastDir()
+{
+    if (lastDir.isEmpty()) {
+        QSettings settings;
+        lastDir = settings.value("LastGCodeDir").toString();
+    }
+    return lastDir;
+}
+
+void GCodeFile::setLastDir(QString value)
+{
+    value = value.left(value.lastIndexOf('/') + 1);
+    if (lastDir != value) {
+        lastDir = value;
+        QSettings settings;
+        settings.setValue("LastGCodeDir", lastDir);
+    }
+}
+
 void GCodeFile::startPath(const QPointF& point)
 {
     sl.append(formated({ g0(), x(point.x()), y(point.y()), s(m_tool.spindleSpeed) })); //start xy
@@ -322,8 +344,6 @@ void GCodeFile::endPath()
 
 void GCodeFile::statFile()
 {
-    sl.clear();
-    sl.append(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
 
     const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
     for (bool& fl : FormatFlags) {
@@ -338,11 +358,14 @@ void GCodeFile::statFile()
         }
     }
 
+    for (QString& str : lastValues)
+        str.clear();
+    sl.clear();
+    sl.append(Settings::startGCode()); //"G21 G17 G90"); //G17 XY plane
+
     //    QPointF home(MaterialSetup::homePos - MaterialSetup::zeroPos);
     //    sl.append(g0() + x(home.x()) + y(home.y()) + s(m_tool.spindleSpeed) + "M3"); //HomeXY
-
     sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
-
     //    sl.append(s(m_tool.spindleSpeed) + " M3"); //HomeXY
 }
 

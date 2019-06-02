@@ -12,10 +12,11 @@ LayerDelegate::LayerDelegate(QObject* parent)
 
 LayerDelegate::~LayerDelegate() {}
 
-QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const
+QWidget* LayerDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const
 {
     QComboBox* comboBox = new QComboBox(parent);
     comboBox->addItems({ tr("Top"), tr("Bottom") });
+    comboBox->setCurrentIndex(index.model()->data(index).toInt());
     //        if (index.column() == 1)
     //            comboBox->addItems(IconPreviewArea::iconModeNames());
     //        else if (index.column() == 2)
@@ -29,9 +30,8 @@ void LayerDelegate::setEditorData(QWidget* editor, const QModelIndex& index) con
     QComboBox* comboBox = qobject_cast<QComboBox*>(editor);
     if (!comboBox)
         return;
-    //        int pos = comboBox->findText(index.model()->data(index).toString(),
-    //            Qt::MatchExactly);
-    comboBox->setCurrentIndex(index.model()->data(index).toInt());
+    comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());
+    comboBox->showPopup();
 }
 
 void LayerDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const

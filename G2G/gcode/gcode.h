@@ -30,7 +30,10 @@ public:
     FileType type() const override { return FileType::GCode; }
     Paths m_pocketPaths;
 
+    QMap<int, QVector<int>> m_used;
+
 private:
+    static QString lastDir;
     void saveDrill();
     void saveProfilePocket();
 
@@ -113,6 +116,9 @@ protected:
 public:
     virtual void save() const override;
     virtual void open() const override;
+
+    static QString getLastDir();
+    static void setLastDir(QString value);
 };
 
 #endif // GCODE_H

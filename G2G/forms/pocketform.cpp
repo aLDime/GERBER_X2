@@ -21,7 +21,7 @@ enum {
 };
 
 PocketForm::PocketForm(QWidget* parent)
-    : ToolPathUtil("PocketForm", parent)
+    : FormsUtil("PocketForm", parent)
     , ui(new Ui::PocketForm)
 {
     ui->setupUi(this);
@@ -141,9 +141,9 @@ void PocketForm::on_pbSelect_2_clicked()
 void PocketForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
-    d.toolEdit->setTool(tool);
+    d.setTool(tool);
     if (d.exec()) {
-        tool = d.toolEdit->tool();
+        tool = d.tool();
         tool.id = -2;
         ui->lblToolName->setText(tool.name);
         updateName();
@@ -153,9 +153,9 @@ void PocketForm::on_pbEdit_clicked()
 void PocketForm::on_pbEdit_2_clicked()
 {
     ToolEditDialog d;
-    d.toolEdit->setTool(tool2);
+    d.setTool(tool2);
     if (d.exec()) {
-        tool2 = d.toolEdit->tool();
+        tool2 = d.tool();
         tool2.id = -2;
         ui->lblToolName_2->setText(tool2.name);
         updateName();
@@ -175,39 +175,53 @@ void PocketForm::on_pbClose_clicked()
 
 void PocketForm::create()
 {
-    Scene* scene = Scene::self;
-
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
-
     if (ui->chbxUseTwoTools->isChecked() && !tool2.isValid()) {
         tool2.errorMessageBox(this);
         return;
     }
 
     Paths wPaths;
+    AbstractFile const* file = nullptr;
 
-    Gerber::File const* file = nullptr;
-
-    for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == GerberItemType) {
-            GerberItem* gi = static_cast<GerberItem*>(item);
-            if (!file)
+    for (QGraphicsItem* item : Scene::selectedItems()) {
+        GraphicsItem* gi = static_cast<GraphicsItem*>(item);
+        switch (item->type()) {
+        case GerberItemType:
+            if (!file) {
                 file = gi->file();
-            if (file != gi->file()) {
-                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
+                boardSide = file->side();
+            } else if (file != gi->file()) {
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
-            boardSide = gi->file()->side();
+            wPaths.append(gi->paths());
+            m_used[gi->file()->id()].append(gi->id());
+            break;
+        case DrillItemType:
+            wPaths.append(gi->paths());
+            m_used[gi->file()->id()].append(gi->id());
+            break;
+        default:
+            break;
         }
-        if (item->type() == GerberItemType || item->type() == DrillItemType)
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
-    }
 
-    if (boardSide == NullSide)
-        boardSide = Top;
+        //        if (item->type() == GerberItemType) {
+        //            GerberItem* gi = static_cast<GerberItem*>(item);
+        //            if (!file)
+        //                file = gi->typedFile<Gerber::File>();
+        //            if (file != gi->file()) {
+        //                QMessageBox::warning(this, tr("Warning"), tr("Working items from different files!"));
+        //                return;
+        //            }
+        //            boardSide = gi->file()->side();
+        //        }
+        //        if (item->type() == GerberItemType || item->type() == DrillItemType)
+        //            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+    }
 
     if (wPaths.isEmpty()) {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
@@ -219,12 +233,11 @@ void PocketForm::create()
         fileCount = 2;
         connect(this, &PocketForm::createPocket2, tps, &ToolPathCreator::createPocket2);
         emit createPocket2({ tool, tool2 }, ui->dsbxDepth->value());
-        progress(1, 0);
     } else {
         connect(this, &PocketForm::createPocket, tps, &ToolPathCreator::createPocket);
         emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
-        progress(1, 0);
     }
+    showProgress();
 }
 
 void PocketForm::on_sbxSteps_valueChanged(int arg1)
@@ -271,7 +284,8 @@ void PocketForm::showEvent(QShowEvent* event)
     QWidget::showEvent(event);
 }
 
-void PocketForm::on_leName_textChanged(const QString& arg1)
+void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
+
+void PocketForm::editFile(GCodeFile* file)
 {
-    m_fileName = arg1;
 }

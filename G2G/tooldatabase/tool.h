@@ -27,24 +27,24 @@ public:
         PlungeRate,
         SpindleSpeed,
         Stepover,
-
         OneTurnCutPercent,
         StepoverPercent,
     };
 
     QString name;
     QString note;
-    Type type = Group;
+    Type type = EndMill;
     double angle = 0.0;
-    double diameter = 0.0;
-    double feedRate = 0.0;
-    double oneTurnCut = 0.0;
-    double passDepth = 0.0;
-    double plungeRate = 0.0;
-    int spindleSpeed = 0.0;
-    double stepover = 0.0;
+    double diameter = 1.0;
+    double feedRate = 1200.0;
+    double oneTurnCut = 0.1;
+    double passDepth = 2.0;
+    double plungeRate = 1200.0;
+    int spindleSpeed = 12000.0;
+    double stepover = 0.5;
+    bool autoName = true;
 
-    int id = -1;
+    int id = 0;
 
     double getDiameter(double depth) const;
 

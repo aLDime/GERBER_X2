@@ -42,7 +42,7 @@ enum Id {
     RemoveIcon,
     DeleteIcon,
 
-    CopyIcon,
+    CopyIcon_,
     NewToolIcon,
     NewGroupIcon,
 
@@ -125,7 +125,7 @@ static QIcon Icon(int id)
         return QIcon::fromTheme("list-remove");
     case DeleteIcon:
         return QIcon::fromTheme("edit-delete");
-    case CopyIcon:
+    case CopyIcon_:
         return QIcon::fromTheme("edit-copy");
     case NewToolIcon:
         return QIcon::fromTheme("list-add");

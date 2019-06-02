@@ -2,7 +2,7 @@
 #include "ui_drillform.h"
 
 #include "drillmodel.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "previewitem.h"
@@ -274,13 +274,13 @@ void DrillForm::updateFiles()
 
     ui->cbxFile->clear();
 
-    for (Excellon::File* file : FileHolder::files<Excellon::File>()) {
+    for (Excellon::File* file : Project::files<Excellon::File>()) {
         ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, Icon(PathDrillIcon), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 
-    for (Gerber::File* file : FileHolder::files<Gerber::File>()) {
+    for (Gerber::File* file : Project::files<Gerber::File>()) {
         if (file->flashedApertures()) {
             ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);

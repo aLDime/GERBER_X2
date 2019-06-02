@@ -6,36 +6,6 @@
 
 using namespace Gerber;
 
-class Union : public QThread {
-    //    Q_OBJECT
-public:
-    Union(QSemaphore* semaphore, const Paths& paths)
-        : m_semaphore(semaphore)
-        , m_paths(paths)
-    {
-    }
-    virtual ~Union() {}
-
-    // QThread interface
-    Paths& paths();
-
-protected:
-    void run() override
-    {
-        //qDebug("run()");
-        Clipper clipper(ioStrictlySimple);
-        clipper.AddPaths(m_paths, ptClip, true);
-        clipper.Execute(ctUnion, m_paths, pftPositive);
-        m_semaphore->release();
-        //qDebug("exit()");
-        exit(0);
-    }
-
-private:
-    Paths m_paths;
-    QSemaphore* m_semaphore = nullptr;
-};
-
 File::File(const QString& fileName) { m_fileName = fileName; }
 
 template <typename T>
@@ -109,7 +79,7 @@ Paths File::merge() const
     m_mergedPaths.clear();
     int i = 0;
     while (i < size()) {
-        Clipper clipper; //(ioStrictlySimple);
+        Clipper clipper;
         clipper.AddPaths(m_mergedPaths, ptSubject, true);
 
         const int exp = at(i).state.imgPolarity();
@@ -118,7 +88,6 @@ Paths File::merge() const
 
         do {
             Paths paths(at(i++).paths);
-            //SimplifyPolygons(tmpPaths, pftNonZero);
             workingPaths.append(paths);
         } while (i < size() && exp == at(i).state.imgPolarity());
 
@@ -136,6 +105,42 @@ Paths File::merge() const
     qDebug() << shortFileName() << t.elapsed();
 #endif
     return m_mergedPaths;
+}
+
+void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
+{
+    Path path;
+    Paths paths;
+    switch (group) {
+    case CutoffGroup:
+        if (!node->IsHole()) {
+            path = node->Contour;
+            paths.push_back(path);
+            for (int var = 0; var < node->ChildCount(); ++var) {
+                path = node->Childs[var]->Contour;
+                paths.push_back(path);
+            }
+            pathss->push_back(paths);
+        }
+        for (int var = 0; var < node->ChildCount(); ++var) {
+            grouping(node->Childs[var], pathss, group);
+        }
+        break;
+    case CopperGroup:
+        if (node->IsHole()) {
+            path = node->Contour;
+            paths.push_back(path);
+            for (int var = 0; var < node->ChildCount(); ++var) {
+                path = node->Childs[var]->Contour;
+                paths.push_back(path);
+            }
+            pathss->push_back(paths);
+        }
+        for (int var = 0; var < node->ChildCount(); ++var) {
+            grouping(node->Childs[var], pathss, group);
+        }
+        break;
+    }
 }
 
 File::ItemsType File::itemsType() const { return m_itemsType; }
@@ -202,75 +207,6 @@ void File::setItemType(File::ItemsType type)
         m_itemGroup.data()->setVisible(false);
         m_rawItemGroup.data()->setVisible(visible);
     }
-
-    //    if (m_type == Normal)
-    //        return m_itemGroup;
-    //    else
-    //        return m_rawItemGroup.data();
-}
-
-//QMap<int, QSharedPointer<AbstractAperture>> File::apertures() const { return m_apertures; }
-
-//Pathss& File::groupedPaths(Group group, bool fl)
-//{
-//    PolyTree polyTree;
-//    Clipper clipper;
-//    clipper.AddPaths(m_mergedPaths, ptSubject, true);
-//    IntRect r(clipper.GetBounds());
-//    int k = /*uScale*/ 1;
-//    Path outer = {
-//        IntPoint(r.left - k, r.bottom + k),
-//        IntPoint(r.right + k, r.bottom + k),
-//        IntPoint(r.right + k, r.top - k),
-//        IntPoint(r.left - k, r.top - k)
-//    };
-//    if (fl)
-//        ReversePath(outer);
-//    clipper.AddPath(outer, ptSubject, true);
-//    clipper.Execute(ctUnion, polyTree, pftNonZero);
-//    grouping(polyTree.GetFirst(), &m_groupedPaths, group);
-//    return m_groupedPaths;
-//}
-
-//void File::grouping(PolyNode* node, Pathss* pathss, File::Group group)
-//{
-//    Path path;
-//    Paths paths;
-//    switch (group) {
-//    case CutoffGroup:
-//        if (!node->IsHole()) {
-//            path = node->Contour;
-//            paths.push_back(path);
-//            for (int var = 0; var < node->ChildCount(); ++var) {
-//                path = node->Childs[var]->Contour;
-//                paths.push_back(path);
-//            }
-//            pathss->push_back(paths);
-//        }
-//        for (int var = 0; var < node->ChildCount(); ++var) {
-//            grouping(node->Childs[var], pathss, group);
-//        }
-//        break;
-//    case CopperGroup:
-//        if (node->IsHole()) {
-//            path = node->Contour;
-//            paths.push_back(path);
-//            for (int var = 0; var < node->ChildCount(); ++var) {
-//                path = node->Childs[var]->Contour;
-//                paths.push_back(path);
-//            }
-//            pathss->push_back(paths);
-//        }
-//        for (int var = 0; var < node->ChildCount(); ++var) {
-//            grouping(node->Childs[var], pathss, group);
-//        }
-//        break;
-//    }
-//}
-
-Paths& Union::paths()
-{
-    return m_paths;
 }
 
 void Gerber::File::save() const

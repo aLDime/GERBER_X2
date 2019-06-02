@@ -18,6 +18,7 @@ BridgeItem::BridgeItem(double& lenght, double& size, BridgeItem*& ptr)
     connect(GraphicsView::self, &GraphicsView::mouseMove, this, &BridgeItem::setNewPos);
     m_path.addEllipse(QPointF(), m_lenght / 2, m_lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
+    setZValue(std::numeric_limits<double>::max());
 }
 
 QRectF BridgeItem::boundingRect() const

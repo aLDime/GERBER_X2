@@ -12,6 +12,7 @@ class Parser;
 }
 
 class DockWidget;
+class Project;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -69,6 +70,7 @@ private:
     void readSettings();
     void writeSettings();
     void selectAll();
+    void redo();
     void on_customContextMenuRequested(const QPoint& pos);
 
     QAction* recentFileActs[MaxRecentFiles + 1];
@@ -95,13 +97,15 @@ private:
     QToolBar* zoomToolBar;
     QVector<QAction*> toolpathActionList;
 
+    Project* pro;
+
     // QWidget interface
 protected:
-    virtual void contextMenuEvent(QContextMenuEvent *event) override;
+    virtual void contextMenuEvent(QContextMenuEvent* event) override;
 
     // QMainWindow interface
 public:
-    virtual QMenu *createPopupMenu() override;
+    virtual QMenu* createPopupMenu() override;
 };
 
 class DockWidget : public QDockWidget {

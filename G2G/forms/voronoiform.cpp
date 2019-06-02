@@ -14,7 +14,7 @@
 #include <scene.h>
 
 VoronoiForm::VoronoiForm(QWidget* parent)
-    : ToolPathUtil("VoronoiForm", parent)
+    : FormsUtil("VoronoiForm", parent)
     , ui(new Ui::VoronoiForm)
 {
     ui->setupUi(this);
@@ -60,9 +60,9 @@ void VoronoiForm::on_pbSelect_clicked()
 void VoronoiForm::on_pbEdit_clicked()
 {
     ToolEditDialog d;
-    d.toolEdit->setTool(tool);
+    d.setTool(tool);
     if (d.exec()) {
-        tool = d.toolEdit->tool();
+        tool = d.tool();
         tool.id = -1;
         ui->lblToolName->setText(tool.name);
         updateName();
@@ -81,8 +81,6 @@ void VoronoiForm::on_pbClose_clicked()
 
 void VoronoiForm::create()
 {
-    Scene* scene = Scene::self;
-
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -90,12 +88,13 @@ void VoronoiForm::create()
 
     Paths wPaths;
     Paths wRawPaths;
+    AbstractFile const* file = nullptr;
 
-    Gerber::File const* file = nullptr;
-
-    for (QGraphicsItem* item : scene->selectedItems()) {
-        if (item->type() == GerberItemType) {
-            GerberItem* gi = static_cast<GerberItem*>(item);
+    for (QGraphicsItem* item : Scene::selectedItems()) {
+        GraphicsItem* gi = static_cast<GraphicsItem*>(item);
+        switch (item->type()) {
+        case GerberItemType:
+            //GerberItem* gi = static_cast<GerberItem*>(item);
             if (!file) {
                 file = gi->file();
                 boardSide = gi->file()->side();
@@ -104,28 +103,31 @@ void VoronoiForm::create()
                 QMessageBox::warning(this, "", tr("Working items from different files!"));
                 return;
             }
-        }
-        if (item->type() == RawItemType) {
-            RawItem* gi = static_cast<RawItem*>(item);
-            if (!file) {
-                file = gi->file();
-                boardSide = gi->file()->side();
-            }
-            if (file != gi->file()) {
-                QMessageBox::warning(this, "", tr("Working items from different files!"));
-                return;
-            }
-        }
-        if (item->type() == GerberItemType)
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
-        if (item->type() == DrillItemType) {
+
+            break;
+        case RawItemType:
+            //RawItem* gi = static_cast<RawItem*>(item);
+            if (!file) {
+                file = gi->file();
+                boardSide = gi->file()->side();
+            }
+            if (file != gi->file()) {
+                QMessageBox::warning(this, "", tr("Working items from different files!"));
+                return;
+            }
+            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
+
+            break;
+        case DrillItemType:
             //            if (static_cast<DrillItem*>(item)->isSlot())
             //                wrPaths.append(static_cast<GraphicsItem*>(item)->paths());
             //            else
             wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            break;
+        default:
+            break;
         }
-        if (item->type() == RawItemType)
-            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
     }
 
     if (wPaths.isEmpty() && wRawPaths.isEmpty()) {
@@ -137,7 +139,8 @@ void VoronoiForm::create()
     tps->addRawPaths(wRawPaths);
     connect(this, &VoronoiForm::createVoronoi, tps, &ToolPathCreator::createVoronoi);
     emit createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value());
-    progress(1, 0);
+    showProgress();
+    //    progrfess(1, 0);
 }
 
 void VoronoiForm::updateName()
@@ -148,4 +151,9 @@ void VoronoiForm::updateName()
 void VoronoiForm::on_leName_textChanged(const QString& arg1)
 {
     m_fileName = arg1;
+}
+
+
+void VoronoiForm::editFile(GCodeFile *file)
+{
 }

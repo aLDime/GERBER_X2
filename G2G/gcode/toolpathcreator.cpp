@@ -385,7 +385,6 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
 
             if (m_returnPaths.isEmpty()) {
                 emit fileReady(nullptr);
-                // emit progress(0, 0); // progress
                 return;
             }
 
@@ -435,8 +434,6 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
     try {
         self = this;
 
-        // emit progress(1, 0); // progress
-
         m_toolDiameter = tool.getDiameter(depth);
         // execute offset
         if (m_side == On) {
@@ -483,7 +480,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
         }
 
         if (m_returnPaths.isEmpty()) {
-            // emit progress(0, 0); // progress
+            emit fileReady(nullptr);
             return;
         }
 
@@ -595,7 +592,7 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
             path.append(path.first());
 
         if (m_returnPaths.isEmpty()) {
-            emit fileReady(nullptr); // emit progress(0, 0); // progress
+            emit fileReady(nullptr);
             return;
         }
 
@@ -630,7 +627,6 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
         //self = nullptr;
 
         for (int index = 0, size = m_returnPaths.size(); index < size; ++index) {
-            //progressOrCancel(size, index); // progress
             Path& path = m_returnPaths[index];
             //            {
             //                ClipperOffset offset;
@@ -1263,10 +1259,9 @@ Path& ToolPathCreator::fixPath(PolyNode* node)
 {
     if (m_convent ^ !node->IsHole())
         ReversePath(node->Contour);
-    else {
-        //std::rotate(path.begin(), path.begin() + 1, path.end());
+    else
         fixBegin(node->Contour);
-    }
+
     node->Contour.append(node->Contour.first());
     return node->Contour;
 }
@@ -1321,7 +1316,6 @@ void ToolPathCreator::progressOrCancel()
     if (!(++self->m_progressValue % 1000)) {
         if (self->m_progressMax == self->m_progressValue)
             self->m_progressMax += 1000000;
-        //        emit self->progress(self->m_progressMax, self->m_progressValue);
         if (QThread::currentThread()->isInterruptionRequested())
             throw true;
     }
@@ -1333,90 +1327,5 @@ int ToolPathCreator::progressValue() const
         throw true;
     return m_progressValue;
 }
+
 int ToolPathCreator::progressMax() const { return m_progressMax; }
-
-//void ToolPathCreator::DoOffset(const Paths& paths, Pathss& pathss, QVector<bool> flags)
-//{
-//    if (paths.isEmpty())
-//        return;
-//    static bool fl = false;
-//    //qDebug() << flags;
-//    QVector<bool> flags2;
-//    Paths wPaths;
-//    if (flags.contains(false)) {
-//        //qDebug() << "NNN";
-//        ClipperOffset offset;
-//        offset.AddPaths(paths, fl ? jtMiter : jtRound, etClosedPolygon);
-//        offset.Execute(wPaths, -m_stepOver);
-//        fl = true;
-//        if (wPaths.isEmpty())
-//            return;
-//        Paths tmp(wPaths);
-//        for (Path& path : tmp) {
-//            flags2.append(Orientation(path));
-//            path.append(path.first());
-//            if (!m_convent)
-//                ReversePath(path);
-//        }
-
-//        if (flags == flags2) {
-//            bool fl = true;
-//            for (int i = 0; i < tmp.size() && fl; ++i) {
-//                if (!flags[i])
-//                    fl = PointInPolygon(tmp[i][0], pathss.last()[i]);
-//                else
-//                    fl = PointInPolygon(pathss.last()[i][0], tmp[i]);
-//            }
-//            if (fl) {
-//                //qDebug() << "append";
-//                for (int i = 0; i < tmp.size(); ++i)
-//                    pathss.last()[i].append(tmp[i]);
-//                DoOffset(wPaths, pathss, flags2);
-//                flags = flags2;
-//            } else {
-//                //qDebug() << "insert";
-//                pathss.append(tmp);
-//                DoOffset(wPaths, pathss, flags2);
-//                flags = flags2;
-//            }
-//        } else {
-//            //qDebug() << "insert";
-//            pathss.append(tmp);
-//            DoOffset(wPaths, pathss, flags2);
-//            flags = flags2;
-//        }
-//    } else {
-//        for (const Path& path : paths) {
-//            //qDebug() << "111";
-//            ClipperOffset offset;
-//            offset.AddPath(path, fl ? jtMiter : jtRound, etClosedPolygon);
-//            offset.Execute(wPaths, -m_stepOver);
-//            fl = true;
-//            if (wPaths.isEmpty())
-//                return;
-//            Paths tmp(wPaths);
-//            for (Path& path : tmp) {
-//                flags2.append(Orientation(path));
-//                path.append(path.first());
-//                if (!m_convent)
-//                    ReversePath(path);
-//            }
-//            if (wPaths.size() == 1) {
-//                //qDebug() << "append";
-//                if (PointInPolygon(tmp[0][0], pathss.last()[0]))
-//                    pathss.last()[0].append(tmp[0]);
-//                else
-//                    pathss.append({ tmp[0] });
-//                DoOffset(wPaths, pathss, flags2);
-//                flags = flags2;
-//            } else {
-//                for (int i = 0; i < tmp.size(); ++i) {
-//                    //qDebug() << "insert";
-//                    pathss.append({ tmp[i] });
-//                    DoOffset({ wPaths[i] }, pathss, flags2);
-//                    flags = flags2;
-//                }
-//            }
-//        }
-//    }
-//}

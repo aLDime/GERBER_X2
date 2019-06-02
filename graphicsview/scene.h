@@ -16,6 +16,7 @@ public:
     QRectF itemsBoundingRect();
 
     static bool drawPdf();
+    static QList<QGraphicsItem*> selectedItems();
 
 private:
     bool m_drawPdf;

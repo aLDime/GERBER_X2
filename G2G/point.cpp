@@ -1,5 +1,5 @@
 #include "point.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include "forms/gcodepropertiesform.h"
 #include "gi/graphicsitem.h"
 #include "mainwindow.h"
@@ -17,7 +17,7 @@ QRectF Shtift::worckRect;
 
 bool updateRect()
 {
-    QRectF rect(FileHolder::getSelectedBoundingRect());
+    QRectF rect(Project::getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "", QObject::tr("There is no dedicated data to define boundaries.\nOld data will be used."), QMessageBox::No, QMessageBox::Yes)
             == QMessageBox::No)

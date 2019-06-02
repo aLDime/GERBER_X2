@@ -1,4 +1,5 @@
 #include "tool.h"
+#include <QDebug>
 #include <QFile>
 #include <QJsonArray>
 #include <QJsonDocument>
@@ -8,12 +9,12 @@ int toolId = qRegisterMetaType<Tool>("Tool");
 
 Tool::Tool()
     : name("Name")
-    , angle(0.0)
-    , diameter(1.0)
-    , oneTurnCut(0.1)
-    , passDepth(1.0)
-    , spindleSpeed(12000)
-    , stepover(50.0)
+//    , angle(0.0)
+//    , diameter(1.0)
+//    , oneTurnCut(0.1)
+//    , passDepth(1.0)
+//    , spindleSpeed(12000)
+//    , stepover(50.0)
 {
 }
 
@@ -40,6 +41,8 @@ void Tool::read(const QJsonObject& json)
     name = json["name"].toString();
     note = json["note"].toString();
     type = static_cast<Type>(json["type"].toInt());
+    autoName = json["autoName"].toBool();
+    qDebug() << "autoName" << autoName;
 }
 
 void Tool::write(QJsonObject& json) const
@@ -55,6 +58,7 @@ void Tool::write(QJsonObject& json) const
     json["name"] = name;
     json["note"] = note;
     json["type"] = type;
+    json["autoName"] = autoName;
 }
 
 bool Tool::isValid()
@@ -121,16 +125,14 @@ ToolHolder::ToolHolder()
 void ToolHolder::readTools()
 {
     QFile loadFile(QStringLiteral("../tools.dat"));
-    if (loadFile.exists()) {
-        if (!loadFile.open(QIODevice::ReadOnly)) {
-            return;
-        }
-    } else {
+    do {
+        if (loadFile.open(QIODevice::ReadOnly))
+            break;
         loadFile.setFileName(QStringLiteral("tools.dat"));
-        if (!loadFile.open(QIODevice::ReadOnly)) {
-            return;
-        }
-    }
+        if (loadFile.open(QIODevice::ReadOnly))
+            break;
+        return;
+    } while (1);
 
     QJsonDocument loadDoc(QJsonDocument::fromBinaryData(loadFile.readAll()));
     QJsonArray toolArray = loadDoc.object()["tools"].toArray();

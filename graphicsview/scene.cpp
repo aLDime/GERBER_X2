@@ -74,6 +74,13 @@ bool Scene::drawPdf()
     return false;
 }
 
+QList<QGraphicsItem*> Scene::selectedItems()
+{
+    if (self)
+        return self->QGraphicsScene::selectedItems();
+    return QList<QGraphicsItem*>();
+}
+
 void Scene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     if (m_drawPdf)
@@ -86,7 +93,7 @@ void Scene::drawBackground(QPainter* painter, const QRectF& rect)
 
     //    painter->save();
 
-    //    //    if (GerberFileHolder::getDrawingType() == GerberFileHolder::RAW)
+    //    //    if (GerberProject::getDrawingType() == GerberProject::RAW)
     //    //        painter->setBrush(QColor(128, 128, 0));
     //    //    else
     //    painter->setBrush(Qt::NoBrush);

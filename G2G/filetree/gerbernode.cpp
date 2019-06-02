@@ -1,12 +1,12 @@
 #include "gerbernode.h"
-#include "filetree/fileholder.h"
+#include "project.h"
 #include <QFileInfo>
 #include <mainwindow.h>
 
 QTimer GerberNode::m_repaintTimer;
 
 GerberNode::GerberNode(Gerber::File* file)
-    : m_id(FileHolder::addFile(file))
+    : m_id(Project::addFile(file))
 {
     file->itemGroup()->addToTheScene();
     file->itemGroup()->setZValue(-m_id);
@@ -20,8 +20,8 @@ GerberNode::GerberNode(Gerber::File* file)
 
 GerberNode::~GerberNode()
 {
-    FileHolder::deleteFile(m_id);
-    //MainWindow::self->closeAllAct->setEnabled(FileHolder::isEmpty());
+    Project::deleteFile(m_id);
+    //MainWindow::self->closeAllAct->setEnabled(Project::isEmpty());
     if (Scene::self) {
         Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
         Scene::self->update();
@@ -36,7 +36,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case Name:
         switch (role) {
         case Qt::CheckStateRole:
-            FileHolder::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+            Project::file(m_id)->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
         default:
             return false;
@@ -44,7 +44,7 @@ bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case Layer:
         switch (role) {
         case Qt::EditRole:
-            FileHolder::file(m_id)->setSide(static_cast<Side>(value.toBool()));
+            Project::file(m_id)->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:
             return false;
@@ -84,21 +84,21 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     case Name:
         switch (role) {
         case Qt::DisplayRole:
-            return FileHolder::file(m_id)->shortFileName();
+            return Project::file(m_id)->shortFileName();
         case Qt::ToolTipRole:
-            return FileHolder::file(m_id)->shortFileName() + "\n"
-                + FileHolder::file(m_id)->fileName();
+            return Project::file(m_id)->shortFileName() + "\n"
+                + Project::file(m_id)->fileName();
         case Qt::CheckStateRole:
-            return FileHolder::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: {
-            QColor color(FileHolder::file(m_id)->color());
+            QColor color(Project::file(m_id)->color());
             color.setAlpha(255);
             QPixmap pixmap(22, 22);
             pixmap.fill(Qt::transparent);
             QPainter p(&pixmap);
             p.setBrush(color);
             p.drawRect(3, 3, 15, 15);
-            if (FileHolder::file<Gerber::File>(m_id)->itemsType() == Gerber::File::Raw) {
+            if (Project::file<Gerber::File>(m_id)->itemsType() == Gerber::File::Raw) {
                 QFont f;
                 f.setBold(true);
                 p.setFont(f);
@@ -115,9 +115,9 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return tr("Top|Bottom").split('|')[FileHolder::file(m_id)->side()];
+            return tr("Top|Bottom").split('|')[Project::file(m_id)->side()];
         case Qt::EditRole:
-            return static_cast<bool>(FileHolder::file(m_id)->side());
+            return static_cast<bool>(Project::file(m_id)->side());
         case Qt::UserRole:
             return m_id;
         default:
@@ -145,8 +145,8 @@ void GerberNode::repaint()
 {
     int count = m_parentItem->childCount();
     int k = (count > 1) ? (200.0 / (count - 1)) * row() : 0;
-    FileHolder::file(m_id)->setColor(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
-    FileHolder::file(m_id)->itemGroup()->setBrush(FileHolder::file(m_id)->color());
-    FileHolder::file<Gerber::File>(m_id)->rawItemGroup()->setPen(QPen(FileHolder::file(m_id)->color(), 0.0));
+    Project::file(m_id)->setColor(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
+    Project::file(m_id)->itemGroup()->setBrush(Project::file(m_id)->color());
+    Project::file<Gerber::File>(m_id)->rawItemGroup()->setPen(QPen(Project::file(m_id)->color(), 0.0));
     Scene::self->update();
 }

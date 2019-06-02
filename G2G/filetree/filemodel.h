@@ -30,7 +30,6 @@ signals:
     void select(const QModelIndex&);
 
 public:
-    static FileModel* self;
     explicit FileModel(QObject* parent = nullptr);
     ~FileModel();
 
@@ -51,7 +50,10 @@ public:
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
 
+    static FileModel* self();
+
 private:
+    static FileModel* m_self;
     AbstractNode* getItem(const QModelIndex& index) const;
 };
 

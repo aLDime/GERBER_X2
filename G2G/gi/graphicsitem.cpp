@@ -1,14 +1,11 @@
 #include "graphicsitem.h"
 #include "itemgroup.h"
 
-GraphicsItem::GraphicsItem()
-    : m_pen(QPen(Qt::white, 0.0))
+GraphicsItem::GraphicsItem(AbstractFile* file)
+    : m_file(file)
+    , m_pen(QPen(Qt::white, 0.0))
     , m_brush(Qt::white)
 {
-    //    setAcceptDrops(false);
-    //    setAcceptedMouseButtons(false);
-    //    setAcceptHoverEvents(false);
-    //    setAcceptTouchEvents(false);
 }
 
 GraphicsItem::~GraphicsItem()
@@ -34,3 +31,10 @@ void GraphicsItem::setPen(const QPen& pen) { m_pen = pen; }
 void GraphicsItem::setPenColor(QColor& penColor) { m_penColor = &penColor; }
 
 void GraphicsItem::setBrushColor(QColor& brushColor) { m_brushColor = &brushColor; }
+
+const AbstractFile* GraphicsItem::file() const { return m_file; }
+
+int GraphicsItem::id() const
+{
+    return m_id;
+}

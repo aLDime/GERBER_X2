@@ -24,7 +24,7 @@ ThermalPreviewItem::ThermalPreviewItem(const Gerber::GraphicObject& go, Tool& to
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(QColor(255, 255, 255, 100))
 {
-    setZValue(std::numeric_limits<double>::max()-10);
+    setZValue(std::numeric_limits<double>::max() - 10);
     setFlag(ItemIsSelectable, true);
     redraw();
 }
@@ -155,7 +155,7 @@ void ThermalPreviewItem::setCount(int count)
     redraw();
 }
 
-ThermalNode *ThermalPreviewItem::node() const
+ThermalNode* ThermalPreviewItem::node() const
 {
     return m_node;
 }

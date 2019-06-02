@@ -2202,7 +2202,7 @@ Depth:</source>
     <message>
         <location filename="../tooldatabase/tooleditform.ui" line="97"/>
         <source>Units</source>
-        <translation>Единици измерения</translation>
+        <translation type="unfinished">Единицы измерения</translation>
     </message>
     <message>
         <location filename="../tooldatabase/tooleditform.ui" line="110"/>

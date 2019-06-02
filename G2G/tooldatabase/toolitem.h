@@ -23,6 +23,7 @@ public:
     int row() const;
     int childCount() const;
     ToolItem* child(int row) const;
+    ToolItem* lastChild() const;
     ToolItem* takeChild(int row);
     ToolItem* parent();
     void addChild(ToolItem* item);
@@ -34,7 +35,7 @@ public:
 
     QVariant data(const QModelIndex& index, int role) const;
 
-    Qt::ItemFlags flags() const;
+    Qt::ItemFlags flags(const QModelIndex&) const;
 
     int toolId() const;
 
@@ -55,8 +56,7 @@ private:
     static bool m_deleteEnable;
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
-    int m_toolId = 0;
-    mutable bool m_isTool = false;
+    mutable int m_toolId = 0;
     QString m_name;
     QString m_note;
 };

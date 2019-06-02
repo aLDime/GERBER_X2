@@ -1,7 +1,7 @@
 #ifndef THERMALFORM_H
 #define THERMALFORM_H
 
-#include "toolpathutil.h"
+#include "formsutil.h"
 
 #include "forms/thermalmodel.h"
 #include "forms/thermalpreviewitem.h"
@@ -16,7 +16,7 @@ class QGridLayout;
 //class ThermalModel;
 //class ThermalPreviewItem;
 
-class ThermalForm : public ToolPathUtil {
+class ThermalForm : public FormsUtil {
     Q_OBJECT
 
 public:
@@ -54,10 +54,11 @@ private:
     double m_depth;
     inline void redraw();
 
-    // ToolPathUtil interface
+    // FormsUtil interface
 protected:
     void create() override;
     void updateName() override;
+   public: virtual void editFile(GCodeFile* file) override;
 };
 
 #endif // THERMALFORM_H

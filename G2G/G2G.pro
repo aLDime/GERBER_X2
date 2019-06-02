@@ -8,7 +8,7 @@ TEMPLATE = app
 RESOURCES += \
     res/resources.qrc \
 
-DEFINES += QT_DEPRECATED_WARNINGS G2G
+DEFINES += QT_DEPRECATED_WARNINGS G2G QT_DEBUG
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 VERSION = 0.7.5
@@ -40,7 +40,6 @@ HEADERS += \
     doublespinbox.h \
     filetree/abstractnode.h \
     filetree/drillnode.h \
-    filetree/fileholder.h \
     filetree/filemodel.h \
     filetree/foldernode.h \
     filetree/gcodenode.h \
@@ -49,13 +48,13 @@ HEADERS += \
     filetree/treeview.h \
     forms/drillform.h \
     forms/drillmodel.h \
+    forms/formsutil.h \
     forms/gcodepropertiesform.h \
     forms/pocketform.h \
     forms/profileform.h \
     forms/thermalform.h \
     forms/thermalmodel.h \
     forms/thermalpreviewitem.h \
-    forms/toolpathutil.h \
     forms/voronoiform.h \
     gcode/gcode.h \
     gcode/toolpathcreator.h \
@@ -82,7 +81,8 @@ HEADERS += \
     icons.h \
     forms/previewitem.h \
     voroni/jc_voronoi.h \
-    settings.h
+    settings.h \
+    project.h
 
 
 SOURCES += \
@@ -91,7 +91,6 @@ SOURCES += \
     doublespinbox.cpp \
     filetree/abstractnode.cpp \
     filetree/drillnode.cpp \
-    filetree/fileholder.cpp \
     filetree/filemodel.cpp \
     filetree/foldernode.cpp \
     filetree/gcodenode.cpp \
@@ -100,13 +99,13 @@ SOURCES += \
     filetree/treeview.cpp \
     forms/drillform.cpp \
     forms/drillmodel.cpp \
+    forms/formsutil.cpp \
     forms/gcodepropertiesform.cpp \
     forms/pocketform.cpp \
     forms/profileform.cpp \
     forms/thermalform.cpp \
     forms/thermalmodel.cpp \
     forms/thermalpreviewitem.cpp \
-    forms/toolpathutil.cpp \
     forms/voronoiform.cpp \
     gcode/gcode.cpp \
     gcode/toolpathcreator.cpp \
@@ -132,7 +131,8 @@ SOURCES += \
     tooldatabase/tooltreeview.cpp \
     forms/previewitem.cpp \
     voroni/jc_voronoi.cpp \
-    settings.cpp
+    settings.cpp \
+    project.cpp
 
 
 

@@ -10,7 +10,7 @@
 #include "forms/gcodepropertiesform.h"
 
 RawItem::RawItem(const Path& path, Gerber::File* file)
-    : m_file(file)
+    : GraphicsItem(file)
     , m_path(path)
 {
     m_polygon = toQPolygon(path);
@@ -76,17 +76,16 @@ QPainterPath RawItem::shape() const
     return m_shape;
 }
 
-const Gerber::File* RawItem::file() const { return m_file; }
-
 void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
 {
     event->ignore();
     if (event->modifiers() & Qt::ShiftModifier) {
+
         const double glueLen = GCodePropertiesForm::glue * uScale;
         IntPoint dest(m_path.last());
         IntPoint init(m_path.last());
         QList<int> skip;
-        ItemGroup* ig = m_file->rawItemGroup();
+        ItemGroup* ig = typedFile<Gerber::File>()->rawItemGroup();
 
         for (int i = 0; i < ig->size(); ++i) {
             if (skip.contains(i))
@@ -113,4 +112,6 @@ void RawItem::mouseReleaseEvent(QGraphicsSceneMouseEvent* event)
         return;
     }
     GraphicsItem::mouseReleaseEvent(event);
+    if (event->modifiers() & Qt::ShiftModifier)
+        setSelected(true);
 }
