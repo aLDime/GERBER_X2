@@ -8,8 +8,7 @@
 #include <QTranslator>
 
 //#include "application.h"
-//#include "mainwindow.h"
-#include "tooldatabase/tooldatabase.h"
+#include "mainwindow.h"
 #ifndef linux
 //#include <qt_windows.h>
 #endif
@@ -68,20 +67,17 @@ int main(int argc, char* argv[])
             delete baseTranslator;
     }
 
-    ToolDatabase d;
-    d.show();
-
-    //    MainWindow* mainWin = new MainWindow;
-    //    mainWin->setIconSize({ 24, 24 });
-    //    mainWin->show();
-    //    QCommandLineParser parser;
-    //    parser.setApplicationDescription(QCoreApplication::applicationName());
-    //    parser.addHelpOption();
-    //    parser.addVersionOption();
-    //    parser.addPositionalArgument("file", "The file(s) to open.");
-    //    parser.process(app);
-    //    for (const QString& file : parser.positionalArguments()) {
-    //        mainWin->openFile(file);
-    //    }
+    MainWindow* mainWin = new MainWindow;
+    mainWin->setIconSize({ 24, 24 });
+    mainWin->show();
+    QCommandLineParser parser;
+    parser.setApplicationDescription(QCoreApplication::applicationName());
+    parser.addHelpOption();
+    parser.addVersionOption();
+    parser.addPositionalArgument("file", "The file(s) to open.");
+    parser.process(app);
+    for (const QString& file : parser.positionalArguments()) {
+        mainWin->openFile(file);
+    }
     return app.exec();
 }

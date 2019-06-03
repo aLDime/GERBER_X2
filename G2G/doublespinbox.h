@@ -10,6 +10,11 @@ public:
     void setRange(double min, double max);
     void setMaximum(double max);
     void setMinimum(double min);
+    void flicker();
+
+private:
+    void red();
+    void normal();
 
     // QWidget interface
 protected:

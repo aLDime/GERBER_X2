@@ -87,23 +87,6 @@ void FormsUtil::showProgress()
     m_timerId = startTimer(50);
 }
 
-//void ToolPathUtil::progress(int max, int value)
-//{
-//    //qDebug() << "progress" << max << value;
-
-//    if (max && !value) {
-//        qDebug() << "create";
-
-//    } else if (pd && !max && !value) {
-//        qDebug() << "close";
-//        pd->hide();
-//        pd->deleteLater();
-//        pd = nullptr;
-//    } else if (pd) {
-//        pd->setMaximum(max);
-//        pd->setValue(value);
-//    }
-//}
 
 void FormsUtil::cancel()
 {

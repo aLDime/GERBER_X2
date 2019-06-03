@@ -11,7 +11,7 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
         if (toolEdit->m_tool.isValid())
             accept();
         else
-            toolEdit->m_tool.errorMessageBox(this);
+            toolEdit->on_pbApply_clicked(); //            toolEdit->m_tool.errorMessageBox(this);
     });
 }
 

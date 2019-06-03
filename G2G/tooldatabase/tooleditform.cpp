@@ -157,16 +157,6 @@ void ToolEditForm::setChanged(bool fl)
     parentWidget()->setWindowModified(fl);
 }
 
-void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
-{
-    if (!dsbx->value()) {
-        for (int i = 0, t = 0; i < 3; ++i) {
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [=] { if(!ui) return; dsbx->setStyleSheet("QWidget{ background-color: red; padding: 1px; }"); });
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [=] { if(!ui) return; dsbx->setStyleSheet(""); });
-        }
-    }
-}
-
 void ToolEditForm::setVisibleUnusedWidgets(bool visible)
 {
     ui->cbxFeedSpeeds->setVisible(visible);
@@ -253,21 +243,21 @@ void ToolEditForm::on_pbApply_clicked()
     }
     switch (m_tool.type()) {
     case Tool::Drill:
-        flicker(ui->dsbxDiameter);
-        flicker(ui->dsbxOneTurnCut);
-        flicker(ui->dsbxPassDepth);
-        flicker(ui->dsbxPlungeRate);
-        flicker(ui->dsbxSpindleSpeed);
+        ui->dsbxDiameter->flicker();
+        ui->dsbxOneTurnCut->flicker();
+        ui->dsbxPassDepth->flicker();
+        ui->dsbxPlungeRate->flicker();
+        ui->dsbxSpindleSpeed->flicker();
         break;
     case Tool::EndMill:
     case Tool::Engraving:
-        flicker(ui->dsbxDiameter);
-        flicker(ui->dsbxFeedRate);
-        flicker(ui->dsbxOneTurnCut);
-        flicker(ui->dsbxPassDepth);
-        flicker(ui->dsbxPlungeRate);
-        flicker(ui->dsbxSpindleSpeed);
-        flicker(ui->dsbxStepover);
+        ui->dsbxDiameter->flicker();
+        ui->dsbxFeedRate->flicker();
+        ui->dsbxOneTurnCut->flicker();
+        ui->dsbxPassDepth->flicker();
+        ui->dsbxPlungeRate->flicker();
+        ui->dsbxSpindleSpeed->flicker();
+        ui->dsbxStepover->flicker();
         break;
     case Tool::Group:
     default:
@@ -278,6 +268,7 @@ void ToolEditForm::on_pbApply_clicked()
 void ToolEditForm::setDialog()
 {
     m_dialog = false;
+    ui->pbApply->setVisible(false);
     ui->cbxToolType->setEnabled(m_dialog);
 }
 

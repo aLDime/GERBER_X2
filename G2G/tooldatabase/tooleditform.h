@@ -43,7 +43,6 @@ private:
 
     void updateName();
     void setChanged(bool fl= true);
-    void flicker(QDoubleSpinBox* dsbx);
     void setVisibleUnusedWidgets(bool visible);
     QVector<QDoubleSpinBox*> set;
 };

@@ -1,9 +1,9 @@
 #include "treeview.h"
 #include "abstractnode.h"
-#include "project.h"
 #include "forms/drillform.h"
 #include "gerbernode.h"
 #include "layerdelegate.h"
+#include "project.h"
 #include <QContextMenuEvent>
 #include <QFileDialog>
 #include <QGraphicsScene>
@@ -30,30 +30,30 @@ TreeView::TreeView(QWidget* parent)
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &TreeView::updateTree);
     connect(this, &TreeView::doubleClicked, this, &TreeView::on_doubleClicked);
 
-    //QTimer::singleShot(100, Qt::CoarseTimer, [=] {
+    setIconSize(QSize(22, 22));
+
     int w = indentation();
-    int h = rowHeight(m_model->index(1, 0, QModelIndex()));
-    QImage image(w, h, QImage::Format_ARGB32);
-    qDebug() << w << h << image;
-    QPainter painter(&image);
-    painter.setPen(QColor(128, 128, 128));
+    int h = rowHeight(m_model->index(0, 0, QModelIndex()));
+    QImage i(w, h, QImage::Format_ARGB32);
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    i.save("vline.png", "PNG");
 
-    image.fill(Qt::transparent);
-    painter.drawLine(h / 2, 0, h / 2, w);
-    image.save("vline.png", "PNG");
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-more.png", "PNG");
 
-    painter.drawLine(h / 2, w / 2, h, w / 2);
-    image.save("branch-more.png", "PNG");
-
-    image.fill(Qt::transparent);
-    painter.drawLine(h / 2, 0, h / 2, w / 2);
-    painter.drawLine(h / 2, w / 2, h, w / 2);
-    image.save("branch-end.png", "PNG");
+    i.fill(Qt::transparent);
+    for (int y = 0; y < h / 2; ++y)
+        i.setPixelColor(w / 2, y, QColor(128, 128, 128));
+    for (int x = w / 2; x < w; ++x)
+        i.setPixelColor(x, h / 2, QColor(128, 128, 128));
+    i.save("branch-end.png", "PNG");
 
     QFile file(":/qtreeviewstylesheet/QTreeView.qss");
     file.open(QFile::ReadOnly);
     setStyleSheet(file.readAll());
-    //});
 
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -61,7 +61,6 @@ TreeView::TreeView(QWidget* parent)
 
     setItemDelegateForColumn(1, new LayerDelegate(this));
     setItemDelegateForColumn(2, new RadioDelegate(this));
-    setIconSize(QSize(22, 22));
 }
 
 TreeView::~TreeView()

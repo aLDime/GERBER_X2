@@ -4,6 +4,7 @@
 #include <QEvent>
 #include <QKeyEvent>
 #include <QLineEdit>
+#include <QTimer>
 
 DoubleSpinBox::DoubleSpinBox(QWidget* parent)
     : QDoubleSpinBox(parent)
@@ -29,6 +30,19 @@ void DoubleSpinBox::setMinimum(double min)
     QDoubleSpinBox::setMinimum(min);
     setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
+
+void DoubleSpinBox::flicker()
+{
+    if (!value())
+        for (int i = 0, t = 0; i < 3; ++i) {
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::red);
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::normal);
+        }
+}
+
+void DoubleSpinBox::red() { setStyleSheet("QWidget{ background-color: red; }"); }
+
+void DoubleSpinBox::normal() { setStyleSheet(""); }
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event)
 {
