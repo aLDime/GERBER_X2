@@ -19,7 +19,7 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 {
     ui->setupUi(this);
 
-    ui->lblToolName->setText(tool.name);
+    ui->lblToolName->setText(tool.name());
     ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
     updateName();
@@ -52,7 +52,7 @@ void VoronoiForm::on_pbSelect_clicked()
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
         tool = tdb.tool();
-        ui->lblToolName->setText(tool.name);
+        ui->lblToolName->setText(tool.name());
         updateName();
     }
 }
@@ -63,8 +63,8 @@ void VoronoiForm::on_pbEdit_clicked()
     d.setTool(tool);
     if (d.exec()) {
         tool = d.tool();
-        tool.id = -1;
-        ui->lblToolName->setText(tool.name);
+        tool.setId(-1);
+        ui->lblToolName->setText(tool.name());
         updateName();
     }
 }
@@ -153,7 +153,6 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1)
     m_fileName = arg1;
 }
 
-
-void VoronoiForm::editFile(GCodeFile *file)
+void VoronoiForm::editFile(GCodeFile* file)
 {
 }

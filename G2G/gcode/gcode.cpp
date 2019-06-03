@@ -186,7 +186,7 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
         break;
     case Drill:
         for (const IntPoint& point : m_toolPaths.first()) {
-            item = new DrillItem(tool.diameter);
+            item = new DrillItem(tool.diameter());
             item->setPos(toQPointF(point));
             item->setPenColor(Settings::color(Colors::ToolPath));
             item->setBrushColor(Settings::color(Colors::CutArea));
@@ -243,11 +243,11 @@ void GCodeFile::saveDrill()
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size();
         startPath(point);
-        for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
-            sl.append(formated({ g1(), z(-m_tool.passDepth * i), feed(m_tool.plungeRate) }));
+        for (int i = 1; m_depth > m_tool.passDepth() * i; ++i) {
+            sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) }));
             sl.append(formated({ g0(), z(0.0) }));
         }
-        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate) }));
+        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate()) }));
         endPath();
     }
     endFile();
@@ -275,16 +275,16 @@ void GCodeFile::saveProfilePocket()
         }
     }
 
-    for (int i = 1; m_depth > m_tool.passDepth * i; ++i) {
+    for (int i = 1; m_depth > m_tool.passDepth() * i; ++i) {
         for (const QPolygonF& path : paths) {
             startPath(path.first());
-            sl.append(formated({ g1(), z(-m_tool.passDepth * i), feed(m_tool.plungeRate) })); //start z
+            sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) })); //start z
             bool skip = true;
             for (const QPointF& point : path) {
                 if (skip)
                     skip = false;
                 else
-                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate) }));
+                    sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
             }
             endPath();
         }
@@ -292,13 +292,13 @@ void GCodeFile::saveProfilePocket()
 
     for (const QPolygonF& path : paths) {
         startPath(path.first());
-        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate) })); //start z
+        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate()) })); //start z
         bool skip = true;
         for (const QPointF& point : path) {
             if (skip)
                 skip = false;
             else
-                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate) }));
+                sl.append(formated({ g1(), x(point.x()), y(point.y()), feed(m_tool.feedRate()) }));
         }
         endPath();
     }
@@ -332,7 +332,7 @@ void GCodeFile::setLastDir(QString value)
 
 void GCodeFile::startPath(const QPointF& point)
 {
-    sl.append(formated({ g0(), x(point.x()), y(point.y()), s(m_tool.spindleSpeed) })); //start xy
+    sl.append(formated({ g0(), x(point.x()), y(point.y()), s(m_tool.spindleSpeed()) })); //start xy
     sl.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
     lastValues[AlwaysF].clear();
 }

@@ -105,7 +105,7 @@ QVariant DrillModel::data(const QModelIndex& index, int role) const
         else
             switch (role) {
             case Qt::DisplayRole:
-                return ToolHolder::tools[m_data[row].toolId].name;
+                return ToolHolder::tools[m_data[row].toolId].name();
             case Qt::DecorationRole:
                 return ToolHolder::tools[m_data[row].toolId].icon();
             case Qt::UserRole:

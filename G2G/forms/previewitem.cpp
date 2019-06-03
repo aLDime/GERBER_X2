@@ -100,7 +100,7 @@ void PreviewItem::setToolId(int toolId)
     m_toolId = toolId;
     if (m_toolId > -1) {
         m_toolPath = QPainterPath();
-        const double diameter = ToolHolder::tools[m_toolId].diameter;
+        const double diameter = ToolHolder::tools[m_toolId].diameter();
         switch (m_type) {
         case SlotType: {
             Paths tmpPpath;

@@ -83,6 +83,7 @@ void ToolTreeView::newTool()
         index = index.parent();
     if (!m_model->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
         return;
+
     ToolItem* item = nullptr;
 
     if (!index.isValid())
@@ -92,7 +93,7 @@ void ToolTreeView::newTool()
 
     if (item) {
         item->setIsTool();
-        item->tool().name = tr("New Tool ") + QString::number(item->toolId());
+        item->tool().setName(tr("New Tool ") + QString::number(item->toolId()));
         index = m_model->createIndex(item->row(), 0, item);
         selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }
@@ -101,9 +102,7 @@ void ToolTreeView::newTool()
 
 void ToolTreeView::deleteItem()
 {
-    if (QMessageBox::question(this, tr("Warning"),
-            tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No)
-        == QMessageBox::No)
+    if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
         return;
     QModelIndex index = selectionModel()->currentIndex();
     if (m_model->removeRows(index.row(), 1, index.parent()))
@@ -122,6 +121,7 @@ void ToolTreeView::copyTool()
     ToolItem* itemDst = static_cast<ToolItem*>(index.internalPointer());
     itemDst->setIsTool();
     itemDst->tool() = itemSrc->tool();
+    selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 
     updateActions();
 }

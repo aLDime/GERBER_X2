@@ -29,13 +29,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, QVector<Tool::Type> types)
     connect(ui->treeView, &ToolTreeView::itemSelected, [=](ToolItem* item) {
         if (item->isTool())
             m_tool = item->tool();
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && m_types.contains(item->tool().type)) || m_types.isEmpty());
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && m_types.contains(item->tool().type())) || m_types.isEmpty());
         ui->toolEdit->setItem(item);
     });
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [=](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-        if ((item->isTool() && m_types.contains(item->tool().type))) {
+        if ((item->isTool() && m_types.contains(item->tool().type()))) {
             if (item->tool().isValid()) {
                 m_tool = item->tool();
                 accept();

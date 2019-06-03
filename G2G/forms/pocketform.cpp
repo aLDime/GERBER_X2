@@ -25,8 +25,8 @@ PocketForm::PocketForm(QWidget* parent)
     , ui(new Ui::PocketForm)
 {
     ui->setupUi(this);
-    ui->lblToolName->setText(tool.name);
-    ui->lblToolName_2->setText(tool2.name);
+    ui->lblToolName->setText(tool.name());
+    ui->lblToolName_2->setText(tool2.name());
 
     ui->dsbxDepth->setValue(GCodePropertiesForm::thickness);
 
@@ -116,11 +116,11 @@ void PocketForm::on_pbSelect_clicked()
         //        ui->lblToolName->setText(tool.name);
         //        updateName();
         Tool mpTool(tdb.tool());
-        if (ui->chbxUseTwoTools->isChecked() && tool2.id > -1 && tool2.diameter <= mpTool.diameter) {
+        if (ui->chbxUseTwoTools->isChecked() && tool2.id() > -1 && tool2.diameter() <= mpTool.diameter()) {
             QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
         } else {
             tool = mpTool;
-            ui->lblToolName->setText(tool.name);
+            ui->lblToolName->setText(tool.name());
         }
     }
 }
@@ -129,11 +129,11 @@ void PocketForm::on_pbSelect_2_clicked()
     ToolDatabase tdb(this, { Tool::EndMill, Tool::Engraving });
     if (tdb.exec()) {
         Tool mpTool(tdb.tool());
-        if (tool.id > -1 && tool.diameter >= mpTool.diameter) {
+        if (tool.id() > -1 && tool.diameter() >= mpTool.diameter()) {
             QMessageBox::warning(this, tr("Warning"), tr("The diameter of the second tool must be greater than the first!"));
         } else {
             tool2 = mpTool;
-            ui->lblToolName_2->setText(tool2.name);
+            ui->lblToolName_2->setText(tool2.name());
         }
     }
 }
@@ -144,8 +144,8 @@ void PocketForm::on_pbEdit_clicked()
     d.setTool(tool);
     if (d.exec()) {
         tool = d.tool();
-        tool.id = -2;
-        ui->lblToolName->setText(tool.name);
+        tool.setId(-1);
+        ui->lblToolName->setText(tool.name());
         updateName();
     }
 }
@@ -156,8 +156,8 @@ void PocketForm::on_pbEdit_2_clicked()
     d.setTool(tool2);
     if (d.exec()) {
         tool2 = d.tool();
-        tool2.id = -2;
-        ui->lblToolName_2->setText(tool2.name);
+        tool.setId(-1);
+        ui->lblToolName_2->setText(tool2.name());
         updateName();
     }
 }

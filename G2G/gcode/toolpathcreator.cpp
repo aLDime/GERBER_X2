@@ -144,7 +144,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
 
         m_toolDiameter = tool.getDiameter(depth) * uScale;
         m_dOffset = m_toolDiameter / 2;
-        m_stepOver = tool.stepover * uScale;
+        m_stepOver = tool.stepover() * uScale;
 
         Paths fillPaths;
 
@@ -235,7 +235,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
         clipper.AddPaths(m_returnPaths, ptSubject, true);
         IntRect r(clipper.GetBounds());
 
-        int k = tool.diameter * uScale;
+        int k = tool.diameter() * uScale;
         Path outer = {
             IntPoint(r.left - k, r.bottom + k),
             IntPoint(r.right + k, r.bottom + k),
@@ -256,7 +256,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
             emit fileReady(nullptr);
         } else {
             m_file = new GCodeFile(m_returnPaths, tool, depth, Pocket, fillPaths);
-            m_file->setFileName(tool.name);
+            m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
     } catch (...) {
@@ -275,7 +275,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
         do {
             m_toolDiameter = tool.second.getDiameter(depth) * uScale;
             m_dOffset = m_toolDiameter / 2;
-            m_stepOver = tool.second.stepover * uScale;
+            m_stepOver = tool.second.stepover() * uScale;
 
             Paths fillPaths;
 
@@ -315,7 +315,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
             clipper.AddPaths(m_returnPaths, ptSubject, true);
             IntRect r(clipper.GetBounds());
 
-            int k = tool.second.diameter * uScale;
+            int k = tool.second.diameter() * uScale;
             Path outer = {
                 IntPoint(r.left - k, r.bottom + k),
                 IntPoint(r.right + k, r.bottom + k),
@@ -336,7 +336,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
                 emit fileReady(nullptr);
             } else {
                 m_file = new GCodeFile(m_returnPaths, tool.second, depth, Pocket, fillPaths);
-                m_file->setFileName(tool.second.name);
+                m_file->setFileName(tool.second.name());
                 emit fileReady(m_file);
             }
         } while (0);
@@ -345,7 +345,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
 
             m_toolDiameter = tool.first.getDiameter(depth) * uScale;
             m_dOffset = m_toolDiameter / 2;
-            m_stepOver = tool.first.stepover * uScale;
+            m_stepOver = tool.first.stepover() * uScale;
 
             Paths fillPaths;
 
@@ -392,7 +392,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
             clipper.AddPaths(m_returnPaths, ptSubject, true);
             IntRect r(clipper.GetBounds());
 
-            int k = tool.first.diameter * uScale;
+            int k = tool.first.diameter() * uScale;
             Path outer = {
                 IntPoint(r.left - k, r.bottom + k),
                 IntPoint(r.right + k, r.bottom + k),
@@ -413,7 +413,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
                 emit fileReady(nullptr);
             } else {
                 m_file = new GCodeFile(m_returnPaths, tool.first, depth, Pocket, fillPaths);
-                m_file->setFileName(tool.first.name);
+                m_file->setFileName(tool.first.name());
                 emit fileReady(m_file);
             }
         }
@@ -562,7 +562,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
             emit fileReady(nullptr);
         } else {
             m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
-            m_file->setFileName(tool.name);
+            m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
     } catch (...) {
@@ -684,7 +684,7 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
             emit fileReady(nullptr);
         } else {
             m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Thermal);
-            m_file->setFileName(tool.name);
+            m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
     } catch (...) {
@@ -1115,7 +1115,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
         //qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
         //qDebug() << "elapsed" << t2.elapsed();
         m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
-        m_file->setFileName(tool.name);
+        m_file->setFileName(tool.name());
         emit fileReady(m_file);
     } catch (...) {
         //qDebug() << "catch";

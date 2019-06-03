@@ -34,8 +34,7 @@ public slots:
 private:
     Ui::ToolEditForm* ui;
 
-    void calculate(int index, double value);
-    void valueChanged(double value);
+    void valueChangedSlot(double value);
 
     ToolItem* m_item = nullptr;
     Tool m_tool;
@@ -43,11 +42,10 @@ private:
     bool m_dialog = true;
 
     void updateName();
-    void setRed();
-    void setRedReset();
+    void setChanged(bool fl= true);
     void flicker(QDoubleSpinBox* dsbx);
-    void setVisibleWidgets(bool visible);
-    QVector<QObject*> set;
+    void setVisibleUnusedWidgets(bool visible);
+    QVector<QDoubleSpinBox*> set;
 };
 
 #endif // TOOLEDITFORM_H

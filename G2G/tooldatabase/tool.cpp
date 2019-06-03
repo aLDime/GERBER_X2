@@ -8,80 +8,90 @@
 int toolId = qRegisterMetaType<Tool>("Tool");
 
 Tool::Tool()
-    : name("Name")
-//    , angle(0.0)
-//    , diameter(1.0)
-//    , oneTurnCut(0.1)
-//    , passDepth(1.0)
-//    , spindleSpeed(12000)
-//    , stepover(50.0)
+    : m_name("Name")
+    , m_type(EndMill)
+    , m_angle(0.0)
+    , m_diameter(1.0)
+    , m_feedRate(1200.0)
+    , m_oneTurnCut(0.1)
+    , m_passDepth(2.0)
+    , m_plungeRate(600.0)
+    , m_spindleSpeed(12000.0)
+    , m_stepover(0.5)
+    , m_autoName(true)
+    , m_id(0)
 {
 }
 
 double Tool::getDiameter(double depth) const
 {
-    if (type == Engraving && depth > 0.0 && angle > 0.0 && angle < 90.0) {
-        double a = qDegreesToRadians(90 - angle / 2);
+    if (type() == Engraving && depth > 0.0 && angle() > 0.0 && angle() < 90.0) {
+        double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
-        return d * 2 + diameter;
+        return d * 2 + diameter();
     }
-    return diameter;
+    return diameter();
+}
+
+double Tool::getDepth() const
+{
+    return diameter();
 }
 
 void Tool::read(const QJsonObject& json)
 {
-    angle = json["angle"].toDouble();
-    diameter = json["diameter"].toDouble();
-    feedRate = json["feedRate"].toDouble();
-    oneTurnCut = json["oneTurnCut"].toDouble();
-    passDepth = json["passDepth"].toDouble();
-    plungeRate = json["plungeRate"].toDouble();
-    spindleSpeed = json["spindleSpeed"].toInt();
-    stepover = json["stepover"].toDouble();
-    name = json["name"].toString();
-    note = json["note"].toString();
-    type = static_cast<Type>(json["type"].toInt());
-    autoName = json["autoName"].toBool();
-    qDebug() << "autoName" << autoName;
+    m_angle = json["angle"].toDouble();
+    m_diameter = json["diameter"].toDouble();
+    m_feedRate = json["feedRate"].toDouble();
+    m_oneTurnCut = json["oneTurnCut"].toDouble();
+    m_passDepth = json["passDepth"].toDouble();
+    m_plungeRate = json["plungeRate"].toDouble();
+    m_spindleSpeed = json["spindleSpeed"].toInt();
+    m_stepover = json["stepover"].toDouble();
+    m_name = json["name"].toString();
+    m_note = json["note"].toString();
+    m_type = static_cast<Type>(json["type"].toInt());
+    m_autoName = json["autoName"].toBool();
+    qDebug() << "autoName" << autoName();
 }
 
 void Tool::write(QJsonObject& json) const
 {
-    json["angle"] = angle;
-    json["diameter"] = diameter;
-    json["feedRate"] = feedRate;
-    json["oneTurnCut"] = oneTurnCut;
-    json["passDepth"] = passDepth;
-    json["plungeRate"] = plungeRate;
-    json["spindleSpeed"] = spindleSpeed;
-    json["stepover"] = stepover;
-    json["name"] = name;
-    json["note"] = note;
-    json["type"] = type;
-    json["autoName"] = autoName;
+    json["angle"] = m_angle;
+    json["diameter"] = m_diameter;
+    json["feedRate"] = m_feedRate;
+    json["oneTurnCut"] = m_oneTurnCut;
+    json["passDepth"] = m_passDepth;
+    json["plungeRate"] = m_plungeRate;
+    json["spindleSpeed"] = m_spindleSpeed;
+    json["stepover"] = m_stepover;
+    json["name"] = m_name;
+    json["note"] = m_note;
+    json["type"] = m_type;
+    json["autoName"] = m_autoName;
 }
 
 bool Tool::isValid()
 {
-    bool fl = true;
-    if (qFuzzyIsNull(diameter))
-        fl = false;
-    if (qFuzzyIsNull(passDepth))
-        fl = false;
-    if (type != Drill) {
-        if (qFuzzyIsNull(feedRate))
-            fl = false;
-        if (qFuzzyIsNull(stepover))
-            fl = false;
-    }
-    if (qFuzzyIsNull(plungeRate))
-        fl = false;
-    return fl;
+    do {
+        if (qFuzzyIsNull(m_diameter))
+            break;
+        if (qFuzzyIsNull(m_passDepth))
+            break;
+        if (type() != Drill && qFuzzyIsNull(m_feedRate))
+            break;
+        if (type() != Drill && qFuzzyIsNull(m_stepover))
+            break;
+        if (qFuzzyIsNull(m_plungeRate))
+            break;
+        return true;
+    } while (0);
+    return false;
 }
 
-QIcon Tool::icon()
+QIcon&& Tool::icon()
 {
-    switch (type) {
+    switch (type()) {
     case Tool::Drill:
         return Icon(ToolDrillIcon);
     case Tool::EndMill:
@@ -96,19 +106,19 @@ QIcon Tool::icon()
 QString Tool::errorStr()
 {
     QString errorString;
-    if (qFuzzyIsNull(diameter))
+    if (qFuzzyIsNull(m_diameter))
         errorString += "Tool diameter = 0!\n";
-    if (qFuzzyIsNull(passDepth)) {
-        if (type == Drill)
+    if (qFuzzyIsNull(m_passDepth)) {
+        if (type() == Drill)
             errorString += "Pass = 0!\n";
         else
             errorString += "Depth = 0!\n";
     }
-    if (qFuzzyIsNull(feedRate))
+    if (qFuzzyIsNull(m_feedRate))
         errorString += "Feed rate = 0\n";
-    if (qFuzzyIsNull(stepover))
+    if (qFuzzyIsNull(m_stepover))
         errorString += "Stepover = 0\n";
-    if (qFuzzyIsNull(plungeRate))
+    if (qFuzzyIsNull(m_plungeRate))
         errorString += "Plunge rate = 0!\n";
     return errorString;
 }
@@ -140,8 +150,8 @@ void ToolHolder::readTools()
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
-        tool.id = toolObject["id"].toInt();
-        tools[tool.id] = tool;
+        tool.setId(toolObject["id"].toInt());
+        tools[tool.id()] = tool;
     }
 }
 
@@ -152,8 +162,8 @@ void ToolHolder::readTools(const QJsonObject& json)
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
-        tool.id = toolObject["id"].toInt();
-        tools[tool.id] = tool;
+        tool.setId(toolObject["id"].toInt());
+        tools[tool.id()] = tool;
     }
 }
 

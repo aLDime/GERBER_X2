@@ -435,7 +435,7 @@ void MainWindow::createShtifts()
         settings.setValue("Shtift/depth", depth);
 
         GCodeFile* gcode = new GCodeFile({ toPath(dst) }, tool, depth, Drill);
-        gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id) + ")");
+        gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id()) + ")");
         FileModel::addFile(gcode);
     }
 }

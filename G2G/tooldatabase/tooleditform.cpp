@@ -14,19 +14,19 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 {
     ui->setupUi(this);
 
-    connect(ui->dsbxAngle, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxDiameter, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxFeedRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxOneTurnCut, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxOneTurnCutPercent, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxPassDepth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxPlungeRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxSpindleSpeed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxStepover, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
-    connect(ui->dsbxStepoverPercent, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChanged);
+    connect(ui->dsbxAngle, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxDiameter, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxFeedRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxOneTurnCut, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxOneTurnCutPercent, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxPassDepth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxPlungeRate, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxSpindleSpeed, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxStepover, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
+    connect(ui->dsbxStepoverPercent, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &ToolEditForm::valueChangedSlot);
 
     connect(ui->cbxFeedSpeeds, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
-        double feed = m_feed;
+        double tmpFeed = m_feed;
         switch (index) {
         case 0: //mm/sec
             m_feed = 1.0 / 60.0;
@@ -45,8 +45,8 @@ ToolEditForm::ToolEditForm(QWidget* parent)
         }
         bool fl1 = parentWidget()->isWindowModified();
         bool fl2 = ui->pbApply->isEnabled();
-        ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / feed) * m_feed);
-        ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / feed) * m_feed);
+        ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / tmpFeed) * m_feed);
+        ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / tmpFeed) * m_feed);
         ui->dsbxFeedRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
         ui->dsbxPlungeRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
         parentWidget()->setWindowModified(fl1);
@@ -54,55 +54,56 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     });
 
     connect(ui->cbxToolType, QOverload<int>::of(&QComboBox::currentIndexChanged), [=](int index) {
+        m_tool.setType(index);
         ui->dsbxAngle->setEnabled(true);
         ui->dsbxFeedRate->setEnabled(true);
         ui->dsbxStepover->setEnabled(true);
         ui->dsbxStepoverPercent->setEnabled(true);
         switch (index) {
         case Tool::Drill:
-            ui->dsbxFeedRate->setEnabled(false);
-            ui->dsbxStepover->setEnabled(false);
-            ui->dsbxStepoverPercent->setEnabled(false);
-            if (ui->lblPixmap)
-                ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/drill.png")));
             ui->label_3->setText(tr("Pass"));
+            ui->dsbxAngle->setMaximum(180.0);
+            if (!ui->dsbxAngle->value())
+                ui->dsbxAngle->setValue(120.0);
+            ui->dsbxFeedRate->setEnabled(false);
+            ui->dsbxFeedRate->setMaximum(0.0);
+            ui->dsbxStepover->setEnabled(false);
+            ui->dsbxStepover->setMaximum(0.0);
+            ui->dsbxStepoverPercent->setEnabled(false);
+            ui->dsbxStepoverPercent->setMaximum(0.0);
             break;
         case Tool::EndMill:
-            ui->dsbxAngle->setEnabled(false);
-            if (ui->lblPixmap)
-                ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/endmill.png")));
             ui->label_3->setText(tr("Depth"));
-            if (ui->dsbxFeedRate->value() == 0.0) {
-                //                ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-                //                ui->dsbxStepoverPercent->setValue(ui->dsbxStepover->value() / (m_tool.diameter * 0.01));
-                ui->dsbxFeedRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxAngle->setEnabled(false);
+            ui->dsbxAngle->setMaximum(0.0);
+            ui->dsbxFeedRate->setMaximum(100000.0);
+            ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
+            ui->dsbxStepoverPercent->setMaximum(100.0);
+            if (ui->dsbxStepover->value() == 0.0) {
+                ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
+                ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
             }
             break;
         case Tool::Engraving:
-            if (ui->lblPixmap)
-                ui->lblPixmap->setPixmap(QPixmap(QString::fromUtf8(":/tool/engraving.png")));
             ui->label_3->setText(tr("Depth"));
-            if (ui->dsbxFeedRate->value() == 0.0) {
-                //                ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
-                //                ui->dsbxStepoverPercent->setValue(ui->dsbxStepover->value() / (m_tool.diameter * 0.01));
-                ui->dsbxFeedRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxAngle->setValue(0.0);
+            ui->dsbxAngle->setMaximum(180.0);
+            ui->dsbxFeedRate->setMaximum(100000.0);
+            ui->dsbxStepover->setMaximum(ui->dsbxDiameter->value());
+            ui->dsbxStepoverPercent->setMaximum(100.0);
+            if (ui->dsbxStepover->value() == 0.0) {
+                ui->dsbxStepover->setValue(ui->dsbxDiameter->value() * 0.5);
+                ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
             }
             break;
         }
-
-        //        ui->dsbxAngle->setMaximum(ui->dsbxAngle->isEnabled() ? 180.0 : 0.0);
-        ui->dsbxFeedRate->setMaximum(ui->dsbxFeedRate->isEnabled() ? 100000.0 : 0.0);
-        //        ui->dsbxStepover->setMaximum(ui->dsbxStepover->isEnabled() ? ui->dsbxDiameter->value() : 0.0);
-        //        ui->dsbxStepoverPercent->setMaximum(ui->dsbxStepoverPercent->isEnabled() ? 100.0 : 0.0);
-
-        m_tool.type = static_cast<Tool::Type>(index);
-        setRed();
+        setChanged();
         updateName();
     });
 
-    connect(ui->leName, &QLineEdit::textChanged, [=](const QString& arg1) { m_tool.name = arg1; setRed(); });
-    connect(ui->leName, &QLineEdit::textEdited, [=](const QString& arg1) { m_tool.name = arg1; setRed();  ui->chbxAutoName->setChecked(false); });
-    connect(ui->teNote, &QTextEdit::textChanged, [=] { m_tool.note = ui->teNote->toPlainText(); setRed(); });
+    connect(ui->leName, &QLineEdit::textChanged, [=](const QString& arg1) { m_tool.setName(arg1); setChanged(); });
+    connect(ui->leName, &QLineEdit::textEdited, [=](const QString& arg1) { m_tool.setName(arg1); setChanged(); ui->chbxAutoName->setChecked(false); });
+    connect(ui->teNote, &QTextEdit::textChanged, [=] { m_tool.setNote(ui->teNote->toPlainText()); setChanged(); });
 
     set = {
         ui->dsbxAngle,
@@ -121,20 +122,16 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     QSettings settings;
     ui->cbxFeedSpeeds->setCurrentIndex(settings.value("cbxFeedSpeeds").toInt());
-    //ui->cbxToolType->setCurrentIndex(settings.value("cbxToolType").toInt());
     //ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
-
-    setVisibleWidgets(false);
-    setRedReset();
+    setVisibleUnusedWidgets(false);
+    setChanged(false);
 }
 
 ToolEditForm::~ToolEditForm()
 {
     QSettings settings;
     settings.setValue("cbxFeedSpeeds", ui->cbxFeedSpeeds->currentIndex());
-    //settings.setValue("cbxToolType", ui->cbxToolType->currentIndex());
     //settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
-
     delete ui;
     ui = nullptr;
 }
@@ -149,164 +146,132 @@ void ToolEditForm::setItem(ToolItem* item)
     } else {
         ui->leName->setText(m_item->name());
         ui->teNote->setText(m_item->note());
-        setVisibleWidgets(false);
+        setVisibleUnusedWidgets(false);
     }
-    setRedReset();
-    parentWidget()->setWindowModified(false);
+    setChanged(false);
 }
 
-void ToolEditForm::setRed()
+void ToolEditForm::setChanged(bool fl)
 {
-    //if (m_item)
-    ui->pbApply->setEnabled(true);
-    parentWidget()->setWindowModified(true);
-}
-
-void ToolEditForm::setRedReset()
-{
-    ui->pbApply->setEnabled(false);
-    parentWidget()->setWindowModified(false);
+    ui->pbApply->setEnabled(fl);
+    parentWidget()->setWindowModified(fl);
 }
 
 void ToolEditForm::flicker(QDoubleSpinBox* dsbx)
 {
     if (!dsbx->value()) {
         for (int i = 0, t = 0; i < 3; ++i) {
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx, this] { if(!ui) return; dsbx->setStyleSheet("QDoubleSpinBox { background-color: #FF0000;}"); });
-            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [dsbx, this] { if(!ui) return; dsbx->setStyleSheet(""); });
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [=] { if(!ui) return; dsbx->setStyleSheet("QWidget{ background-color: red; padding: 1px; }"); });
+            QTimer::singleShot(++t * 150, Qt::CoarseTimer, [=] { if(!ui) return; dsbx->setStyleSheet(""); });
         }
     }
 }
 
-void ToolEditForm::setVisibleWidgets(bool visible)
+void ToolEditForm::setVisibleUnusedWidgets(bool visible)
 {
     ui->cbxFeedSpeeds->setVisible(visible);
     ui->cbxToolType->setVisible(visible);
     ui->cbxUnits->setVisible(visible);
+    ui->chbxAutoName->setVisible(visible);
     ui->groupBox_2->setVisible(visible);
     ui->groupBox_3->setVisible(visible);
     ui->groupBox_4->setVisible(visible);
-    if (ui->lblPixmap)
-        ui->lblPixmap->setVisible(visible);
     ui->lblToolType->setVisible(visible);
     ui->lblUnits->setVisible(visible);
-    ui->chbxAutoName->setVisible(visible);
+    setMinimumWidth(width());
 }
 
-void ToolEditForm::calculate(int index, double value)
+void ToolEditForm::valueChangedSlot(double value)
 {
-    switch (index) {
+    switch (set.indexOf(static_cast<QDoubleSpinBox*>(sender()))) {
     case Tool::Angle:
-        m_tool.angle = value;
+        m_tool.setAngle(value);
         break;
     case Tool::Diameter:
-        m_tool.diameter = value;
+        m_tool.setDiameter(value);
         ui->dsbxOneTurnCut->setMaximum(value);
         ui->dsbxStepover->setMaximum(value);
-        // ui->dsbxOneTurnCutPercent->setValue((ui->dsbxOneTurnCut->value() / value) * 100.0);
-        // ui->dsbxStepoverPercent->setValue((ui->dsbxStepover->value() / value) * 100.0);
+        if (ui->dsbxStepover->value() == 0.0)
+            ui->dsbxStepover->setValue(value * 0.5);
+        if (ui->dsbxOneTurnCut->value() == 0.0)
+            ui->dsbxOneTurnCut->setValue(value * 0.1);
         ui->dsbxOneTurnCutPercent->valueChanged(ui->dsbxOneTurnCutPercent->value());
         ui->dsbxStepoverPercent->valueChanged(ui->dsbxStepoverPercent->value());
         break;
     case Tool::FeedRate:
-        m_tool.feedRate = value / m_feed;
+        m_tool.setFeedRate(value / m_feed);
         break;
     case Tool::OneTurnCut:
-        m_tool.oneTurnCut = value;
-        ui->dsbxOneTurnCutPercent->setValue(value / (m_tool.diameter * 0.01));
+        m_tool.setOneTurnCut(value);
+        ui->dsbxOneTurnCutPercent->setValue(value / (m_tool.diameter() * 0.01));
         if (ui->chbxFeedRate->isChecked())
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         if (ui->chbxPlungeRate->isChecked())
-            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         break;
     case Tool::PassDepth:
-        m_tool.passDepth = value;
+        m_tool.setPassDepth(value);
         break;
     case Tool::PlungeRate:
-        m_tool.plungeRate = value / m_feed;
+        m_tool.setPlungeRate(value / m_feed);
         break;
     case Tool::SpindleSpeed:
-        m_tool.spindleSpeed = value; //rpm
+        m_tool.setSpindleSpeed(value); //rpm
         if (ui->chbxFeedRate->isChecked())
-            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxFeedRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         if (ui->chbxPlungeRate->isChecked())
-            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut * m_tool.spindleSpeed * m_feed);
+            ui->dsbxPlungeRate->setValue(m_tool.oneTurnCut() * m_tool.spindleSpeed() * m_feed);
         break;
     case Tool::Stepover:
-        m_tool.stepover = value;
-        ui->dsbxStepoverPercent->setValue(value / (m_tool.diameter * 0.01));
+        m_tool.setStepover(value);
+        ui->dsbxStepoverPercent->setValue(value / (m_tool.diameter() * 0.01));
         break;
     case Tool::OneTurnCutPercent:
-        ui->dsbxOneTurnCut->setValue(value * (m_tool.diameter * 0.01));
+        ui->dsbxOneTurnCut->setValue(value * (m_tool.diameter() * 0.01));
         break;
     case Tool::StepoverPercent:
-        ui->dsbxStepover->setValue(value * (m_tool.diameter * 0.01));
+        ui->dsbxStepover->setValue(value * (m_tool.diameter() * 0.01));
         break;
     default:
         break;
     }
-}
 
-void ToolEditForm::valueChanged(double value)
-{
-    calculate(set.indexOf(sender()), value);
     updateName();
-    setRed();
+    setChanged();
 }
 
 void ToolEditForm::on_pbApply_clicked()
 {
     if (m_item && m_tool.isValid()) {
+        m_item->setName(m_tool.name());
+        m_item->setNote(m_tool.note());
+        m_tool.setAutoName(ui->chbxAutoName->isChecked());
         m_item->tool() = m_tool;
-        m_item->setName(m_tool.name);
-        m_item->setNote(m_tool.note);
         emit itemChanged(m_item);
-        setRedReset();
-    } else {
-        m_tool.autoName = ui->chbxAutoName->isChecked();
-        switch (m_tool.type) {
-        case Tool::Drill:
-            flicker(ui->dsbxDiameter);
-            flicker(ui->dsbxOneTurnCut);
-            flicker(ui->dsbxPassDepth);
-            flicker(ui->dsbxPlungeRate);
-            flicker(ui->dsbxSpindleSpeed);
-            flicker(ui->dsbxOneTurnCutPercent);
-            break;
-        case Tool::EndMill:
-            flicker(ui->dsbxDiameter);
-            flicker(ui->dsbxFeedRate);
-            flicker(ui->dsbxOneTurnCut);
-            flicker(ui->dsbxPassDepth);
-            flicker(ui->dsbxPlungeRate);
-            flicker(ui->dsbxSpindleSpeed);
-            flicker(ui->dsbxStepover);
-            flicker(ui->dsbxOneTurnCutPercent);
-            flicker(ui->dsbxStepoverPercent);
-            break;
-        case Tool::Engraving:
-            flicker(ui->dsbxDiameter);
-            flicker(ui->dsbxFeedRate);
-            flicker(ui->dsbxOneTurnCut);
-            flicker(ui->dsbxPassDepth);
-            flicker(ui->dsbxPlungeRate);
-            flicker(ui->dsbxSpindleSpeed);
-            flicker(ui->dsbxStepover);
-            flicker(ui->dsbxOneTurnCutPercent);
-            flicker(ui->dsbxStepoverPercent);
-        case Tool::Group:
-        default:
-            if (!m_item) {
-                setRedReset();
-                break;
-            }
-            m_item->tool() = m_tool;
-            // m_item->setName(m_tool.name);
-            // m_item->setNote(m_tool.note);
-            emit itemChanged(m_item);
-            setRedReset();
-            break;
-        }
+        setChanged(false);
+        return;
+    }
+    switch (m_tool.type()) {
+    case Tool::Drill:
+        flicker(ui->dsbxDiameter);
+        flicker(ui->dsbxOneTurnCut);
+        flicker(ui->dsbxPassDepth);
+        flicker(ui->dsbxPlungeRate);
+        flicker(ui->dsbxSpindleSpeed);
+        break;
+    case Tool::EndMill:
+    case Tool::Engraving:
+        flicker(ui->dsbxDiameter);
+        flicker(ui->dsbxFeedRate);
+        flicker(ui->dsbxOneTurnCut);
+        flicker(ui->dsbxPassDepth);
+        flicker(ui->dsbxPlungeRate);
+        flicker(ui->dsbxSpindleSpeed);
+        flicker(ui->dsbxStepover);
+        break;
+    case Tool::Group:
+    default:
+        break;
     }
 }
 
@@ -314,44 +279,41 @@ void ToolEditForm::setDialog()
 {
     m_dialog = false;
     ui->cbxToolType->setEnabled(m_dialog);
-    delete ui->lblPixmap;
-    ui->lblPixmap = nullptr;
 }
 
 void ToolEditForm::setTool(const Tool& tool)
 {
     m_tool = tool;
-    ui->dsbxAngle->setValue(tool.angle);
-    ui->dsbxDiameter->setValue(tool.diameter);
-    ui->dsbxPassDepth->setValue(tool.passDepth);
-    ui->dsbxSpindleSpeed->setValue(tool.spindleSpeed);
-    ui->dsbxStepover->setValue(tool.stepover);
-    ui->dsbxOneTurnCut->setValue(tool.oneTurnCut);
 
-    ui->cbxToolType->setCurrentIndex(tool.type);
-    ui->leName->setText(tool.name);
-    ui->teNote->setText(tool.note);
+    set[Tool::Angle]->setValue(tool.angle());
+    set[Tool::Diameter]->setValue(tool.diameter());
+    set[Tool::FeedRate]->setValue(tool.feedRate() * m_feed);
+    set[Tool::OneTurnCut]->setValue(tool.oneTurnCut());
+    set[Tool::PassDepth]->setValue(tool.passDepth());
+    set[Tool::PlungeRate]->setValue(tool.plungeRate() * m_feed);
+    set[Tool::SpindleSpeed]->setValue(tool.spindleSpeed());
+    set[Tool::Stepover]->setValue(tool.stepover());
 
-    ui->dsbxFeedRate->setValue(tool.feedRate * m_feed);
-    ui->dsbxPlungeRate->setValue(tool.plungeRate * m_feed);
-
-    ui->chbxAutoName->setChecked(tool.autoName);
-    setVisibleWidgets(true);
+    ui->cbxToolType->setCurrentIndex(tool.type());
+    ui->chbxAutoName->setChecked(tool.autoName());
+    ui->leName->setText(tool.name());
+    ui->teNote->setText(tool.note());
+    setVisibleUnusedWidgets(true);
 }
 
 void ToolEditForm::updateName()
 {
-    if (ui->chbxAutoName->isChecked()) {
-        switch (ui->cbxToolType->currentIndex()) {
-        case Tool::EndMill:
-            ui->leName->setText(QString(tr("End Mill (Ø%1 mm)")).arg(ui->dsbxDiameter->value()));
-            break;
-        case Tool::Engraving:
-            ui->leName->setText(QString(tr("Engrave (%2\302\260 %1 mm tip)")).arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value()));
-            break;
-        case Tool::Drill:
-            ui->leName->setText(QString(tr("Drill (Ø%1 mm)")).arg(ui->dsbxDiameter->value()));
-            break;
-        }
+    if (!ui->chbxAutoName->isChecked())
+        return;
+    switch (ui->cbxToolType->currentIndex()) {
+    case Tool::EndMill:
+        ui->leName->setText(QString(tr("End Mill (Ø%1 mm)")).arg(ui->dsbxDiameter->value()));
+        return;
+    case Tool::Engraving:
+        ui->leName->setText(QString(tr("Engrave (%2\302\260 %1 mm tip)")).arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value()));
+        return;
+    case Tool::Drill:
+        ui->leName->setText(QString(tr("Drill (Ø%1 mm)")).arg(ui->dsbxDiameter->value()));
+        return;
     }
 }

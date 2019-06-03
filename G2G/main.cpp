@@ -1,13 +1,14 @@
 #include <QApplication>
 #include <QCommandLineParser>
 #include <QDebug>
+#include <QFile>
 #include <QGLWidget>
 #include <QLocale>
 #include <QSettings>
 #include <QTranslator>
 
 //#include "application.h"
-#include "mainwindow.h"
+//#include "mainwindow.h"
 #include "tooldatabase/tooldatabase.h"
 #ifndef linux
 //#include <qt_windows.h>
