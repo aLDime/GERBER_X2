@@ -72,13 +72,7 @@ File* Parser::parseFile(const QString& fileName)
         delete m_file;
         m_file = nullptr;
     } else {
-        m_file->setItemGroup(new ItemGroup);
-        for (Hole& hole : *m_file) {
-            DrillItem* item = new DrillItem(&hole, m_file);
-            hole.item = item;
-            m_file->itemGroup()->append(item);
-        }
-        m_file->restoreFormat();
+        m_file->createGi();
     }
     return m_file;
 }

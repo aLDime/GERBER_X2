@@ -23,7 +23,7 @@ public:
     GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
 
     Paths getPaths() const;
-    void save(const QString& name);
+    void write(const QString& name);
 
     GCodeType gtype() const;
 
@@ -114,11 +114,15 @@ protected:
 
     // AbstractFile interface
 public:
-    virtual void save() const override;
-    virtual void open() const override;
+    virtual void write() const override;
+    virtual void read() override;
 
     static QString getLastDir();
     static void setLastDir(QString value);
+
+    // AbstractFile interface
+public:
+    void createGi() override;
 };
 
 #endif // GCODE_H

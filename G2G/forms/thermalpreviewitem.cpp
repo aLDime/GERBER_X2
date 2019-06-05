@@ -6,13 +6,13 @@
 QPainterPath ThermalPreviewItem::drawPoly(const Gerber::GraphicObject& go)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go.paths /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
+    for (QPolygonF& polygon : toQPolygons(go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
     //    const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
     //    if (hole)
-    //        painterPath.addEllipse(toQPointF(go.state.curPos()), hole, hole);
+    //        painterPath.addEllipse(toQPointF(go.state().curPos()), hole, hole);
     return painterPath;
 }
 
@@ -67,9 +67,9 @@ QRectF ThermalPreviewItem::boundingRect() const { return m_sourcePath.boundingRe
 
 int ThermalPreviewItem::type() const { return ThermalType; }
 
-IntPoint ThermalPreviewItem::pos() const { return grob->state.curPos(); }
+IntPoint ThermalPreviewItem::pos() const { return grob->state().curPos(); }
 
-Paths ThermalPreviewItem::paths() const { return grob->paths; }
+Paths ThermalPreviewItem::paths() const { return grob->paths(); }
 
 Paths ThermalPreviewItem::bridge() const { return m_bridge; }
 
@@ -79,7 +79,7 @@ void ThermalPreviewItem::redraw()
     Paths paths;
     {
         ClipperOffset offset;
-        offset.AddPaths(grob->paths, jtRound, etClosedPolygon);
+        offset.AddPaths(grob->paths(), jtRound, etClosedPolygon);
         offset.Execute(paths, diameter * uScale * 0.5);
     }
     Clipper clipper;

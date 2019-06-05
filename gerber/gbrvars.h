@@ -132,9 +132,86 @@ struct Format {
     int xDecimal = 4;
     int yInteger = 3;
     int yDecimal = 4;
+
+    friend QDataStream& operator<<(QDataStream& stream, const Gerber::Format& format)
+    {
+        //    stream << static_cast<int>(st.m_dCode)
+        //           << static_cast<int>(st.m_gCode)
+        //           << static_cast<int>(st.m_imgPolarity)
+        //           << static_cast<int>(st.m_interpolation)
+        //           << static_cast<int>(st.m_type)
+        //           << static_cast<int>(st.m_quadrant)
+        //           << static_cast<int>(st.m_region)
+        //           << st.m_aperture
+        //           << st.m_lineNum
+        //           << st.m_curPos
+        //           << static_cast<int>(st.m_mirroring)
+        //           << st.m_scaling
+        //           << st.m_rotating;
+        stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Gerber::Format));
+        return stream;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, Gerber::Format& format)
+    {
+        //    stream >> static_cast<qint32>(st.m_dCode);
+        //    stream >> static_cast<qint32>(st.m_gCode);
+        //    stream >> static_cast<qint32>(st.m_imgPolarity);
+        //    stream >> static_cast<qint32>(st.m_interpolation);
+        //    stream >> static_cast<qint32>(st.m_type);
+        //    stream >> static_cast<qint32>(st.m_quadrant);
+        //    stream >> static_cast<qint32>(st.m_region);
+        //    stream >> st.m_aperture;
+        //    stream >> st.m_lineNum;
+        //    stream >> st.m_curPos;
+        //    stream >> static_cast<int>(st.m_mirroring);
+        //    stream >> st.m_scaling;
+        //    stream >> st.m_rotating;
+        stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Gerber::Format));
+        return stream;
+    }
 };
 
 class State {
+    friend class File;
+    friend QDataStream& operator<<(QDataStream& stream, const Gerber::State& state)
+    {
+        //    stream << static_cast<int>(st.m_dCode)
+        //           << static_cast<int>(st.m_gCode)
+        //           << static_cast<int>(st.m_imgPolarity)
+        //           << static_cast<int>(st.m_interpolation)
+        //           << static_cast<int>(st.m_type)
+        //           << static_cast<int>(st.m_quadrant)
+        //           << static_cast<int>(st.m_region)
+        //           << st.m_aperture
+        //           << st.m_lineNum
+        //           << st.m_curPos
+        //           << static_cast<int>(st.m_mirroring)
+        //           << st.m_scaling
+        //           << st.m_rotating;
+        stream.writeRawData(reinterpret_cast<const char*>(&state), sizeof(Gerber::State));
+        return stream;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, Gerber::State& state)
+    {
+        //    stream >> static_cast<qint32>(st.m_dCode);
+        //    stream >> static_cast<qint32>(st.m_gCode);
+        //    stream >> static_cast<qint32>(st.m_imgPolarity);
+        //    stream >> static_cast<qint32>(st.m_interpolation);
+        //    stream >> static_cast<qint32>(st.m_type);
+        //    stream >> static_cast<qint32>(st.m_quadrant);
+        //    stream >> static_cast<qint32>(st.m_region);
+        //    stream >> st.m_aperture;
+        //    stream >> st.m_lineNum;
+        //    stream >> st.m_curPos;
+        //    stream >> static_cast<int>(st.m_mirroring);
+        //    stream >> st.m_scaling;
+        //    stream >> st.m_rotating;
+        stream.readRawData(reinterpret_cast<char*>(&state), sizeof(Gerber::State));
+        return stream;
+    }
+
     Format* m_format = nullptr;
     DCode m_dCode = D02;
     GCode m_gCode = G01;
@@ -146,12 +223,12 @@ class State {
     int m_aperture = 0;
     int m_lineNum = 0;
     IntPoint m_curPos;
-    Mirroring m_mirroring;
+    Mirroring m_mirroring = NoMirroring;
     double m_scaling = 1.0;
     double m_rotating = 0.0;
 
 public:
-    State(Format* format = nullptr)
+    State(Format* const format = nullptr)
         : m_format(format)
         , m_dCode(D02)
         , m_gCode(G01)
@@ -169,7 +246,7 @@ public:
     {
     }
 
-    inline Format* format() const { return m_format; }
+    inline Format* const format() const { return m_format; }
 
     inline DCode dCode() const { return m_dCode; }
     inline void setDCode(DCode dCode) { m_dCode = dCode; }
@@ -209,25 +286,46 @@ public:
     inline void setRotating(double rotating) { m_rotating = rotating; }
 };
 
-struct GraphicObject {
-    explicit GraphicObject(
-        int id,
-        const State& state,
-        const Paths& paths,
-        const File* gFile,
-        const Path& path = Path())
-        : id(id)
-        , state(state)
-        , paths(paths)
-        , gFile(gFile)
-        , path(path)
+class GraphicObject {
+    friend class File;
+    friend QDataStream& operator<<(QDataStream& stream, const Gerber::GraphicObject& go)
+    {
+        stream << go.m_path << go.m_paths << go.m_state;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Gerber::GraphicObject& go)
+    {
+        stream >> go.m_path >> go.m_paths >> go.m_state;
+        return stream;
+    }
+
+    File* m_gFile;
+    Path m_path;
+    Paths m_paths;
+    State m_state;
+
+public:
+    GraphicObject()
+        : m_gFile(nullptr)
     {
     }
-    const int id;
-    const State state;
-    const Paths paths;
-    const File* gFile;
-    const Path path;
+    GraphicObject(
+        int /*id*/,
+        const State& state,
+        const Paths& paths,
+        File* gFile,
+        const Path& path = Path())
+        : m_state(state)
+        , m_paths(paths)
+        , m_gFile(gFile)
+        , m_path(path)
+    {
+    }
+
+    inline File* gFile() const { return m_gFile; }
+    inline const Path& path() const { return m_path; }
+    inline const Paths& paths() const { return m_paths; }
+    inline State state() const { return m_state; }
 };
 
 } // namespace Gerber

@@ -286,6 +286,6 @@ void PocketForm::showEvent(QShowEvent* event)
 
 void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void PocketForm::editFile(GCodeFile* file)
+void PocketForm::editFile(GCodeFile* /*file*/)
 {
 }

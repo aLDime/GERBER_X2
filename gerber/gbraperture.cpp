@@ -128,6 +128,22 @@ ApertureType ApCircle::type() const { return Circle; }
 
 bool ApCircle::fit(double toolDiam) const { return m_diam > toolDiam; }
 
+void ApCircle::read(QDataStream& stream)
+{
+    stream >> m_diam;
+    stream >> m_drillDiam;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApCircle::write(QDataStream& stream) const
+{
+    stream << m_diam;
+    stream << m_drillDiam;
+    stream << m_isFlashed;
+    stream << m_size;
+}
+
 void ApCircle::draw()
 {
     m_paths.push_back(CirclePath(m_diam * uScale));
@@ -160,6 +176,24 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 
 bool ApRectangle::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
 
+void ApRectangle::read(QDataStream& stream)
+{
+    stream >> m_height;
+    stream >> m_width;
+    stream >> m_drillDiam;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApRectangle::write(QDataStream& stream) const
+{
+    stream << m_height;
+    stream << m_width;
+    stream << m_drillDiam;
+    stream << m_isFlashed;
+    stream << m_size;
+}
+
 void ApRectangle::draw()
 {
     m_paths.push_back(RectanglePath(m_width * uScale, m_height * uScale));
@@ -186,6 +220,24 @@ QString ApObround::name() { return QString("OBRO(%1 x %2)").arg(m_width).arg(m_h
 ApertureType ApObround::type() const { return Obround; }
 
 bool ApObround::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
+
+void ApObround::read(QDataStream& stream)
+{
+    stream >> m_height;
+    stream >> m_width;
+    stream >> m_drillDiam;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApObround::write(QDataStream& stream) const
+{
+    stream << m_height;
+    stream << m_width;
+    stream << m_drillDiam;
+    stream << m_isFlashed;
+    stream << m_size;
+}
 
 void ApObround::draw()
 {
@@ -235,6 +287,26 @@ ApertureType ApPolygon::type() const { return Polygon; }
 
 bool ApPolygon::fit(double toolDiam) const { return m_diam * cos(M_PI / m_verticesCount) > toolDiam; }
 
+void ApPolygon::read(QDataStream& stream)
+{
+    stream >> m_diam;
+    stream >> m_rotation;
+    stream >> m_verticesCount;
+    stream >> m_drillDiam;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApPolygon::write(QDataStream& stream) const
+{
+    stream << m_diam;
+    stream << m_rotation;
+    stream << m_verticesCount;
+    stream << m_drillDiam;
+    stream << m_isFlashed;
+    stream << m_size;
+}
+
 void ApPolygon::draw()
 {
     Path poligon;
@@ -261,7 +333,7 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QM
 {
     m_macro = macro;
     m_modifiers = modifiers;
-    while (m_modifiers.last().isEmpty()) {
+    while (m_modifiers.size() && m_modifiers.last().isEmpty()) {
         m_modifiers.removeLast();
     }
     m_coefficients = coefficients;
@@ -270,6 +342,26 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const QM
 QString ApMacro::name() { return QString("MACRO(%1)").arg(m_macro); } //MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
+
+bool ApMacro::fit(double) const { return true; }
+
+void ApMacro::read(QDataStream& stream)
+{
+    stream >> m_modifiers;
+    stream >> m_coefficients;
+    stream >> m_macro;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApMacro::write(QDataStream& stream) const
+{
+    stream << m_modifiers;
+    stream << m_coefficients;
+    stream << m_macro;
+    stream << m_isFlashed;
+    stream << m_size;
+}
 
 void ApMacro::draw()
 {
@@ -597,6 +689,22 @@ QString ApBlock::name() { return QString("BLOCK"); }
 
 ApertureType ApBlock::type() const { return Block; }
 
+bool ApBlock::fit(double) const { return true; }
+
+void ApBlock::read(QDataStream& stream)
+{
+    stream >> *this;
+    stream >> m_isFlashed;
+    stream >> m_size;
+}
+
+void ApBlock::write(QDataStream& stream) const
+{
+    stream << *this;
+    stream << m_isFlashed;
+    stream << m_size;
+}
+
 void ApBlock::draw()
 {
     m_paths.clear();
@@ -604,12 +712,12 @@ void ApBlock::draw()
     while (i < size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddPaths(m_paths, ptSubject, true);
-        const int exp = at(i).state.imgPolarity();
+        const int exp = at(i).state().imgPolarity();
         do {
-            m_paths.append(at(i).paths);
-            clipper.AddPaths(at(i++).paths, ptClip, true);
-        } while (i < size() && exp == at(i).state.imgPolarity());
-        if (at(i - 1).state.imgPolarity() == Positive)
+            m_paths.append(at(i).paths());
+            clipper.AddPaths(at(i++).paths(), ptClip, true);
+        } while (i < size() && exp == at(i).state().imgPolarity());
+        if (at(i - 1).state().imgPolarity() == Positive)
             clipper.Execute(ctUnion, m_paths, pftPositive);
         else
             clipper.Execute(ctDifference, m_paths, pftNonZero);

@@ -203,11 +203,11 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
 
 Paths GCodeFile::getPaths() const { return m_toolPaths; }
 
-void GCodeFile::save(const QString& name)
+void GCodeFile::write(const QString& name)
 {
     setLastDir(name);
     if (!name.isEmpty())
-        m_fileName = name;
+        m_name = name;
     switch (m_type) {
     case Profile:
     case Pocket:
@@ -377,7 +377,7 @@ void GCodeFile::endFile()
     //    sl.append("M5"); //HomeXY
     sl.append(Settings::endGCode());
 
-    QFile file(m_fileName);
+    QFile file(m_name);
     //    QString str(m_fileName);
     //    QFile file(str.insert(str.length() - 4, QString("(Top)|(Bot)").split('|')[side()]));
     if (file.open(QIODevice::WriteOnly | QIODevice::Text)) {
@@ -405,10 +405,15 @@ QString GCodeFile::formated(const QList<QString> data)
     return ret.trimmed();
 }
 
-void GCodeFile::save() const
+void GCodeFile::write() const
 {
 }
 
-void GCodeFile::open() const
+void GCodeFile::read()
+{
+}
+
+
+void GCodeFile::createGi()
 {
 }

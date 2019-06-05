@@ -6,7 +6,9 @@
 
 using namespace Gerber;
 
-File::File(const QString& fileName) { m_fileName = fileName; }
+Format* crutch;
+
+File::File(const QString& fileName) { m_name = fileName; }
 
 template <typename T>
 void addData(QByteArray& dataArray, const T& data)
@@ -17,21 +19,21 @@ void addData(QByteArray& dataArray, const T& data)
 File::~File()
 {
     return;
-    qDebug() << "~File()" << shortFileName();
+    qDebug() << "~File()" << shortName();
     QByteArray data;
-    QFile file(m_fileName.append(".g2"));
+    QFile file(m_name.append(".g2"));
     if (file.open(QFile::WriteOnly)) {
 
         auto appendSize = [&](int size) {
             data.append(reinterpret_cast<const char*>(&size), sizeof(int));
         };
-        addData(data, format);
+        addData(data, format());
         addData(data, layer);
         addData(data, miror);
         addData(data, m_itemsType);
 
-        appendSize(m_fileName.size());
-        data.append(m_fileName.toLocal8Bit());
+        appendSize(m_name.size());
+        data.append(m_name.toLocal8Bit());
 
         data.append(reinterpret_cast<char*>(&m_side), sizeof(Side));
 
@@ -82,16 +84,16 @@ Paths File::merge() const
         Clipper clipper;
         clipper.AddPaths(m_mergedPaths, ptSubject, true);
 
-        const int exp = at(i).state.imgPolarity();
+        const int exp = at(i).state().imgPolarity();
 
         Paths workingPaths;
 
         do {
-            Paths paths(at(i++).paths);
+            Paths paths(at(i++).paths());
             workingPaths.append(paths);
-        } while (i < size() && exp == at(i).state.imgPolarity());
+        } while (i < size() && exp == at(i).state().imgPolarity());
 
-        if (at(i - 1).state.imgPolarity() == Positive) {
+        if (at(i - 1).state().imgPolarity() == Positive) {
             clipper.AddPaths(workingPaths, ptClip, true);
             clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
         } else {
@@ -102,7 +104,7 @@ Paths File::merge() const
     if (Settings::cleanPolygons())
         CleanPolygons(m_mergedPaths, 0.0005 * uScale);
 #ifdef QT_DEBUG
-    qDebug() << shortFileName() << t.elapsed();
+    qDebug() << shortName() << t.elapsed();
 #endif
     return m_mergedPaths;
 }
@@ -151,7 +153,6 @@ ItemGroup* File::rawItemGroup() const { return m_rawItemGroup.data(); }
 
 Pathss& File::groupedPaths(File::Group group, bool fl)
 {
-
     if (m_groupedPaths.isEmpty()) {
         PolyTree polyTree;
         Clipper clipper;
@@ -197,9 +198,7 @@ void File::setItemType(File::ItemsType type)
         visible = m_itemGroup.data()->isVisible();
     else
         visible = m_rawItemGroup.data()->isVisible();
-
     m_itemsType = type; // !!!
-
     if (m_itemsType == Normal && visible) {
         m_itemGroup.data()->setVisible(visible);
         m_rawItemGroup.data()->setVisible(false);
@@ -209,10 +208,138 @@ void File::setItemType(File::ItemsType type)
     }
 }
 
-void Gerber::File::save() const
+void Gerber::File::write() const
 {
+    //return;
+    QFile file(name() + ".g2g");
+    if (file.open(QIODevice::WriteOnly)) {
+        QDataStream out(&file); // we will serialize the data into the file
+        out << reinterpret_cast<const AbstractFile*>(this);
+        out << *this;
+        out << m_apertures;
+        out << m_itemsType;
+        out << m_format;
+        out << layer;
+        out << miror;
+        out << rawIndex;
+    }
 }
 
-void Gerber::File::open() const
+void Gerber::File::read()
 {
+    QFile file(name() + ".g2g");
+    if (file.open(QIODevice::ReadOnly)) {
+        QDataStream in(&file); // we will serialize the data into the file
+        crutch = &m_format;
+        in >> reinterpret_cast<AbstractFile*>(this);
+        in >> *this;
+        in >> m_apertures;
+        int tmp;
+        in >> tmp;
+        m_itemsType = static_cast<ItemsType>(tmp);
+        in >> m_format;
+        in >> tmp;
+        layer = static_cast<Layer>(tmp);
+        in >> tmp;
+        miror = static_cast<Miror>(tmp);
+        in >> rawIndex;
+        for (GraphicObject& go : *this) {
+            go.m_gFile = this;
+            go.m_state.m_format = format();
+        }
+    }
+}
+
+void Gerber::File::createGi()
+{
+    if (shortName().contains("bot", Qt::CaseInsensitive))
+        setSide(Bottom);
+
+    setItemGroup(new ItemGroup);
+    for (Paths& paths : groupedPaths()) {
+        GraphicsItem* item = new GerberItem(paths, this);
+        item->m_id = itemGroup()->size();
+        itemGroup()->append(item);
+    }
+
+    setRawItemGroup(new ItemGroup);
+    if (rawIndex.isEmpty()) {
+        QList<Path> checkList;
+        for (int i = 0; i < size(); ++i) {
+            const GraphicObject& go = at(i);
+            if (go.path().size() > 1) { // skip empty
+                if (Settings::skipDuplicates()) {
+                    bool contains = false;
+                    for (const Path& path : checkList) { // find copy
+                        int counter = 0;
+                        if (path.size() == go.path().size()) {
+                            for (const IntPoint& p1 : path) {
+                                for (const IntPoint& p2 : go.path()) {
+                                    const double k = 0.001 * uScale;
+                                    if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                                        ++counter;
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                        if (counter == go.path().size()) {
+                            contains = true;
+                            break;
+                        }
+                    }
+                    if (contains) // skip dublicates
+                        continue;
+                    checkList.append(go.path());
+                }
+                GraphicsItem* item = new RawItem(go.path(), this);
+                item->m_id = rawItemGroup()->size();
+                rawIndex.append(i);
+                rawItemGroup()->append(item);
+            }
+        }
+    } else {
+        for (int i : rawIndex) {
+            GraphicsItem* item = new RawItem(at(i).path(), this);
+            item->m_id = rawItemGroup()->size();
+            rawIndex.append(i);
+            rawItemGroup()->append(item);
+        }
+    }
+    rawItemGroup()->setVisible(false);
+}
+
+QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& m_aperture)
+{
+    stream << m_aperture->type();
+    m_aperture->write(stream);
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& m_aperture)
+{
+    int type;
+    stream >> type;
+    switch (type) {
+    case Circle:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApCircle(0.0, 0.0, crutch));
+        break;
+    case Rectangle:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApRectangle(0.0, 0.0, 0.0, crutch));
+        break;
+    case Obround:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApObround(0.0, 0.0, 0.0, crutch));
+        break;
+    case Polygon:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApPolygon(0.0, 0.0, 0.0, 0.0, crutch));
+        break;
+    case Macro:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApMacro("", {}, {}, crutch));
+        break;
+    case Block:
+        m_aperture = QSharedPointer<AbstractAperture>(new ApMacro("", {}, {}, crutch));
+        break;
+    }
+    m_aperture->read(stream);
+    return stream;
 }

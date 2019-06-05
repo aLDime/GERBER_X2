@@ -73,13 +73,15 @@ void SettingsDialog::readSettings()
         m_color[i].setNamedColor(settings.value(QString("%1").arg(i), m_color[i].name(QColor::HexArgb)).toString());
     settings.endGroup();
 
-    settings.beginGroup("Circle");
+    settings.beginGroup("Gerber");
     sbxMinCircleSegments->setValue(settings.value("MinCircleSegments", 36).toInt());
     dsbxMinCircleSegmentLength->setValue(settings.value("MinCircleSegmentLenght", 0.5).toDouble());
     chbxCleanPolygons->setChecked(settings.value("MinCircleSegmentLenght", true).toBool());
+    chbxSkipDuplicates->setChecked(settings.value("SkipDuplicates", true).toBool());
     m_minCircleSegments = sbxMinCircleSegments->value();
     m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value();
     m_cleanPolygons = chbxCleanPolygons->isChecked();
+    m_skipDuplicates = chbxSkipDuplicates->isChecked();
     settings.endGroup();
 
     settings.beginGroup("GCode");
@@ -130,10 +132,11 @@ void SettingsDialog::writeSettings()
         settings.setValue(QString("%1").arg(i), m_color[i].name(QColor::HexArgb));
     settings.endGroup();
 
-    settings.beginGroup("Circle");
+    settings.beginGroup("Gerber");
     settings.setValue("MinCircleSegments", (m_minCircleSegments = sbxMinCircleSegments->value()));
     settings.setValue("MinCircleSegmentLenght", (m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value()));
     settings.setValue("CleanPolygons", (m_cleanPolygons = chbxCleanPolygons->isChecked()));
+    settings.setValue("SkipDuplicates", (m_skipDuplicates = chbxSkipDuplicates->isChecked()));
     settings.endGroup();
 
     settings.beginGroup("GCode");

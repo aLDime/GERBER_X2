@@ -59,6 +59,7 @@
 #include <stdexcept>
 #include <vector>
 
+#include <QDataStream>
 #include <QDebug>
 #include <QVector>
 
@@ -84,9 +85,9 @@ typedef int cInt;
 static cInt const loRange = 0x7FFF;
 static cInt const hiRange = 0x7FFF;
 #else
-typedef signed long long cInt;
+typedef signed /*long*/ long cInt;
 static cInt const loRange = 0x3FFFFFFF;
-static cInt const hiRange = 0x3FFFFFFFFFFFFFFFLL;
+static cInt const hiRange = 0x3FFFFFFFFFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
 typedef unsigned long long ulong64;
 
@@ -108,7 +109,6 @@ struct IntPoint {
     {
     }
 #endif
-
     friend inline bool operator==(const IntPoint& a, const IntPoint& b)
     {
         return a.X == b.X && a.Y == b.Y;
@@ -116,6 +116,16 @@ struct IntPoint {
     friend inline bool operator!=(const IntPoint& a, const IntPoint& b)
     {
         return a.X != b.X || a.Y != b.Y;
+    }
+    friend QDataStream& operator<<(QDataStream& stream, const IntPoint& pt)
+    {
+        stream.writeRawData(reinterpret_cast<const char*>(&pt), sizeof(IntPoint));
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, IntPoint& pt)
+    {
+        stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(IntPoint));
+        return stream;
     }
 };
 //------------------------------------------------------------------------------

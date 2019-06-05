@@ -75,7 +75,7 @@ QString Project::fileNames()
     for (const QSharedPointer<AbstractFile>& sp : m_files) {
         AbstractFile* item = sp.data();
         if (item && (item->type() == FileType::Gerber || item->type() == FileType::Drill))
-            paths.append(item->fileName()).append('|');
+            paths.append(item->name()).append('|');
     }
     return paths;
 }

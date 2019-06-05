@@ -23,14 +23,14 @@ enum {
 class AbstractFile;
 
 namespace Gerber {
-class Parser;
+class File;
 }
 namespace Excellon {
 class File;
 }
 
 class GraphicsItem : public QGraphicsItem {
-    friend class Gerber::Parser;
+    friend class Gerber::File;
     friend class Excellon::File;
 
 public:

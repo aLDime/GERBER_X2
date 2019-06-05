@@ -26,7 +26,7 @@ QIcon drawRegionIcon(const Gerber::GraphicObject& go)
 {
     QPainterPath painterPath;
 
-    for (QPolygonF& polygon : toQPolygons(go.paths))
+    for (QPolygonF& polygon : toQPolygons(go.paths()))
         painterPath.addPolygon(polygon);
 
     const QRectF rect = painterPath.boundingRect();
@@ -111,7 +111,7 @@ void ThermalForm::updateFiles()
 
     for (Gerber::File* file : Project::files<Gerber::File>()) {
         if (file->flashedApertures()) {
-            ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
+            ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
             QColor color(file->color());
             color.setAlpha(255);
@@ -248,23 +248,23 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
 
     ThermalNode* thermalNode = model->appendRow(QIcon(), "Regions");
     for (const Gerber::GraphicObject& go : *file) {
-        if (go.state.type() == Gerber::Region && go.state.imgPolarity() == Gerber::Positive) {
+        if (go.state().type() == Gerber::Region && go.state().imgPolarity() == Gerber::Positive) {
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
             item->setToolTip("Region");
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
             Scene::self->addItem(item);
-            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state.curPos(), item));
+            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state().curPos(), item));
         }
     }
 
     thermalNode = model->appendRow(QIcon(), "Lines");
     for (const Gerber::GraphicObject& go : *file) {
-        if (go.state.type() == Gerber::Line && go.state.imgPolarity() == Gerber::Positive && go.path.size() == 2 && Length(go.path.first(), go.path.last()) * dScale * 0.3 < m_apertures[go.state.aperture()]->minSize()) {
+        if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive && go.path().size() == 2 && Length(go.path().first(), go.path().last()) * dScale * 0.3 < m_apertures[go.state().aperture()]->minSize()) {
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
             item->setToolTip("Line");
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
             Scene::self->addItem(item);
-            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Line", 0.0, 0.5, 4, go.state.curPos(), item));
+            thermalNode->append(new ThermalNode(drawRegionIcon(go), "Line", 0.0, 0.5, 4, go.state().curPos(), item));
         }
     }
 
@@ -274,12 +274,12 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
             QString name(apertureIt.value()->name());
             ThermalNode* thermalNode = model->appendRow(drawApertureIcon(apertureIt.value().data()), name);
             for (const Gerber::GraphicObject& go : *file) {
-                if (go.state.dCode() == Gerber::D03 && go.state.aperture() == apertureIt.key()) {
+                if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
                     item->setToolTip(name);
                     m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
                     Scene::self->addItem(item);
-                    thermalNode->append(new ThermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state.curPos(), item));
+                    thermalNode->append(new ThermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state().curPos(), item));
                 }
             }
         }
@@ -343,6 +343,6 @@ void ThermalForm::on_pbExclude_clicked()
     ui->treeView->update();
 }
 
-void ThermalForm::editFile(GCodeFile* file)
+void ThermalForm::editFile(GCodeFile* /*file*/)
 {
 }

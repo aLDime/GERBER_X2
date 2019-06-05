@@ -42,6 +42,9 @@ public:
 
     virtual bool fit(double toolDiam) const = 0;
 
+    virtual void read(QDataStream& stream) = 0;
+    virtual void write(QDataStream& stream) const = 0;
+
 protected:
     bool m_isFlashed = false;
     double m_drillDiam = 0.0;
@@ -64,6 +67,9 @@ public:
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
+
 protected:
     void draw() override;
 
@@ -83,6 +89,9 @@ public:
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
+
 protected:
     void draw() override;
 
@@ -100,6 +109,9 @@ public:
     QString name() override;
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
+
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
 
 protected:
     void draw() override;
@@ -122,6 +134,9 @@ public:
     ApertureType type() const override;
     bool fit(double toolDiam) const override;
 
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
+
 protected:
     void draw() override;
 
@@ -139,7 +154,10 @@ public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const QMap<QString, double>& coefficients, const Format* format);
     QString name() override;
     ApertureType type() const override;
-    bool fit(double) const override { return true; }
+    bool fit(double) const override;
+
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
 
 protected:
     void draw() override;
@@ -165,7 +183,10 @@ public:
     ApBlock(const Format* format);
     QString name() override;
     ApertureType type() const override;
-    bool fit(double) const override { return true; }
+    bool fit(double) const override;
+
+    virtual void read(QDataStream& stream) override;
+    virtual void write(QDataStream& stream) const override;
 
 protected:
     void draw() override;

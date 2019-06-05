@@ -153,6 +153,6 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1)
     m_fileName = arg1;
 }
 
-void VoronoiForm::editFile(GCodeFile* file)
+void VoronoiForm::editFile(GCodeFile* /*file*/)
 {
 }

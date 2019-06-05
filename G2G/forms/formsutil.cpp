@@ -114,7 +114,7 @@ void FormsUtil::setFile(GCodeFile* file)
         return;
     }
 
-    file->setFileName(m_fileName + " (" + file->fileName() + ")");
+    file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
     file->m_used = m_used;
     FileModel::addFile(file);

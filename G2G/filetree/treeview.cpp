@@ -151,7 +151,7 @@ void TreeView::saveGcodeFile()
     if (name.isEmpty())
         return;
 
-    file->save(name);
+    file->write(name);
 }
 
 void TreeView::showExcellonDialog()

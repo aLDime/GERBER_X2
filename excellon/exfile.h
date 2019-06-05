@@ -4,7 +4,6 @@
 #include "exvars.h"
 #include <abstractfile.h>
 
-
 namespace Excellon {
 
 class File : public AbstractFile, public QList<Hole> {
@@ -33,8 +32,9 @@ protected:
 
     // AbstractFile interface
 public:
-    virtual void save() const override;
-    virtual void open() const override;
+    virtual void write() const override;
+    virtual void read() override;
+    virtual void createGi() override;
 };
 } // namespace Excellon
 

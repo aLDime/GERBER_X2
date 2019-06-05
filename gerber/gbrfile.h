@@ -14,7 +14,7 @@ class File : public AbstractFile, public QList<GraphicObject> {
     friend class Parser;
 
 public:
-    File(const QString& fileName = "");
+    File(const QString& name = "");
     ~File();
 
     enum Group {
@@ -27,18 +27,16 @@ public:
         Raw,
     };
 
-    Format format;
-    Layer layer = Copper;
-    Miror miror = Vertical;
-    FileType type() const override { return FileType::Gerber; }
-    const QMap<int, QSharedPointer<AbstractAperture>>* const apertures() const;
+    Format* format() { return &m_format; }
+    Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
-    ItemGroup* itemGroup() const override;
+    const QMap<int, QSharedPointer<AbstractAperture>>* const apertures() const;
     void setItemType(ItemsType type);
-    ItemsType itemsType() const;
     void setRawItemGroup(ItemGroup* itemGroup);
     ItemGroup* rawItemGroup() const;
-    Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
+    ItemsType itemsType() const;
+    FileType type() const override { return FileType::Gerber; }
+    ItemGroup* itemGroup() const override;
 
 protected:
     Paths merge() const override;
@@ -48,11 +46,19 @@ private:
     ItemsType m_itemsType = Normal;
     QSharedPointer<ItemGroup> m_rawItemGroup;
     void grouping(PolyNode* node, Pathss* pathss, Group group);
+    Format m_format;
+    Layer layer = Copper;
+    Miror miror = Vertical;
+    QVector<int> rawIndex;
 
     // AbstractFile interface
 public:
-    virtual void save() const override;
-    virtual void open() const override;
+    virtual void write() const override;
+    virtual void read() override;
+
+    // AbstractFile interface
+public:
+    void createGi() override;
 };
 }
 

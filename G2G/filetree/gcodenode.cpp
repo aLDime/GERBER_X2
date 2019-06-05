@@ -47,7 +47,7 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;
     case 1: {
-        if (Project::file(m_id)->shortFileName().contains(".tap"))
+        if (Project::file(m_id)->shortName().contains(".tap"))
             return itemFlag;
         else
             return itemFlag | Qt::ItemIsEditable;
@@ -64,12 +64,12 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         switch (role) {
         case Qt::DisplayRole: {
             //            if (Project::file(m_id)->shortFileName().contains(".tap"))
-            return Project::file(m_id)->shortFileName();
+            return Project::file(m_id)->shortName();
             //            else
             //                return Project::file(m_id)->shortFileName() + QStringList({ "(Top)", "(Bot)" })[Project::file(m_id)->side()];
         }
         case Qt::ToolTipRole:
-            return Project::file(m_id)->shortFileName() + "\n" + Project::file(m_id)->fileName();
+            return Project::file(m_id)->shortName() + "\n" + Project::file(m_id)->name();
         case Qt::CheckStateRole:
             return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:

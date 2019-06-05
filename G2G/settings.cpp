@@ -26,6 +26,8 @@ double Settings::m_minCircleSegmentLength = 0.5;
 
 bool Settings::m_cleanPolygons = true;
 
+bool Settings::m_skipDuplicates = true;
+
 QString Settings::m_startGCode = "G21 G17 G90";
 
 QString Settings::m_endGCode = "M30";
@@ -47,6 +49,8 @@ int Settings::circleSegments(double radius)
 QColor& Settings::color(Colors id) { return m_color[static_cast<int>(id)]; }
 
 bool Settings::cleanPolygons() { return m_cleanPolygons; }
+
+bool Settings::skipDuplicates() { return m_skipDuplicates; }
 
 QString Settings::startGCode() { return m_startGCode; }
 

@@ -609,8 +609,8 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
             {
                 ClipperOffset offset;
                 for (const Gerber::GraphicObject& go : *file) {
-                    if (go.state.type() == Gerber::Line && go.state.imgPolarity() == Gerber::Positive) {
-                        offset.AddPaths(go.paths, jtMiter, etClosedPolygon);
+                    if (go.state().type() == Gerber::Line && go.state().imgPolarity() == Gerber::Positive) {
+                        offset.AddPaths(go.paths(), jtMiter, etClosedPolygon);
                     }
                 }
                 offset.Execute(framePaths, dOffset - 0.005 * uScale);

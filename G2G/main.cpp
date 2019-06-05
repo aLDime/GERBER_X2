@@ -15,7 +15,6 @@
 
 int main(int argc, char* argv[])
 {
-
     //#ifndef linux
     //    HANDLE hCorvetEvent = CreateEventA(nullptr, FALSE, FALSE, ("Getber2Gcode"));
     //    if (GetLastError() == ERROR_ALREADY_EXISTS) {

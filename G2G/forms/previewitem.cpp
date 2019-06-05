@@ -9,13 +9,13 @@ extern Paths offset(const Path path, double offset, bool fl = false);
 QPainterPath PreviewItem::drawApetrure(const Gerber::GraphicObject& go, int id)
 {
     QPainterPath painterPath;
-    for (QPolygonF& polygon : toQPolygons(go.paths /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
+    for (QPolygonF& polygon : toQPolygons(go.paths() /* go.gFile->apertures()->value(id)->draw(go.state)*/)) {
         polygon.append(polygon.first());
         painterPath.addPolygon(polygon);
     }
-    const double hole = go.gFile->apertures()->value(id)->drillDiameter() * 0.5;
+    const double hole = go.gFile()->apertures()->value(id)->drillDiameter() * 0.5;
     if (hole)
-        painterPath.addEllipse(toQPointF(go.state.curPos()), hole, hole);
+        painterPath.addEllipse(toQPointF(go.state().curPos()), hole, hole);
     return painterPath;
 }
 
@@ -38,12 +38,12 @@ PreviewItem::PreviewItem(const Gerber::GraphicObject& go, int id)
     : id(id)
     , grob(&go)
     , m_sourcePath(drawApetrure(go, id))
-    , m_sourceDiameter(go.gFile->apertures()->value(id)->drillDiameter() ? go.gFile->apertures()->value(id)->drillDiameter() : go.gFile->apertures()->value(id)->minSize())
+    , m_sourceDiameter(go.gFile()->apertures()->value(id)->drillDiameter() ? go.gFile()->apertures()->value(id)->drillDiameter() : go.gFile()->apertures()->value(id)->minSize())
     , m_type(ApetrureType)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
-    setZValue(std::numeric_limits<double>::max()-10);
+    setZValue(std::numeric_limits<double>::max() - 10);
     setFlag(ItemIsSelectable, true);
 }
 
@@ -55,7 +55,7 @@ PreviewItem::PreviewItem(const Excellon::Hole& hole)
     , m_pen(Qt::darkGray, 0.0)
     , m_brush(Qt::darkGray)
 {
-    setZValue(std::numeric_limits<double>::max()-10);
+    setZValue(std::numeric_limits<double>::max() - 10);
     setFlag(ItemIsSelectable, true);
 }
 
@@ -133,11 +133,11 @@ void PreviewItem::setToolId(int toolId)
             m_toolPath.lineTo(hole->state.offsetedPos() + QPointF(diameter * 0.7, 0.0));
             break;
         case ApetrureType:
-            m_toolPath.addEllipse(toQPointF(grob->state.curPos()), diameter * 0.5, diameter * 0.5);
-            m_toolPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(0.0, diameter * 0.7));
-            m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(0.0, diameter * 0.7));
-            m_toolPath.moveTo(toQPointF(grob->state.curPos()) - QPointF(diameter * 0.7, 0.0));
-            m_toolPath.lineTo(toQPointF(grob->state.curPos()) + QPointF(diameter * 0.7, 0.0));
+            m_toolPath.addEllipse(toQPointF(grob->state().curPos()), diameter * 0.5, diameter * 0.5);
+            m_toolPath.moveTo(toQPointF(grob->state().curPos()) - QPointF(0.0, diameter * 0.7));
+            m_toolPath.lineTo(toQPointF(grob->state().curPos()) + QPointF(0.0, diameter * 0.7));
+            m_toolPath.moveTo(toQPointF(grob->state().curPos()) - QPointF(diameter * 0.7, 0.0));
+            m_toolPath.lineTo(toQPointF(grob->state().curPos()) + QPointF(diameter * 0.7, 0.0));
             break;
         }
     }
@@ -152,7 +152,7 @@ IntPoint PreviewItem::pos() const
     case DrillType:
         return toIntPoint(hole->state.offsetedPos());
     case ApetrureType:
-        return grob->state.curPos();
+        return grob->state().curPos();
     }
     return IntPoint();
 }
@@ -167,7 +167,7 @@ Paths PreviewItem::paths() const
         return ReversePaths(paths);
     }
     case ApetrureType:
-        return grob->paths;
+        return grob->paths();
     }
     return Paths();
 }
@@ -179,7 +179,7 @@ bool PreviewItem::fit(double depth)
     case DrillType:
         return m_sourceDiameter > ToolHolder::tools[m_toolId].getDiameter(depth);
     case ApetrureType:
-        return grob->gFile->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
+        return grob->gFile()->apertures()->value(id)->fit(ToolHolder::tools[m_toolId].getDiameter(depth));
     }
     return false;
 }

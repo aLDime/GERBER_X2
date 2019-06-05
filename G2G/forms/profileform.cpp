@@ -242,6 +242,6 @@ void ProfileForm::updatePixmap()
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void ProfileForm::editFile(GCodeFile* file)
+void ProfileForm::editFile(GCodeFile* /*file*/)
 {
 }

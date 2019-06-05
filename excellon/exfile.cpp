@@ -46,43 +46,34 @@ void File::setFormatForFile(const Format& /*value*/)
     //    }
 }
 
-template <typename T>
-void write(QFile& file, T t)
-{
-    file.write(reinterpret_cast<const char*>(&t), sizeof(T));
-}
-template <typename T>
-void read(QFile& file, T& t)
-{
-    file.read(reinterpret_cast<char*>(&t), sizeof(T));
-}
-
 void File::saveFormat()
 {
-    QFile file(m_fileName + ".fmt");
+    QFile file(m_name + ".fmt");
     if (file.open(QFile::WriteOnly)) {
+        QDataStream out(&file);
         qDebug("saveFormat()");
-        write(file, m_format.zeroMode);
-        write(file, m_format.unitMode);
-        write(file, m_format.decimal);
-        write(file, m_format.integer);
-        write(file, m_format.offsetPos.x());
-        write(file, m_format.offsetPos.y());
+        out << m_format.zeroMode;
+        out << m_format.unitMode;
+        out << m_format.decimal;
+        out << m_format.integer;
+        out << m_format.offsetPos;
     }
 }
 
 void File::restoreFormat()
 {
-    QFile file(m_fileName + ".fmt");
+    QFile file(m_name + ".fmt");
     if (file.exists() && file.open(QFile::ReadOnly)) {
-        double x, y;
-        read(file, m_format.zeroMode);
-        read(file, m_format.unitMode);
-        read(file, m_format.decimal);
-        read(file, m_format.integer);
-        read(file, x);
-        read(file, y);
-        m_format.offsetPos = QPointF(x, y);
+        QDataStream in(&file);
+        qDebug("saveFormat()");
+        int tmp;
+        in >> tmp;
+        m_format.zeroMode = static_cast<ZeroMode>(tmp);
+        in >> tmp;
+        m_format.unitMode = static_cast<UnitMode>(tmp);
+        in >> m_format.decimal;
+        in >> m_format.integer;
+        in >> m_format.offsetPos;
         setFormat(m_format);
     }
 }
@@ -116,11 +107,21 @@ Paths Excellon::File::merge() const
 }
 } //  namespace Excellon
 
-
-void Excellon::File::save() const
+void Excellon::File::write() const
 {
 }
 
-void Excellon::File::open() const
+void Excellon::File::read()
 {
+}
+
+void Excellon::File::createGi()
+{
+    setItemGroup(new ItemGroup);
+    for (Hole& hole : *this) {
+        DrillItem* item = new DrillItem(&hole, this);
+        hole.item = item;
+        itemGroup()->append(item);
+    }
+    restoreFormat();
 }

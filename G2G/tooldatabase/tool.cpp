@@ -52,7 +52,6 @@ void Tool::read(const QJsonObject& json)
     m_note = json["note"].toString();
     m_type = static_cast<Type>(json["type"].toInt());
     m_autoName = json["autoName"].toBool();
-    qDebug() << "autoName" << autoName();
 }
 
 void Tool::write(QJsonObject& json) const

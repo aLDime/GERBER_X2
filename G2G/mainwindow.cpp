@@ -48,7 +48,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
-        prependToRecentFiles(file->fileName());
+        prependToRecentFiles(file->name());
         QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
     });
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
@@ -144,11 +144,11 @@ void MainWindow::saveSelectedToolpaths()
             continue;
         isEmpty = false;
         QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-            GCodeFile::getLastDir().append(file->shortFileName()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
+            GCodeFile::getLastDir().append(file->shortName()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
             tr("GCode (*.tap)")));
         if (name.isEmpty())
             return;
-        file->save(name);
+        file->write(name);
         file->itemGroup()->setVisible(false);
     }
     if (isEmpty) {
@@ -570,7 +570,7 @@ void MainWindow::openFile(const QString& fileName)
         Excellon::File* exFile = dp.parseFile(fileName);
         if (exFile) {
             FileModel::addFile(exFile);
-            prependToRecentFiles(exFile->fileName());
+            prependToRecentFiles(exFile->name());
             QTimer::singleShot(100, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
         }
     } else

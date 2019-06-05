@@ -209,7 +209,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
             model->appendRow(name, drawApertureIcon(apertureIt.value().data()), apertureIt.key());
             const Gerber::File* file = static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>());
             for (const Gerber::GraphicObject& go : *file) {
-                if (go.state.dCode() == Gerber::D03 && go.state.aperture() == apertureIt.key()) {
+                if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     PreviewItem* item = new PreviewItem(go, apertureIt.key());
                     m_sourcePreview[apertureIt.key()].append(QSharedPointer<PreviewItem>(item));
                     Scene::self->addItem(item);
@@ -275,14 +275,14 @@ void DrillForm::updateFiles()
     ui->cbxFile->clear();
 
     for (Excellon::File* file : Project::files<Excellon::File>()) {
-        ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
+        ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, Icon(PathDrillIcon), Qt::DecorationRole);
         ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QSize(0, Size), Qt::SizeHintRole);
     }
 
     for (Gerber::File* file : Project::files<Gerber::File>()) {
         if (file->flashedApertures()) {
-            ui->cbxFile->addItem(file->shortFileName(), QVariant::fromValue(static_cast<void*>(file)));
+            ui->cbxFile->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
             QPixmap pixmap(Size, Size);
             QColor color(file->color());
             color.setAlpha(255);

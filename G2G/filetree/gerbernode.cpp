@@ -84,10 +84,10 @@ QVariant GerberNode::data(const QModelIndex& index, int role) const
     case Name:
         switch (role) {
         case Qt::DisplayRole:
-            return Project::file(m_id)->shortFileName();
+            return Project::file(m_id)->shortName();
         case Qt::ToolTipRole:
-            return Project::file(m_id)->shortFileName() + "\n"
-                + Project::file(m_id)->fileName();
+            return Project::file(m_id)->shortName() + "\n"
+                + Project::file(m_id)->name();
         case Qt::CheckStateRole:
             return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: {
