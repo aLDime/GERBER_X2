@@ -1,6 +1,6 @@
 #include "drillnode.h"
-#include "project.h"
 #include "gerbernode.h"
+#include "project.h"
 #include <QFileInfo>
 #include <exfile.h>
 #include <mainwindow.h>
@@ -61,37 +61,38 @@ Qt::ItemFlags DrillNode::flags(const QModelIndex& index) const
 
 QVariant DrillNode::data(const QModelIndex& index, int role) const
 {
-    switch (index.column()) {
-    case Name:
-        switch (role) {
-        case Qt::DisplayRole:
-            return Project::file(m_id)->shortName();
-        case Qt::ToolTipRole:
-            return Project::file(m_id)->shortName() + "\n"
-                + Project::file(m_id)->name();
-        case Qt::CheckStateRole:
-            return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole:
-            return Icon(PathDrillIcon);
-        case Qt::UserRole:
-            return m_id;
+    if (Project::file(m_id))
+        switch (index.column()) {
+        case Name:
+            switch (role) {
+            case Qt::DisplayRole:
+                return Project::file(m_id)->shortName();
+            case Qt::ToolTipRole:
+                return Project::file(m_id)->shortName() + "\n"
+                    + Project::file(m_id)->name();
+            case Qt::CheckStateRole:
+                return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            case Qt::DecorationRole:
+                return Icon(PathDrillIcon);
+            case Qt::UserRole:
+                return m_id;
+            default:
+                return QVariant();
+            }
+        case Layer:
+            switch (role) {
+            case Qt::DisplayRole:
+            case Qt::ToolTipRole:
+                return tr("Top|Bottom").split('|')[Project::file(m_id)->side()];
+            case Qt::EditRole:
+                return static_cast<bool>(Project::file(m_id)->side());
+            case Qt::UserRole:
+                return m_id;
+            default:
+                return QVariant();
+            }
         default:
             return QVariant();
         }
-    case Layer:
-        switch (role) {
-        case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return tr("Top|Bottom").split('|')[Project::file(m_id)->side()];
-        case Qt::EditRole:
-            return static_cast<bool>(Project::file(m_id)->side());
-        case Qt::UserRole:
-            return m_id;
-        default:
-            return QVariant();
-        }
-    default:
-        return QVariant();
-    }
     return QVariant();
 }

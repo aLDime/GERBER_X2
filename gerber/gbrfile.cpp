@@ -208,42 +208,42 @@ void File::setItemType(File::ItemsType type)
     }
 }
 
-void Gerber::File::write() const
+void Gerber::File::write(QDataStream& stream) const
 {
     //return;
-    QFile file(name() + ".g2g");
-    if (file.open(QIODevice::WriteOnly)) {
-        QDataStream out(&file); // we will serialize the data into the file
-        _write(out); // out << reinterpret_cast<const AbstractFile*>(this);
-        out << *this;
-        out << m_apertures;
-        out << m_itemsType;
-        out << m_format;
-        out << layer;
-        out << miror;
-        out << rawIndex;
-    }
+    //    QFile file(name() + ".g2g");
+    //    if (file.open(QIODevice::WriteOnly)) {
+    //        QDataStream out(&file); // we will serialize the data into the file
+    //_write(out); // out << reinterpret_cast<const AbstractFile*>(this);
+    stream << *this;
+    stream << m_apertures;
+    stream << m_itemsType;
+    stream << m_format;
+    stream << layer;
+    stream << miror;
+    stream << rawIndex;
+    //    }
 }
 
-void Gerber::File::read()
+void Gerber::File::read(QDataStream& stream)
 {
-    QFile file(name() + ".g2g");
-    if (file.open(QIODevice::ReadOnly)) {
-        QDataStream in(&file); // we will serialize the data into the file
-        crutch = &m_format;
-        _read(in);
-        in >> *this;
-        in >> m_apertures;
-        in >> (int&)m_itemsType;
-        in >> m_format;
-        in >> (int&)layer;
-        in >> (int&)miror;
-        in >> rawIndex;
-        for (GraphicObject& go : *this) {
-            go.m_gFile = this;
-            go.m_state.m_format = format();
-        }
+    //    QFile file(name() + ".g2g");
+    //    if (file.open(QIODevice::ReadOnly)) {
+    //        QDataStream in(&file); // we will serialize the data into the file
+    crutch = &m_format;
+    //_read(in);
+    stream >> *this;
+    stream >> m_apertures;
+    stream >> (int&)m_itemsType;
+    stream >> m_format;
+    stream >> (int&)layer;
+    stream >> (int&)miror;
+    stream >> rawIndex;
+    for (GraphicObject& go : *this) {
+        go.m_gFile = this;
+        go.m_state.m_format = format();
     }
+    //    }
 }
 
 void Gerber::File::createGi()

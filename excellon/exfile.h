@@ -32,8 +32,8 @@ protected:
 
     // AbstractFile interface
 public:
-    virtual void write() const override;
-    virtual void read() override;
+    virtual void write(QDataStream& stream) const override;
+    virtual void read(QDataStream& stream) override;
     virtual void createGi() override;
 };
 } // namespace Excellon

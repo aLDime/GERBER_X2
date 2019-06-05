@@ -14,10 +14,11 @@ using namespace ClipperLib;
 class Project {
 
 public:
-    explicit Project(const QString& fileName);
+    explicit Project(const QString& fileName = QString());
     ~Project();
 
-    QString fileName;
+    bool save(const QString& fileName = QString());
+    bool open(const QString& fileName);
 
     static AbstractFile* file(int id);
     static void deleteFile(int id);
@@ -53,6 +54,7 @@ public:
     //        }
     //        return paths;
     //    }
+
     static QRectF getSelectedBoundingRect();
     static QString fileNames();
 
@@ -63,15 +65,7 @@ public:
         return static_cast<T*>(m_files.value(id).data());
     }
 
-    template <typename T>
-    static int addFile(T* file)
-    {
-        QMutexLocker locker(&m_mutex);
-        const int id = m_id;
-        ++m_id;
-        m_files.insert(id, QSharedPointer<AbstractFile>(file));
-        return id;
-    }
+    static int addFile(AbstractFile* file);
 
     template <typename T>
     static bool replaceFile(int id, T* file)
@@ -115,6 +109,7 @@ private:
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;
     static int m_id;
+    QString m_fileName;
 };
 
 #endif // PROJECT_H

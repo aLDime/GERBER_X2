@@ -107,11 +107,11 @@ Paths Excellon::File::merge() const
 }
 } //  namespace Excellon
 
-void Excellon::File::write() const
+void Excellon::File::write(QDataStream &stream) const
 {
 }
 
-void Excellon::File::read()
+void Excellon::File::read(QDataStream &stream)
 {
 }
 

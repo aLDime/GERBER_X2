@@ -49,7 +49,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
         prependToRecentFiles(file->name());
-        QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
+        //        QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
     });
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
@@ -111,14 +111,17 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (QFile("ui_mainwindow.h").exists()) {
+        Project().save("g2g.g2g");
         writeSettings();
         dockWidget->close();
         FileModel::closeAllFiles();
         qApp->closeAllWindows();
         event->accept();
+
         return;
     }
     if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
+        Project().save("g2g.g2g");
         qApp->closeAllWindows();
         writeSettings();
         dockWidget->close();
@@ -449,8 +452,10 @@ void MainWindow::readSettings()
 
     lastPath = settings.value("lastPath").toString();
 
-    for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
-        openFile(file);
+    //    for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
+    //        openFile(file);
+
+    Project().open("g2g.g2g");
 
     SettingsDialog().readSettings();
     settings.endGroup();

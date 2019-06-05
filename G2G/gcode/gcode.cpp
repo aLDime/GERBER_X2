@@ -405,14 +405,13 @@ QString GCodeFile::formated(const QList<QString> data)
     return ret.trimmed();
 }
 
-void GCodeFile::write() const
+void GCodeFile::write(QDataStream& stream) const
 {
 }
 
-void GCodeFile::read()
+void GCodeFile::read(QDataStream& stream)
 {
 }
-
 
 void GCodeFile::createGi()
 {

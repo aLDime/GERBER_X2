@@ -48,16 +48,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     }
 
     reset(fileName);
-    m_file->read();
-    if (m_file->size()) {
-        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
-        m_file->createGi();
-        emit fileReady(m_file);
-        emit fileProgress(m_file->shortName(), 1, 1);
-        mutex.unlock();
-        qDebug() << m_file->shortName() << "read" << t.elapsed();
-        return;
-    }
+    //    m_file->read();
+    //    if (m_file->size()) {
+    //        emit fileProgress(m_file->shortName(), m_file->lines().size(), 0);
+    //        m_file->createGi();
+    //        emit fileReady(m_file);
+    //        emit fileProgress(m_file->shortName(), 1, 1);
+    //        mutex.unlock();
+    //        qDebug() << m_file->shortName() << "read" << t.elapsed();
+    //        return;
+    //    }
 
     m_file->lines() = format(gerberLines);
     if (m_file->lines().isEmpty())
@@ -159,7 +159,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
         m_file->mergedPaths();
         //        qDebug() << m_file->shortName() << "mergedPaths" << t.elapsed();
         //        t.start();
-        m_file->write();
+        //        m_file->write();
         //        qDebug() << m_file->shortName() << "write" << t.elapsed();
         //        t.start();
         m_file->createGi();
