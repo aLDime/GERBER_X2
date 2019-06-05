@@ -56,34 +56,6 @@ public:
 
     int id() const;
 
-    friend QDataStream& operator<<(QDataStream& stream, const AbstractFile* af)
-    {
-        stream << af->m_id;
-        stream << af->m_lines;
-        stream << af->m_name;
-        stream << af->m_mergedPaths;
-        stream << af->m_groupedPaths;
-        stream << af->m_side;
-        stream << af->m_color;
-        stream << af->m_date;
-        return stream;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, AbstractFile* af)
-    {
-        int tmp;
-        stream >> af->m_id;
-        stream >> af->m_lines;
-        stream >> af->m_name;
-        stream >> af->m_mergedPaths;
-        stream >> af->m_groupedPaths;
-        stream >> tmp;
-        af->m_side = static_cast<Side>(tmp);
-        stream >> af->m_color;
-        stream >> af->m_date;
-        return stream;
-    }
-
 protected:
     int m_id;
     virtual Paths merge() const = 0;
@@ -97,6 +69,29 @@ protected:
     Side m_side = Top;
     QColor m_color;
     QDateTime m_date;
+
+    void _write(QDataStream& stream) const
+    {
+        stream << m_id;
+        stream << m_lines;
+        stream << m_name;
+        stream << m_mergedPaths;
+        stream << m_groupedPaths;
+        stream << m_side;
+        stream << m_color;
+        stream << m_date;
+    }
+    void _read(QDataStream& stream)
+    {
+        stream >> m_id;
+        stream >> m_lines;
+        stream >> m_name;
+        stream >> m_mergedPaths;
+        stream >> m_groupedPaths;
+        stream >> (int&)(m_side);
+        stream >> m_color;
+        stream >> m_date;
+    }
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)

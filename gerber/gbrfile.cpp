@@ -214,7 +214,7 @@ void Gerber::File::write() const
     QFile file(name() + ".g2g");
     if (file.open(QIODevice::WriteOnly)) {
         QDataStream out(&file); // we will serialize the data into the file
-        out << reinterpret_cast<const AbstractFile*>(this);
+        _write(out); // out << reinterpret_cast<const AbstractFile*>(this);
         out << *this;
         out << m_apertures;
         out << m_itemsType;
@@ -231,17 +231,13 @@ void Gerber::File::read()
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file); // we will serialize the data into the file
         crutch = &m_format;
-        in >> reinterpret_cast<AbstractFile*>(this);
+        _read(in);
         in >> *this;
         in >> m_apertures;
-        int tmp;
-        in >> tmp;
-        m_itemsType = static_cast<ItemsType>(tmp);
+        in >> (int&)m_itemsType;
         in >> m_format;
-        in >> tmp;
-        layer = static_cast<Layer>(tmp);
-        in >> tmp;
-        miror = static_cast<Miror>(tmp);
+        in >> (int&)layer;
+        in >> (int&)miror;
         in >> rawIndex;
         for (GraphicObject& go : *this) {
             go.m_gFile = this;
