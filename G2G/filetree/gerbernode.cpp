@@ -6,7 +6,7 @@
 QTimer GerberNode::m_repaintTimer;
 
 GerberNode::GerberNode(Gerber::File* file)
-    : m_id(Project::addFile(file))
+    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
 {
     file->itemGroup()->addToTheScene();
     file->itemGroup()->setZValue(-m_id);

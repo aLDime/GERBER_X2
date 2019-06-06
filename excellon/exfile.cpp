@@ -48,34 +48,34 @@ void File::setFormatForFile(const Format& /*value*/)
 
 void File::saveFormat()
 {
-    QFile file(m_name + ".fmt");
-    if (file.open(QFile::WriteOnly)) {
-        QDataStream out(&file);
-        qDebug("saveFormat()");
-        out << m_format.zeroMode;
-        out << m_format.unitMode;
-        out << m_format.decimal;
-        out << m_format.integer;
-        out << m_format.offsetPos;
-    }
+    //    QFile file(m_name + ".fmt");
+    //    if (file.open(QFile::WriteOnly)) {
+    //        QDataStream out(&file);
+    //        qDebug("saveFormat()");
+    //        out << m_format.zeroMode;
+    //        out << m_format.unitMode;
+    //        out << m_format.decimal;
+    //        out << m_format.integer;
+    //        out << m_format.offsetPos;
+    //    }
 }
 
 void File::restoreFormat()
 {
-    QFile file(m_name + ".fmt");
-    if (file.exists() && file.open(QFile::ReadOnly)) {
-        QDataStream in(&file);
-        qDebug("saveFormat()");
-        int tmp;
-        in >> tmp;
-        m_format.zeroMode = static_cast<ZeroMode>(tmp);
-        in >> tmp;
-        m_format.unitMode = static_cast<UnitMode>(tmp);
-        in >> m_format.decimal;
-        in >> m_format.integer;
-        in >> m_format.offsetPos;
-        setFormat(m_format);
-    }
+    //    QFile file(m_name + ".fmt");
+    //    if (file.exists() && file.open(QFile::ReadOnly)) {
+    //        QDataStream in(&file);
+    //        qDebug("saveFormat()");
+    //        int tmp;
+    //        in >> tmp;
+    //        m_format.zeroMode = static_cast<ZeroMode>(tmp);
+    //        in >> tmp;
+    //        m_format.unitMode = static_cast<UnitMode>(tmp);
+    //        in >> m_format.decimal;
+    //        in >> m_format.integer;
+    //        in >> m_format.offsetPos;
+    //        setFormat(m_format);
+    //    }
 }
 
 double File::tool(int t) const
@@ -107,12 +107,25 @@ Paths Excellon::File::merge() const
 }
 } //  namespace Excellon
 
-void Excellon::File::write(QDataStream &stream) const
+void Excellon::File::write(QDataStream& stream) const
 {
+    _write(stream);
+    stream << *this;
+    stream << m_tools;
+    stream << m_format;
 }
 
-void Excellon::File::read(QDataStream &stream)
+void Excellon::File::read(QDataStream& stream)
 {
+    _read(stream);
+    stream >> *this;
+    stream >> m_tools;
+    stream >> m_format;
+    m_format.file = this;
+    for (Hole& hole : *this) {
+        hole.file = this;
+        hole.state.format = &m_format;
+    }
 }
 
 void Excellon::File::createGi()

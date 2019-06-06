@@ -1,13 +1,13 @@
 #include "gcodenode.h"
-#include "project.h"
 #include "icons.h"
+#include "project.h"
 
 #include <QFileInfo>
 
-GcodeNode::GcodeNode(GCodeFile* gCode)
-    : m_id(Project::addFile(gCode))
+GcodeNode::GcodeNode(GCodeFile* file)
+    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
 {
-    gCode->itemGroup()->addToTheScene();
+    file->itemGroup()->addToTheScene();
 }
 
 GcodeNode::~GcodeNode()

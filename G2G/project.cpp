@@ -3,7 +3,7 @@
 #include <filetree/filemodel.h>
 
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
-int Project::m_id = 0;
+bool Project::fl = false;
 QMutex Project::m_mutex;
 
 Project::Project(const QString& fileName)
@@ -23,6 +23,7 @@ bool Project::save(const QString& fileName)
     if (file.open(QIODevice::WriteOnly)) {
         QDataStream out(&file);
         out << m_files;
+        qDebug() << m_files;
         return true;
     }
     qDebug() << file.errorString();
@@ -31,14 +32,36 @@ bool Project::save(const QString& fileName)
 
 bool Project::open(const QString& fileName)
 {
+    fl = true;
     m_fileName = fileName;
     QFile file(m_fileName);
     if (file.open(QIODevice::ReadOnly)) {
         QDataStream in(&file);
         in >> m_files;
+        fl = false;
+        for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+            switch (filePtr->type()) {
+            case FileType::Gerber:
+                filePtr->createGi();
+                qDebug("Gerber");
+                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
+                continue;
+            case FileType::Drill:
+                filePtr->createGi();
+                qDebug("Drill");
+                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
+                continue;
+            case FileType::GCode:
+                filePtr->createGi();
+                qDebug("GCode");
+                FileModel::addFile(static_cast<GCodeFile*>(filePtr.data()));
+                continue;
+            }
+        }
         return true;
     }
     qDebug() << file.errorString();
+    fl = false;
     return false;
 }
 
@@ -115,7 +138,7 @@ int Project::addFile(AbstractFile* file)
     QMutexLocker locker(&m_mutex);
     qDebug() << m_files << file->m_id;
     if (file->m_id == -1) {
-        file->m_id = m_id++;
+        file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
     }
     return file->m_id;
@@ -128,47 +151,28 @@ bool Project::contains(AbstractFile* file)
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
-    qDebug() << Q_FUNC_INFO;
     stream << static_cast<int>(file->type());
-    {
-        stream << file->m_id;
-        stream << file->m_lines;
-        stream << file->m_name;
-        stream << file->m_mergedPaths;
-        stream << file->m_groupedPaths;
-        stream << file->m_side;
-        stream << file->m_color;
-        stream << file->m_date;
-    }
     file->write(stream);
+    qDebug() << Q_FUNC_INFO;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
 {
-    qDebug() << Q_FUNC_INFO;
     int type;
     stream >> type;
     switch (type) {
     case FileType::Gerber:
         file = QSharedPointer<AbstractFile>(new Gerber::File);
-        stream >> file->m_id;
-        stream >> file->m_lines;
-        stream >> file->m_name;
-        stream >> file->m_mergedPaths;
-        stream >> file->m_groupedPaths;
-        stream >> (int&)(file->m_side);
-        stream >> file->m_color;
-        stream >> file->m_date;
         file->read(stream);
-        FileModel::addFile(static_cast<Gerber::File*>(file.data()));
         break;
     case FileType::Drill:
-        //        file = QSharedPointer<AbstractFile>(new Excellon::File);
-        //        file->read(stream);
+        file = QSharedPointer<AbstractFile>(new Excellon::File);
+        file->read(stream);
         break;
     case FileType::GCode:
-        //        file = QSharedPointer<AbstractFile>(new GCodeFile);
+        file = QSharedPointer<AbstractFile>(new GCodeFile);
+        file->read(stream);
         break;
     }
     qDebug() << Q_FUNC_INFO;

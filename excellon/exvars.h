@@ -1,6 +1,7 @@
 #ifndef VARS_H
 #define VARS_H
 
+#include <QDataStream>
 #include <QPolygonF>
 
 class DrillItem;
@@ -141,6 +142,25 @@ struct Format {
     int integer = 0;
     QPointF offsetPos;
     File* /*const*/ file = nullptr;
+
+    friend QDataStream& operator<<(QDataStream& stream, const Excellon::Format& fmt)
+    {
+        stream << fmt.zeroMode;
+        stream << fmt.unitMode;
+        stream << fmt.decimal;
+        stream << fmt.integer;
+        stream << fmt.offsetPos;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Excellon::Format& fmt)
+    {
+        stream >> (int&)(fmt.zeroMode);
+        stream >> (int&)(fmt.unitMode);
+        stream >> fmt.decimal;
+        stream >> fmt.integer;
+        stream >> fmt.offsetPos;
+        return stream;
+    }
 };
 
 #pragma pack(pop)
@@ -192,10 +212,36 @@ struct State {
     QPointF offsetedPos() const { return pos + format->offsetPos; }
     QPolygonF path;
     int line = 0;
+
+    friend QDataStream& operator<<(QDataStream& stream, const Excellon::State& stt)
+    {
+        stream << stt.rawPos;
+        stream << stt.rawPosList;
+        stream << stt.gCode;
+        stream << stt.mCode;
+        stream << stt.tCode;
+        stream << stt.pos;
+        stream << stt.path;
+        stream << stt.line;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Excellon::State& stt)
+    {
+        stream >> stt.rawPos;
+        stream >> stt.rawPosList;
+        stream >> (int&)(stt.gCode);
+        stream >> (int&)(stt.mCode);
+        stream >> stt.tCode;
+        stream >> stt.pos;
+        stream >> stt.path;
+        stream >> stt.line;
+        return stream;
+    }
 };
 
 class Hole {
 public:
+    Hole() {}
     Hole(const State& state, File* file)
         : file(file)
         , state(state)
@@ -209,6 +255,18 @@ public:
     File* file = nullptr;
     State state;
     DrillItem* item = nullptr;
+
+    friend QDataStream& operator<<(QDataStream& stream, const Excellon::Hole& hole)
+    {
+        stream << hole.state;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Excellon::Hole& hole)
+    {
+        stream >> hole.state;
+        return stream;
+    }
+    friend QDataStream& readArrayBasedContainer(QDataStream& s, Excellon::Hole& c);
 };
 
 } // namespace Excellon

@@ -17,6 +17,8 @@ public:
     explicit Project(const QString& fileName = QString());
     ~Project();
 
+    static bool fl;
+
     bool save(const QString& fileName = QString());
     bool open(const QString& fileName);
 
@@ -108,7 +110,6 @@ public:
 private:
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;
-    static int m_id;
     QString m_fileName;
 };
 

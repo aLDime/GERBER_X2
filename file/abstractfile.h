@@ -72,6 +72,29 @@ protected:
     Side m_side = Top;
     QColor m_color;
     QDateTime m_date;
+
+    void _write(QDataStream& stream) const
+    {
+        stream << m_id;
+        stream << m_lines;
+        stream << m_name;
+        stream << m_mergedPaths;
+        stream << m_groupedPaths;
+        stream << m_side;
+        stream << m_color;
+        stream << m_date;
+    }
+    void _read(QDataStream& stream)
+    {
+        stream >> m_id;
+        stream >> m_lines;
+        stream >> m_name;
+        stream >> m_mergedPaths;
+        stream >> m_groupedPaths;
+        stream >> (int&)(m_side);
+        stream >> m_color;
+        stream >> m_date;
+    }
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)

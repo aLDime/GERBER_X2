@@ -111,7 +111,7 @@ MainWindow::~MainWindow()
 void MainWindow::closeEvent(QCloseEvent* event)
 {
     if (QFile("ui_mainwindow.h").exists()) {
-        Project().save("g2g.g2g");
+        Project().save("D:/g2g.g2g");
         writeSettings();
         dockWidget->close();
         FileModel::closeAllFiles();
@@ -121,7 +121,7 @@ void MainWindow::closeEvent(QCloseEvent* event)
         return;
     }
     if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
-        Project().save("g2g.g2g");
+        Project().save("D:/g2g.g2g");
         qApp->closeAllWindows();
         writeSettings();
         dockWidget->close();
@@ -455,7 +455,7 @@ void MainWindow::readSettings()
     //    for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
     //        openFile(file);
 
-    Project().open("g2g.g2g");
+    Project().open("D:/g2g.g2g");
 
     SettingsDialog().readSettings();
     settings.endGroup();

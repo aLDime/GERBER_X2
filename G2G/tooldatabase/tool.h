@@ -8,6 +8,40 @@
 #include <QObject>
 
 class Tool {
+    friend QDataStream& operator<<(QDataStream& stream, const Tool& tool)
+    {
+        stream << tool.m_name;
+        stream << tool.m_note;
+        stream << tool.m_type;
+        stream << tool.m_angle;
+        stream << tool.m_diameter;
+        stream << tool.m_feedRate;
+        stream << tool.m_oneTurnCut;
+        stream << tool.m_passDepth;
+        stream << tool.m_plungeRate;
+        stream << tool.m_spindleSpeed;
+        stream << tool.m_stepover;
+        stream << tool.m_autoName;
+        stream << tool.m_id;
+        return stream;
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Tool& tool)
+    {
+        stream >> tool.m_name;
+        stream >> tool.m_note;
+        stream >> (int&)(tool.m_type);
+        stream >> tool.m_angle;
+        stream >> tool.m_diameter;
+        stream >> tool.m_feedRate;
+        stream >> tool.m_oneTurnCut;
+        stream >> tool.m_passDepth;
+        stream >> tool.m_plungeRate;
+        stream >> tool.m_spindleSpeed;
+        stream >> tool.m_stepover;
+        stream >> tool.m_autoName;
+        stream >> tool.m_id;
+        return stream;
+    }
 
 public:
     Tool();
@@ -31,7 +65,6 @@ public:
         OneTurnCutPercent,
         StepoverPercent,
     };
-
 
     // name
     inline QString name() const { return m_name; }

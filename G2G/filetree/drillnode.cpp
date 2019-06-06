@@ -6,7 +6,7 @@
 #include <mainwindow.h>
 
 DrillNode::DrillNode(Excellon::File* file)
-    : m_id(Project::addFile(file))
+    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
 {
     Project::file(m_id)->itemGroup()->addToTheScene();
 }

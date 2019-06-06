@@ -87,7 +87,7 @@ static cInt const hiRange = 0x7FFF;
 #else
 typedef signed /*long*/ long cInt;
 static cInt const loRange = 0x3FFFFFFF;
-static cInt const hiRange = 0x3FFFFFFFFFFFFFFFL /*L*/;
+static cInt const hiRange = 0x3FFFFFFF;//FFFFFFFFL /*L*/;
 typedef signed long long long64; //used by Int128 class
 typedef unsigned long long ulong64;
 

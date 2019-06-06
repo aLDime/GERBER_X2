@@ -20,6 +20,7 @@ enum GCodeType {
 
 class GCodeFile : public AbstractFile {
 public:
+    GCodeFile() {}
     GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
 
     Paths getPaths() const;
@@ -37,10 +38,10 @@ private:
     void saveDrill();
     void saveProfilePocket();
 
-    const GCodeType m_type;
+    GCodeType m_type;
     Paths m_g0path;
-    const Paths m_toolPaths;
-    const Tool m_tool;
+    Paths m_toolPaths;
+    Tool m_tool;
     double m_depth;
 
     enum GCode {

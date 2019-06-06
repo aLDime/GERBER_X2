@@ -210,31 +210,23 @@ void File::setItemType(File::ItemsType type)
 
 void Gerber::File::write(QDataStream& stream) const
 {
-    //return;
-    //    QFile file(name() + ".g2g");
-    //    if (file.open(QIODevice::WriteOnly)) {
-    //        QDataStream out(&file); // we will serialize the data into the file
-    //_write(out); // out << reinterpret_cast<const AbstractFile*>(this);
+    _write(stream);
     stream << *this;
     stream << m_apertures;
-    stream << m_itemsType;
+    //    stream << m_itemsType;
     stream << m_format;
     stream << layer;
     stream << miror;
     stream << rawIndex;
-    //    }
 }
 
 void Gerber::File::read(QDataStream& stream)
 {
-    //    QFile file(name() + ".g2g");
-    //    if (file.open(QIODevice::ReadOnly)) {
-    //        QDataStream in(&file); // we will serialize the data into the file
     crutch = &m_format;
-    //_read(in);
+    _read(stream);
     stream >> *this;
     stream >> m_apertures;
-    stream >> (int&)m_itemsType;
+    //    stream >> (int&)m_itemsType;
     stream >> m_format;
     stream >> (int&)layer;
     stream >> (int&)miror;
@@ -243,7 +235,6 @@ void Gerber::File::read(QDataStream& stream)
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
-    //    }
 }
 
 void Gerber::File::createGi()
@@ -257,52 +248,59 @@ void Gerber::File::createGi()
         item->m_id = itemGroup()->size();
         itemGroup()->append(item);
     }
-
     setRawItemGroup(new ItemGroup);
-    if (rawIndex.isEmpty()) {
-        QList<Path> checkList;
-        for (int i = 0; i < size(); ++i) {
-            const GraphicObject& go = at(i);
-            if (go.path().size() > 1) { // skip empty
-                if (Settings::skipDuplicates()) {
-                    bool contains = false;
-                    for (const Path& path : checkList) { // find copy
-                        int counter = 0;
-                        if (path.size() == go.path().size()) {
-                            for (const IntPoint& p1 : path) {
-                                for (const IntPoint& p2 : go.path()) {
-                                    const double k = 0.001 * uScale;
-                                    if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-                                        ++counter;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        if (counter == go.path().size()) {
-                            contains = true;
-                            break;
-                        }
-                    }
-                    if (contains) // skip dublicates
-                        continue;
-                    checkList.append(go.path());
-                }
-                GraphicsItem* item = new RawItem(go.path(), this);
-                item->m_id = rawItemGroup()->size();
-                rawIndex.append(i);
-                rawItemGroup()->append(item);
-            }
-        }
-    } else {
-        for (int i : rawIndex) {
-            GraphicsItem* item = new RawItem(at(i).path(), this);
-            item->m_id = rawItemGroup()->size();
-            rawIndex.append(i);
-            rawItemGroup()->append(item);
-        }
+    for (GraphicObject& go : *this) {
+        GraphicsItem* item = new RawItem(go.path(), this);
+        item->m_id = rawItemGroup()->size();
+        rawItemGroup()->append(item);
     }
-    rawItemGroup()->setVisible(false);
+    //    if (rawIndex.isEmpty()) {
+    //        QList<Path> checkList;
+    //        for (int i = 0; i < size(); ++i) {
+    //            const GraphicObject& go = at(i);
+    //            if (go.path().size() > 1) { // skip empty
+    //                if (Settings::skipDuplicates()) {
+    //                    bool contains = false;
+    //                    for (const Path& path : checkList) { // find copy
+    //                        int counter = 0;
+    //                        if (path.size() == go.path().size()) {
+    //                            for (const IntPoint& p1 : path) {
+    //                                for (const IntPoint& p2 : go.path()) {
+    //                                    const double k = 0.001 * uScale;
+    //                                    if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+    //                                        ++counter;
+    //                                        break;
+    //                                    }
+    //                                }
+    //                            }
+    //                        }
+    //                        if (counter == go.path().size()) {
+    //                            contains = true;
+    //                            break;
+    //                        }
+    //                    }
+    //                    if (contains) // skip dublicates
+    //                        continue;
+    //                    checkList.append(go.path());
+    //                }
+    //                GraphicsItem* item = new RawItem(go.path(), this);
+    //                item->m_id = rawItemGroup()->size();
+    //                rawIndex.append(i);
+    //                rawItemGroup()->append(item);
+    //            }
+    //        }
+    //    } else {
+    //        for (int i : rawIndex) {
+    //            GraphicsItem* item = new RawItem(at(i).path(), this);
+    //            item->m_id = rawItemGroup()->size();
+    //            rawIndex.append(i);
+    //            rawItemGroup()->append(item);
+    //        }
+    //    }
+    //    if (m_itemsType == Normal)
+    m_rawItemGroup->setVisible(false);
+    //    else
+    //        m_itemGroup->setVisible(false);
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& m_aperture)
@@ -333,7 +331,7 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractAperture>& m
         m_aperture = QSharedPointer<AbstractAperture>(new ApMacro("", {}, {}, crutch));
         break;
     case Block:
-        m_aperture = QSharedPointer<AbstractAperture>(new ApMacro("", {}, {}, crutch));
+        m_aperture = QSharedPointer<AbstractAperture>(new ApBlock(crutch));
         break;
     }
     m_aperture->read(stream);
