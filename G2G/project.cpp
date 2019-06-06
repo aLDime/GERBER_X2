@@ -1,5 +1,6 @@
 #include "project.h"
 
+#include <QElapsedTimer>
 #include <filetree/filemodel.h>
 
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
@@ -32,6 +33,8 @@ bool Project::save(const QString& fileName)
 
 bool Project::open(const QString& fileName)
 {
+    QElapsedTimer t;
+    t.start();
     fl = true;
     m_fileName = fileName;
     QFile file(m_fileName);
@@ -58,6 +61,7 @@ bool Project::open(const QString& fileName)
                 continue;
             }
         }
+        qDebug() << "Project::open" << t.elapsed();
         return true;
     }
     qDebug() << file.errorString();

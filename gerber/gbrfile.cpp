@@ -213,7 +213,6 @@ void Gerber::File::write(QDataStream& stream) const
     _write(stream);
     stream << *this;
     stream << m_apertures;
-    //    stream << m_itemsType;
     stream << m_format;
     stream << layer;
     stream << miror;
@@ -226,7 +225,6 @@ void Gerber::File::read(QDataStream& stream)
     _read(stream);
     stream >> *this;
     stream >> m_apertures;
-    //    stream >> (int&)m_itemsType;
     stream >> m_format;
     stream >> (int&)layer;
     stream >> (int&)miror;
@@ -248,59 +246,64 @@ void Gerber::File::createGi()
         item->m_id = itemGroup()->size();
         itemGroup()->append(item);
     }
-    setRawItemGroup(new ItemGroup);
-    for (GraphicObject& go : *this) {
-        GraphicsItem* item = new RawItem(go.path(), this);
-        item->m_id = rawItemGroup()->size();
-        rawItemGroup()->append(item);
-    }
-    //    if (rawIndex.isEmpty()) {
-    //        QList<Path> checkList;
-    //        for (int i = 0; i < size(); ++i) {
-    //            const GraphicObject& go = at(i);
-    //            if (go.path().size() > 1) { // skip empty
-    //                if (Settings::skipDuplicates()) {
-    //                    bool contains = false;
-    //                    for (const Path& path : checkList) { // find copy
-    //                        int counter = 0;
-    //                        if (path.size() == go.path().size()) {
-    //                            for (const IntPoint& p1 : path) {
-    //                                for (const IntPoint& p2 : go.path()) {
-    //                                    const double k = 0.001 * uScale;
-    //                                    if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
-    //                                        ++counter;
-    //                                        break;
-    //                                    }
-    //                                }
-    //                            }
-    //                        }
-    //                        if (counter == go.path().size()) {
-    //                            contains = true;
-    //                            break;
-    //                        }
-    //                    }
-    //                    if (contains) // skip dublicates
-    //                        continue;
-    //                    checkList.append(go.path());
-    //                }
-    //                GraphicsItem* item = new RawItem(go.path(), this);
-    //                item->m_id = rawItemGroup()->size();
-    //                rawIndex.append(i);
-    //                rawItemGroup()->append(item);
-    //            }
-    //        }
-    //    } else {
-    //        for (int i : rawIndex) {
-    //            GraphicsItem* item = new RawItem(at(i).path(), this);
-    //            item->m_id = rawItemGroup()->size();
-    //            rawIndex.append(i);
-    //            rawItemGroup()->append(item);
-    //        }
+    //    for (GraphicObject& go : *this) {
+    //        GraphicsItem* item = new RawItem(go.path(), this);
+    //        item->m_id = rawItemGroup()->size();
+    //        rawItemGroup()->append(item);
     //    }
-    //    if (m_itemsType == Normal)
+    setRawItemGroup(new ItemGroup);
+    if (!Settings::skipDuplicates()) {
+        for (const GraphicObject& go : *this) {
+            GraphicsItem* item = new RawItem(go.path(), this);
+            item->m_id = rawItemGroup()->size();
+            m_rawItemGroup->append(item);
+        }
+    } else /*if (rawIndex.isEmpty())*/ {
+        QList<Path> checkList;
+        for (int i = 0; i < size(); ++i) {
+            const GraphicObject& go = at(i);
+            if (go.path().size() > 1) { // skip empty
+                bool contains = false;
+                for (const Path& path : checkList) { // find copy
+                    int counter = 0;
+                    if (path.size() == go.path().size()) {
+                        for (const IntPoint& p1 : path) {
+                            for (const IntPoint& p2 : go.path()) {
+                                const double k = 0.001 * uScale;
+                                if ((abs(p1.X - p2.X) < k) && (abs(p1.Y - p2.Y) < k)) {
+                                    ++counter;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (counter == go.path().size()) {
+                        contains = true;
+                        break;
+                    }
+                }
+                if (!contains) {
+                    checkList.append(go.path());
+                    GraphicsItem* item = new RawItem(go.path(), this);
+                    item->m_id = rawItemGroup()->size();
+                    m_rawItemGroup->append(item);
+                    //                    rawIndex.append(i);
+                }
+            }
+        }
+    } /*else {
+        for (int i : rawIndex) {
+            qDebug() << i << size();
+            if (0 > i || i > size()) {
+                continue;
+            }
+            GraphicsItem* item = new RawItem(at(i).path(), this);
+            item->m_id = rawItemGroup()->size();
+            rawIndex.append(i);
+            m_rawItemGroup->append(item);
+        }
+    }*/
     m_rawItemGroup->setVisible(false);
-    //    else
-    //        m_itemGroup->setVisible(false);
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& m_aperture)
