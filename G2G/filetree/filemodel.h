@@ -36,7 +36,7 @@ public:
     static void addFile(Gerber::File* file);
     static void addFile(Excellon::File* file);
     static void addFile(GCodeFile* file);
-    static void closeAllFiles();
+    static void closeProject();
 
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;

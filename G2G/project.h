@@ -14,13 +14,11 @@ using namespace ClipperLib;
 class Project {
 
 public:
-    explicit Project(const QString& fileName = QString());
+    explicit Project();
     ~Project();
 
-    static bool fl;
-
-    bool save(const QString& fileName = QString());
-    bool open(const QString& fileName);
+    static bool save(QFile& file);
+    static bool open(QFile& file);
 
     static AbstractFile* file(int id);
     static void deleteFile(int id);
@@ -56,6 +54,8 @@ public:
     //        }
     //        return paths;
     //    }
+
+    static bool isModified() { return m_isModified; }
 
     static QRectF getSelectedBoundingRect();
     static QString fileNames();
@@ -106,11 +106,13 @@ public:
     }
 
     static bool contains(AbstractFile* file);
+    static void setIsModified(bool isModified) { m_isModified = isModified; }
 
 private:
+    static bool m_isModified;
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;
-    QString m_fileName;
+    static QString m_fileName;
 };
 
 #endif // PROJECT_H

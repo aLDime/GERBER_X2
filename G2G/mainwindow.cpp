@@ -49,14 +49,14 @@ MainWindow::MainWindow(QWidget* parent)
     connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
         prependToRecentFiles(file->name());
-        //        QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
+        // QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
     });
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
     connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     gerberThread.start(QThread::HighestPriority);
 
-    connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::openFile);
+    connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::on_customContextMenuRequested);
 
@@ -95,14 +95,14 @@ MainWindow::MainWindow(QWidget* parent)
     self = this;
 
     ToolHolder::readTools();
-
+    setCurrentFile(QString());
     readSettings();
 }
 
 MainWindow::~MainWindow()
 {
-    //    delete m_zeroPoint;
-    //    delete m_homePoint;
+    // delete m_zeroPoint;
+    // delete m_homePoint;
     gerberThread.quit();
     gerberThread.wait();
     self = nullptr;
@@ -110,22 +110,31 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
-    if (QFile("ui_mainwindow.h").exists()) {
-        Project().save("D:/g2g.g2g");
+    if (maybeSave()) {
         writeSettings();
         dockWidget->close();
-        FileModel::closeAllFiles();
+        FileModel::closeProject();
+        qApp->closeAllWindows();
+
+        event->accept();
+    } else {
+        event->ignore();
+    }
+    return;
+    if (QFile("ui_mainwindow.h").exists()) {
+        writeSettings();
+        dockWidget->close();
+        FileModel::closeProject();
         qApp->closeAllWindows();
         event->accept();
 
         return;
     }
     if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
-        Project().save("D:/g2g.g2g");
         qApp->closeAllWindows();
         writeSettings();
         dockWidget->close();
-        FileModel::closeAllFiles();
+        FileModel::closeProject();
         event->accept();
     } else
         event->ignore();
@@ -133,9 +142,11 @@ void MainWindow::closeEvent(QCloseEvent* event)
 
 void MainWindow::open()
 {
-    QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Files (*.gbr *.*)")));
-    for (QString& fileName : files) {
-        openFile(fileName);
+    if (maybeSave()) {
+        QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc);;Project (*.g2g)")));
+        for (QString& fileName : files) {
+            loadFile(fileName);
+        }
     }
 }
 
@@ -159,16 +170,19 @@ void MainWindow::saveSelectedToolpaths()
     }
 }
 
-void MainWindow::closeFiles()
+void MainWindow::closeProject()
 {
     if (QFile("ui_mainwindow.h").exists()) {
         dockWidget->close();
-        FileModel::closeAllFiles();
+        FileModel::closeProject();
+        Project::setIsModified(false);
         return;
     }
     if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
         dockWidget->close();
-        FileModel::closeAllFiles();
+        FileModel::closeProject();
+        Project::setIsModified(false);
+        setCurrentFile(QString());
     }
 }
 
@@ -188,33 +202,45 @@ void MainWindow::init()
 
 void MainWindow::createActions()
 {
-    QAction* action = nullptr;
+    // fileMenu
+    createActionsFile();
+    // serviceMenu
+    createActionsService();
+    // helpMenu
+    createActionsHelp();
+    // zoomToolBar
+    createActionsZoom();
+    // Selection / Delete selected
+    createActionsSDS();
+    // toolpathToolBar
+    createActionsToolPath();
+    // grafica
+    createActionsGraphics();
+}
 
-    //==================== fileMenu ====================
+void MainWindow::createActionsFile()
+{
     fileMenu = menuBar()->addMenu(tr("&File"));
     fileMenu->setObjectName(QStringLiteral("fileMenu"));
 
     fileToolBar = addToolBar(tr("File"));
-    //fileToolBar->setIconSize(QSize(24, 24));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
-    //     fileToolBar->setMovable(false);
-
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
 
-    action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
-    fileToolBar->addAction(action);
+    QAction* action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
+    fileToolBar->addAction(action);
 
     action = fileMenu->addAction(Icon(SaveAllIcon), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
-    fileToolBar->addAction(action);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save selected toolpaths to one directory"));
+    fileToolBar->addAction(action);
 
     exportPdfAct = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
-    fileToolBar->addAction(exportPdfAct);
     exportPdfAct->setStatusTip(tr("Export to PDF file"));
     exportPdfAct->setEnabled(false);
+    fileToolBar->addAction(exportPdfAct);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -236,39 +262,16 @@ void MainWindow::createActions()
     });
 
     recentFileSeparator = fileMenu->addSeparator();
-
     setRecentFilesVisible(MainWindow::hasRecentFiles());
 
-    closeAllAct = fileMenu->addAction(Icon(CloseIcon), tr("&Close all"), this, &MainWindow::closeFiles);
-    fileToolBar->addAction(closeAllAct);
+    closeAllAct = fileMenu->addAction(Icon(CloseIcon), tr("&Close all"), this, &MainWindow::closeProject);
     closeAllAct->setShortcuts(QKeySequence::Close);
     closeAllAct->setStatusTip(tr("Close all files"));
     closeAllAct->setEnabled(false);
+    fileToolBar->addAction(closeAllAct);
 
     fileMenu->addSeparator();
-    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), [=] {
-        QPrinter printer(QPrinter::HighResolution);
-        QPrintPreviewDialog preview(&printer, this);
-        connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* printer) {
-            Scene::self->m_drawPdf = true;
-            QRectF rect;
-            for (QGraphicsItem* item : Scene::self->items())
-                if (item->isVisible() && !item->boundingRect().isNull())
-                    rect |= item->boundingRect();
-            QSizeF size(rect.size());
-            printer->setMargins({ 10, 10, 10, 10 });
-            printer->setPageSizeMM(size + QSizeF(printer->margins().left + printer->margins().right, printer->margins().top + printer->margins().bottom));
-            printer->setResolution(4800);
-
-            QPainter painter(printer);
-            painter.setRenderHint(QPainter::HighQualityAntialiasing);
-            painter.setTransform(QTransform().scale(1.0, -1.0));
-            painter.translate(0, -(printer->resolution() / 25.4) * size.height());
-            Scene::self->render(&painter, QRectF(0, 0, printer->width(), printer->height()), rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
-            Scene::self->m_drawPdf = false;
-        });
-        preview.exec();
-    });
+    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), this, &MainWindow::print);
     action->setShortcuts(QKeySequence::Print);
     action->setStatusTip(tr("Print"));
     fileMenu->addSeparator();
@@ -276,27 +279,32 @@ void MainWindow::createActions()
     action = fileMenu->addAction(Icon(ExitIcon), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);
     action->setStatusTip(tr("Exit the application"));
+}
 
-    //==================== serviceMenu ====================
+void MainWindow::createActionsService()
+{
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"),
-        this, &MainWindow::showSettingsDialog);
+    QAction* action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"), this, &MainWindow::showSettingsDialog);
     action->setStatusTip(tr("Show the application's settings box"));
+}
 
-    //==================== helpMenu ====================
+void MainWindow::createActionsHelp()
+{
     helpMenu = menuBar()->addMenu(tr("&Help"));
-    action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
+    QAction* action = helpMenu->addAction(tr("&About"), this, &MainWindow::about);
     action->setStatusTip(tr("Show the application's About box"));
 
     action = helpMenu->addAction(tr("About &Qt"), qApp, &QApplication::aboutQt);
     action->setStatusTip(tr("Show the Qt library's About box"));
+}
 
-    //==================== zoomToolBar ====================
+void MainWindow::createActionsZoom()
+{
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     //zoomToolBar->setIconSize(QSize(22, 22));
     zoomToolBar->setObjectName(QStringLiteral("zoomToolBar"));
-    //     zoomToolBar->setMovable(false);
-    action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
+    // zoomToolBar->setMovable(false);
+    QAction* action = zoomToolBar->addAction(Icon(ZoomFitIcon), tr("Fit best"), [=]() { graphicsView->zoomFit(); });
     action->setShortcut(QKeySequence::FullScreen);
     action = zoomToolBar->addAction(Icon(Zoom100Icon), tr("100%"), [=]() { graphicsView->zoom100(); });
     action->setShortcut(tr("Ctrl+0"));
@@ -306,53 +314,58 @@ void MainWindow::createActions()
     action->setShortcut(QKeySequence::ZoomOut);
     zoomToolBar->addSeparator();
     action = zoomToolBar->addAction(Icon(ZoomToSelectedIcon), tr("Zoom to selected"), [=]() { graphicsView->zoomToSelected(); });
+}
 
-    //==================== Selection / Delete selected ====================
+void MainWindow::createActionsSDS()
+{
     QToolBar* s = addToolBar(tr("Selection"));
     s->setObjectName(QStringLiteral("s"));
-    //     s->setMovable(false);
-    action = s->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
+    // s->setMovable(false);
+    QAction* action = s->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
     action = s->addAction(Icon(CloseIcon), tr("Redo"), this, &MainWindow::redo);
     action->setShortcut(QKeySequence::Redo);
-    //    action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
-    //        QList<QGraphicsItem*> list;
-    //        for (QGraphicsItem* item : MyScene::self->items())
-    //            if (item->isSelected() && item->type() != DrillItemType)
-    //                list << item;
-    //        if (list.size() && QMessageBox::question(this,
+    // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
+    // QList<QGraphicsItem*> list;
+    // for (QGraphicsItem* item : MyScene::self->items())
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // list << item;
+    // if (list.size() && QMessageBox::question(this,
     //"", "Do you really want to delete the selected items?", QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes) {
-    //            for (QGraphicsItem* item : list)
-    //                if (item->isSelected() && item->type() != DrillItemType)
-    //                    delete item;
-    //            MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
-    //            MyScene::self->update();
-    //            MainWindow::self->zero()->resetPos();
-    //            MainWindow::self->home()->resetPos();
-    //            Shtift::shtifts()[0]->resetPos();
-    //        }
-    //    });
-    //    action->setShortcut(QKeySequence::Delete);
+    // for (QGraphicsItem* item : list)
+    // if (item->isSelected() && item->type() != DrillItemType)
+    // delete item;
+    // MyScene::self->setSceneRect(MyScene::self->itemsBoundingRect());
+    // MyScene::self->update();
+    // MainWindow::self->zero()->resetPos();
+    // MainWindow::self->home()->resetPos();
+    // Shtift::shtifts()[0]->resetPos();
+    // }
+    // });
+    // action->setShortcut(QKeySequence::Delete);
+}
 
-    //==================== toolpathToolBar ====================
+void MainWindow::createActionsToolPath()
+{
     toolpathToolBar = addToolBar(tr("Toolpath"));
     //toolpathToolBar->setIconSize(QSize(24, 24));
     toolpathToolBar->setObjectName(QStringLiteral("toolpathToolBar"));
 
-    //     toolpathToolBar->setMovable(false);
+    // toolpathToolBar->setMovable(false);
     dockWidget = new DockWidget(this);
+    connect(dockWidget, &DockWidget::visibilityChanged, [=](bool visible) { if (!visible) resetActions(); });
     dockWidget->setObjectName(QStringLiteral("dwCreatePath"));
     addDockWidget(Qt::LeftDockWidgetArea, dockWidget);
     dockWidget->hide();
-    //    connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
-    //        if (!visible) {
-    //            for (QAction* action : toolpathActionList)
-    //                action->setChecked(false);
-    //            if (dockWidget->widget() != nullptr)
-    //                dockWidget->widget()->deleteLater();
-    //            dockWidget->toggleViewAction()->setVisible(false);
-    //        }
-    //    });
+    // connect(dockWidget, &QDockWidget::visibilityChanged, [&](bool visible) {
+    // if (!visible) {
+    // for (QAction* action : toolpathActionList)
+    // action->setChecked(false);
+    // if (dockWidget->widget() != nullptr)
+    // dockWidget->widget()->deleteLater();
+    // dockWidget->toggleViewAction()->setVisible(false);
+    // }
+    // });
 
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathProfileIcon), tr("Profile"), [=] { createDockWidget(new ProfileForm(dockWidget), Profile); }));
     toolpathActionList.append(toolpathToolBar->addAction(Icon(PathPocketIcon), tr("Pocket"), [=] { createDockWidget(new PocketForm(dockWidget), Pocket); }));
@@ -391,11 +404,14 @@ void MainWindow::createActions()
             item->setSelected(selected.takeFirst());
         graphicsView->zoomFit();
     });
-    //==================== grafica ====================
+}
+
+void MainWindow::createActionsGraphics()
+{
     QToolBar* tb = addToolBar(tr("Graphics Items"));
     tb->setObjectName("GraphicsItemsToolBar");
     tb->setEnabled(false);
-    //     tb->setMovable(false);
+    // tb->setMovable(false);
     tb->addAction(QIcon::fromTheme("draw-rectangle"), tr("Rect"));
     tb->addAction(QIcon::fromTheme("draw-line"), tr("line"));
     tb->addAction(QIcon::fromTheme("draw-ellipse"), tr("Elipse"));
@@ -443,6 +459,14 @@ void MainWindow::createShtifts()
     }
 }
 
+void MainWindow::newFile()
+{
+    if (maybeSave()) {
+        closeAllAct->triggered();
+        setCurrentFile(QString());
+    }
+}
+
 void MainWindow::readSettings()
 {
     QSettings settings;
@@ -452,10 +476,8 @@ void MainWindow::readSettings()
 
     lastPath = settings.value("lastPath").toString();
 
-    //    for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
-    //        openFile(file);
-
-    Project().open("D:/g2g.g2g");
+    // for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
+    // openFile(file);
 
     SettingsDialog().readSettings();
     settings.endGroup();
@@ -486,6 +508,31 @@ void MainWindow::selectAll()
 
 void MainWindow::redo()
 {
+}
+
+void MainWindow::print()
+{
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintPreviewDialog preview(&printer, this);
+    connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* printer) {
+        Scene::self->m_drawPdf = true;
+        QRectF rect;
+        for (QGraphicsItem* item : Scene::self->items())
+            if (item->isVisible() && !item->boundingRect().isNull())
+                rect |= item->boundingRect();
+        QSizeF size(rect.size());
+        printer->setMargins({ 10, 10, 10, 10 });
+        printer->setPageSizeMM(size + QSizeF(printer->margins().left + printer->margins().right, printer->margins().top + printer->margins().bottom));
+        printer->setResolution(4800);
+
+        QPainter painter(printer);
+        painter.setRenderHint(QPainter::HighQualityAntialiasing);
+        painter.setTransform(QTransform().scale(1.0, -1.0));
+        painter.translate(0, -(printer->resolution() / 25.4) * size.height());
+        Scene::self->render(&painter, QRectF(0, 0, printer->width(), printer->height()), rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
+        Scene::self->m_drawPdf = false;
+    });
+    preview.exec();
 }
 
 void MainWindow::on_customContextMenuRequested(const QPoint& pos)
@@ -548,38 +595,37 @@ void MainWindow::fileError(const QString& fileName, const QString& error)
     QMessageBox::critical(this, fileName, error);
 }
 
-void MainWindow::openFile(const QString& fileName)
+void MainWindow::loadFile(const QString& fileName)
 {
-    static QMutex mutex;
-    QMutexLocker locker(&mutex);
-
-    if (fileName.endsWith(".fmt"))
-        return;
-
     if (Project::fileNames().contains(fileName)) {
         QMessageBox::warning(this, "", tr("The document is open."));
         return;
     }
-
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this,
-            "",
-            tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    if (file.open(QFile::ReadOnly)) {
+        lastPath = QFileInfo(fileName).absolutePath();
+        Excellon::Parser dp;
+        if (dp.isDrillFile(fileName)) {
+            Excellon::File* exFile = dp.parseFile(fileName);
+            if (exFile) {
+                FileModel::addFile(exFile);
+                prependToRecentFiles(exFile->name());
+                QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
+            }
+        } else if (fileName.endsWith(".g2g")) {
+            Project::open(file);
+            setCurrentFile(fileName);
+        } else
+            emit parseFile(fileName);
         return;
     }
-    QFileInfo fi(fileName);
-    lastPath = fi.absolutePath();
-    Excellon::Parser dp;
-    if (dp.isDrillFile(fileName)) {
-        Excellon::File* exFile = dp.parseFile(fileName);
-        if (exFile) {
-            FileModel::addFile(exFile);
-            prependToRecentFiles(exFile->name());
-            QTimer::singleShot(100, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
-        }
-    } else
-        emit parseFile(fileName);
+    QMessageBox::warning(this, "", tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+}
+
+void MainWindow::resetActions()
+{
+    for (QAction* action : toolpathActionList)
+        action->setChecked(false);
 }
 
 void MainWindow::setRecentFilesVisible(bool visible)
@@ -654,17 +700,25 @@ void MainWindow::updateRecentFileActions()
 void MainWindow::openRecentFile()
 {
     if (const QAction* action = qobject_cast<const QAction*>(sender()))
-        openFile(action->data().toString());
+        loadFile(action->data().toString());
 }
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
+    //    curFile = fileName;
+    //    textEdit->document()->setModified(false);
+    //    setWindowModified(false);
+    //    QString shownName = curFile;
+    //    if (curFile.isEmpty())
+    //        shownName = "untitled.txt";
+    //    setWindowFilePath(shownName);
+
     static int sequenceNumber = 1;
 
     isUntitled = fileName.isEmpty();
 
     if (isUntitled)
-        curFile = tr("document%1.txt").arg(sequenceNumber++);
+        curFile = tr("Untitled%1.g2g").arg(sequenceNumber++);
     else
         curFile = QFileInfo(fileName).canonicalFilePath();
 
@@ -702,7 +756,7 @@ void MainWindow::createDockWidget(QWidget* dwContent, int type)
     if (dockWidget->widget())
         delete dockWidget->widget();
     dockWidget->setWidget(dwContent);
-    //    dockWidget->setWindowTitle(tr("Create Toolpath"));
+    // dockWidget->setWindowTitle(tr("Create Toolpath"));
     dockWidget->show();
 }
 
@@ -721,4 +775,71 @@ QMenu* MainWindow::createPopupMenu()
     menu->addAction(tr("Icon size = 48"), [=]() { setIconSize(QSize(48, 48)); });
     menu->addAction(tr("Icon size = 72"), [=]() { setIconSize(QSize(72, 72)); });
     return menu;
+}
+
+bool MainWindow::save()
+{
+    if (/*curFile.isEmpty()*/ isUntitled) {
+        return saveAs();
+    } else {
+        return saveFile(curFile);
+    }
+}
+
+bool MainWindow::saveAs()
+{
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    dialog.setNameFilter(tr("Project (*.g2g)"));
+    if (dialog.exec() != QDialog::Accepted)
+        return false;
+    return saveFile(dialog.selectedFiles().first());
+}
+
+bool MainWindow::maybeSave()
+{
+    if (!Project::isModified())
+        return true;
+    const QMessageBox::StandardButton ret
+        = QMessageBox::warning(this, tr("Application"),
+            tr("The document has been modified.\n"
+               "Do you want to save your changes?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    switch (ret) {
+    case QMessageBox::Save:
+        return save();
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        closeProject();
+        break;
+    }
+    return true;
+}
+
+bool MainWindow::saveFile(const QString& fileName)
+{
+    QFile file(fileName);
+    if (!file.open(QFile::WriteOnly)) {
+        QMessageBox::warning(this, tr("Application"),
+            tr("Cannot write file %1:\n%2.")
+                .arg(QDir::toNativeSeparators(fileName),
+                    file.errorString()));
+        return false;
+    }
+
+#ifndef QT_NO_CURSOR
+    QApplication::setOverrideCursor(Qt::WaitCursor);
+#endif
+    //    QTextStream out(&file);
+    //    out << textEdit->toPlainText();
+    Project::save(file);
+#ifndef QT_NO_CURSOR
+    QApplication::restoreOverrideCursor();
+#endif
+
+    setCurrentFile(fileName);
+    statusBar()->showMessage(tr("File saved"), 2000);
+    return true;
 }

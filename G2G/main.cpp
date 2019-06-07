@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
     for (const QString& file : parser.positionalArguments()) {
-        mainWin->openFile(file);
+        mainWin->loadFile(file);
     }
     return app.exec();
 }

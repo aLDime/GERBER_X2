@@ -1,71 +1,58 @@
 #include "project.h"
+#include "mainwindow.h"
 
 #include <QElapsedTimer>
 #include <filetree/filemodel.h>
 
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
-bool Project::fl = false;
+bool Project::m_isModified = false;
 QMutex Project::m_mutex;
+QString Project::m_fileName;
 
-Project::Project(const QString& fileName)
-    : m_fileName(fileName)
-{
-}
+Project::Project() {}
 
-Project::~Project()
-{
-}
+Project::~Project() {}
 
-bool Project::save(const QString& fileName)
+bool Project::save(QFile& file)
 {
-    if (!fileName.isEmpty())
-        m_fileName = fileName;
-    QFile file(m_fileName);
-    if (file.open(QIODevice::WriteOnly)) {
+    try {
         QDataStream out(&file);
         out << m_files;
-        qDebug() << m_files;
+        m_isModified = false;
         return true;
+    } catch (...) {
+        qDebug() << file.errorString();
     }
-    qDebug() << file.errorString();
     return false;
 }
 
-bool Project::open(const QString& fileName)
+bool Project::open(QFile& file)
 {
-    QElapsedTimer t;
-    t.start();
-    fl = true;
-    m_fileName = fileName;
-    QFile file(m_fileName);
-    if (file.open(QIODevice::ReadOnly)) {
+    try {
+        QElapsedTimer t;
+        t.start();
         QDataStream in(&file);
         in >> m_files;
-        fl = false;
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+            filePtr->createGi();
             switch (filePtr->type()) {
             case FileType::Gerber:
-                filePtr->createGi();
-                qDebug("Gerber");
                 FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
-                continue;
+                break;
             case FileType::Drill:
-                filePtr->createGi();
-                qDebug("Drill");
                 FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
-                continue;
+                break;
             case FileType::GCode:
-                filePtr->createGi();
-                qDebug("GCode");
                 FileModel::addFile(static_cast<GCodeFile*>(filePtr.data()));
-                continue;
+                break;
             }
         }
+        m_isModified = false;
         qDebug() << "Project::open" << t.elapsed();
         return true;
+    } catch (...) {
+        qDebug() << file.errorString();
     }
-    qDebug() << file.errorString();
-    fl = false;
     return false;
 }
 
@@ -83,7 +70,9 @@ void Project::deleteFile(int id)
     if (m_files.contains(id))
         m_files.take(id);
     else
-        qWarning() << "Error id";
+        qWarning() << "Error id" << id;
+    m_isModified = true;
+    MainWindow ::self->setWindowModified(true);
 }
 
 bool Project::isEmpty()
@@ -145,6 +134,8 @@ int Project::addFile(AbstractFile* file)
         file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
     }
+    m_isModified = true;
+    MainWindow ::self->setWindowModified(true);
     return file->m_id;
 }
 
@@ -157,7 +148,6 @@ QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>&
 {
     stream << static_cast<int>(file->type());
     file->write(stream);
-    qDebug() << Q_FUNC_INFO;
     return stream;
 }
 
@@ -179,6 +169,5 @@ QDataStream& operator>>(QDataStream& stream, QSharedPointer<AbstractFile>& file)
         file->read(stream);
         break;
     }
-    qDebug() << Q_FUNC_INFO;
     return stream;
 }

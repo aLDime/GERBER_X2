@@ -104,7 +104,7 @@ void FileModel::addFile(GCodeFile* file)
     emit m_self->select(selectIndex);
 }
 
-void FileModel::closeAllFiles()
+void FileModel::closeProject()
 {
     if (m_self) {
         AbstractNode* item;
