@@ -17,6 +17,11 @@ public:
 
     static bool drawPdf();
     static QList<QGraphicsItem*> selectedItems();
+    static void addItem(QGraphicsItem* item)
+    {
+        if (self)
+            self->QGraphicsScene::addItem(item);
+    }
 
 private:
     bool m_drawPdf;

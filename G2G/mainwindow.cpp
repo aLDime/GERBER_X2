@@ -26,10 +26,10 @@ MainWindow* MainWindow::self = nullptr;
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow(parent)
     , gerberParser(new Gerber::Parser)
+    , pro(new Project)
 {
-
     setupUi(this);
-    setToolTipDuration(0);
+    init();
 
     GCodePropertiesForm::homePoint = new Point(Point::Home);
     GCodePropertiesForm::zeroPoint = new Point(Point::Zero);
@@ -39,26 +39,20 @@ MainWindow::MainWindow(QWidget* parent)
     new Shtift();
     new Shtift();
 
-    Scene::self->addItem(GCodePropertiesForm::homePoint);
-    Scene::self->addItem(GCodePropertiesForm::zeroPoint);
-
-    init();
+    Scene::addItem(GCodePropertiesForm::homePoint);
+    Scene::addItem(GCodePropertiesForm::zeroPoint);
 
     gerberParser->moveToThread(&gerberThread);
     connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
     connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
-    connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) {
-        prependToRecentFiles(file->name());
-        // QTimer::singleShot(10, Qt::CoarseTimer, GraphicsView::self, &GraphicsView::zoomFit);
-    });
+    connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) { prependToRecentFiles(file->name()); });
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
-    connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
+    //    connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
-    graphicsView->setContextMenuPolicy(Qt::CustomContextMenu);
-    connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::on_customContextMenuRequested);
+    connect(graphicsView, &GraphicsView::customContextMenuRequested, this, &MainWindow::onCustomContextMenuRequested);
 
     if (0) {
         QPainterPath painterPath;
@@ -73,7 +67,7 @@ MainWindow::MainWindow(QWidget* parent)
         pathItem->setPen(Qt::NoPen);
         QTransform tr = QTransform::fromScale(2, -2);
         pathItem->setTransform(tr);
-        Scene::self->addItem(pathItem);
+        Scene::addItem(pathItem);
     }
 
     QLatin1String styleSheet("QGroupBox, .QFrame {"
@@ -92,21 +86,22 @@ MainWindow::MainWindow(QWidget* parent)
 
     setStyleSheet(styleSheet);
 
-    self = this;
-
     ToolHolder::readTools();
     setCurrentFile(QString());
     readSettings();
+
+    self = this;
 }
 
 MainWindow::~MainWindow()
 {
-    // delete m_zeroPoint;
-    // delete m_homePoint;
     gerberThread.quit();
     gerberThread.wait();
     self = nullptr;
 }
+
+//QAction* MainWindow::closeAllAct() { return self ? self->m_closeAllAct : nullptr; }
+//QAction* MainWindow::exportPdfAct() { return self ? self->m_exportPdfAct : nullptr; }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
@@ -115,39 +110,26 @@ void MainWindow::closeEvent(QCloseEvent* event)
         dockWidget->close();
         FileModel::closeProject();
         qApp->closeAllWindows();
-
         event->accept();
     } else {
         event->ignore();
     }
-    return;
-    if (QFile("ui_mainwindow.h").exists()) {
-        writeSettings();
-        dockWidget->close();
-        FileModel::closeProject();
-        qApp->closeAllWindows();
-        event->accept();
-
-        return;
-    }
-    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
-        qApp->closeAllWindows();
-        writeSettings();
-        dockWidget->close();
-        FileModel::closeProject();
-        event->accept();
-    } else
-        event->ignore();
-}
-
-void MainWindow::open()
-{
-    if (maybeSave()) {
-        QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc);;Project (*.g2g)")));
-        for (QString& fileName : files) {
-            loadFile(fileName);
-        }
-    }
+    //    if (QFile("ui_mainwindow.h").exists()) {
+    //        writeSettings();
+    //        dockWidget->close();
+    //        FileModel::closeProject();
+    //        qApp->closeAllWindows();
+    //        event->accept();
+    //        return;
+    //    }
+    //    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to quit the program?"), tr("No"), tr("Yes")) == 1) {
+    //        qApp->closeAllWindows();
+    //        writeSettings();
+    //        dockWidget->close();
+    //        FileModel::closeProject();
+    //        event->accept();
+    //    } else
+    //        event->ignore();
 }
 
 void MainWindow::saveSelectedToolpaths()
@@ -172,18 +154,23 @@ void MainWindow::saveSelectedToolpaths()
 
 void MainWindow::closeProject()
 {
-    if (QFile("ui_mainwindow.h").exists()) {
+    if (maybeSave()) {
         dockWidget->close();
         FileModel::closeProject();
-        Project::setIsModified(false);
-        return;
-    }
-    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
-        dockWidget->close();
-        FileModel::closeProject();
-        Project::setIsModified(false);
         setCurrentFile(QString());
     }
+    //    if (QFile("ui_mainwindow.h").exists()) {
+    //        dockWidget->close();
+    //        FileModel::closeProject();
+    //        Project::setIsModified(false);
+    //        return;
+    //    }
+    //    if (!Project::size() || QMessageBox::question(this, "", tr("Do you really want to close all files?"), tr("No"), tr("Yes")) == 1) {
+    //        dockWidget->close();
+    //        FileModel::closeProject();
+    //        Project::setIsModified(false);
+    //        setCurrentFile(QString());
+    //    }
 }
 
 void MainWindow::about()
@@ -194,10 +181,10 @@ void MainWindow::about()
 
 void MainWindow::init()
 {
-    setAttribute(Qt::WA_DeleteOnClose);
     isUntitled = true;
     createActions();
-    createStatusBar();
+    connect(pro, &Project::changed, this, &MainWindow::documentWasModified);
+    setUnifiedTitleAndToolBarOnMac(true);
 }
 
 void MainWindow::createActions()
@@ -216,6 +203,8 @@ void MainWindow::createActions()
     createActionsToolPath();
     // grafica
     createActionsGraphics();
+
+    statusBar()->showMessage(tr("Ready"));
 }
 
 void MainWindow::createActionsFile()
@@ -226,21 +215,34 @@ void MainWindow::createActionsFile()
     fileToolBar = addToolBar(tr("File"));
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
-
-    QAction* action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
+    // New
+    QAction* action = fileMenu->addAction(Icon(OpenFileIcon), tr("&New project"), this, &MainWindow::newFile);
+    action->setShortcuts(QKeySequence::New);
+    action->setStatusTip(tr("Create a new file"));
+    fileToolBar->addAction(action);
+    // Open
+    action = fileMenu->addAction(Icon(OpenFileIcon), tr("&Open..."), this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
     fileToolBar->addAction(action);
-
-    action = fileMenu->addAction(Icon(SaveAllIcon), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
+    // Save
+    action = fileMenu->addAction(tr("&Save"), this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
-    action->setStatusTip(tr("Save selected toolpaths to one directory"));
+    action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
-
-    exportPdfAct = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
-    exportPdfAct->setStatusTip(tr("Export to PDF file"));
-    exportPdfAct->setEnabled(false);
-    fileToolBar->addAction(exportPdfAct);
+    // Save As
+    action = fileMenu->addAction(tr("Save &As..."), this, &MainWindow::saveAs);
+    action->setShortcuts(QKeySequence::SaveAs);
+    action->setStatusTip(tr("Save the document under a new name"));
+    fileToolBar->addAction(action);
+    // Save Selected Tool Paths
+    action = fileMenu->addAction(Icon(SaveAllIcon), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedToolpaths);
+    action->setStatusTip(tr("Save selected toolpaths"));
+    fileToolBar->addAction(action);
+    // Export PDF
+    action = fileMenu->addAction(Icon(SavePdfIcon), tr("&Export PDF..."), Scene::self, &Scene::RenderPdf);
+    action->setStatusTip(tr("Export to PDF file"));
+    fileToolBar->addAction(action);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -264,14 +266,14 @@ void MainWindow::createActionsFile()
     recentFileSeparator = fileMenu->addSeparator();
     setRecentFilesVisible(MainWindow::hasRecentFiles());
 
-    closeAllAct = fileMenu->addAction(Icon(CloseIcon), tr("&Close all"), this, &MainWindow::closeProject);
-    closeAllAct->setShortcuts(QKeySequence::Close);
-    closeAllAct->setStatusTip(tr("Close all files"));
-    closeAllAct->setEnabled(false);
-    fileToolBar->addAction(closeAllAct);
+    m_closeAllAct = fileMenu->addAction(Icon(CloseIcon), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+    m_closeAllAct->setShortcuts(QKeySequence::Close);
+    m_closeAllAct->setStatusTip(tr("Close project"));
+    //    m_closeAllAct->setEnabled(false);
+    fileToolBar->addAction(m_closeAllAct);
 
     fileMenu->addSeparator();
-    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), this, &MainWindow::print);
+    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), this, &MainWindow::printDialog);
     action->setShortcuts(QKeySequence::Print);
     action->setStatusTip(tr("Print"));
     fileMenu->addSeparator();
@@ -284,7 +286,7 @@ void MainWindow::createActionsFile()
 void MainWindow::createActionsService()
 {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
-    QAction* action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"), this, &MainWindow::showSettingsDialog);
+    QAction* action = serviceMenu->addAction(Icon(SettingsIcon), tr("&Settings"), [=] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));
 }
 
@@ -424,12 +426,7 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("intersection"));
 }
 
-void MainWindow::createStatusBar()
-{
-    statusBar()->showMessage(tr("Ready"));
-}
-
-void MainWindow::createShtifts()
+void MainWindow::createShtiftsPath()
 {
     ToolDatabase tdb(this, { Tool::Drill });
     if (tdb.exec()) {
@@ -462,7 +459,7 @@ void MainWindow::createShtifts()
 void MainWindow::newFile()
 {
     if (maybeSave()) {
-        closeAllAct->triggered();
+        closeProject();
         setCurrentFile(QString());
     }
 }
@@ -475,7 +472,10 @@ void MainWindow::readSettings()
     restoreState(settings.value("state", QByteArray()).toByteArray());
 
     lastPath = settings.value("lastPath").toString();
+    curFile = settings.value("project").toString();
 
+    loadFile(curFile);
+    //loadFile(settings.value("project").toString());
     // for (const QString& file : settings.value("files").toString().split('|', QString::SkipEmptyParts))
     // openFile(file);
 
@@ -490,7 +490,8 @@ void MainWindow::writeSettings()
     settings.setValue("geometry", saveGeometry());
     settings.setValue("state", saveState());
     settings.setValue("lastPath", lastPath);
-    settings.setValue("files", Project::fileNames());
+    //    settings.setValue("files", Project::fileNames());
+    settings.setValue("project", curFile);
     settings.endGroup();
 }
 
@@ -510,7 +511,7 @@ void MainWindow::redo()
 {
 }
 
-void MainWindow::print()
+void MainWindow::printDialog()
 {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
@@ -535,7 +536,7 @@ void MainWindow::print()
     preview.exec();
 }
 
-void MainWindow::on_customContextMenuRequested(const QPoint& pos)
+void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
 {
     QMenu menu;
     QAction* a = nullptr;
@@ -545,7 +546,7 @@ void MainWindow::on_customContextMenuRequested(const QPoint& pos)
         return;
 
     if (item->type() == ShtiftType) {
-        a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Shtifts"), this, &MainWindow::createShtifts);
+        a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Shtifts"), this, &MainWindow::createShtiftsPath);
         a = menu.addAction(tr("Fixed"), [](bool fl) {
             for (Shtift* item : Shtift::shtifts())
                 item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
@@ -595,33 +596,6 @@ void MainWindow::fileError(const QString& fileName, const QString& error)
     QMessageBox::critical(this, fileName, error);
 }
 
-void MainWindow::loadFile(const QString& fileName)
-{
-    if (Project::fileNames().contains(fileName)) {
-        QMessageBox::warning(this, "", tr("The document is open."));
-        return;
-    }
-    QFile file(fileName);
-    if (file.open(QFile::ReadOnly)) {
-        lastPath = QFileInfo(fileName).absolutePath();
-        Excellon::Parser dp;
-        if (dp.isDrillFile(fileName)) {
-            Excellon::File* exFile = dp.parseFile(fileName);
-            if (exFile) {
-                FileModel::addFile(exFile);
-                prependToRecentFiles(exFile->name());
-                QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
-            }
-        } else if (fileName.endsWith(".g2g")) {
-            Project::open(file);
-            setCurrentFile(fileName);
-        } else
-            emit parseFile(fileName);
-        return;
-    }
-    QMessageBox::warning(this, "", tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
-}
-
 void MainWindow::resetActions()
 {
     for (QAction* action : toolpathActionList)
@@ -665,6 +639,140 @@ bool MainWindow::hasRecentFiles()
     return count > 0;
 }
 
+void MainWindow::open()
+{
+    if (maybeSave()) {
+        QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc);;Project (*.g2g)")));
+        for (QString& fileName : files) {
+            loadFile(fileName);
+        }
+    }
+}
+
+bool MainWindow::save()
+{
+    if (curFile.isEmpty()) {
+        return saveAs();
+    } else {
+        return saveFile(curFile);
+    }
+}
+
+bool MainWindow::saveAs()
+{
+    QFileDialog dialog(this);
+    dialog.setWindowModality(Qt::WindowModal);
+    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    if (dialog.exec() != QDialog::Accepted)
+        return false;
+    return saveFile(dialog.selectedFiles().first());
+}
+
+void MainWindow::documentWasModified()
+{
+    setWindowModified(pro->isModified());
+}
+
+bool MainWindow::maybeSave()
+{
+    if (!pro->isModified())
+        return true;
+    const QMessageBox::StandardButton ret
+        = QMessageBox::warning(this, tr("Application"),
+            tr("The document has been modified.\n"
+               "Do you want to save your changes?"),
+            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
+    switch (ret) {
+    case QMessageBox::Save:
+        return save();
+    case QMessageBox::Cancel:
+        return false;
+    default:
+        break;
+    }
+    return true;
+}
+
+void MainWindow::loadFile(const QString& fileName)
+{
+    if (!QFileInfo(fileName).exists())
+        return;
+    if (Project::fileNames().contains(fileName)) {
+        QMessageBox::warning(this, "", tr("The document is open."));
+        return;
+    }
+    QFile file(fileName);
+    if (file.open(QFile::ReadOnly)) {
+        lastPath = QFileInfo(fileName).absolutePath();
+        Excellon::Parser dp;
+        if (dp.isDrillFile(fileName)) {
+            Excellon::File* exFile = dp.parseFile(fileName);
+            if (exFile) {
+                FileModel::addFile(exFile);
+                prependToRecentFiles(exFile->name());
+                QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
+            }
+        } else if (fileName.endsWith(".g2g")) {
+            Project::open(file);
+            setCurrentFile(fileName);
+        } else
+            emit parseFile(fileName);
+        return;
+    }
+    QMessageBox::warning(this, "", tr("Cannot read file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+
+    //    QFile file(fileName);
+    //    if (!file.open(QFile::ReadOnly | QFile::Text)) {
+    //        QMessageBox::warning(this, tr("Application"),
+    //            tr("Cannot read file %1:\n%2.")
+    //                .arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    //        return;
+    //    }
+
+    //    QTextStream in(&file);
+    //    QApplication::setOverrideCursor(Qt::WaitCursor);
+    //    textEdit->setPlainText(in.readAll());
+    //    QApplication::restoreOverrideCursor();
+
+    //    setCurrentFile(fileName);
+    //    statusBar()->showMessage(tr("File loaded"), 2000);
+}
+
+bool MainWindow::saveFile(const QString& fileName)
+{
+    QFile file(fileName);
+    if (file.open(QFile::WriteOnly)) {
+        QApplication::setOverrideCursor(Qt::WaitCursor);
+        pro->save(file);
+        QApplication::restoreOverrideCursor();
+        setCurrentFile(fileName);
+        statusBar()->showMessage(tr("File saved"), 2000);
+        return true;
+    }
+    QMessageBox::warning(this, tr("Application"), tr("Cannot write file %1:\n%2.").arg(QDir::toNativeSeparators(fileName), file.errorString()));
+    return false;
+}
+
+void MainWindow::setCurrentFile(const QString& fileName)
+{
+    static int sequenceNumber = 1;
+
+    isUntitled = fileName.isEmpty();
+
+    if (isUntitled)
+        curFile = tr("Untitled%1.g2g").arg(sequenceNumber++);
+    else
+        curFile = QFileInfo(fileName).canonicalFilePath();
+
+    pro->setModified(false);
+    setWindowModified(false);
+
+    if (!isUntitled && windowFilePath() != curFile)
+        prependToRecentFiles(curFile);
+    m_closeAllAct->setText(tr("&Close project \"%1\"").arg(strippedName(curFile)));
+    setWindowFilePath(curFile);
+}
+
 void MainWindow::prependToRecentFiles(const QString& fileName)
 {
     QSettings settings;
@@ -703,45 +811,9 @@ void MainWindow::openRecentFile()
         loadFile(action->data().toString());
 }
 
-void MainWindow::setCurrentFile(const QString& fileName)
-{
-    //    curFile = fileName;
-    //    textEdit->document()->setModified(false);
-    //    setWindowModified(false);
-    //    QString shownName = curFile;
-    //    if (curFile.isEmpty())
-    //        shownName = "untitled.txt";
-    //    setWindowFilePath(shownName);
-
-    static int sequenceNumber = 1;
-
-    isUntitled = fileName.isEmpty();
-
-    if (isUntitled)
-        curFile = tr("Untitled%1.g2g").arg(sequenceNumber++);
-    else
-        curFile = QFileInfo(fileName).canonicalFilePath();
-
-    //textEdit->document()->setModified(false);
-    setWindowModified(false);
-
-    if (!isUntitled && windowFilePath() != curFile)
-        prependToRecentFiles(curFile);
-
-    setWindowFilePath(curFile);
-}
-
 QString MainWindow::strippedName(const QString& fullFileName)
 {
     return QFileInfo(fullFileName).fileName();
-}
-
-void MainWindow::showSettingsDialog()
-{
-    SettingsDialog settings(this);
-    if (settings.exec()) {
-        //readSettings();
-    }
 }
 
 void MainWindow::createDockWidget(QWidget* dwContent, int type)
@@ -777,69 +849,6 @@ QMenu* MainWindow::createPopupMenu()
     return menu;
 }
 
-bool MainWindow::save()
-{
-    if (/*curFile.isEmpty()*/ isUntitled) {
-        return saveAs();
-    } else {
-        return saveFile(curFile);
-    }
-}
+QString MainWindow::fileKey() { return QStringLiteral("file"); }
 
-bool MainWindow::saveAs()
-{
-    QFileDialog dialog(this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-    dialog.setNameFilter(tr("Project (*.g2g)"));
-    if (dialog.exec() != QDialog::Accepted)
-        return false;
-    return saveFile(dialog.selectedFiles().first());
-}
-
-bool MainWindow::maybeSave()
-{
-    if (!Project::isModified())
-        return true;
-    const QMessageBox::StandardButton ret
-        = QMessageBox::warning(this, tr("Application"),
-            tr("The document has been modified.\n"
-               "Do you want to save your changes?"),
-            QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
-    switch (ret) {
-    case QMessageBox::Save:
-        return save();
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        closeProject();
-        break;
-    }
-    return true;
-}
-
-bool MainWindow::saveFile(const QString& fileName)
-{
-    QFile file(fileName);
-    if (!file.open(QFile::WriteOnly)) {
-        QMessageBox::warning(this, tr("Application"),
-            tr("Cannot write file %1:\n%2.")
-                .arg(QDir::toNativeSeparators(fileName),
-                    file.errorString()));
-        return false;
-    }
-
-#ifndef QT_NO_CURSOR
-    QApplication::setOverrideCursor(Qt::WaitCursor);
-#endif
-    //    QTextStream out(&file);
-    //    out << textEdit->toPlainText();
-    Project::save(file);
-#ifndef QT_NO_CURSOR
-    QApplication::restoreOverrideCursor();
-#endif
-
-    setCurrentFile(fileName);
-    statusBar()->showMessage(tr("File saved"), 2000);
-    return true;
-}
+QString MainWindow::recentFilesKey() { return QStringLiteral("recentFileList"); }

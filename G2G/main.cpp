@@ -66,17 +66,17 @@ int main(int argc, char* argv[])
             delete baseTranslator;
     }
 
-    MainWindow* mainWin = new MainWindow;
-    mainWin->setIconSize({ 24, 24 });
-    mainWin->show();
+    MainWindow mainWin;
+    mainWin.setIconSize({ 24, 24 });
+    mainWin.show();
     QCommandLineParser parser;
     parser.setApplicationDescription(QCoreApplication::applicationName());
     parser.addHelpOption();
     parser.addVersionOption();
     parser.addPositionalArgument("file", "The file(s) to open.");
     parser.process(app);
-    for (const QString& file : parser.positionalArguments()) {
-        mainWin->loadFile(file);
-    }
+    //    for (const QString& file : parser.positionalArguments()) {
+    //        mainWin.loadFile(file);
+    //    }
     return app.exec();
 }

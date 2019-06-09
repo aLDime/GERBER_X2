@@ -28,6 +28,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     setViewportUpdateMode(FullViewportUpdate /*NoViewportUpdate*/);
     setDragMode(RubberBandDrag);
     setInteractive(true);
+    setContextMenuPolicy(Qt::CustomContextMenu);
     ////////////////////////////////////
 
     // add two rulers on top and left.

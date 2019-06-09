@@ -95,28 +95,26 @@ void TreeView::on_doubleClicked(const QModelIndex& index)
 
 void TreeView::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected)
 {
-    if (!selected.indexes().isEmpty()) {
+#ifndef QT_DEBUG
+    if (!selected.indexes().isEmpty() && selected.indexes().first().isValid()) {
         QModelIndex& index = selected.indexes().first();
         const int row = index.parent().row();
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
-            if (index.isValid()) {
-                const int id = index.data(Qt::UserRole).toInt();
-                AbstractFile* file = Project::file(id);
-                file->itemGroup()->setZValue(id);
-            }
+            const int id = index.data(Qt::UserRole).toInt();
+            AbstractFile* file = Project::file(id);
+            file->itemGroup()->setZValue(id);
         }
     }
     if (!deselected.indexes().isEmpty()) {
         QModelIndex& index = deselected.indexes().first();
         const int row = index.parent().row();
         if (row == NodeGerberFiles || row == NodeDrillFiles || row == NodeToolPath) {
-            if (index.isValid()) {
-                const int id = index.data(Qt::UserRole).toInt();
-                AbstractFile* file = Project::file(id);
-                file->itemGroup()->setZValue(-id);
-            }
+            const int id = index.data(Qt::UserRole).toInt();
+            AbstractFile* file = Project::file(id);
+            file->itemGroup()->setZValue(-id);
         }
     }
+#endif
 }
 
 void TreeView::hideOther()

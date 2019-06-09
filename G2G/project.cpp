@@ -8,8 +8,14 @@ QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
 bool Project::m_isModified = false;
 QMutex Project::m_mutex;
 QString Project::m_fileName;
+Project* Project::self = nullptr;
+QSemaphore Project::sem;
 
-Project::Project() {}
+Project::Project()
+{
+    if (!self)
+        self = this;
+}
 
 Project::~Project() {}
 
@@ -71,8 +77,7 @@ void Project::deleteFile(int id)
         m_files.take(id);
     else
         qWarning() << "Error id" << id;
-    m_isModified = true;
-    MainWindow ::self->setWindowModified(true);
+    setChanged();
 }
 
 bool Project::isEmpty()
@@ -134,8 +139,7 @@ int Project::addFile(AbstractFile* file)
         file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
     }
-    m_isModified = true;
-    MainWindow ::self->setWindowModified(true);
+    setChanged();
     return file->m_id;
 }
 

@@ -4,6 +4,7 @@
 #include <QMap>
 #include <QMutex>
 #include <QObject>
+#include <QSemaphore>
 #include <exfile.h>
 #include <gbrfile.h>
 #include <gcode/gcode.h>
@@ -11,11 +12,12 @@
 
 using namespace ClipperLib;
 
-class Project {
+class Project : public QObject {
+    Q_OBJECT
 
 public:
     explicit Project();
-    ~Project();
+    virtual ~Project();
 
     static bool save(QFile& file);
     static bool open(QFile& file);
@@ -56,6 +58,7 @@ public:
     //    }
 
     static bool isModified() { return m_isModified; }
+    static void setModified(bool fl) { m_isModified = fl; }
 
     static QRectF getSelectedBoundingRect();
     static QString fileNames();
@@ -108,11 +111,23 @@ public:
     static bool contains(AbstractFile* file);
     static void setIsModified(bool isModified) { m_isModified = isModified; }
 
+signals:
+    void changed();
+
 private:
+    static void setChanged()
+    {
+        if (self)
+            self->changed();
+        m_isModified = true;
+    }
+
     static bool m_isModified;
     static QMutex m_mutex;
     static QMap<int, QSharedPointer<AbstractFile>> m_files;
     static QString m_fileName;
+    static Project* self;
+    static QSemaphore sem;
 };
 
 #endif // PROJECT_H

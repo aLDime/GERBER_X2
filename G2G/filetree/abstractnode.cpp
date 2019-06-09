@@ -5,18 +5,18 @@
 
 AbstractNode::AbstractNode()
 {
-    if (MainWindow::self) {
-        MainWindow::self->closeAllAct->setEnabled(true);
-        MainWindow::self->exportPdfAct->setEnabled(true);
-    }
+    //    if (MainWindow::closeAllAct()) {
+    //        MainWindow::closeAllAct()->setEnabled(true);
+    //        MainWindow::exportPdfAct()->setEnabled(true);
+    //    }
 }
 
 AbstractNode::~AbstractNode()
 {
-    if (MainWindow::self) {
-        MainWindow::self->closeAllAct->setEnabled(Project::isEmpty());
-        MainWindow::self->exportPdfAct->setEnabled(Project::isEmpty());
-    }
+    //    if (MainWindow::closeAllAct()) {
+    //        MainWindow::closeAllAct()->setEnabled(Project::isEmpty());
+    //        MainWindow::exportPdfAct()->setEnabled(Project::isEmpty());
+    //    }
     childItems.clear();
 }
 
