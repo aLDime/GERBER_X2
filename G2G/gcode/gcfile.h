@@ -17,11 +17,11 @@ enum GCodeType {
     Drill,
     GCodeProperties
 };
-
-class GCodeFile : public AbstractFile {
+namespace GCode {
+class File : public AbstractFile {
 public:
-    GCodeFile() {}
-    GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
+    File() {}
+    File(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
 
     Paths getPaths() const;
     void write(const QString& name);
@@ -125,5 +125,5 @@ public:
 public:
     void createGi() override;
 };
-
+}
 #endif // GCODE_H

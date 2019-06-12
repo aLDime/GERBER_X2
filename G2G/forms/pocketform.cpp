@@ -3,8 +3,8 @@
 #include "ui_pocketform.h"
 
 #include "filetree/filemodel.h"
-#include "gcode/gcode.h"
-#include "gcode/toolpathcreator.h"
+#include "gcode/gccreator.h"
+#include "gcode/gcfile.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QDockWidget>
 #include <QMessageBox>
@@ -228,13 +228,13 @@ void PocketForm::create()
         return;
     }
 
-    ToolPathCreator* tps = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
+    GCode::Creator* tps = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
     if (ui->chbxUseTwoTools->isChecked()) {
         fileCount = 2;
-        connect(this, &PocketForm::createPocket2, tps, &ToolPathCreator::createPocket2);
+        connect(this, &PocketForm::createPocket2, tps, &GCode::Creator::createPocket2);
         emit createPocket2({ tool, tool2 }, ui->dsbxDepth->value());
     } else {
-        connect(this, &PocketForm::createPocket, tps, &ToolPathCreator::createPocket);
+        connect(this, &PocketForm::createPocket, tps, &GCode::Creator::createPocket);
         emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
     }
     showProgress();
@@ -286,6 +286,6 @@ void PocketForm::showEvent(QShowEvent* event)
 
 void PocketForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void PocketForm::editFile(GCodeFile* /*file*/)
+void PocketForm::editFile(GCode::File* /*file*/)
 {
 }

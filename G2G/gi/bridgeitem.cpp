@@ -5,7 +5,7 @@
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
-#include <gcode/toolpathcreator.h>
+#include <gcode/gccreator.h>
 #include <graphicsview.h>
 #include <limits>
 #include <scene.h>

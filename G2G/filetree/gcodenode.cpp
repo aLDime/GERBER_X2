@@ -4,7 +4,7 @@
 
 #include <QFileInfo>
 
-GcodeNode::GcodeNode(GCodeFile* file)
+GcodeNode::GcodeNode(GCode::File* file)
     : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
 {
     file->itemGroup()->addToTheScene();
@@ -73,7 +73,7 @@ QVariant GcodeNode::data(const QModelIndex& index, int role) const
         case Qt::CheckStateRole:
             return Project::file(m_id)->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            return Icon(Project::file<GCodeFile>(m_id)->gtype());
+            return Icon(Project::file<GCode::File>(m_id)->gtype());
         case Qt::UserRole:
             return m_id;
         default:

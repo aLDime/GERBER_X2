@@ -1,4 +1,4 @@
-#include "gcode.h"
+#include "gcfile.h"
 
 #include "forms/gcodepropertiesform.h"
 #include <QFile>
@@ -9,7 +9,9 @@
 #include <point.h>
 #include <settings.h>
 
-QString GCodeFile::lastDir;
+namespace GCode {
+
+QString File::lastDir;
 
 ///////////////////////////////////////////////
 void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
@@ -60,7 +62,7 @@ void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths&
     }
 }
 
-GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
+File::File(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths)
     : m_pocketPaths(pocketPaths)
     , m_type(type)
     , m_toolPaths(toolPaths)
@@ -70,12 +72,12 @@ GCodeFile::GCodeFile(const Paths& toolPaths, const Tool& tool, double depth, GCo
     createGi();
 }
 
-Paths GCodeFile::getPaths() const
+Paths File::getPaths() const
 {
     return m_toolPaths;
 }
 
-void GCodeFile::write(const QString& name)
+void File::write(const QString& name)
 {
     setLastDir(name);
     if (!name.isEmpty())
@@ -95,7 +97,7 @@ void GCodeFile::write(const QString& name)
     }
 }
 
-void GCodeFile::saveDrill()
+void File::saveDrill()
 {
     statFile();
 
@@ -125,7 +127,7 @@ void GCodeFile::saveDrill()
     endFile();
 }
 
-void GCodeFile::saveProfilePocket()
+void File::saveProfilePocket()
 {
     statFile();
 
@@ -178,12 +180,12 @@ void GCodeFile::saveProfilePocket()
     endFile();
 }
 
-GCodeType GCodeFile::gtype() const
+GCodeType File::gtype() const
 {
     return m_type;
 }
 
-QString GCodeFile::getLastDir()
+QString File::getLastDir()
 {
     if (lastDir.isEmpty()) {
         QSettings settings;
@@ -192,7 +194,7 @@ QString GCodeFile::getLastDir()
     return lastDir;
 }
 
-void GCodeFile::setLastDir(QString value)
+void File::setLastDir(QString value)
 {
     value = value.left(value.lastIndexOf('/') + 1);
     if (lastDir != value) {
@@ -202,19 +204,19 @@ void GCodeFile::setLastDir(QString value)
     }
 }
 
-void GCodeFile::startPath(const QPointF& point)
+void File::startPath(const QPointF& point)
 {
     sl.append(formated({ g0(), x(point.x()), y(point.y()), s(m_tool.spindleSpeed()) })); //start xy
     sl.append(formated({ g0(), z(GCodePropertiesForm::plunge) })); //start z
     lastValues[AlwaysF].clear();
 }
 
-void GCodeFile::endPath()
+void File::endPath()
 {
     sl.append(formated({ g0(), z(GCodePropertiesForm::clearence) }));
 }
 
-void GCodeFile::statFile()
+void File::statFile()
 {
 
     const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
@@ -241,7 +243,7 @@ void GCodeFile::statFile()
     //    sl.append(s(m_tool.spindleSpeed) + " M3"); //HomeXY
 }
 
-void GCodeFile::endFile()
+void File::endFile()
 {
     sl.append(formated({ g0(), z(GCodePropertiesForm::safeZ) })); //HomeZ
     QPointF home(GCodePropertiesForm::homePoint->pos() - GCodePropertiesForm::zeroPoint->pos());
@@ -261,7 +263,7 @@ void GCodeFile::endFile()
     file.close();
 }
 
-QString GCodeFile::formated(const QList<QString> data)
+QString File::formated(const QList<QString> data)
 {
     static const QList<QChar> cl{ 'G', 'X', 'Y', 'Z', 'F', 'S' };
     QString ret;
@@ -277,7 +279,7 @@ QString GCodeFile::formated(const QList<QString> data)
     return ret.trimmed();
 }
 
-void GCodeFile::write(QDataStream& stream) const
+void File::write(QDataStream& stream) const
 {
     _write(stream);
     stream << m_pocketPaths;
@@ -287,7 +289,7 @@ void GCodeFile::write(QDataStream& stream) const
     stream << m_depth;
 }
 
-void GCodeFile::read(QDataStream& stream)
+void File::read(QDataStream& stream)
 {
     _read(stream);
     stream >> m_pocketPaths;
@@ -297,7 +299,7 @@ void GCodeFile::read(QDataStream& stream)
     stream >> m_depth;
 }
 
-void GCodeFile::createGi()
+void File::createGi()
 {
     setItemGroup(new ItemGroup);
     GraphicsItem* item;
@@ -428,4 +430,5 @@ void GCodeFile::createGi()
     default:
         break;
     }
+}
 }

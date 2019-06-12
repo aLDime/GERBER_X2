@@ -77,7 +77,7 @@ void SettingsDialog::readSettings()
     sbxMinCircleSegments->setValue(settings.value("MinCircleSegments", 36).toInt());
     dsbxMinCircleSegmentLength->setValue(settings.value("MinCircleSegmentLenght", 0.5).toDouble());
     chbxCleanPolygons->setChecked(settings.value("MinCircleSegmentLenght", true).toBool());
-    chbxSkipDuplicates->setChecked(settings.value("SkipDuplicates", true).toBool());
+    chbxSkipDuplicates->setChecked(settings.value("SkipDuplicates", false).toBool());
     m_minCircleSegments = sbxMinCircleSegments->value();
     m_minCircleSegmentLength = dsbxMinCircleSegmentLength->value();
     m_cleanPolygons = chbxCleanPolygons->isChecked();

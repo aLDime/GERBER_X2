@@ -2,10 +2,10 @@
 #include "ui_drillform.h"
 
 #include "drillmodel.h"
-#include "project.h"
 #include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "previewitem.h"
+#include "project.h"
 #include "tooldatabase/tooldatabase.h"
 #include <QCheckBox>
 #include <QMenu>
@@ -353,7 +353,7 @@ void DrillForm::on_pbCreate_clicked()
             for (int id : v)
                 indexes += QString::number(id) + (id != v.last() ? "," : "");
             if (!pathsMap[selectedToolId].paths.isEmpty()) {
-                GCodeFile* gcode = new GCodeFile(pathsMap[selectedToolId].paths, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
+                GCode::File* gcode = new GCode::File(pathsMap[selectedToolId].paths, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
                 FileModel::addFile(gcode);
@@ -437,7 +437,7 @@ void DrillForm::on_pbCreate_clicked()
                         point1 = path[counter++];
                     }
                 }
-                GCodeFile* gcode = new GCodeFile({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drill);
+                GCode::File* gcode = new GCode::File({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drill);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
                 FileModel::addFile(gcode);
@@ -447,15 +447,15 @@ void DrillForm::on_pbCreate_clicked()
                 clipper.AddPaths(pathsMap[toolId].paths, ptSubject, true);
                 clipper.Execute(ctUnion, pathsMap[toolId].paths, pftPositive);
                 ReversePaths(pathsMap[toolId].paths);
-                GCodeFile* gcode = nullptr;
+                GCode::File* gcode = nullptr;
                 switch (m_worckType) {
                 case Profile: {
-                    ToolPathCreator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), m_side);
+                    GCode::Creator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), m_side);
                     tpc.createProfile(ToolHolder::tools[toolId], ui->dsbxDepth->value());
                     gcode = tpc.file();
                 } break;
                 case Pocket: {
-                    ToolPathCreator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), Inner);
+                    GCode::Creator tpc(pathsMap[toolId].paths, ui->rbConventional->isChecked(), Inner);
                     tpc.createPocket(ToolHolder::tools[toolId], ui->dsbxDepth->value(), 0);
                     gcode = tpc.file();
                 } break;

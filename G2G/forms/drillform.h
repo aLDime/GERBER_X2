@@ -3,8 +3,8 @@
 
 #include <QWidget>
 
-#include <gcode/gcode.h>
-#include <gcode/toolpathcreator.h>
+#include <gcode/gcfile.h>
+#include <gcode/gccreator.h>
 
 namespace Ui {
 class DrillForm;

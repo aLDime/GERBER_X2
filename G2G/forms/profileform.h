@@ -45,7 +45,7 @@ protected:
     void updateName() override;
 
 public:
-    virtual void editFile(GCodeFile* file) override;
+    virtual void editFile(GCode::File* file) override;
 };
 
 #endif // PROFILEFORM_H

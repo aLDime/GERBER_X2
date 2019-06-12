@@ -1,7 +1,7 @@
 #ifndef TOOLPATHUTIL_H
 #define TOOLPATHUTIL_H
 
-#include "gcode/toolpathcreator.h"
+#include "gcode/gccreator.h"
 #include "tooldatabase/tool.h"
 #include <QThread>
 #include <QVector>
@@ -15,7 +15,7 @@ class FormsUtil : public QWidget {
 public:
     FormsUtil(const QString& name, QWidget* parent = nullptr);
     ~FormsUtil();
-    virtual void editFile(GCodeFile* file) = 0;
+    virtual void editFile(GCode::File* file) = 0;
 
 protected:
     void readTools(const QVector<Tool*>& tools) const;
@@ -23,7 +23,7 @@ protected:
     virtual void create() = 0;
     virtual void updateName() = 0;
 
-    void setFile(GCodeFile* file);
+    void setFile(GCode::File* file);
 
     int fileCount;
     Tool tool;
@@ -32,7 +32,7 @@ protected:
     SideOfMilling side = Outer;
     Side boardSide = Top;
 
-    ToolPathCreator* toolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
+    GCode::Creator* toolPathCreator(const Paths& value, const bool convent, SideOfMilling side);
     QString m_fileName;
 
     void showProgress();
@@ -43,9 +43,9 @@ protected:
 private:
     const QString m_name;
     QThread thread;
-    GCodeFile* m_file;
+    GCode::File* m_file;
     void cancel();
-    ToolPathCreator* m_tps = nullptr;
+    GCode::Creator* m_tps = nullptr;
     QProgressDialog* pd = nullptr;
     int m_timerId = 0;
 

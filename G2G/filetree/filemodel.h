@@ -18,7 +18,10 @@ namespace Excellon {
 class File;
 }
 
-class GCodeFile;
+namespace GCode {
+class File;
+}
+
 class AbstractNode;
 
 class FileModel : public QAbstractItemModel {
@@ -35,7 +38,7 @@ public:
 
     static void addFile(Gerber::File* file);
     static void addFile(Excellon::File* file);
-    static void addFile(GCodeFile* file);
+    static void addFile(GCode::File* file);
     static void closeProject();
 
     // QAbstractItemModel interface

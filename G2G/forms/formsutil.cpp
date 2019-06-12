@@ -59,15 +59,15 @@ void FormsUtil::writeTools(const QVector<Tool*>& tools) const
     file.write(saveDoc.toBinaryData());
 }
 
-ToolPathCreator* FormsUtil::toolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
+GCode::Creator* FormsUtil::toolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
 {
     Scene::self->selectedItems();
 
     fileCount = 1;
     thread.wait();
-    m_tps = new ToolPathCreator(value, convent, side);
+    m_tps = new GCode::Creator(value, convent, side);
     m_tps->moveToThread(&thread);
-    connect(m_tps, &ToolPathCreator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
+    connect(m_tps, &GCode::Creator::fileReady, this, &FormsUtil::setFile, Qt::QueuedConnection);
     connect(&thread, &QThread::finished, m_tps, &QObject::deleteLater);
     thread.start(QThread::HighestPriority);
     return m_tps;
@@ -87,7 +87,6 @@ void FormsUtil::showProgress()
     m_timerId = startTimer(50);
 }
 
-
 void FormsUtil::cancel()
 {
     thread.requestInterruption();
@@ -104,7 +103,7 @@ void FormsUtil::cancel()
     qDebug("canceled");
 }
 
-void FormsUtil::setFile(GCodeFile* file)
+void FormsUtil::setFile(GCode::File* file)
 {
     if (pd && !(--fileCount))
         cancel();

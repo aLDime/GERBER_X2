@@ -9,7 +9,7 @@ class GerberNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    GerberNode(Gerber::File* file);
+    GerberNode(int id);
     ~GerberNode();
     // AbstractItem interface
 public:

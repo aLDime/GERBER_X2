@@ -45,7 +45,7 @@
 #include <cstring>
 #include <functional>
 #include <gbrvars.h>
-#include <gcode/toolpathcreator.h>
+#include <gcode/gccreator.h>
 #include <ostream>
 #include <settings.h>
 #include <stdexcept>
@@ -1617,7 +1617,7 @@ bool Clipper::ExecuteInternal()
         InsertLocalMinimaIntoAEL(botY);
 
         while (PopScanbeam(topY) || LocalMinimaPending()) {
-            ToolPathCreator::progressOrCancel();
+            GCode::Creator::progressOrCancel();
 
             ProcessHorizontals();
             ClearGhostJoins();

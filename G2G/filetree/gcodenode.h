@@ -3,12 +3,12 @@
 
 #include "abstractnode.h"
 #include <QGraphicsItemGroup>
-#include <gcode/gcode.h>
+#include <gcode/gcfile.h>
 
 class GcodeNode : public AbstractNode {
 
 public:
-    GcodeNode(GCodeFile* gCode);
+    GcodeNode(GCode::File* gCode);
     ~GcodeNode();
 
     // AbstractItem interface

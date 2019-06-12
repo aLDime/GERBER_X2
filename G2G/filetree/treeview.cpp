@@ -140,10 +140,10 @@ void TreeView::closeFile()
 
 void TreeView::saveGcodeFile()
 {
-    GCodeFile* file = Project::file<GCodeFile>(m_menuIndex.data(Qt::UserRole).toInt());
+    GCode::File* file = Project::file<GCode::File>(m_menuIndex.data(Qt::UserRole).toInt());
 
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-        GCodeFile::getLastDir().append(m_menuIndex.data().toString()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
+        GCode::File::getLastDir().append(m_menuIndex.data().toString()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
         tr("GCode (*.tap)")));
 
     if (name.isEmpty())

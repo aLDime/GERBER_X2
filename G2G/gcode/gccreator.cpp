@@ -1,6 +1,6 @@
-#include "toolpathcreator.h"
+#include "gccreator.h"
 #include "forms/gcodepropertiesform.h"
-#include "toolpathcreator.h"
+#include "gccreator.h"
 #include "voroni/jc_voronoi.h"
 #include <QCoreApplication>
 #include <QDebug>
@@ -17,7 +17,29 @@
 #include <scene.h>
 #include <voronoi.h>
 
-ToolPathCreator* ToolPathCreator::self = nullptr;
+struct Pair {
+    IntPoint first;
+    IntPoint second;
+    int id;
+    bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
+};
+
+using Pairs = QSet<Pair>;
+using Pairss = QVector<Pairs>;
+inline uint qHash(const Pair& tag, uint seed = 0) { return qHash(tag.first.X * tag.second.X, seed ^ 0xa317a317) ^ qHash(tag.first.Y * tag.second.Y, seed ^ 0x17a317a3); }
+
+struct OrdPath {
+    IntPoint Pt;
+    OrdPath* Next = nullptr;
+    OrdPath* Prev = nullptr;
+    OrdPath* Last = nullptr;
+    inline void append(OrdPath* opt)
+    {
+        Last->Next = opt;
+        Last = opt->Prev->Last;
+        opt->Prev = this;
+    }
+};
 
 void fixBegin(Path& path)
 {
@@ -36,6 +58,10 @@ void fixBegin(Path& path)
     if (rotate)
         std::rotate(path.begin(), path.begin() + rotate, path.end());
 }
+
+namespace GCode {
+
+Creator* Creator::self = nullptr;
 
 Paths& sortByStratDistance(Paths& src)
 {
@@ -114,14 +140,14 @@ bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
 /// \param value
 /// \param convent
 ///
-ToolPathCreator::ToolPathCreator(const Paths& workingPaths, const bool convent, SideOfMilling side)
+Creator::Creator(const Paths& workingPaths, const bool convent, SideOfMilling side)
     : m_side(side)
     , m_workingPaths(workingPaths)
     , m_convent(convent)
 {
 }
 
-ToolPathCreator::~ToolPathCreator()
+Creator::~Creator()
 {
     self = nullptr;
 }
@@ -134,7 +160,7 @@ ToolPathCreator::~ToolPathCreator()
 /// \param ex
 /// \return
 ///
-void ToolPathCreator::createPocket(const Tool& tool, const double depth, const int steps)
+void Creator::createPocket(const Tool& tool, const double depth, const int steps)
 {
     try {
         self = this;
@@ -255,7 +281,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
         } else {
-            m_file = new GCodeFile(m_returnPaths, tool, depth, Pocket, fillPaths);
+            m_file = new GCode::File(m_returnPaths, tool, depth, Pocket, fillPaths);
             m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
@@ -264,7 +290,7 @@ void ToolPathCreator::createPocket(const Tool& tool, const double depth, const i
     }
 }
 
-void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
+void Creator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
 {
     try {
         self = this;
@@ -335,7 +361,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
             if (m_returnPaths.isEmpty()) {
                 emit fileReady(nullptr);
             } else {
-                m_file = new GCodeFile(m_returnPaths, tool.second, depth, Pocket, fillPaths);
+                m_file = new GCode::File(m_returnPaths, tool.second, depth, Pocket, fillPaths);
                 m_file->setFileName(tool.second.name());
                 emit fileReady(m_file);
             }
@@ -412,7 +438,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
             if (m_returnPaths.isEmpty()) {
                 emit fileReady(nullptr);
             } else {
-                m_file = new GCodeFile(m_returnPaths, tool.first, depth, Pocket, fillPaths);
+                m_file = new GCode::File(m_returnPaths, tool.first, depth, Pocket, fillPaths);
                 m_file->setFileName(tool.first.name());
                 emit fileReady(m_file);
             }
@@ -429,7 +455,7 @@ void ToolPathCreator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
 /// \param side
 /// \return
 ///
-void ToolPathCreator::createProfile(const Tool& tool, double depth)
+void Creator::createProfile(const Tool& tool, double depth)
 {
     try {
         self = this;
@@ -561,7 +587,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
         } else {
-            m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Profile);
+            m_file = new GCode::File(sortByStratDistance(m_returnPaths), tool, depth, Profile);
             m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
@@ -570,7 +596,7 @@ void ToolPathCreator::createProfile(const Tool& tool, double depth)
     }
 }
 
-void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double depth)
+void Creator::createThermal(Gerber::File* file, const Tool& tool, double depth)
 {
     try {
         self = this;
@@ -683,7 +709,7 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
         if (m_returnPaths.isEmpty()) {
             emit fileReady(nullptr);
         } else {
-            m_file = new GCodeFile(sortByStratDistance(m_returnPaths), tool, depth, Thermal);
+            m_file = new GCode::File(sortByStratDistance(m_returnPaths), tool, depth, Thermal);
             m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }
@@ -692,31 +718,7 @@ void ToolPathCreator::createThermal(Gerber::File* file, const Tool& tool, double
     }
 }
 
-struct Pair {
-    IntPoint first;
-    IntPoint second;
-    int id;
-    bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
-};
-
-using Pairs = QSet<Pair>;
-using Pairss = QVector<Pairs>;
-inline uint qHash(const Pair& tag, uint seed = 0) { return qHash(tag.first.X * tag.second.X, seed ^ 0xa317a317) ^ qHash(tag.first.Y * tag.second.Y, seed ^ 0x17a317a3); }
-
-struct OrdPath {
-    IntPoint Pt;
-    OrdPath* Next = nullptr;
-    OrdPath* Prev = nullptr;
-    OrdPath* Last = nullptr;
-    inline void append(OrdPath* opt)
-    {
-        Last->Next = opt;
-        Last = opt->Prev->Last;
-        opt->Prev = this;
-    }
-};
-
-void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double k)
+void Creator::createVoronoi(const Tool& tool, double depth, const double k)
 {
     try {
         //qDebug() << "";
@@ -1114,7 +1116,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
 
         //qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
         //qDebug() << "elapsed" << t2.elapsed();
-        m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
+        m_file = new GCode::File(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
         m_file->setFileName(tool.name());
         emit fileReady(m_file);
     } catch (...) {
@@ -1122,7 +1124,7 @@ void ToolPathCreator::createVoronoi(const Tool& tool, double depth, const double
     }
 }
 
-Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
+Pathss& Creator::groupedPaths(Grouping group, cInt k, bool fl)
 {
     PolyTree polyTree;
     Clipper clipper;
@@ -1146,7 +1148,7 @@ Pathss& ToolPathCreator::groupedPaths(Grouping group, cInt k, bool fl)
 /// \brief ToolPathCreator::addRawPaths
 /// \param paths
 ///
-void ToolPathCreator::addRawPaths(Paths rawPaths)
+void Creator::addRawPaths(Paths rawPaths)
 {
     if (rawPaths.isEmpty())
         return;
@@ -1205,22 +1207,22 @@ void ToolPathCreator::addRawPaths(Paths rawPaths)
     m_workingPaths.append(paths);
 }
 
-void ToolPathCreator::addSupportPaths(Pathss supportPaths)
+void Creator::addSupportPaths(Pathss supportPaths)
 {
     m_supportPathss.append(supportPaths);
 }
 
-void ToolPathCreator::addPaths(const Paths& paths)
+void Creator::addPaths(const Paths& paths)
 {
     m_workingPaths.append(paths);
 }
 
-GCodeFile* ToolPathCreator::file() const
+GCode::File* Creator::file() const
 {
     return m_file;
 }
 
-void ToolPathCreator::grouping(PolyNode* node, Pathss* pathss, Grouping group)
+void Creator::grouping(PolyNode* node, Pathss* pathss, Grouping group)
 {
     Path path;
     Paths paths;
@@ -1255,7 +1257,7 @@ void ToolPathCreator::grouping(PolyNode* node, Pathss* pathss, Grouping group)
     }
 }
 
-Path& ToolPathCreator::fixPath(PolyNode* node)
+Path& Creator::fixPath(PolyNode* node)
 {
     if (m_convent ^ !node->IsHole())
         ReversePath(node->Contour);
@@ -1266,7 +1268,7 @@ Path& ToolPathCreator::fixPath(PolyNode* node)
     return node->Contour;
 }
 
-void ToolPathCreator::grouping2(PolyNode* node, Paths* paths, bool fl)
+void Creator::grouping2(PolyNode* node, Paths* paths, bool fl)
 {
 
     static bool newPath = false;
@@ -1299,7 +1301,7 @@ void ToolPathCreator::grouping2(PolyNode* node, Paths* paths, bool fl)
     }
 }
 
-void ToolPathCreator::progressOrCancel(int progressMax, int progressValue)
+void Creator::progressOrCancel(int progressMax, int progressValue)
 {
     m_progressValue = progressValue;
     m_progressMax = progressMax;
@@ -1309,9 +1311,9 @@ void ToolPathCreator::progressOrCancel(int progressMax, int progressValue)
     }
 }
 
-void ToolPathCreator::progressOrCancel()
+void Creator::progressOrCancel()
 {
-    if (!ToolPathCreator::self)
+    if (!Creator::self)
         return;
     if (!(++self->m_progressValue % 1000)) {
         if (self->m_progressMax == self->m_progressValue)
@@ -1321,11 +1323,12 @@ void ToolPathCreator::progressOrCancel()
     }
 }
 
-int ToolPathCreator::progressValue() const
+int Creator::progressValue() const
 {
     if (QThread::currentThread()->isInterruptionRequested())
         throw true;
     return m_progressValue;
 }
 
-int ToolPathCreator::progressMax() const { return m_progressMax; }
+int Creator::progressMax() const { return m_progressMax; }
+}

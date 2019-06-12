@@ -63,11 +63,12 @@ void FileModel::addFile(Gerber::File* file)
 {
     if (!m_self || !file)
         return;
+
     AbstractNode* item(m_self->rootItem->child(NodeGerberFiles));
     QModelIndex index = m_self->createIndex(0, 0, item);
     int rowCount = item->childCount();
     m_self->beginInsertRows(index, rowCount, rowCount);
-    item->append(new GerberNode(file));
+    item->append(new GerberNode(file->id()));
     m_self->endInsertRows();
 
     QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));
@@ -78,6 +79,7 @@ void FileModel::addFile(Excellon::File* file)
 {
     if (!m_self || !file)
         return;
+
     AbstractNode* item(m_self->rootItem->child(NodeDrillFiles));
     QModelIndex index = m_self->createIndex(0, 0, item);
     int rowCount = item->childCount();
@@ -89,10 +91,11 @@ void FileModel::addFile(Excellon::File* file)
     emit m_self->select(selectIndex);
 }
 
-void FileModel::addFile(GCodeFile* file)
+void FileModel::addFile(GCode::File* file)
 {
     if (!m_self || !file)
         return;
+
     AbstractNode* item(m_self->rootItem->child(NodeToolPath));
     QModelIndex index = m_self->createIndex(0, 0, item);
     int rowCount = item->childCount();

@@ -1,7 +1,7 @@
 #include "thermalform.h"
 #include "ui_thermalform.h"
 
-#include "gcode/gcode.h"
+#include "gcode/gcfile.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
 #include "project.h"
@@ -219,9 +219,9 @@ void ThermalForm::create()
     //        return;
     //    }
 
-    ToolPathCreator* tps = toolPathCreator(wPaths, true, side);
+    GCode::Creator* tps = toolPathCreator(wPaths, true, side);
     tps->addSupportPaths(wBridgePaths);
-    connect(this, &ThermalForm::createThermal, tps, &ToolPathCreator::createThermal);
+    connect(this, &ThermalForm::createThermal, tps, &GCode::Creator::createThermal);
     emit createThermal(static_cast<Gerber::File*>(ui->cbxFile->currentData().value<void*>()), tool, ui->dsbxDepth->value());
     showProgress();
     //progress(1, 0);
@@ -343,6 +343,6 @@ void ThermalForm::on_pbExclude_clicked()
     ui->treeView->update();
 }
 
-void ThermalForm::editFile(GCodeFile* /*file*/)
+void ThermalForm::editFile(GCode::File* /*file*/)
 {
 }

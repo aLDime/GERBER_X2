@@ -19,6 +19,7 @@
 #include <QToolBar>
 #include <excellondialog.h>
 #include <exparser.h>
+#include <filetree/gerbernode.h>
 #include <gbrparser.h>
 
 MainWindow* MainWindow::self = nullptr;
@@ -44,11 +45,12 @@ MainWindow::MainWindow(QWidget* parent)
 
     gerberParser->moveToThread(&gerberThread);
     connect(this, &MainWindow::parseFile, gerberParser, &Gerber::Parser::parseFile, Qt::QueuedConnection);
-    connect(gerberParser, &Gerber::Parser::fileReady, FileModel::self(), QOverload<Gerber::File*>::of(&FileModel::addFile));
+    connect(gerberParser, &Gerber::Parser::fileReady, pro, &Project::addFile);
     connect(gerberParser, &Gerber::Parser::fileReady, [=](Gerber::File* file) { prependToRecentFiles(file->name()); });
+    connect(gerberParser, &Gerber::Parser::fileReady, GerberNode::repaintTimer(), QOverload<>::of(&QTimer::start));
     connect(gerberParser, &Gerber::Parser::fileProgress, this, &MainWindow::fileProgress);
     connect(gerberParser, &Gerber::Parser::fileError, this, &MainWindow::fileError);
-    //    connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
+    connect(&gerberThread, &QThread::finished, gerberParser, &QObject::deleteLater);
     gerberThread.start(QThread::HighestPriority);
 
     connect(graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
@@ -135,12 +137,12 @@ void MainWindow::closeEvent(QCloseEvent* event)
 void MainWindow::saveSelectedToolpaths()
 {
     bool isEmpty = true;
-    for (GCodeFile* file : Project::files<GCodeFile>()) {
+    for (GCode::File* file : Project::files<GCode::File>()) {
         if (!file->itemGroup()->isVisible())
             continue;
         isEmpty = false;
         QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
-            GCodeFile::getLastDir().append(file->shortName()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
+            GCode::File::getLastDir().append(file->shortName()) + QStringList({ "(Top)", "(Bot)" })[file->side()],
             tr("GCode (*.tap)")));
         if (name.isEmpty())
             return;
@@ -216,7 +218,7 @@ void MainWindow::createActionsFile()
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     fileToolBar->setObjectName(QStringLiteral("fileToolBar"));
     // New
-    QAction* action = fileMenu->addAction(Icon(OpenFileIcon), tr("&New project"), this, &MainWindow::newFile);
+    QAction* action = fileMenu->addAction(/*Icon(OpenFileIcon), */ tr("&New project"), this, &MainWindow::newFile);
     action->setShortcuts(QKeySequence::New);
     action->setStatusTip(tr("Create a new file"));
     fileToolBar->addAction(action);
@@ -273,7 +275,7 @@ void MainWindow::createActionsFile()
     fileToolBar->addAction(m_closeAllAct);
 
     fileMenu->addSeparator();
-    action = fileMenu->addAction(Icon(ExitIcon), tr("P&rint"), this, &MainWindow::printDialog);
+    action = fileMenu->addAction(/*Icon(ExitIcon), */ tr("P&rint"), this, &MainWindow::printDialog);
     action->setShortcuts(QKeySequence::Print);
     action->setStatusTip(tr("Print"));
     fileMenu->addSeparator();
@@ -320,13 +322,15 @@ void MainWindow::createActionsZoom()
 
 void MainWindow::createActionsSDS()
 {
-    QToolBar* s = addToolBar(tr("Selection"));
-    s->setObjectName(QStringLiteral("s"));
+    QToolBar* toolBar = addToolBar(tr("Selection"));
+    toolBar->setObjectName(QStringLiteral("s"));
     // s->setMovable(false);
-    QAction* action = s->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
+    QAction* action = toolBar->addAction(Icon(SelectAllIcon), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
-    action = s->addAction(Icon(CloseIcon), tr("Redo"), this, &MainWindow::redo);
-    action->setShortcut(QKeySequence::Redo);
+
+    //    action = toolBar->addAction(Icon(CloseIcon), tr("Redo"), this, &MainWindow::redo);
+    //    action->setShortcut(QKeySequence::Redo);
+
     // action = s->addAction(QIcon::fromTheme("layer-delete"), tr("Delete selected"), [=]() {
     // QList<QGraphicsItem*> list;
     // for (QGraphicsItem* item : MyScene::self->items())
@@ -450,7 +454,7 @@ void MainWindow::createShtiftsPath()
             return;
         settings.setValue("Shtift/depth", depth);
 
-        GCodeFile* gcode = new GCodeFile({ toPath(dst) }, tool, depth, Drill);
+        GCode::File* gcode = new GCode::File({ toPath(dst) }, tool, depth, Drill);
         gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id()) + ")");
         FileModel::addFile(gcode);
     }
@@ -660,12 +664,15 @@ bool MainWindow::save()
 
 bool MainWindow::saveAs()
 {
-    QFileDialog dialog(this);
-    dialog.setWindowModality(Qt::WindowModal);
-    dialog.setAcceptMode(QFileDialog::AcceptSave);
-    if (dialog.exec() != QDialog::Accepted)
+    QString file(QFileDialog::getSaveFileName(this, tr("Open File"), lastPath, tr("Project (*.g2g)")));
+    if (file.isEmpty())
         return false;
-    return saveFile(dialog.selectedFiles().first());
+    return saveFile(file); //    QFileDialog dialog(this);
+    //    dialog.setWindowModality(Qt::WindowModal);
+    //    dialog.setAcceptMode(QFileDialog::AcceptSave);
+    //    if (dialog.exec() != QDialog::Accepted)
+    //        return false;
+    //    return saveFile(dialog.selectedFiles().first()); //    QFileDialog dialog(this);
 }
 
 void MainWindow::documentWasModified()
@@ -697,8 +704,8 @@ void MainWindow::loadFile(const QString& fileName)
 {
     if (!QFileInfo(fileName).exists())
         return;
-    if (Project::fileNames().contains(fileName)) {
-        QMessageBox::warning(this, "", tr("The document is open."));
+    if (Project::contains(fileName) != -1
+        && QMessageBox::warning(this, "", tr("Do you want to reload file?"), QMessageBox::Ok | QMessageBox::Cancel) == QMessageBox::Cancel) {
         return;
     }
     QFile file(fileName);

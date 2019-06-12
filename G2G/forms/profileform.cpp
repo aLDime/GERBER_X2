@@ -2,7 +2,7 @@
 #include "ui_profileform.h"
 
 #include "filetree/filemodel.h"
-#include "gcode/gcode.h"
+#include "gcode/gcfile.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
 #include "tooldatabase/tooldatabase.h"
@@ -175,9 +175,9 @@ void ProfileForm::create()
         return;
     }
 
-    ToolPathCreator* tpc = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
+    GCode::Creator* tpc = toolPathCreator(wPaths, ui->rbConventional->isChecked(), side);
     tpc->addRawPaths(wrPaths);
-    connect(this, &ProfileForm::createProfile, tpc, &ToolPathCreator::createProfile);
+    connect(this, &ProfileForm::createProfile, tpc, &GCode::Creator::createProfile);
     emit createProfile(tool, ui->dsbxDepth->value());
     showProgress();
 }
@@ -242,6 +242,6 @@ void ProfileForm::updatePixmap()
 
 void ProfileForm::on_leName_textChanged(const QString& arg1) { m_fileName = arg1; }
 
-void ProfileForm::editFile(GCodeFile* /*file*/)
+void ProfileForm::editFile(GCode::File* /*file*/)
 {
 }

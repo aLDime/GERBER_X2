@@ -1,7 +1,7 @@
 #include "voronoiform.h"
 #include "ui_voronoiform.h"
 
-#include "gcode/gcode.h"
+#include "gcode/gcfile.h"
 #include "gcodepropertiesform.h"
 #include "gi/bridgeitem.h"
 #include "tooldatabase/tooldatabase.h"
@@ -135,9 +135,9 @@ void VoronoiForm::create()
         return;
     }
 
-    ToolPathCreator* tps = toolPathCreator(wPaths, true, side);
+    GCode::Creator* tps = toolPathCreator(wPaths, true, side);
     tps->addRawPaths(wRawPaths);
-    connect(this, &VoronoiForm::createVoronoi, tps, &ToolPathCreator::createVoronoi);
+    connect(this, &VoronoiForm::createVoronoi, tps, &GCode::Creator::createVoronoi);
     emit createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value());
     showProgress();
     //    progrfess(1, 0);
@@ -153,6 +153,6 @@ void VoronoiForm::on_leName_textChanged(const QString& arg1)
     m_fileName = arg1;
 }
 
-void VoronoiForm::editFile(GCodeFile* /*file*/)
+void VoronoiForm::editFile(GCode::File* /*file*/)
 {
 }

@@ -86,10 +86,8 @@ bool Parser::isDrillFile(const QString& fileName)
     QString line;
     const QRegExp match("^T([0]?[0-9]{1})[FSC]((\\d*\\.?\\d+))?.*$");
     while (in.readLineInto(&line)) {
-        if (match.exactMatch(line)) {
-            //qDebug() << match.capturedTexts();
+        if (match.exactMatch(line))
             return true;
-        }
     }
     return false;
 }

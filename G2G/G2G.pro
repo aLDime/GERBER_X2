@@ -56,8 +56,8 @@ HEADERS += \
     forms/thermalmodel.h \
     forms/thermalpreviewitem.h \
     forms/voronoiform.h \
-    gcode/gcode.h \
-    gcode/toolpathcreator.h \
+    gcode/gccreator.h \
+    gcode/gcfile.h \
     gi/boarditem.h \
     gi/bridgeitem.h \
     gi/drillitem.h \
@@ -107,8 +107,8 @@ SOURCES += \
     forms/thermalmodel.cpp \
     forms/thermalpreviewitem.cpp \
     forms/voronoiform.cpp \
-    gcode/gcode.cpp \
-    gcode/toolpathcreator.cpp \
+    gcode/gccreator.cpp \
+    gcode/gcfile.cpp \
     gi/boarditem.cpp \
     gi/bridgeitem.cpp \
     gi/drillitem.cpp \

@@ -58,7 +58,7 @@ private:
 protected:
     void create() override;
     void updateName() override;
-   public: virtual void editFile(GCodeFile* file) override;
+   public: virtual void editFile(GCode::File* file) override;
 };
 
 #endif // THERMALFORM_H

@@ -5,14 +5,13 @@
 
 QTimer GerberNode::m_repaintTimer;
 
-GerberNode::GerberNode(Gerber::File* file)
-    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
+GerberNode::GerberNode(int id)
+    : m_id(id)
 {
-    file->itemGroup()->addToTheScene();
-    file->itemGroup()->setZValue(-m_id);
-    file->rawItemGroup()->addToTheScene();
-    file->rawItemGroup()->setZValue(-m_id);
-    //MainWindow::self->closeAllAct->setEnabled(true);
+    Project::file<Gerber::File>(m_id)->itemGroup()->addToTheScene();
+    Project::file<Gerber::File>(m_id)->itemGroup()->setZValue(-m_id);
+    Project::file<Gerber::File>(m_id)->rawItemGroup()->addToTheScene();
+    Project::file<Gerber::File>(m_id)->rawItemGroup()->setZValue(-m_id);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
     m_repaintTimer.setSingleShot(true);
     m_repaintTimer.start(100);
@@ -21,7 +20,6 @@ GerberNode::GerberNode(Gerber::File* file)
 GerberNode::~GerberNode()
 {
     Project::deleteFile(m_id);
-    //MainWindow::self->closeAllAct->setEnabled(Project::isEmpty());
     if (Scene::self) {
         Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
         Scene::self->update();

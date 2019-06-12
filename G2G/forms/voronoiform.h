@@ -15,7 +15,7 @@ public:
     ~VoronoiForm();
 
 signals:
-    GCodeFile* createVoronoi(const Tool& tool, double depth, const double k);
+    GCode::File* createVoronoi(const Tool& tool, double depth, const double k);
 
 private slots:
     void on_pbSelect_clicked();
@@ -34,7 +34,7 @@ private:
 protected:
     void create() override;
     void updateName() override;
-  public:  virtual void editFile(GCodeFile* file) override;
+  public:  virtual void editFile(GCode::File* file) override;
 };
 
 #endif // VORONOIFORM_H

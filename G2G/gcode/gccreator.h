@@ -4,7 +4,7 @@
 #include <QObject>
 #include <QSemaphore>
 #include <gbrfile.h>
-#include <gcode/gcode.h>
+#include <gcode/gcfile.h>
 #include <myclipper.h>
 #include <tooldatabase/tool.h>
 
@@ -28,14 +28,16 @@ enum Grouping {
 
 void fixBegin(Path& path);
 
-class ToolPathCreator : public QObject {
+namespace GCode {
+
+class Creator : public QObject {
     Q_OBJECT
     friend class ClipperLib::Clipper;
 
 public:
-    static ToolPathCreator* self;
-    ToolPathCreator(const Paths& workingPaths, const bool convent, SideOfMilling side);
-    ~ToolPathCreator();
+    static Creator* self;
+    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
+    ~Creator();
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);
@@ -46,16 +48,16 @@ public:
     void addSupportPaths(Pathss supportPaths);
     void addPaths(const Paths& paths);
 
-    GCodeFile* file() const;
+    File* file() const;
 
     int progressMax() const;
     int progressValue() const;
 
 signals:
-    void fileReady(GCodeFile* file);
+    void fileReady(GCode::File* file);
 
 private:
-    GCodeFile* m_file = nullptr;
+    File* m_file = nullptr;
     Paths m_workingPaths;
     Paths m_workingRawPaths;
     Paths m_returnPaths;
@@ -78,5 +80,5 @@ private:
     double m_stepOver = 0.0;
     const bool m_convent;
 };
-
+}
 #endif // TOOLPATHCREATOR_H

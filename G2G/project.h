@@ -7,7 +7,7 @@
 #include <QSemaphore>
 #include <exfile.h>
 #include <gbrfile.h>
-#include <gcode/gcode.h>
+#include <gcode/gcfile.h>
 #include <myclipper.h>
 
 using namespace ClipperLib;
@@ -62,6 +62,8 @@ public:
 
     static QRectF getSelectedBoundingRect();
     static QString fileNames();
+    static int contains(const QString& name);
+    static bool reload(int id, AbstractFile* file);
 
     template <typename T>
     static T* file(int id)
