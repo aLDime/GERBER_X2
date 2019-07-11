@@ -25,6 +25,7 @@ Ruler::~Ruler()
 
 QRectF Ruler::boundingRect() const
 {
+    //     return QRectF();
     const double k = GraphicsView::scaleFactor();
     const double width = (m_textRect.width() + 10) * k;
     const double height = (m_textRect.height() + 10) * k;
@@ -80,8 +81,10 @@ void Ruler::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
     painter->setFont(m_font);
     painter->translate(m_pt2);
     painter->scale(k, -k);
+    //const QPainter::CompositionMode cm = painter->compositionMode();
+    //painter->setCompositionMode(QPainter::CompositionMode_Exclusion);
     painter->drawText(m_textRect, Qt::AlignLeft, m_text);
-
+    //painter->setCompositionMode(cm);
     //    QPainterPath path;
     //    path.addText(0.0, 0.0, m_font, m_text);
     //    painter->setPen(Qt::NoPen);

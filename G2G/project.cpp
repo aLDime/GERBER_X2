@@ -4,8 +4,8 @@
 #include <QElapsedTimer>
 //#include <WinBase.h>
 //#include <WinNT.h>
-#include <qt_windows.h>
 #include <filetree/filemodel.h>
+#include <qt_windows.h>
 
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
 bool Project::m_isModified = false;
@@ -37,31 +37,7 @@ bool Project::save(QFile& file)
 
 bool Project::open(QFile& file)
 {
-    __try {
-        QDataStream in(&file);
-        in >> m_files;
-        for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-            filePtr->createGi();
-            switch (filePtr->type()) {
-            case FileType::Gerber:
-                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
-                break;
-            case FileType::Drill:
-                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
-                break;
-            case FileType::GCode:
-                FileModel::addFile(static_cast<GCode::File*>(filePtr.data()));
-                break;
-            }
-        }
-        m_isModified = false;
-        return true;
-    } __except (GetExceptionCode()) {
-        return false;
-    }
-    //    try {
-    //        QElapsedTimer t;
-    //        t.start();
+    //    __try {
     //        QDataStream in(&file);
     //        in >> m_files;
     //        for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
@@ -79,12 +55,36 @@ bool Project::open(QFile& file)
     //            }
     //        }
     //        m_isModified = false;
-    //        qDebug() << "Project::open" << t.elapsed();
     //        return true;
-    //    } catch (...) {
-    //        qDebug() <<  file.errorString();
+    //    } __except (GetExceptionCode()) {
+    //        return false;
     //    }
-    //    return false;
+    try {
+        QElapsedTimer t;
+        t.start();
+        QDataStream in(&file);
+        in >> m_files;
+        for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+            filePtr->createGi();
+            switch (filePtr->type()) {
+            case FileType::Gerber:
+                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
+                break;
+            case FileType::Drill:
+                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
+                break;
+            case FileType::GCode:
+                FileModel::addFile(static_cast<GCode::File*>(filePtr.data()));
+                break;
+            }
+        }
+        m_isModified = false;
+        qDebug() << "Project::open" << t.elapsed();
+        return true;
+    } catch (...) {
+        qDebug() << file.errorString();
+    }
+    return false;
 }
 
 AbstractFile* Project::file(int id)

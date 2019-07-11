@@ -30,9 +30,9 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     setMinimumWidth(400);
     setIconSize({ 24, 24 });
 
-    QFile brFile(":/QTreeView.qss");
-    brFile.open(QFile::ReadOnly);
-    setStyleSheet(brFile.readAll());
+//    QFile brFile(":/QTreeView.qss");
+//    brFile.open(QFile::ReadOnly);
+//    setStyleSheet(brFile.readAll());
 
     int w = indentation();
     int h = rowHeight(m_model->index(0, 0, QModelIndex()));

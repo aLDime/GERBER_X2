@@ -646,16 +646,21 @@ bool MainWindow::hasRecentFiles()
 void MainWindow::open()
 {
     if (maybeSave()) {
-        QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc);;Project (*.g2g)")));
-        for (QString& fileName : files) {
-            loadFile(fileName);
+        QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g);;Any (*.*)")));
+        if (files.filter(QRegExp(".+g2g$")).size()) {
+            closeProject();
+            loadFile(files.at(files.indexOf(QRegExp(".+g2g$"))));
+        } else {
+            for (QString& fileName : files) {
+                loadFile(fileName);
+            }
         }
     }
 }
 
 bool MainWindow::save()
 {
-    if (curFile.isEmpty()) {
+    if (isUntitled /*curFile.isEmpty()*/) {
         return saveAs();
     } else {
         return saveFile(curFile);
@@ -762,12 +767,11 @@ bool MainWindow::saveFile(const QString& fileName)
 
 void MainWindow::setCurrentFile(const QString& fileName)
 {
-    static int sequenceNumber = 1;
 
     isUntitled = fileName.isEmpty();
 
     if (isUntitled)
-        curFile = tr("Untitled%1.g2g").arg(sequenceNumber++);
+        curFile = tr("Untitled.g2g");
     else
         curFile = QFileInfo(fileName).canonicalFilePath();
 

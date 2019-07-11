@@ -212,16 +212,19 @@ bool Parser::parsePos(const QString& line)
                   "(?:Y([+-]?\\d*\\.?\\d+))?"
                   ".*$");
     if (match.exactMatch(line)) {
+        if (match.cap(2).isEmpty() && match.cap(3).isEmpty())
+            return false;
+
         if (!match.cap(2).isEmpty())
             m_state.rawPos.first = match.cap(2);
+
         if (!match.cap(3).isEmpty())
             m_state.rawPos.second = match.cap(3);
 
         parseNumber(match.cap(2), m_state.pos.rx());
         parseNumber(match.cap(3), m_state.pos.ry());
 
-        if (!(m_state.mCode == M15 || m_state.mCode == M16)
-            && !(m_state.gCode == G00 || m_state.gCode == G01)) {
+        if (!(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
             m_file->append(Hole(m_state, m_file));
         }
         return true;

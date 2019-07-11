@@ -111,7 +111,7 @@ public:
     void read(const QJsonObject& json);
     void write(QJsonObject& json) const;
     bool isValid();
-    QIcon&& icon();
+    QIcon icon() const;
     QString errorStr();
     void errorMessageBox(QWidget* parent = nullptr) { QMessageBox::warning(parent, QObject::tr("No valid tool...!!!"), errorStr()); }
 

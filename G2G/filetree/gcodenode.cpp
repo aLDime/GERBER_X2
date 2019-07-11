@@ -47,9 +47,9 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;
     case 1: {
-        if (Project::file(m_id)->shortName().contains(".tap"))
-            return itemFlag;
-        else
+//        if (Project::file(m_id)->shortName().contains(".tap"))
+//            return itemFlag;
+//        else
             return itemFlag | Qt::ItemIsEditable;
     }
     default:

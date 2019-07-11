@@ -8,6 +8,7 @@
 #include <gi/itemgroup.h>
 
 using namespace ClipperLib;
+
 enum class FileType {
     Gerber,
     Drill,
@@ -18,6 +19,10 @@ enum Side {
     NullSide = -1,
     Top,
     Bottom
+};
+
+enum FileVersion {
+    G2G_Ver = 1,
 };
 
 class AbstractFile {

@@ -88,9 +88,9 @@ bool Tool::isValid()
     return false;
 }
 
-QIcon&& Tool::icon()
+QIcon Tool::icon() const
 {
-    switch (type()) {
+    switch (m_type) {
     case Tool::Drill:
         return Icon(ToolDrillIcon);
     case Tool::EndMill:
