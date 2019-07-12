@@ -59,48 +59,29 @@ FileModel::~FileModel()
     m_self = nullptr;
 }
 
-void FileModel::addFile(Gerber::File* file)
+void FileModel::addFile(AbstractFile* file)
 {
     if (!m_self || !file)
         return;
 
-    AbstractNode* item(m_self->rootItem->child(NodeGerberFiles));
+    AbstractNode* item(m_self->rootItem->child(static_cast<int>(file->type())));
     QModelIndex index = m_self->createIndex(0, 0, item);
     int rowCount = item->childCount();
+
     m_self->beginInsertRows(index, rowCount, rowCount);
-    item->append(new GerberNode(file->id()));
-    m_self->endInsertRows();
-
-    QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));
-    emit m_self->select(selectIndex);
-}
-
-void FileModel::addFile(Excellon::File* file)
-{
-    if (!m_self || !file)
-        return;
-
-    AbstractNode* item(m_self->rootItem->child(NodeDrillFiles));
-    QModelIndex index = m_self->createIndex(0, 0, item);
-    int rowCount = item->childCount();
-    m_self->beginInsertRows(index, rowCount, rowCount);
-    item->append(new DrillNode(file));
-    m_self->endInsertRows();
-
-    QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));
-    emit m_self->select(selectIndex);
-}
-
-void FileModel::addFile(GCode::File* file)
-{
-    if (!m_self || !file)
-        return;
-
-    AbstractNode* item(m_self->rootItem->child(NodeToolPath));
-    QModelIndex index = m_self->createIndex(0, 0, item);
-    int rowCount = item->childCount();
-    m_self->beginInsertRows(index, rowCount, rowCount);
-    item->append(new GcodeNode(file));
+    switch (file->type()) {
+    case FileType ::Gerber:
+        item->append(new GerberNode(file->id()));
+        break;
+    case FileType ::Drill:
+        item->append(new DrillNode(file->id()));
+        break;
+    case FileType::GCode:
+        item->append(new GcodeNode(file->id()));
+        break;
+    default:
+        break;
+    }
     m_self->endInsertRows();
 
     QModelIndex selectIndex = m_self->createIndex(rowCount, 0, item->child(rowCount));

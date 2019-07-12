@@ -1,9 +1,9 @@
 #include "abstractnode.h"
 #include "project.h"
-#include <QDebug>
-#include <mainwindow.h>
+#include "mainwindow.h"
 
-AbstractNode::AbstractNode()
+AbstractNode::AbstractNode(int id)
+    : m_id(id)
 {
     //    if (MainWindow::closeAllAct()) {
     //        MainWindow::closeAllAct()->setEnabled(true);
@@ -17,6 +17,14 @@ AbstractNode::~AbstractNode()
     //        MainWindow::closeAllAct()->setEnabled(Project::isEmpty());
     //        MainWindow::exportPdfAct()->setEnabled(Project::isEmpty());
     //    }
+    if (m_id != -1) {
+        QGraphicsScene* scene = Project::file(m_id)->itemGroup()->first()->scene();
+        if (scene) {
+            scene->setSceneRect(scene->itemsBoundingRect());
+            scene->update();
+        }
+        Project::deleteFile(m_id);
+    }
     childItems.clear();
 }
 

@@ -18,52 +18,6 @@ void addData(QByteArray& dataArray, const T& data)
 
 File::~File()
 {
-    return;
-    qDebug() << "~File()" << shortName();
-    QByteArray data;
-    QFile file(m_name.append(".g2"));
-    if (file.open(QFile::WriteOnly)) {
-
-        auto appendSize = [&](int size) {
-            data.append(reinterpret_cast<const char*>(&size), sizeof(int));
-        };
-        addData(data, format());
-        addData(data, layer);
-        addData(data, miror);
-        addData(data, m_itemsType);
-
-        appendSize(m_name.size());
-        data.append(m_name.toLocal8Bit());
-
-        data.append(reinterpret_cast<char*>(&m_side), sizeof(Side));
-
-        appendSize(m_color.name(QColor::HexArgb).size());
-        data.append(m_color.name(QColor::HexArgb));
-
-        appendSize(m_lines.size());
-        for (const QString& line : m_lines) {
-            appendSize(line.size());
-            data.append(line.toLocal8Bit());
-        }
-
-        appendSize(m_mergedPaths.size());
-        for (const Path& path : m_mergedPaths) {
-            int size = path.size();
-            appendSize(size);
-            data.append(reinterpret_cast<const char*>(path.data()), size * sizeof(IntPoint));
-        }
-
-        appendSize(m_groupedPaths.size());
-        for (const Paths& paths : m_groupedPaths) {
-            appendSize(paths.size());
-            for (const Path& path : paths) {
-                int size = path.size();
-                appendSize(size);
-                data.append(reinterpret_cast<const char*>(path.data()), size * sizeof(IntPoint));
-            }
-        }
-        file.write(data);
-    }
 }
 
 const QMap<int, QSharedPointer<AbstractAperture>>* const File::apertures() const

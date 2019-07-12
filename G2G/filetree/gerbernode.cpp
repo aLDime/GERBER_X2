@@ -6,10 +6,10 @@
 QTimer GerberNode::m_repaintTimer;
 
 GerberNode::GerberNode(int id)
-    : m_id(id)
+    : AbstractNode(id)
 {
-    Project::file<Gerber::File>(m_id)->itemGroup()->addToTheScene();
-    Project::file<Gerber::File>(m_id)->itemGroup()->setZValue(-m_id);
+    Project::file(m_id)->itemGroup()->addToTheScene();
+    Project::file(m_id)->itemGroup()->setZValue(-m_id);
     Project::file<Gerber::File>(m_id)->rawItemGroup()->addToTheScene();
     Project::file<Gerber::File>(m_id)->rawItemGroup()->setZValue(-m_id);
     connect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
@@ -19,13 +19,7 @@ GerberNode::GerberNode(int id)
 
 GerberNode::~GerberNode()
 {
-    Project::deleteFile(m_id);
-    if (Scene::self) {
-        Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
-        Scene::self->update();
-    }
-    disconnect(&m_repaintTimer, &QTimer::timeout, this, &GerberNode::repaint);
-    m_repaintTimer.start(1);
+    m_repaintTimer.start(10);
 }
 
 bool GerberNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -146,5 +140,5 @@ void GerberNode::repaint()
     Project::file(m_id)->setColor(QColor::fromHsv(k, /* 255 - k * 0.2*/ 255, 255, 150));
     Project::file(m_id)->itemGroup()->setBrush(Project::file(m_id)->color());
     Project::file<Gerber::File>(m_id)->rawItemGroup()->setPen(QPen(Project::file(m_id)->color(), 0.0));
-    Scene::self->update();
+    Project::file(m_id)->itemGroup()->first()->scene()->update();
 }

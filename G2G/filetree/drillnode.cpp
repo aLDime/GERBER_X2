@@ -5,20 +5,14 @@
 #include <exfile.h>
 #include <mainwindow.h>
 
-DrillNode::DrillNode(Excellon::File* file)
-    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
+DrillNode::DrillNode(int id)
+    : AbstractNode(id)
 {
     Project::file(m_id)->itemGroup()->addToTheScene();
 }
 
 DrillNode::~DrillNode()
 {
-    qDebug("~DrillNode()");
-    Project::deleteFile(m_id);
-    if (Scene::self) {
-        Scene::self->setSceneRect(Scene::self->itemsBoundingRect());
-        Scene::self->update();
-    }
 }
 
 bool DrillNode::setData(const QModelIndex& index, const QVariant& value, int role)

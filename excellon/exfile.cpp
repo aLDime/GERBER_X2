@@ -11,7 +11,6 @@ File::File()
 File::~File()
 {
     saveFormat();
-    qDebug("~File()");
 }
 
 Format File::format() const

@@ -10,9 +10,13 @@
 namespace Gerber {
 class Parser;
 }
+namespace Excellon {
+class Parser;
+}
 
 class DockWidget;
 class Project;
+class Scene;
 
 class MainWindow : public QMainWindow, private Ui::MainWindow {
     Q_OBJECT
@@ -27,13 +31,15 @@ public:
     virtual QMenu* createPopupMenu() override;
 
 signals:
-    void parseFile(const QString& filename);
+    void parseGerberFile(const QString& filename);
+    void parseExcellonFile(const QString& filename);
 
 private:
     enum { MaxRecentFiles = 20 };
     DockWidget* dockWidget = nullptr;
 
     Gerber::Parser* gerberParser;
+    Excellon::Parser* excellonParser;
 
     QAction* m_closeAllAct = nullptr;
     QAction* recentFileActs[MaxRecentFiles + 1];
@@ -45,15 +51,18 @@ private:
     QMenu* recentMenu = nullptr;
     QMenu* serviceMenu = nullptr;
 
-    QString curFile;
+
     QString lastPath;
-    QThread gerberThread;
+    QThread parserThread;
 
     QToolBar* fileToolBar = nullptr;
     QToolBar* toolpathToolBar = nullptr;
     QToolBar* zoomToolBar = nullptr;
 
+    Scene* scene;
+
     Project* pro;
+    bool openFlag;
 
     QVector<QAction*> toolpathActionList;
 
@@ -64,7 +73,7 @@ private:
     inline QString fileKey();
     inline QString recentFilesKey();
     void about();
-    void closeProject();
+    bool closeProject();
     void createDockWidget(QWidget* dwContent, int type);
     void createShtiftsPath();
     void fileError(const QString& fileName, const QString& error);

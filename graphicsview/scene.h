@@ -8,23 +8,19 @@ class Scene : public QGraphicsScene {
     friend class MainWindow;
 
 public:
-    explicit Scene(QObject* parent);
+    explicit Scene(QObject* parent = nullptr);
     ~Scene();
     void RenderPdf();
-
-    static Scene* self;
     QRectF itemsBoundingRect();
-
     static bool drawPdf();
     static QList<QGraphicsItem*> selectedItems();
-    static void addItem(QGraphicsItem* item)
-    {
-        if (self)
-            self->QGraphicsScene::addItem(item);
-    }
+    static void addItem(QGraphicsItem* item);
+    static QList<QGraphicsItem*> items(Qt::SortOrder order = Qt::DescendingOrder);
+    void setCross(const QPointF& cross);
 
 private:
     bool m_drawPdf;
+    QPointF m_cross;
 
     // QGraphicsScene interface
 protected:

@@ -328,6 +328,22 @@ public:
     inline State state() const { return m_state; }
 };
 
+struct StepRepeatStr {
+    void reset()
+    {
+        x = 0;
+        y = 0;
+        i = 0.0;
+        j = 0.0;
+        storage.clear();
+    }
+    int x = 0;
+    int y = 0;
+    double i = 0.0;
+    double j = 0.0;
+    QList<GraphicObject> storage;
+};
+
 } // namespace Gerber
 
 #endif //   GERBER_H

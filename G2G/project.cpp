@@ -14,13 +14,9 @@ QString Project::m_fileName;
 Project* Project::self = nullptr;
 QSemaphore Project::sem;
 
-Project::Project()
-{
-    if (!self)
-        self = this;
-}
+Project::Project() { self = this; }
 
-Project::~Project() {}
+Project::~Project() { self = nullptr; }
 
 bool Project::save(QFile& file)
 {
@@ -37,28 +33,6 @@ bool Project::save(QFile& file)
 
 bool Project::open(QFile& file)
 {
-    //    __try {
-    //        QDataStream in(&file);
-    //        in >> m_files;
-    //        for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-    //            filePtr->createGi();
-    //            switch (filePtr->type()) {
-    //            case FileType::Gerber:
-    //                FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
-    //                break;
-    //            case FileType::Drill:
-    //                FileModel::addFile(static_cast<Excellon::File*>(filePtr.data()));
-    //                break;
-    //            case FileType::GCode:
-    //                FileModel::addFile(static_cast<GCode::File*>(filePtr.data()));
-    //                break;
-    //            }
-    //        }
-    //        m_isModified = false;
-    //        return true;
-    //    } __except (GetExceptionCode()) {
-    //        return false;
-    //    }
     try {
         QElapsedTimer t;
         t.start();
@@ -98,11 +72,11 @@ AbstractFile* Project::file(int id)
 void Project::deleteFile(int id)
 {
     QMutexLocker locker(&m_mutex);
-    if (m_files.contains(id))
+    if (m_files.contains(id)) {
         m_files.take(id);
-    else
+        setChanged();
+    } else
         qWarning() << "Error id" << id;
-    setChanged();
 }
 
 bool Project::isEmpty()
@@ -170,18 +144,29 @@ int Project::contains(const QString& name)
 
 bool Project::reload(int id, AbstractFile* file)
 {
+    file->m_id = id;
     if (m_files.contains(id)) {
         switch (file->type()) {
         case FileType::Gerber:
             file->setColor(m_files[id]->color());
             file->itemGroup()->setBrush(m_files[id]->itemGroup()->brush());
-            static_cast<Gerber::File*>(file)->rawItemGroup()->setPen(static_cast<Gerber::File*>(m_files[id].data())->rawItemGroup()->pen());
             file->itemGroup()->addToTheScene();
             file->itemGroup()->setZValue(-id);
+            static_cast<Gerber::File*>(file)->rawItemGroup()->setPen(static_cast<Gerber::File*>(m_files[id].data())->rawItemGroup()->pen());
             static_cast<Gerber::File*>(file)->rawItemGroup()->addToTheScene();
             static_cast<Gerber::File*>(file)->rawItemGroup()->setZValue(-id);
             break;
+        case FileType::Drill:
+            file->setColor(m_files[id]->color());
+            static_cast<Excellon::File*>(file)->setFormat(static_cast<Excellon::File*>(m_files[id].data())->format());
+            file->itemGroup()->addToTheScene();
+            file->itemGroup()->setZValue(-id);
+            break;
         default:
+            file->setColor(m_files[id]->color());
+            file->itemGroup()->setBrush(m_files[id]->itemGroup()->brush());
+            file->itemGroup()->addToTheScene();
+            file->itemGroup()->setZValue(-id);
             break;
         }
         m_files[id] = QSharedPointer<AbstractFile>(file);
@@ -193,29 +178,19 @@ bool Project::reload(int id, AbstractFile* file)
 int Project::addFile(AbstractFile* file)
 {
     //QMutexLocker locker(&m_mutex);
-    qDebug() << file->m_id << file->name();
     const int id = contains(file->name());
     if (id != -1) {
         reload(id, file);
     } else if (file->m_id == -1) {
         file->m_id = m_files.size() ? m_files.lastKey() + 1 : 0;
         m_files.insert(file->m_id, QSharedPointer<AbstractFile>(file));
-        switch (file->type()) {
-        case FileType::Gerber:
-            FileModel::addFile(static_cast<Gerber::File*>(file));
-            break;
-        default:
-            break;
-        }
+        FileModel::addFile(file);
     }
     setChanged();
     return file->m_id;
 }
 
-bool Project::contains(AbstractFile* file)
-{
-    return m_files.values().contains(QSharedPointer<AbstractFile>(file));
-}
+bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {

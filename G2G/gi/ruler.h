@@ -4,18 +4,18 @@
 #include <QFont>
 #include <QGraphicsItem>
 
-class Ruler : public QGraphicsItem {
+class Ruler : public QGraphicsObject {
+    Q_OBJECT
 public:
     Ruler(const QPointF& point);
     ~Ruler();
 
     // QGraphicsItem interface
-    virtual QRectF boundingRect() const override;
-    virtual void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    virtual int type() const override;
+    QRectF boundingRect() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    int type() const override;
 
-    static void setPoint2(const QPointF& point2);
-    static Ruler* self;
+    void setPoint2(const QPointF& point2);
 
 private:
     QPointF m_pt1;

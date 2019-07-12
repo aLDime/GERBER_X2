@@ -9,20 +9,22 @@
 #include <QPainter>
 #include <QPdfWriter>
 #include <QtMath>
+#include <gi/graphicsitem.h>
 #include <settings.h>
 
-Scene* Scene::self = nullptr;
+Scene* m_self = nullptr;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
     , m_drawPdf(false)
+
 {
-    self = this;
+    m_self = this;
 }
 
 Scene::~Scene()
 {
-    self = nullptr;
+    m_self = nullptr;
 }
 
 void Scene::RenderPdf()
@@ -69,16 +71,35 @@ QRectF Scene::itemsBoundingRect()
 
 bool Scene::drawPdf()
 {
-    if (self)
-        return self->m_drawPdf;
+    if (m_self)
+        return m_self->m_drawPdf;
     return false;
 }
 
 QList<QGraphicsItem*> Scene::selectedItems()
 {
-    if (self)
-        return self->QGraphicsScene::selectedItems();
+    if (m_self)
+        return m_self->QGraphicsScene::selectedItems();
     return QList<QGraphicsItem*>();
+}
+
+void Scene::addItem(QGraphicsItem* item)
+{
+    if (m_self)
+        m_self->QGraphicsScene::addItem(item);
+}
+
+QList<QGraphicsItem*> Scene::items(Qt::SortOrder order)
+{
+    if (m_self)
+        return m_self->QGraphicsScene::items(order);
+    return QList<QGraphicsItem*>();
+}
+
+void Scene::setCross(const QPointF& cross)
+{
+    m_cross = cross;
+    update();
 }
 
 void Scene::drawBackground(QPainter* painter, const QRectF& rect)
@@ -167,19 +188,28 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     for (int i = 0; i < 3; ++i) {
         painter->setPen(QPen(color[i], 1.0 / scale));
         for (long hPos : hGrid.keys(i)) {
-            if (hPos) {
+            if (hPos)
                 painter->drawLine(QLineF(hPos * invK, rect.top(), hPos * invK, rect.bottom()));
-            }
         }
         for (long vPos : vGrid.keys(i)) {
-            if (vPos) {
+            if (vPos)
                 painter->drawLine(QLineF(rect.left(), vPos * invK, rect.right(), vPos * invK));
-            }
         }
     }
 
+    const double k2 = 0.5 / scale;
+
     painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
-    painter->drawLine(QLineF(0.5 / scale, rect.top(), 0.5 / scale, rect.bottom()));
-    painter->drawLine(QLineF(rect.left(), -0.5 / scale, rect.right(), -0.5 / scale));
+    painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
+    painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
+
+    QGraphicsItem* item = itemAt(m_cross, views().first()->transform());
+    if (item && item->type() != RulerType)
+        painter->setPen(QPen(Qt::red, 0.0 /*1.0 / scale*/));
+    else
+        painter->setPen(QPen(Qt::white, 0.0 /*1.0 / scale*/));
+    painter->drawLine(QLineF(m_cross.x(), rect.top(), m_cross.x(), rect.bottom()));
+    painter->drawLine(QLineF(rect.left(), m_cross.y(), rect.right(), m_cross.y()));
+
     painter->restore();
 }

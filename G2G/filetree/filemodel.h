@@ -10,23 +10,13 @@ enum RootNodes {
     NodeSpecial,
 };
 
-namespace Gerber {
-class File;
-}
-
-namespace Excellon {
-class File;
-}
-
-namespace GCode {
-class File;
-}
-
+class AbstractFile;
 class AbstractNode;
 
 class FileModel : public QAbstractItemModel {
     Q_OBJECT
     AbstractNode* rootItem;
+    friend class Project;
 
 signals:
     void updateActions();
@@ -36,9 +26,6 @@ public:
     explicit FileModel(QObject* parent = nullptr);
     ~FileModel();
 
-    static void addFile(Gerber::File* file);
-    static void addFile(Excellon::File* file);
-    static void addFile(GCode::File* file);
     static void closeProject();
 
     // QAbstractItemModel interface
@@ -56,6 +43,7 @@ public:
     static FileModel* self();
 
 private:
+    static void addFile(AbstractFile* file);
     static FileModel* m_self;
     AbstractNode* getItem(const QModelIndex& index) const;
 };

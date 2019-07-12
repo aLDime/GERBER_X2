@@ -2,7 +2,6 @@
 #include "ui_drillform.h"
 
 #include "drillmodel.h"
-#include "filetree/filemodel.h"
 #include "gcodepropertiesform.h"
 #include "previewitem.h"
 #include "project.h"
@@ -212,7 +211,7 @@ void DrillForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAper
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     PreviewItem* item = new PreviewItem(go, apertureIt.key());
                     m_sourcePreview[apertureIt.key()].append(QSharedPointer<PreviewItem>(item));
-                    Scene::self->addItem(item);
+                    Scene::addItem(item);
                 }
             }
             if (drillDiameter != 0.0)
@@ -250,7 +249,7 @@ void DrillForm::setHoles(const QMap<int, double>& value)
                 if (!hole.state.path.isEmpty())
                     isSlot = true;
                 m_sourcePreview[toolIt.key()].append(QSharedPointer<PreviewItem>(item));
-                Scene::self->addItem(item);
+                Scene::addItem(item);
             }
         }
         model->setSlot(model->rowCount() - 1, isSlot);
@@ -356,7 +355,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File(pathsMap[selectedToolId].paths, ToolHolder::tools[selectedToolId], ui->dsbxDepth->value(), Profile);
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[selectedToolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                FileModel::addFile(gcode);
+                Project::addFile(gcode);
             }
         }
     }
@@ -440,7 +439,7 @@ void DrillForm::on_pbCreate_clicked()
                 GCode::File* gcode = new GCode::File({ path }, ToolHolder::tools[toolId], ui->dsbxDepth->value(), Drill);
                 gcode->setFileName(/*"Drill " +*/ ToolHolder::tools[toolId].name() + (m_type ? " - T(" : " - D(") + indexes + ')');
                 gcode->setSide(file->side());
-                FileModel::addFile(gcode);
+                Project::addFile(gcode);
             }
             if (!pathsMap[toolId].paths.isEmpty()) {
                 Clipper clipper;
@@ -466,7 +465,7 @@ void DrillForm::on_pbCreate_clicked()
                     continue;
                 gcode->setFileName(/*"Slot Drill " +*/ ToolHolder::tools[toolId].name() + " - T(" + indexes + ')');
                 gcode->setSide(file->side());
-                FileModel::addFile(gcode);
+                Project::addFile(gcode);
             }
         }
     }

@@ -47,7 +47,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     if (m_brushColor)
         m_brush.setColor(*m_brushColor);
 
-    if (Scene::self && Scene::self->drawPdf()) {
+    if (Scene::drawPdf()) {
         painter->setBrush(m_brush.color());
         painter->setPen(Qt::NoPen);
         painter->drawPath(m_shape);

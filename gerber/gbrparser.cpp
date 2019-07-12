@@ -18,18 +18,19 @@ namespace Gerber {
 int id1 = qRegisterMetaType<Gerber::File*>("G::GFile*");
 
 Parser::Parser(QObject* parent)
-    : QObject(parent)
+    : FileParser(parent)
 {
 }
 
-void Parser::parseFile(const QString& fileName)
+AbstractFile* Parser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
-        return;
+        return nullptr;
 
     QTextStream in(&file);
     parseLines(in.readAll(), fileName);
+    return m_file;
 }
 
 void Parser::parseLines(const QString& gerberLines, const QString& fileName)
@@ -151,7 +152,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
             break;
         }
     }
-    if (m_file->isEmpty()) {
+    if (file()->isEmpty()) {
         delete m_file;
     } else {
         //        qDebug() << m_file->shortName() << "else" << t.elapsed();
@@ -373,13 +374,13 @@ void Parser::addPath()
         m_state.setType(Region);
         switch (m_abSrIdStack.top().first) {
         case Normal:
-            m_file->append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
+            file()->append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
         case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
         case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), file(), m_path));
             break;
         }
         break;
@@ -387,13 +388,13 @@ void Parser::addPath()
         m_state.setType(Line);
         switch (m_abSrIdStack.top().first) {
         case Normal:
-            m_file->append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
+            file()->append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
             break;
         case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
+            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
             break;
         case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createLine(), m_file, m_path));
+            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createLine(), file(), m_path));
             break;
         }
         break;
@@ -405,24 +406,24 @@ void Parser::addFlash()
 {
     m_state.setType(Aperture);
 
-    if (!m_file->m_apertures.contains(m_state.aperture()) && m_file->m_apertures[m_state.aperture()].data() == nullptr)
+    if (!file()->m_apertures.contains(m_state.aperture()) && file()->m_apertures[m_state.aperture()].data() == nullptr)
         throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
-    Paths paths(m_file->m_apertures[m_state.aperture()]->draw(m_state));
+    Paths paths(file()->m_apertures[m_state.aperture()]->draw(m_state));
 
     ////////////////////////////////// Draw Drill //////////////////////////////////
-    if (m_file->m_apertures[m_state.aperture()]->isDrilled())
-        paths.push_back(m_file->m_apertures[m_state.aperture()]->drawDrill(m_state));
+    if (file()->m_apertures[m_state.aperture()]->isDrilled())
+        paths.push_back(file()->m_apertures[m_state.aperture()]->drawDrill(m_state));
 
     switch (m_abSrIdStack.top().first) {
     case Normal:
-        m_file->append(GraphicObject(m_goId++, m_state, paths, m_file));
+        file()->append(GraphicObject(m_goId++, m_state, paths, file()));
         break;
     case StepRepeat:
-        m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, paths, m_file));
+        m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, paths, file()));
         break;
     case ApertureBlock:
-        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, paths, m_file));
+        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, paths, file()));
         break;
     }
     resetStep();
@@ -434,7 +435,7 @@ void Parser::reset(const QString& fileName)
     m_apertureMacro.clear();
     m_path.clear();
     m_file = new File(fileName);
-    m_state = State(m_file->format());
+    m_state = State(file()->format());
     m_abSrIdStack.clear();
     m_abSrIdStack.push({ Normal, 0 });
     m_stepRepeat.reset();
@@ -504,11 +505,11 @@ Path Parser::arc(IntPoint p1, IntPoint p2, IntPoint center)
 Paths Parser::createLine()
 {
     Paths solution;
-    if (!m_file->m_apertures.contains(m_state.aperture()))
+    if (!file()->m_apertures.contains(m_state.aperture()))
         throw tr("Aperture %1 not found!").arg(m_state.aperture());
 
-    if (m_file->m_apertures[m_state.aperture()]->type() == Rectangle) {
-        ApRectangle* rect = static_cast<ApRectangle*>(m_file->m_apertures[m_state.aperture()].data());
+    if (file()->m_apertures[m_state.aperture()]->type() == Rectangle) {
+        ApRectangle* rect = static_cast<ApRectangle*>(file()->m_apertures[m_state.aperture()].data());
         if (!qFuzzyCompare(rect->m_width, rect->m_height)) // only square Aperture
             throw tr("Aperture D%1 (%2) not supported!").arg(m_state.aperture()).arg(rect->name());
         double size = rect->m_width * uScale * 0.5 * m_state.scaling();
@@ -520,7 +521,7 @@ Paths Parser::createLine()
         if (m_state.imgPolarity() == Negative)
             ReversePaths(solution);
     } else {
-        double size = m_file->m_apertures[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
+        double size = file()->m_apertures[m_state.aperture()]->apertureSize() * uScale * 0.5 * m_state.scaling();
         if (qFuzzyIsNull(size))
             size = 1;
         ClipperOffset offset;
@@ -567,24 +568,24 @@ bool Parser::parseAperture(const QString& gLine)
         case Circle:
             if (paramList.size() > 1)
                 hole = toDouble(paramList[1]);
-            m_file->m_apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, m_file->format()));
+            file()->m_apertures[aperture] = QSharedPointer<AbstractAperture>(new ApCircle(toDouble(paramList[0]), hole, file()->format()));
             break;
         case Rectangle:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, m_file->format())));
+            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApRectangle(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
             break;
         case Obround:
             if (paramList.size() > 2)
                 hole = toDouble(paramList[2]);
-            m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, m_file->format())));
+            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApObround(toDouble(paramList[0]), toDouble(paramList[1]), hole, file()->format())));
             break;
         case Polygon:
             if (paramList.length() > 2)
                 rotation = toDouble(paramList[2], false, false);
             if (paramList.length() > 3)
                 hole = toDouble(paramList[3]);
-            m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, m_file->format())));
+            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file()->format())));
             break;
         case Macro:
         default:
@@ -592,7 +593,7 @@ bool Parser::parseAperture(const QString& gLine)
             for (int i = 0; i < paramList.size(); ++i) {
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             }
-            m_file->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, m_file->format())));
+            file()->m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, file()->format())));
             break;
         }
         return true;
@@ -605,7 +606,7 @@ bool Parser::parseApertureBlock(const QString& gLine)
     static const QRegExp match(QStringLiteral("^%ABD(\\d+)\\*%$"));
     if (match.exactMatch(gLine)) {
         m_abSrIdStack.push({ ApertureBlock, match.cap(1).toInt() });
-        m_file->m_apertures.insert(m_abSrIdStack.top().second, QSharedPointer<AbstractAperture>(new ApBlock(m_file->format())));
+        file()->m_apertures.insert(m_abSrIdStack.top().second, QSharedPointer<AbstractAperture>(new ApBlock(file()->format())));
         return true;
     }
     if (gLine == "%AB*%") {
@@ -699,7 +700,7 @@ void Parser::closeStepRepeat()
                 for (Path& path : paths) {
                     TranslatePath(path, IntPoint(m_stepRepeat.i * x, m_stepRepeat.j * y));
                 }
-                m_file->append(GraphicObject(m_goId++, go.state(), paths, go.gFile(), go.path()));
+                file()->append(GraphicObject(m_goId++, go.state(), paths, go.gFile(), go.path()));
             }
         }
     }

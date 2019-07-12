@@ -11,7 +11,7 @@ class AbstractNode {
     AbstractNode& operator=(const AbstractNode&) = delete;
 
 public:
-    AbstractNode();
+    AbstractNode(int id);
     virtual ~AbstractNode();
     AbstractNode* child(int row);
     AbstractNode* parentItem();
@@ -35,6 +35,7 @@ public:
 protected:
     AbstractNode* m_parentItem = nullptr;
     QList<QSharedPointer<AbstractNode>> childItems;
+    const int m_id;
     //Qt::CheckState m_checkState = Qt::Checked;
 };
 

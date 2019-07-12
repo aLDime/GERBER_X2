@@ -252,7 +252,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
             item->setToolTip("Region");
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-            Scene::self->addItem(item);
+            Scene::addItem(item);
             thermalNode->append(new ThermalNode(drawRegionIcon(go), "Region", 0.0, 0.5, 4, go.state().curPos(), item));
         }
     }
@@ -263,7 +263,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
             ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
             item->setToolTip("Line");
             m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-            Scene::self->addItem(item);
+            Scene::addItem(item);
             thermalNode->append(new ThermalNode(drawRegionIcon(go), "Line", 0.0, 0.5, 4, go.state().curPos(), item));
         }
     }
@@ -278,7 +278,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
                     ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
                     item->setToolTip(name);
                     m_sourcePreview.append(QSharedPointer<ThermalPreviewItem>(item));
-                    Scene::self->addItem(item);
+                    Scene::addItem(item);
                     thermalNode->append(new ThermalNode(drawRegionIcon(go), name, 0.0, 0.5, 4, go.state().curPos(), item));
                 }
             }

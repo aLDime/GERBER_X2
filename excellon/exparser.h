@@ -3,17 +3,16 @@
 
 #include "exvars.h"
 #include <QObject>
+#include <parser.h>
 
 namespace Excellon {
 
-class File;
-
-class Parser : public QObject {
+class Parser : public FileParser {
     Q_OBJECT
 
 public:
     explicit Parser(QObject* parent = nullptr);
-    File* parseFile(const QString& fileName);
+    AbstractFile* parseFile(const QString& fileName) override;
     bool isDrillFile(const QString& fileName);
     static double parseNumber(QString Str, const State& state);
 
@@ -28,8 +27,9 @@ private:
     bool parseFormat(const QString& line);
     bool parseNumber(QString Str, double& val);
 
+    inline File* file() { return reinterpret_cast<File*>(m_file); }
+
     State m_state;
-    File* m_file = nullptr;
 };
 } // namespace Excellon
 

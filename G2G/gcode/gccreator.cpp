@@ -512,7 +512,7 @@ void Creator::createProfile(const Tool& tool, double depth)
 
         // find Bridges
         QVector<BridgeItem*> bridgeItems;
-        for (QGraphicsItem* item : Scene::self->items()) {
+        for (QGraphicsItem* item : Scene::items()) {
             if (item->type() == BridgeType)
                 bridgeItems.append(static_cast<BridgeItem*>(item));
         }

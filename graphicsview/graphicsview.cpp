@@ -70,7 +70,10 @@ GraphicsView::GraphicsView(QWidget* parent)
     viewport()->setObjectName("viewport");
     settings.endGroup();
 
-    setScene(new Scene(this));
+    Scene* scene = new Scene;
+    setScene(scene);
+    connect(this, &GraphicsView::mouseMove, scene, &Scene::setCross);
+
     setStyleSheet("QGraphicsView { background: black }");
 
     //    QTimer* t = new QTimer(this);
@@ -234,6 +237,8 @@ void GraphicsView::wheelEvent(QWheelEvent* event)
         return;
     }
 
+    mouseMove(mapToScene(event->pos()));
+
     //        switch (event->modifiers()) {
     //        case Qt::ControlModifier:
     //            if (event->angleDelta().x() != 0)
@@ -317,7 +322,10 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         setDragMode(NoDrag);
         setInteractive(false);
         //Ruler
-        scene()->addItem(new Ruler(mapToScene(event->pos())));
+        ruller = new Ruler(mapToScene(event->pos()));
+        connect(this, &GraphicsView::mouseMove, ruller, &Ruler::setPoint2);
+        scene()->addItem(ruller);
+
         QGraphicsView::mousePressEvent(event);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
@@ -339,25 +347,20 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         //Ruler
-        delete Ruler::self;
+        delete ruller;
+        ruller = nullptr;
     } else {
         QGraphicsView::mouseReleaseEvent(event);
     }
 }
 
-void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event)
-{
-    QGraphicsView::mouseDoubleClickEvent(event);
-}
+void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) { QGraphicsView::mouseDoubleClickEvent(event); }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event)
 {
     vRuler->SetCursorPos(event->pos());
     hRuler->SetCursorPos(event->pos());
-    mouseMove(mapToScene(event->pos()));
-    //Ruler
-    if (event->buttons() == Qt::RightButton)
-        Ruler::setPoint2(mapToScene(event->pos()));
+    mouseMove(mapToScene(event->pos() + QPoint(1, 1)));
 
     QGraphicsView::mouseMoveEvent(event);
 }

@@ -1,8 +1,8 @@
 #include "point.h"
-#include "project.h"
 #include "forms/gcodepropertiesform.h"
 #include "gi/graphicsitem.h"
 #include "mainwindow.h"
+#include "project.h"
 #include "settings.h"
 #include <QDebug>
 #include <QGraphicsSceneMouseEvent>
@@ -49,6 +49,7 @@ Point::Point(int type)
     settings.beginGroup("Point");
     setPos(settings.value("pos" + QString::number(m_type)).toPointF());
     setFlag(QGraphicsItem::ItemIsMovable, settings.value("fixed").toBool());
+    Scene::addItem(this);
 }
 
 Point::~Point()
@@ -178,7 +179,7 @@ Shtift::Shtift()
     if (m_shtifts.isEmpty())
         worckRect = settings.value("worckRect").toRectF();
     m_shtifts.append(this);
-    Scene::self->addItem(this);
+    Scene::addItem(this);
 }
 
 Shtift::~Shtift()

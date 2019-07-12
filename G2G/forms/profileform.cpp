@@ -90,7 +90,7 @@ ProfileForm::~ProfileForm()
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
     settings.endGroup();
 
-    for (QGraphicsItem* item : Scene::self->items()) {
+    for (QGraphicsItem* item : Scene::items()) {
         if (item->type() == BridgeType)
             delete item;
     }
@@ -220,7 +220,7 @@ void ProfileForm::updateBridge()
 {
     m_lenght = ui->dsbxBridgeLenght->value();
     m_size = tool.getDiameter(ui->dsbxDepth->value());
-    for (QGraphicsItem* item : Scene::self->items()) {
+    for (QGraphicsItem* item : Scene::items()) {
         if (item->type() == BridgeType)
             static_cast<BridgeItem*>(item)->update();
     }

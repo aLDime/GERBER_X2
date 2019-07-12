@@ -5,8 +5,6 @@
 #include <QPainter>
 #include <graphicsview.h>
 
-Ruler* Ruler::self = nullptr;
-
 Ruler::Ruler(const QPointF& point)
     : m_pt1(point)
     , m_pt2(point)
@@ -14,13 +12,11 @@ Ruler::Ruler(const QPointF& point)
     setZValue(std::numeric_limits<double>::max());
     qDebug("Ruler()");
     m_font.setPixelSize(16);
-    self = this;
 }
 
 Ruler::~Ruler()
 {
     qDebug("~Ruler()");
-    self = nullptr;
 }
 
 QRectF Ruler::boundingRect() const
@@ -61,6 +57,7 @@ void Ruler::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
     painter->drawLine(QLineF::fromPolar(length, 90.00).translated(m_pt1));
     painter->drawLine(QLineF::fromPolar(length, 180.0).translated(m_pt1));
     painter->drawLine(QLineF::fromPolar(length, 270.0).translated(m_pt1));
+
     painter->drawLine(QLineF::fromPolar(length, 0.000).translated(m_pt2));
     painter->drawLine(QLineF::fromPolar(length, 90.00).translated(m_pt2));
     painter->drawLine(QLineF::fromPolar(length, 180.0).translated(m_pt2));
@@ -97,23 +94,21 @@ void Ruler::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
 
 void Ruler::setPoint2(const QPointF& point2)
 {
-    if (!self)
-        return;
-    QPointF& pt1 = self->m_pt1;
-    QPointF& pt2 = self->m_pt2;
+    QPointF& pt1 = m_pt1;
+    QPointF& pt2 = m_pt2;
     pt2 = point2;
     QLineF line(pt1, pt2);
     const double width = pt1.x() > pt2.x() ? pt1.x() - pt2.x() : pt2.x() - pt1.x();
     const double height = pt1.y() > pt2.y() ? pt1.y() - pt2.y() : pt2.y() - pt1.y();
     const double length = line.length();
-    self->m_text = QString("    ∆X = %1 mm\n"
-                           "    ∆Y = %2 mm\n"
-                           "    ∆ / = %3 mm")
-                       .arg(width, 4, 'f', 3, '0')
-                       .arg(height, 4, 'f', 3, '0')
-                       .arg(length, 4, 'f', 3, '0');
-    self->m_textRect = QFontMetricsF(self->m_font).boundingRect(QRectF(), Qt::AlignLeft, self->m_text);
-    self->update();
+    m_text = QString("    ∆X = %1 mm\n"
+                     "    ∆Y = %2 mm\n"
+                     "    ∆ / = %3 mm")
+                 .arg(width, 4, 'f', 3, '0')
+                 .arg(height, 4, 'f', 3, '0')
+                 .arg(length, 4, 'f', 3, '0');
+    m_textRect = QFontMetricsF(m_font).boundingRect(QRectF(), Qt::AlignLeft, m_text);
+    update();
 }
 
 int Ruler::type() const { return RulerType; }

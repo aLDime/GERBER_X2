@@ -2,7 +2,8 @@
 #include "gerbernode.h"
 
 FolderNode::FolderNode(const QString& name)
-    : name(name)
+    : AbstractNode(-1)
+    , name(name)
 {
 }
 

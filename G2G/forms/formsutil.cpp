@@ -1,6 +1,6 @@
 #include "formsutil.h"
 
-#include "filetree/filemodel.h"
+#include "project.h"
 #include <QEvent>
 #include <QFile>
 #include <QJsonArray>
@@ -61,7 +61,7 @@ void FormsUtil::writeTools(const QVector<Tool*>& tools) const
 
 GCode::Creator* FormsUtil::toolPathCreator(const Paths& value, const bool convent, SideOfMilling side)
 {
-    Scene::self->selectedItems();
+    //Scene::selectedItems();
 
     fileCount = 1;
     thread.wait();
@@ -116,7 +116,7 @@ void FormsUtil::setFile(GCode::File* file)
     file->setFileName(m_fileName + " (" + file->name() + ")");
     file->setSide(boardSide);
     file->m_used = m_used;
-    FileModel::addFile(file);
+    Project::addFile(file);
 }
 
 void FormsUtil::timerEvent(QTimerEvent* event)

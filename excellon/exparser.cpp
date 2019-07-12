@@ -7,11 +7,11 @@
 using namespace Excellon;
 
 Parser::Parser(QObject* parent)
-    : QObject(parent)
+    : FileParser(parent)
 {
 }
 
-File* Parser::parseFile(const QString& fileName)
+AbstractFile* Parser::parseFile(const QString& fileName)
 {
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
@@ -19,7 +19,7 @@ File* Parser::parseFile(const QString& fileName)
 
     m_file = new File;
     m_file->setFileName(fileName);
-    m_state.reset(&m_file->m_format);
+    m_state.reset(&this->file()->m_format);
 
     QTextStream in(&file);
     QString line;
@@ -58,21 +58,22 @@ File* Parser::parseFile(const QString& fileName)
 
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
-            //emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
+            emit fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
             delete m_file;
             return nullptr;
         } catch (...) {
             qWarning() << "exeption S:" << errno;
-            //emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
+            emit fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
             delete m_file;
             return nullptr;
         }
     }
-    if (m_file->isEmpty()) {
+    if (this->file()->isEmpty()) {
         delete m_file;
         m_file = nullptr;
     } else {
         m_file->createGi();
+        emit fileReady(m_file);
     }
     return m_file;
 }
@@ -99,8 +100,8 @@ bool Parser::parseComment(const QString& line)
         const QRegExp matchFormat(".*FORMAT.*([0-9]).([0-9]).*", Qt::CaseInsensitive);
         if (matchFormat.exactMatch(match.cap(1))) {
             //qDebug() << matchFormat.capturedTexts();
-            m_file->m_format.integer = matchFormat.cap(1).toInt();
-            m_file->m_format.decimal = matchFormat.cap(2).toInt();
+            file()->m_format.integer = matchFormat.cap(1).toInt();
+            file()->m_format.decimal = matchFormat.cap(2).toInt();
         }
         return true;
     }
@@ -148,7 +149,7 @@ bool Parser::parseMCode(const QString& line)
             m_state.mCode = M16;
             m_state.rawPosList.append(m_state.rawPos);
             m_state.path.append(m_state.pos);
-            m_file->append(Hole(m_state, m_file));
+            file()->append(Hole(m_state, file()));
             m_state.path.clear();
             m_state.rawPosList.clear();
             break;
@@ -160,11 +161,11 @@ bool Parser::parseMCode(const QString& line)
             break;
         case M71:
             m_state.mCode = M71;
-            m_file->m_format.unitMode = Millimeters;
+            file()->m_format.unitMode = Millimeters;
             break;
         case M72:
             m_state.mCode = M72;
-            m_file->m_format.unitMode = Inches;
+            file()->m_format.unitMode = Inches;
             break;
         case M95:
             m_state.mCode = M95;
@@ -196,7 +197,7 @@ bool Parser::parseTCode(const QString& line)
         m_state.tCode = match.cap(1).toInt();
         if (index > 0) {
             //            const double k = m_file->format.unitMode ? 1.0 : 25.4;
-            m_file->m_tools[m_state.tCode] = match.cap(index + 1).toDouble() /* * k*/;
+            file()->m_tools[m_state.tCode] = match.cap(index + 1).toDouble() /* * k*/;
             //            m_state.currentToolDiameter = m_file->m_tools[m_state.tCode];
         } /*else
             m_state.currentToolDiameter = m_file->m_tools[m_state.tCode];*/
@@ -212,6 +213,9 @@ bool Parser::parsePos(const QString& line)
                   "(?:Y([+-]?\\d*\\.?\\d+))?"
                   ".*$");
     if (match.exactMatch(line)) {
+
+        qDebug() << match.capturedTexts();
+
         if (match.cap(2).isEmpty() && match.cap(3).isEmpty())
             return false;
 
@@ -221,11 +225,13 @@ bool Parser::parsePos(const QString& line)
         if (!match.cap(3).isEmpty())
             m_state.rawPos.second = match.cap(3);
 
+        qDebug("parseNumber");
+
         parseNumber(match.cap(2), m_state.pos.rx());
         parseNumber(match.cap(3), m_state.pos.ry());
 
         if (!(m_state.mCode == M15 || m_state.mCode == M16) && !(m_state.gCode == G00 || m_state.gCode == G01)) {
-            m_file->append(Hole(m_state, m_file));
+            file()->append(Hole(m_state, file()));
         }
         return true;
     }
@@ -271,7 +277,7 @@ bool Parser::parseSlot(const QString& line)
             m_state.path.append(m_state.pos);
         }
 
-        m_file->append(Hole(m_state, m_file));
+        file()->append(Hole(m_state, file()));
         m_state.path.clear();
         m_state.rawPosList.clear();
         m_state.gCode = G05;
@@ -294,7 +300,7 @@ bool Parser::parseRepeat(const QString& line)
         parseNumber(match.cap(3), p.ry());
         for (int i = 0; i < count; ++i) {
             m_state.pos += p;
-            m_file->append(Hole(m_state, m_file));
+            file()->append(Hole(m_state, file()));
         }
         return true;
     }
@@ -309,20 +315,20 @@ bool Parser::parseFormat(const QString& line)
     if (match.exactMatch(line)) {
         switch (unitMode.indexOf(match.cap(1))) {
         case Inches:
-            m_file->m_format.unitMode = Inches;
+            file()->m_format.unitMode = Inches;
             break;
         case Millimeters:
-            m_file->m_format.unitMode = Millimeters;
+            file()->m_format.unitMode = Millimeters;
             break;
         default:
             break;
         }
         switch (zeroMode.indexOf(match.cap(2))) {
         case LeadingZeros:
-            m_file->m_format.zeroMode = LeadingZeros;
+            file()->m_format.zeroMode = LeadingZeros;
             break;
         case TrailingZeros:
-            m_file->m_format.zeroMode = TrailingZeros;
+            file()->m_format.zeroMode = TrailingZeros;
             break;
         default:
             break;
@@ -331,8 +337,8 @@ bool Parser::parseFormat(const QString& line)
     }
     static const QRegExp match2("^(FMAT).*(2)?$");
     if (match2.exactMatch(line)) {
-        m_file->m_format.unitMode = Inches;
-        m_file->m_format.zeroMode = LeadingZeros;
+        file()->m_format.unitMode = Inches;
+        file()->m_format.zeroMode = LeadingZeros;
         return true;
     }
 
@@ -355,19 +361,19 @@ bool Parser::parseNumber(QString Str, double& val)
                 Str.remove(0, 1);
                 sign = -1;
             }
-            if (Str.length() < m_file->m_format.integer + m_file->m_format.decimal) {
-                switch (m_file->m_format.zeroMode) {
+            if (Str.length() < file()->m_format.integer + file()->m_format.decimal) {
+                switch (file()->m_format.zeroMode) {
                 case LeadingZeros:
-                    Str = Str + QString(m_file->m_format.integer + m_file->m_format.decimal - Str.length(), '0');
+                    Str = Str + QString(file()->m_format.integer + file()->m_format.decimal - Str.length(), '0');
                     break;
                 case TrailingZeros:
-                    Str = QString(m_file->m_format.integer + m_file->m_format.decimal - Str.length(), '0') + Str;
+                    Str = QString(file()->m_format.integer + file()->m_format.decimal - Str.length(), '0') + Str;
                     break;
                 }
             }
-            val = Str.toDouble() * pow(10.0, -m_file->m_format.decimal) * sign;
+            val = Str.toDouble() * pow(10.0, -file()->m_format.decimal) * sign;
         }
-        if (m_file->m_format.unitMode == Inches)
+        if (file()->m_format.unitMode == Inches)
             val *= 25.4;
         if (abs(val) > 1000.0)
             val = 1000.0;

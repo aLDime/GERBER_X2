@@ -5,20 +5,16 @@
 #include "gbrvars.h"
 #include <QObject>
 #include <QStack>
+#include <parser.h>
 
 namespace Gerber {
 
-class Parser : public QObject {
+class Parser : public FileParser {
     Q_OBJECT
 public:
-    Parser(QObject* parent = 0);
-    void parseFile(const QString& fileName);
+    Parser(QObject* parent = nullptr);
+    AbstractFile* parseFile(const QString& fileName) override;
     void parseLines(const QString& gerberLines, const QString& fileName);
-
-signals:
-    void fileReady(File* m_file);
-    void fileProgress(const QString& fileName, int max, int value);
-    void fileError(const QString& fileName, const QString& error);
 
 private:
     QList<QString> format(QString data);
@@ -54,27 +50,12 @@ private:
 
     Path m_path;
     State m_state;
-    File* m_file;
     QString m_currentGerbLine;
 
     int m_lineNum = 0;
     int m_goId = 0;
 
-    struct {
-        void reset()
-        {
-            x = 0;
-            y = 0;
-            i = 0.0;
-            j = 0.0;
-            storage.clear();
-        }
-        int x = 0;
-        int y = 0;
-        double i = 0.0;
-        double j = 0.0;
-        QList<GraphicObject> storage;
-    } m_stepRepeat;
+    StepRepeatStr m_stepRepeat;
 
     bool parseAperture(const QString& gLine);
     bool parseApertureBlock(const QString& gLine);
@@ -92,7 +73,9 @@ private:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(m_file->m_apertures[id].data()); }
+    inline File* file() { return reinterpret_cast<File*>(m_file); }
+
+    /*inline*/ ApBlock* apBlock(int id) { return static_cast<ApBlock*>(file()->m_apertures[id].data()); }
 };
 }
 #endif // GERBERPARSER_H

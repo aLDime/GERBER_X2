@@ -4,15 +4,14 @@
 
 #include <QFileInfo>
 
-GcodeNode::GcodeNode(GCode::File* file)
-    : m_id(file->id() == -1 ? Project::addFile(file) : file->id())
+GcodeNode::GcodeNode(int id)
+    : AbstractNode(id)
 {
-    file->itemGroup()->addToTheScene();
+    Project::file(id)->itemGroup()->addToTheScene();
 }
 
 GcodeNode::~GcodeNode()
 {
-    Project::deleteFile(m_id);
 }
 
 bool GcodeNode::setData(const QModelIndex& index, const QVariant& value, int role)
@@ -47,10 +46,10 @@ Qt::ItemFlags GcodeNode::flags(const QModelIndex& index) const
     case 0:
         return itemFlag | Qt::ItemIsUserCheckable;
     case 1: {
-//        if (Project::file(m_id)->shortName().contains(".tap"))
-//            return itemFlag;
-//        else
-            return itemFlag | Qt::ItemIsEditable;
+        //        if (Project::file(m_id)->shortName().contains(".tap"))
+        //            return itemFlag;
+        //        else
+        return itemFlag | Qt::ItemIsEditable;
     }
     default:
         return itemFlag;

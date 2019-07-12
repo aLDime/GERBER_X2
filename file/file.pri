@@ -12,7 +12,9 @@ DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs depr
 INCLUDEPATH += $$PWD
 
 HEADERS += \
-    $$PWD/abstractfile.h
+    $$PWD/abstractfile.h \
+    $$PWD/parser.h
 
 SOURCES += \
-    $$PWD/abstractfile.cpp
+    $$PWD/abstractfile.cpp \
+    $$PWD/parser.cpp

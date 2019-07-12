@@ -73,7 +73,7 @@ void DrillItem::setDiameter(double diameter)
     m_diameter = diameter;
 
     create();
-    update(m_rect);
+    update(/*m_rect*/);
 }
 
 Paths DrillItem::paths() const
@@ -97,7 +97,7 @@ void DrillItem::updateHole()
     setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(m_hole->state.tCode).arg(m_diameter));
     m_diameter = m_hole->state.currentToolDiameter();
     create();
-    update(m_rect);
+    update(/*m_rect*/);
 }
 
 void DrillItem::create()

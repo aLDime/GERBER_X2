@@ -49,10 +49,15 @@ enum Id {
     CloseAllIcon,
     CloseIcon,
     PrintIcon,
+
     SaveAllIcon,
     SaveIcon,
     SavePdfIcon,
     ExitIcon,
+
+    SaveAsIcon,
+    OpenProjectIcon,
+    NewProjectIcon,
 
 };
 
@@ -136,7 +141,7 @@ static QIcon Icon(int id)
     case CloseIcon:
         return QIcon::fromTheme("document-close");
     case PrintIcon:
-        return QIcon::fromTheme("list-remove");
+        return QIcon::fromTheme("document-print");
     case SaveAllIcon:
         return QIcon::fromTheme("document-save-all");
     case SaveIcon:
@@ -145,6 +150,13 @@ static QIcon Icon(int id)
         return QIcon::fromTheme("acrobat");
     case ExitIcon:
         return QIcon::fromTheme("application-exit");
+
+    case SaveAsIcon:
+        return QIcon::fromTheme("document-save-as");
+    case OpenProjectIcon:
+        return QIcon::fromTheme("project-open");
+    case NewProjectIcon:
+        return QIcon::fromTheme("project-development-new-template");
     }
     return QIcon();
 }

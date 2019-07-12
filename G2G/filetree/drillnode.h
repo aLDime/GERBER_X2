@@ -12,16 +12,13 @@ class DrillNode : public QObject, public AbstractNode {
     Q_OBJECT
 
 public:
-    DrillNode(Excellon::File* file);
+    DrillNode(int id);
     ~DrillNode();
 
     // AbstractItem interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-
-private:
-    const int m_id;
 };
 
 #endif // DrillItem__H

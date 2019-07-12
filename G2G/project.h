@@ -112,16 +112,19 @@ public:
 
     static bool contains(AbstractFile* file);
     static void setIsModified(bool isModified) { m_isModified = isModified; }
+    QString name() const { return m_name; }
+    void setName(const QString& name) { m_name = name; }
 
 signals:
     void changed();
 
 private:
+    QString m_name;
+
     static void setChanged()
     {
-        if (self)
-            self->changed();
         m_isModified = true;
+        self->changed();
     }
 
     static bool m_isModified;
