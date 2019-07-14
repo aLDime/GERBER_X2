@@ -32,6 +32,7 @@ public:
     Paths m_pocketPaths;
 
     QMap<int, QVector<int>> m_used;
+    ItemGroup* itemGroup() const override { return m_itemGroup.data(); }
 
 private:
     static QString lastDir;

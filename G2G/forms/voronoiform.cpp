@@ -24,10 +24,6 @@ VoronoiForm::VoronoiForm(QWidget* parent)
 
     updateName();
 
-    //    QSettings settings;
-    //    settings.beginGroup("VoronoiForm");
-    //    settings.endGroup();
-
     ui->pbEdit->setIcon(Icon(ButtonEditIcon));
     ui->pbSelect->setIcon(Icon(ButtonSelectIcon));
     ui->pbClose->setIcon(Icon(ButtonCloseIcon));
@@ -37,13 +33,24 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
+    QSettings settings;
+    settings.beginGroup("VoronoiForm");
+    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    if (settings.value("rbBoard").toBool())
+        ui->dsbxDepth->rbBoard->setChecked(true);
+    if (settings.value("rbCopper").toBool())
+        ui->dsbxDepth->rbCopper->setChecked(true);
+    settings.endGroup();
 }
 
 VoronoiForm::~VoronoiForm()
 {
-    //    QSettings settings;
-    //    settings.beginGroup("VoronoiForm");
-    //    settings.endGroup();
+    QSettings settings;
+    settings.beginGroup("VoronoiForm");
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
+    settings.endGroup();
     delete ui;
 }
 

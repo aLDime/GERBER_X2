@@ -117,11 +117,12 @@ void File::saveDrill()
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size();
         startPath(point);
-        for (int i = 1; m_depth > m_tool.passDepth() * i; ++i) {
+        const double depth = m_depth + m_tool.getDepth();
+        for (int i = 1; depth > m_tool.passDepth() * i; ++i) {
             sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) }));
             sl.append(formated({ g0(), z(0.0) }));
         }
-        sl.append(formated({ g1(), z(-m_depth), feed(m_tool.plungeRate()) }));
+        sl.append(formated({ g1(), z(-depth), feed(m_tool.plungeRate()) }));
         endPath();
     }
     endFile();
@@ -281,27 +282,26 @@ QString File::formated(const QList<QString> data)
 
 void File::write(QDataStream& stream) const
 {
-    _write(stream);
     stream << m_pocketPaths;
     stream << m_type;
     stream << m_toolPaths;
     stream << m_tool;
     stream << m_depth;
+    _write(stream);
 }
 
 void File::read(QDataStream& stream)
 {
-    _read(stream);
     stream >> m_pocketPaths;
     stream >> (int&)(m_type);
     stream >> m_toolPaths;
     stream >> m_tool;
     stream >> m_depth;
+    _read(stream);
 }
 
 void File::createGi()
 {
-    setItemGroup(new ItemGroup);
     GraphicsItem* item;
     switch (m_type) {
     case Profile:

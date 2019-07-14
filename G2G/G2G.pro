@@ -11,10 +11,10 @@ RESOURCES += \
 DEFINES += QT_DEPRECATED_WARNINGS G2G #QT_DEBUG
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
-VERSION = 0.7.5
+VERSION = 0.7.6
 VER_MAJ = 0
 VER_MIN = 7
-VER_PAT = 5
+VER_PAT = 6
 
 ICON = 256.png
 
@@ -46,6 +46,7 @@ HEADERS += \
     filetree/gerbernode.h \
     filetree/layerdelegate.h \
     filetree/treeview.h \
+    forms/depthform.h \
     forms/drillform.h \
     forms/drillmodel.h \
     forms/formsutil.h \
@@ -80,6 +81,7 @@ HEADERS += \
     tooldatabase/tooltreeview.h \
     icons.h \
     forms/previewitem.h \
+    version.h \
     voroni/jc_voronoi.h \
     settings.h \
     project.h
@@ -97,6 +99,7 @@ SOURCES += \
     filetree/gerbernode.cpp \
     filetree/layerdelegate.cpp \
     filetree/treeview.cpp \
+    forms/depthform.cpp \
     forms/drillform.cpp \
     forms/drillmodel.cpp \
     forms/formsutil.cpp \

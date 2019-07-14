@@ -21,6 +21,7 @@ public:
     static Point* zeroPoint;
     static double safeZ;
     static double thickness;
+    static double copperThickness;
     static double clearence;
     static double plunge;
     static double glue;

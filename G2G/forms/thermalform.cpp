@@ -92,14 +92,26 @@ ThermalForm::ThermalForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
+
+    QSettings settings;
+    settings.beginGroup("ThermalForm");
+    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    if (settings.value("rbBoard").toBool())
+        ui->dsbxDepth->rbBoard->setChecked(true);
+    if (settings.value("rbCopper").toBool())
+        ui->dsbxDepth->rbCopper->setChecked(true);
+    settings.endGroup();
 }
 
 ThermalForm::~ThermalForm()
 {
     m_sourcePreview.clear();
-    //    QSettings settings;
-    //    settings.beginGroup("ProfileForm");
-    //    settings.endGroup();
+    QSettings settings;
+    settings.beginGroup("ThermalForm");
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
+    settings.endGroup();
     delete ui;
 }
 

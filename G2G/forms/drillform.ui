@@ -114,22 +114,6 @@
           </property>
          </widget>
         </item>
-        <item row="0" column="1">
-         <widget class="DoubleSpinBox" name="dsbxDepth">
-          <property name="suffix">
-           <string> mm</string>
-          </property>
-          <property name="decimals">
-           <number>3</number>
-          </property>
-          <property name="maximum">
-           <double>100.000000000000000</double>
-          </property>
-          <property name="singleStep">
-           <double>0.100000000000000</double>
-          </property>
-         </widget>
-        </item>
         <item row="1" column="0" colspan="2">
          <widget class="Line" name="line">
           <property name="frameShadow">
@@ -159,6 +143,9 @@
            <enum>QComboBox::AdjustToMinimumContentsLengthWithIcon</enum>
           </property>
          </widget>
+        </item>
+        <item row="0" column="1">
+         <widget class="DepthForm" name="dsbxDepth" native="true"/>
         </item>
        </layout>
       </item>
@@ -322,9 +309,10 @@
  </widget>
  <customwidgets>
   <customwidget>
-   <class>DoubleSpinBox</class>
-   <extends>QDoubleSpinBox</extends>
-   <header>doublespinbox.h</header>
+   <class>DepthForm</class>
+   <extends>QWidget</extends>
+   <header>forms/depthform.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

@@ -8,7 +8,7 @@
 
 using namespace ClipperLib;
 
-enum {
+enum GiType{
     GerberItemType = QGraphicsItem::UserType,
     BridgeType,
     DrillItemType,

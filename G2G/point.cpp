@@ -94,13 +94,15 @@ QPainterPath Point::shape() const
     return m_shape;
 }
 
-void Point::resetPos()
+void Point::resetPos(bool fl)
 {
-    if (updateRect())
-        if (m_type == Home)
-            setPos(Shtift::worckRect.bottomRight());
-        else
-            setPos(Shtift::worckRect.topLeft());
+    if (fl) {
+        updateRect();
+    }
+    if (m_type == Home)
+        setPos(Shtift::worckRect.bottomRight());
+    else
+        setPos(Shtift::worckRect.topLeft());
     updateGCPForm();
 }
 
@@ -314,9 +316,11 @@ int Shtift::type() const { return ShtiftType; }
 
 QVector<Shtift*> Shtift::shtifts() { return m_shtifts; }
 
-void Shtift::resetPos()
+void Shtift::resetPos(bool fl)
 {
-    updateRect();
+    if (fl) {
+        updateRect();
+    }
     const double k = 3.0;
     QPointF p[]{
         QPointF(Shtift::worckRect.topLeft() + QPointF(-k, -k)),

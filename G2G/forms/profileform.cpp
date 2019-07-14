@@ -53,6 +53,13 @@ ProfileForm::ProfileForm(QWidget* parent)
         ui->rbOn->setChecked(true);
     if (settings.value("rbOutside").toBool())
         ui->rbOutside->setChecked(true);
+
+    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    if (settings.value("rbBoard").toBool())
+        ui->dsbxDepth->rbBoard->setChecked(true);
+    if (settings.value("rbCopper").toBool())
+        ui->dsbxDepth->rbCopper->setChecked(true);
+
     ui->dsbxBridgeLenght->setValue(settings.value("dsbxBridgeLenght").toDouble());
     settings.endGroup();
 
@@ -88,6 +95,10 @@ ProfileForm::~ProfileForm()
     settings.setValue("rbOn", ui->rbOn->isChecked());
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
+
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
 
     for (QGraphicsItem* item : Scene::items()) {

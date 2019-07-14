@@ -35,7 +35,14 @@ double Tool::getDiameter(double depth) const
 
 double Tool::getDepth() const
 {
-    return diameter();
+    switch (m_type) {
+    case Tool::Drill:
+        return m_diameter * 0.5 * tan(qDegreesToRadians(180.0 - m_angle * 0.5)) + 0.1;
+    case Tool::EndMill:
+    case Tool::Engraving:
+    default:
+        return 0.01;
+    }
 }
 
 void Tool::read(const QJsonObject& json)

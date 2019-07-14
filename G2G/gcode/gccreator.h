@@ -52,7 +52,6 @@ public:
 
     int progressMax() const;
     int progressValue() const;
-
 signals:
     void fileReady(GCode::File* file);
 

@@ -21,10 +21,6 @@ enum Side {
     Bottom
 };
 
-enum FileVersion {
-    G2G_Ver = 1,
-};
-
 class AbstractFile {
     friend class Project;
     friend QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file);
@@ -38,8 +34,7 @@ public:
     QString name() const;
     void setFileName(const QString& name);
 
-    virtual ItemGroup* itemGroup() const;
-    void setItemGroup(ItemGroup* itemGroup);
+    virtual ItemGroup* itemGroup() const = 0;
 
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
@@ -78,28 +73,8 @@ protected:
     QColor m_color;
     QDateTime m_date;
 
-    void _write(QDataStream& stream) const
-    {
-        stream << m_id;
-        stream << m_lines;
-        stream << m_name;
-        stream << m_mergedPaths;
-        stream << m_groupedPaths;
-        stream << m_side;
-        stream << m_color;
-        stream << m_date;
-    }
-    void _read(QDataStream& stream)
-    {
-        stream >> m_id;
-        stream >> m_lines;
-        stream >> m_name;
-        stream >> m_mergedPaths;
-        stream >> m_groupedPaths;
-        stream >> (int&)(m_side);
-        stream >> m_color;
-        stream >> m_date;
-    }
+    void _write(QDataStream& stream) const;
+    void _read(QDataStream& stream);
 };
 
 //Q_DECLARE_METATYPE(AbstractFile)

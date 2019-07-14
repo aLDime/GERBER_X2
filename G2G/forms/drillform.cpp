@@ -145,6 +145,13 @@ DrillForm::DrillForm(QWidget* parent)
         ui->rb_pocket->setChecked(true);
     if (settings.value("rb_profile").toBool())
         ui->rb_profile->setChecked(true);
+
+    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    if (settings.value("rbBoard").toBool())
+        ui->dsbxDepth->rbBoard->setChecked(true);
+    if (settings.value("rbCopper").toBool())
+        ui->dsbxDepth->rbCopper->setChecked(true);
+
     settings.endGroup();
 
     connect(ui->rb_drilling, &QRadioButton::clicked, updateState);
@@ -182,6 +189,10 @@ DrillForm::~DrillForm()
     settings.setValue("rb_out", ui->rb_out->isChecked());
     settings.setValue("rb_pocket", ui->rb_pocket->isChecked());
     settings.setValue("rb_profile", ui->rb_profile->isChecked());
+
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
 
     clear();

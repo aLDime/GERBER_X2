@@ -102,24 +102,7 @@
          </font>
         </property>
         <property name="text">
-         <string>Cutting
-Depth:</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="DoubleSpinBox" name="dsbxDepth">
-        <property name="suffix">
-         <string> mm</string>
-        </property>
-        <property name="decimals">
-         <number>3</number>
-        </property>
-        <property name="maximum">
-         <double>100.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
+         <string>Depth:</string>
         </property>
        </widget>
       </item>
@@ -226,6 +209,9 @@ Depth:</string>
       <item row="6" column="1">
        <widget class="QLineEdit" name="leName"/>
       </item>
+      <item row="0" column="1">
+       <widget class="DepthForm" name="dsbxDepth" native="true"/>
+      </item>
      </layout>
     </widget>
    </item>
@@ -263,6 +249,12 @@ Depth:</string>
    <class>DoubleSpinBox</class>
    <extends>QDoubleSpinBox</extends>
    <header>doublespinbox.h</header>
+  </customwidget>
+  <customwidget>
+   <class>DepthForm</class>
+   <extends>QWidget</extends>
+   <header>forms/depthform.h</header>
+   <container>1</container>
   </customwidget>
  </customwidgets>
  <resources/>

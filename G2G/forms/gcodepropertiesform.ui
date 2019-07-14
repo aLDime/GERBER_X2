@@ -121,7 +121,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="thicknessLabel">
         <property name="text">
-         <string>Thickness</string>
+         <string>Board Thickness</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
@@ -144,7 +144,7 @@
         </property>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
+      <item row="3" column="0" colspan="2">
        <widget class="QGroupBox" name="groupBox_3">
         <property name="title">
          <string>G0 Properties</string>
@@ -249,7 +249,7 @@
         </layout>
        </widget>
       </item>
-      <item row="4" column="0" colspan="2">
+      <item row="5" column="0" colspan="2">
        <widget class="QGroupBox" name="groupBox_2">
         <property name="title">
          <string>Home Position</string>
@@ -322,7 +322,7 @@
         </layout>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="QGroupBox" name="groupBox">
         <property name="title">
          <string>Zero Position</string>
@@ -395,7 +395,7 @@
         </layout>
        </widget>
       </item>
-      <item row="7" column="0">
+      <item row="8" column="0">
        <widget class="QLabel" name="glueLabel">
         <property name="font">
          <font>
@@ -404,14 +404,14 @@
          </font>
         </property>
         <property name="text">
-         <string>Glue</string>
+         <string>Glue (for &quot;raw&quot;)</string>
         </property>
         <property name="alignment">
          <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
         </property>
        </widget>
       </item>
-      <item row="7" column="1">
+      <item row="8" column="1">
        <widget class="DoubleSpinBox" name="dsbxGlue">
         <property name="suffix">
          <string> mm</string>
@@ -430,6 +430,29 @@
         </property>
         <property name="value">
          <double>0.010000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="0">
+       <widget class="QLabel" name="label_3">
+        <property name="text">
+         <string>Copper Thickness</string>
+        </property>
+       </widget>
+      </item>
+      <item row="2" column="1">
+       <widget class="DoubleSpinBox" name="dsbxCopperThickness">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>3</number>
+        </property>
+        <property name="maximum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.001000000000000</double>
         </property>
        </widget>
       </item>

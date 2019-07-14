@@ -13,6 +13,7 @@ Point* GCodePropertiesForm::homePoint = nullptr;
 Point* GCodePropertiesForm::zeroPoint = nullptr;
 double GCodePropertiesForm::safeZ;
 double GCodePropertiesForm::thickness;
+double GCodePropertiesForm::copperThickness;
 double GCodePropertiesForm::clearence;
 double GCodePropertiesForm::plunge;
 double GCodePropertiesForm::glue;
@@ -40,11 +41,8 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     connect(ui->dsbxGlue, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { glue = val; });
 
     connect(ui->dsbxHomeX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { homePoint->setPosX(val); });
-
     connect(ui->dsbxHomeY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { homePoint->setPosY(val); });
-
     connect(ui->dsbxZeroX, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { zeroPoint->setPosX(val); });
-
     connect(ui->dsbxZeroY, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double val) { zeroPoint->setPosY(val); });
 
     connect(ui->dsbxSafeZ, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
@@ -57,12 +55,13 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
     });
 
     QSettings settings;
-    settings.beginGroup("Material");
+    settings.beginGroup("GCodeProperties");
     ui->dsbxSafeZ->setValue(settings.value("dsbxSafeZ", 20).toDouble());
     ui->dsbxClearence->setValue(settings.value("dsbxClearence", 10).toDouble());
     ui->dsbxPlunge->setValue(settings.value("dsbxPlunge", 2).toDouble());
     ui->dsbxThickness->setValue(settings.value("dsbxThickness", 1).toDouble());
-    ui->dsbxGlue->setValue(settings.value("dsbxGlue", 0.01).toDouble());
+    ui->dsbxCopperThickness->setValue(settings.value("dsbxCopperThickness", 0.03).toDouble());
+    ui->dsbxGlue->setValue(settings.value("dsbxGlue", 0.05).toDouble());
     settings.endGroup();
 
     ui->dsbxHomeX->setValue(homePoint->pos().x());
@@ -73,36 +72,25 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* prnt)
 
     safeZ = ui->dsbxSafeZ->value();
     thickness = ui->dsbxThickness->value();
+    copperThickness = ui->dsbxCopperThickness->value();
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();
 
     connect(ui->pbOk, &QPushButton::clicked, [=] {
         if (this->parent()
             && ui->dsbxThickness->value() > 0.0
+            && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
             static_cast<QWidget*>(parent())->close();
             return;
         }
-        QString s("QDoubleSpinBox{background: red;}");
-        if (ui->dsbxThickness->value() == 0.0) {
-            int t = 1, tt = 100;
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(""); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(""); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxThickness->setStyleSheet(""); });
-        }
-        if (ui->dsbxClearence->value() == 0.0) {
-            int t = 1, tt = 100;
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(s); });
-            QTimer::singleShot(tt * t++, [=] { ui->dsbxClearence->setStyleSheet(""); });
-        }
+        if (ui->dsbxCopperThickness->value() == 0.0)
+            ui->dsbxCopperThickness->flicker();
+        if (ui->dsbxThickness->value() == 0.0)
+            ui->dsbxThickness->flicker();
+        if (ui->dsbxClearence->value() == 0.0)
+            ui->dsbxClearence->flicker();
     });
     prnt->setWindowTitle(ui->label->text());
     self = this;
@@ -120,16 +108,18 @@ GCodePropertiesForm::~GCodePropertiesForm()
     zeroPoint->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     QSettings settings;
-    settings.beginGroup("Material");
+    settings.beginGroup("GCodeProperties");
     settings.setValue("dsbxSafeZ", ui->dsbxSafeZ->value());
     settings.setValue("dsbxClearence", ui->dsbxClearence->value());
     settings.setValue("dsbxPlunge", ui->dsbxPlunge->value());
     settings.setValue("dsbxThickness", ui->dsbxThickness->value());
+    settings.setValue("dsbxCopperThickness", ui->dsbxCopperThickness->value());
     settings.setValue("dsbxGlue", ui->dsbxGlue->value());
     settings.endGroup();
 
     safeZ = ui->dsbxSafeZ->value();
     thickness = ui->dsbxThickness->value();
+    copperThickness = ui->dsbxCopperThickness->value();
     clearence = ui->dsbxClearence->value();
     plunge = ui->dsbxPlunge->value();
 

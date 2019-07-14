@@ -82,13 +82,13 @@ MainWindow::MainWindow(QWidget* parent)
     QLatin1String styleSheet("QGroupBox, .QFrame {"
                              "background-color: rgb(255,255,255);"
                              "border: 1px solid gray;"
-                             "border-radius: 5px;"
-                             "margin-top: 1ex; /* leave space at the top for the title */"
-                             "padding: 1ex;"
+                             //                             "border-radius: 5px;"
+                             "margin-top: 3ex; /* leave space at the top for the title */"
+                             "padding: 0ex;"
                              "}"
                              "QGroupBox::title {"
                              "subcontrol-origin: margin;"
-                             "margin-top: -2ex;"
+                             "margin-top: -1ex;"
                              "subcontrol-position: top center; /* position at the top center */"
                              "padding: 0 1ex;"
                              "}");
@@ -108,9 +108,6 @@ MainWindow::~MainWindow()
     parserThread.wait();
     self = nullptr;
 }
-
-//QAction* MainWindow::closeAllAct() { return self ? self->m_closeAllAct : nullptr; }
-//QAction* MainWindow::exportPdfAct() { return self ? self->m_exportPdfAct : nullptr; }
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {

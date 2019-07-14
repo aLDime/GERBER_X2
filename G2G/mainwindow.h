@@ -25,8 +25,6 @@ public:
     explicit MainWindow(QWidget* parent = 0);
     ~MainWindow();
 
-    //    static QAction* closeAllAct();
-    //    static QAction* exportPdfAct();
     // QMainWindow interface
     virtual QMenu* createPopupMenu() override;
 
@@ -50,7 +48,6 @@ private:
     QMenu* helpMenu = nullptr;
     QMenu* recentMenu = nullptr;
     QMenu* serviceMenu = nullptr;
-
 
     QString lastPath;
     QThread parserThread;

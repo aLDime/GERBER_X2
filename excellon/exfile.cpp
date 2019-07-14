@@ -108,15 +108,14 @@ Paths Excellon::File::merge() const
 
 void Excellon::File::write(QDataStream& stream) const
 {
-    _write(stream);
     stream << *this;
     stream << m_tools;
     stream << m_format;
+    _write(stream);
 }
 
 void Excellon::File::read(QDataStream& stream)
 {
-    _read(stream);
     stream >> *this;
     stream >> m_tools;
     stream >> m_format;
@@ -125,11 +124,11 @@ void Excellon::File::read(QDataStream& stream)
         hole.file = this;
         hole.state.format = &m_format;
     }
+    _read(stream);
 }
 
 void Excellon::File::createGi()
 {
-    setItemGroup(new ItemGroup);
     for (Hole& hole : *this) {
         DrillItem* item = new DrillItem(&hole, this);
         hole.item = item;

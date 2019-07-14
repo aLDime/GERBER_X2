@@ -6,7 +6,7 @@
 #endif
 const int gridColor = 100;
 
-QColor Settings::m_color[(size_t)Colors::Count]{
+QColor Settings::m_color[Colors::Count]{
     QColor(), //Background
     QColor(255, 255, 0, 120), //Shtift
     QColor(Qt::gray), //CutArea

@@ -26,15 +26,12 @@
 //    return m_mergedPaths;
 //}
 
-AbstractFile::AbstractFile() {}
-
-AbstractFile::~AbstractFile()
+AbstractFile::AbstractFile()
+    : m_itemGroup(QSharedPointer<ItemGroup>(new ItemGroup))
 {
-    //qDebug("~AbstractFile()");
-    //    qDeleteAll(apertures);
-    //    if (itemGroup)
-    //        delete itemGroup;
 }
+
+AbstractFile::~AbstractFile() {}
 
 QString AbstractFile::shortName() const { return QFileInfo(m_name).fileName(); }
 
@@ -43,8 +40,6 @@ QString AbstractFile::name() const { return m_name; }
 void AbstractFile::setFileName(const QString& fileName) { m_name = fileName; }
 
 ItemGroup* AbstractFile::itemGroup() const { return m_itemGroup.data(); }
-
-void AbstractFile::setItemGroup(ItemGroup* itemGroup) { m_itemGroup = QSharedPointer<ItemGroup>(itemGroup); }
 
 Paths AbstractFile::mergedPaths() const { return m_mergedPaths.size() ? m_mergedPaths : merge(); }
 
@@ -63,4 +58,33 @@ void AbstractFile::setColor(const QColor& color) { m_color = color; }
 int AbstractFile::id() const
 {
     return m_id;
+}
+
+void AbstractFile::_write(QDataStream& stream) const
+{
+    stream << m_id;
+    stream << m_lines;
+    stream << m_name;
+    stream << m_mergedPaths;
+    stream << m_groupedPaths;
+    stream << m_side;
+    stream << m_color;
+    stream << m_date;
+    stream << itemGroup()->isVisible();
+}
+
+void AbstractFile::_read(QDataStream& stream)
+{
+    stream >> m_id;
+    stream >> m_lines;
+    stream >> m_name;
+    stream >> m_mergedPaths;
+    stream >> m_groupedPaths;
+    stream >> (int&)(m_side);
+    stream >> m_color;
+    stream >> m_date;
+    createGi();
+    bool fl;
+    stream >> fl;
+    itemGroup()->setVisible(fl);
 }

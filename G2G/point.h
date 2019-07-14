@@ -19,7 +19,7 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    void resetPos();
+    void resetPos(bool fl = true);
     void setPosX(double x);
     void setPosY(double y);
 
@@ -53,7 +53,7 @@ public:
     static QVector<Shtift*> shtifts();
     static double min() { return qMin(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
     static double max() { return qMax(m_shtifts[0]->pos().x(), m_shtifts[1]->pos().x()); }
-    void resetPos();
+    void resetPos(bool fl = true);
     static QRectF worckRect;
 
 private:

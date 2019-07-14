@@ -9,6 +9,7 @@
 
 //#include "application.h"
 #include "mainwindow.h"
+#include "version.h"
 #ifndef linux
 //#include <qt_windows.h>
 #endif
@@ -32,8 +33,8 @@ int main(int argc, char* argv[])
     QApplication app(argc, argv);
 
     app.setApplicationName("G2G");
-    app.setOrganizationName("XrSoft");
-    app.setApplicationVersion("0.7.5");
+    app.setOrganizationName(VER_COMPANYNAME_STR);
+    app.setApplicationVersion(VER_PRODUCTVERSION_STR);
 
     QSettings::setDefaultFormat(QSettings::IniFormat);
     QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, app.applicationDirPath());

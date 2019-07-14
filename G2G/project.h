@@ -61,6 +61,7 @@ public:
     static void setModified(bool fl) { m_isModified = fl; }
 
     static QRectF getSelectedBoundingRect();
+    static QRectF getBoundingRect();
     static QString fileNames();
     static int contains(const QString& name);
     static bool reload(int id, AbstractFile* file);
@@ -114,13 +115,14 @@ public:
     static void setIsModified(bool isModified) { m_isModified = isModified; }
     QString name() const { return m_name; }
     void setName(const QString& name) { m_name = name; }
+    static int ver();
 
 signals:
     void changed();
 
 private:
     QString m_name;
-
+    static int m_ver;
     static void setChanged()
     {
         m_isModified = true;

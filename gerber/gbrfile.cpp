@@ -164,29 +164,31 @@ void File::setItemType(File::ItemsType type)
 
 void Gerber::File::write(QDataStream& stream) const
 {
-    _write(stream);
     stream << *this;
     stream << m_apertures;
     stream << m_format;
     stream << layer;
     stream << miror;
     stream << rawIndex;
+    stream << m_itemsType;
+    _write(stream);
 }
 
 void Gerber::File::read(QDataStream& stream)
 {
     crutch = &m_format;
-    _read(stream);
     stream >> *this;
     stream >> m_apertures;
     stream >> m_format;
     stream >> (int&)layer;
     stream >> (int&)miror;
     stream >> rawIndex;
+    stream >> (int&)m_itemsType;
     for (GraphicObject& go : *this) {
         go.m_gFile = this;
         go.m_state.m_format = format();
     }
+    _read(stream);
 }
 
 void Gerber::File::createGi()
@@ -194,17 +196,11 @@ void Gerber::File::createGi()
     if (shortName().contains("bot", Qt::CaseInsensitive))
         setSide(Bottom);
 
-    setItemGroup(new ItemGroup);
     for (Paths& paths : groupedPaths()) {
         GraphicsItem* item = new GerberItem(paths, this);
-        item->m_id = itemGroup()->size();
-        itemGroup()->append(item);
+        item->m_id = m_itemGroup->size();
+        m_itemGroup->append(item);
     }
-    //    for (GraphicObject& go : *this) {
-    //        GraphicsItem* item = new RawItem(go.path(), this);
-    //        item->m_id = rawItemGroup()->size();
-    //        rawItemGroup()->append(item);
-    //    }
     setRawItemGroup(new ItemGroup);
     if (!Settings::skipDuplicates()) {
         for (const GraphicObject& go : *this) {
@@ -212,7 +208,7 @@ void Gerber::File::createGi()
             item->m_id = rawItemGroup()->size();
             m_rawItemGroup->append(item);
         }
-    } else /*if (rawIndex.isEmpty())*/ {
+    } else {
         QList<Path> checkList;
         for (int i = 0; i < size(); ++i) {
             const GraphicObject& go = at(i);
@@ -241,23 +237,14 @@ void Gerber::File::createGi()
                     GraphicsItem* item = new RawItem(go.path(), this);
                     item->m_id = rawItemGroup()->size();
                     m_rawItemGroup->append(item);
-                    //                    rawIndex.append(i);
                 }
             }
         }
-    } /*else {
-        for (int i : rawIndex) {
-            qDebug() << i << size();
-            if (0 > i || i > size()) {
-                continue;
-            }
-            GraphicsItem* item = new RawItem(at(i).path(), this);
-            item->m_id = rawItemGroup()->size();
-            rawIndex.append(i);
-            m_rawItemGroup->append(item);
-        }
-    }*/
-    m_rawItemGroup->setVisible(false);
+    }
+    if (m_itemsType == Normal)
+        m_rawItemGroup->setVisible(false);
+    else
+        m_itemGroup->setVisible(false);
 }
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractAperture>& m_aperture)

@@ -3,7 +3,7 @@
 
 #include <QColor>
 
-enum class Colors : int {
+enum class Colors : unsigned {
     Background,
     Shtift,
     CutArea,
@@ -32,7 +32,7 @@ public:
     static QString gCodeFormat();
 
 protected:
-    static QColor m_color[(size_t)Colors::Count];
+    static QColor m_color[Colors::Count];
     static int m_minCircleSegments;
     static double m_minCircleSegmentLength;
     static bool m_cleanPolygons;

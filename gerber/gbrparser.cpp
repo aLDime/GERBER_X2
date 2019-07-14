@@ -155,17 +155,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName)
     if (file()->isEmpty()) {
         delete m_file;
     } else {
-        //        qDebug() << m_file->shortName() << "else" << t.elapsed();
-        //        t.start();
         m_file->mergedPaths();
-        //        qDebug() << m_file->shortName() << "mergedPaths" << t.elapsed();
-        //        t.start();
-        //        m_file->write();
-        //        qDebug() << m_file->shortName() << "write" << t.elapsed();
-        //        t.start();
         m_file->createGi();
-        //        qDebug() << m_file->shortName() << "createGi" << t.elapsed();
-        //        t.start();
+        //m_file->itemGroup()->setVisible(true);
         emit fileReady(m_file);
     }
     emit fileProgress(m_file->shortName(), 1, 1);

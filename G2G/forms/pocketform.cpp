@@ -67,6 +67,13 @@ PocketForm::PocketForm(QWidget* parent)
         ui->rbOutside->setChecked(true);
     if (settings.value("rbRaster").toBool())
         ui->rbRaster->setChecked(true);
+
+    ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    if (settings.value("rbBoard").toBool())
+        ui->dsbxDepth->rbBoard->setChecked(true);
+    if (settings.value("rbCopper").toBool())
+        ui->dsbxDepth->rbCopper->setChecked(true);
+
     on_chbxUseTwoTools_clicked(settings.value("chbxUseTwoTools").toBool());
     settings.endGroup();
 
@@ -104,6 +111,10 @@ PocketForm::~PocketForm()
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
+
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
+    settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
     delete ui;
 }

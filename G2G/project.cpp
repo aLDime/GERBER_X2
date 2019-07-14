@@ -5,7 +5,11 @@
 //#include <WinBase.h>
 //#include <WinNT.h>
 #include <filetree/filemodel.h>
+#include <forms/gcodepropertiesform.h>
 #include <qt_windows.h>
+enum FileVersion {
+    G2G_Ver_1 = 1,
+};
 
 QMap<int, QSharedPointer<AbstractFile>> Project::m_files;
 bool Project::m_isModified = false;
@@ -13,6 +17,7 @@ QMutex Project::m_mutex;
 QString Project::m_fileName;
 Project* Project::self = nullptr;
 QSemaphore Project::sem;
+int Project::m_ver = G2G_Ver_1;
 
 Project::Project() { self = this; }
 
@@ -22,6 +27,23 @@ bool Project::save(QFile& file)
 {
     try {
         QDataStream out(&file);
+
+        out << G2G_Ver_1;
+
+        out << GCodePropertiesForm::homePoint->pos();
+        out << GCodePropertiesForm::zeroPoint->pos();
+        out << Shtift::shtifts()[0]->pos();
+        out << Shtift::shtifts()[1]->pos();
+        out << Shtift::shtifts()[2]->pos();
+        out << Shtift::shtifts()[3]->pos();
+        out << Shtift::worckRect;
+        out << GCodePropertiesForm::safeZ;
+        out << GCodePropertiesForm::thickness;
+        out << GCodePropertiesForm::copperThickness;
+        out << GCodePropertiesForm::clearence;
+        out << GCodePropertiesForm::plunge;
+        out << GCodePropertiesForm::glue;
+
         out << m_files;
         m_isModified = false;
         return true;
@@ -37,9 +59,32 @@ bool Project::open(QFile& file)
         QElapsedTimer t;
         t.start();
         QDataStream in(&file);
+
+        in >> m_ver;
+
+        QPointF pt;
+        in >> pt;
+        GCodePropertiesForm::homePoint->setPos(pt);
+        in >> pt;
+        GCodePropertiesForm::zeroPoint->setPos(pt);
+        in >> pt;
+        Shtift::shtifts()[0]->setPos(pt);
+        in >> pt;
+        Shtift::shtifts()[1]->setPos(pt);
+        in >> pt;
+        Shtift::shtifts()[2]->setPos(pt);
+        in >> pt;
+        Shtift::shtifts()[3]->setPos(pt);
+        in >> Shtift::worckRect;
+        in >> GCodePropertiesForm::safeZ;
+        in >> GCodePropertiesForm::thickness;
+        in >> GCodePropertiesForm::copperThickness;
+        in >> GCodePropertiesForm::clearence;
+        in >> GCodePropertiesForm::plunge;
+        in >> GCodePropertiesForm::glue;
+
         in >> m_files;
         for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
-            filePtr->createGi();
             switch (filePtr->type()) {
             case FileType::Gerber:
                 FileModel::addFile(static_cast<Gerber::File*>(filePtr.data()));
@@ -110,6 +155,28 @@ QRectF Project::getSelectedBoundingRect()
                             bottomRight.X = qMax(pt.X, bottomRight.X);
                             bottomRight.Y = qMax(pt.Y, bottomRight.Y);
                         }
+                    }
+                }
+            }
+        }
+    }
+    return QRectF(toQPointF(topleft), toQPointF(bottomRight));
+}
+
+QRectF Project::getBoundingRect()
+{
+    QMutexLocker locker(&m_mutex);
+    IntPoint topleft(std::numeric_limits<cInt>::max(), std::numeric_limits<cInt>::max());
+    IntPoint bottomRight(std::numeric_limits<cInt>::min(), std::numeric_limits<cInt>::min());
+    for (const QSharedPointer<AbstractFile>& filePtr : m_files) {
+        if (filePtr->itemGroup()->isVisible()) {
+            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
+                for (const Path& path : item->paths()) {
+                    for (const IntPoint& pt : path) {
+                        topleft.X = qMin(pt.X, topleft.X);
+                        topleft.Y = qMin(pt.Y, topleft.Y);
+                        bottomRight.X = qMax(pt.X, bottomRight.X);
+                        bottomRight.Y = qMax(pt.Y, bottomRight.Y);
                     }
                 }
             }
@@ -191,6 +258,11 @@ int Project::addFile(AbstractFile* file)
 }
 
 bool Project::contains(AbstractFile* file) { return m_files.values().contains(QSharedPointer<AbstractFile>(file)); }
+
+int Project::ver()
+{
+    return m_ver;
+}
 
 QDataStream& operator<<(QDataStream& stream, const QSharedPointer<AbstractFile>& file)
 {
