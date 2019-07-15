@@ -85,11 +85,16 @@ bool Parser::isDrillFile(const QString& fileName)
         return false;
     QTextStream in(&file);
     QString line;
+
     const QRegExp match("^T([0]?[0-9]{1})[FSC]((\\d*\\.?\\d+))?.*$");
+    const QRegExp match2(".*Holesize.*");
     while (in.readLineInto(&line)) {
         if (match.exactMatch(line))
             return true;
+        if (match2.exactMatch(line))
+            return true;
     }
+
     return false;
 }
 
@@ -99,9 +104,15 @@ bool Parser::parseComment(const QString& line)
     if (match.exactMatch(line)) {
         const QRegExp matchFormat(".*FORMAT.*([0-9]).([0-9]).*", Qt::CaseInsensitive);
         if (matchFormat.exactMatch(match.cap(1))) {
-            //qDebug() << matchFormat.capturedTexts();
             file()->m_format.integer = matchFormat.cap(1).toInt();
             file()->m_format.decimal = matchFormat.cap(2).toInt();
+        }
+        const QRegExp matchTool("\\s*Holesize\\s*(\\d+\\.?\\d*)\\s*=\\s*(\\d+\\.?\\d*).*", Qt::CaseInsensitive);
+        if (matchTool.exactMatch(match.cap(1))) {
+            const int tCode = matchTool.cap(1).toDouble();
+            file()->m_tools[tCode] = matchTool.cap(2).toDouble() * 0.0254 * (1.0 / 25.4);
+            m_state.tCode = file()->m_tools.firstKey();
+            qDebug() << m_state.tCode << matchTool.capturedTexts() << file()->m_tools;
         }
         return true;
     }
@@ -140,6 +151,11 @@ bool Parser::parseMCode(const QString& line)
     const QRegExp match("^M([0]?[0-9]{2})$");
     if (match.exactMatch(line)) {
         switch (match.cap(1).toInt()) {
+        case M00: {
+            QList<int> keys(file()->m_tools.keys());
+            if (keys.indexOf(m_state.tCode) < (keys.size() - 1))
+                m_state.tCode = keys[keys.indexOf(m_state.tCode) + 1];
+        } break;
         case M15:
             m_state.mCode = M15;
             m_state.rawPosList = { m_state.rawPos };
@@ -214,8 +230,6 @@ bool Parser::parsePos(const QString& line)
                   ".*$");
     if (match.exactMatch(line)) {
 
-        qDebug() << match.capturedTexts();
-
         if (match.cap(2).isEmpty() && match.cap(3).isEmpty())
             return false;
 
@@ -224,8 +238,6 @@ bool Parser::parsePos(const QString& line)
 
         if (!match.cap(3).isEmpty())
             m_state.rawPos.second = match.cap(3);
-
-        qDebug("parseNumber");
 
         parseNumber(match.cap(2), m_state.pos.rx());
         parseNumber(match.cap(3), m_state.pos.ry());

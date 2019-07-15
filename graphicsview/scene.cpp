@@ -205,9 +205,9 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
     QGraphicsItem* item = itemAt(m_cross, views().first()->transform());
     if (item && item->type() != RulerType)
-        painter->setPen(QPen(Qt::red, 0.0 /*1.0 / scale*/));
+        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
     else
-        painter->setPen(QPen(Qt::white, 0.0 /*1.0 / scale*/));
+        painter->setPen(QPen(QColor(255, 255, 255, 100), 0.0 /*1.0 / scale*/));
     painter->drawLine(QLineF(m_cross.x(), rect.top(), m_cross.x(), rect.bottom()));
     painter->drawLine(QLineF(rect.left(), m_cross.y(), rect.right(), m_cross.y()));
 

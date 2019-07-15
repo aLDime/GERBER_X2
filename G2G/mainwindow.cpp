@@ -624,13 +624,20 @@ bool MainWindow::hasRecentFiles()
 void MainWindow::open()
 {
     QStringList files(QFileDialog::getOpenFileNames(this, tr("Open File"), lastPath, tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
+    if (files.isEmpty())
+        return;
+
     if (files.filter(QRegExp(".+g2g$")).size()) {
         loadFile(files.at(files.indexOf(QRegExp(".+g2g$"))));
+        return;
     } else {
         for (QString& fileName : files) {
             loadFile(fileName);
         }
     }
+
+    QString name(QFileInfo(files.first()).path());
+    setCurrentFile(name + "/" + name.split('/').last() + ".g2g");
 }
 
 bool MainWindow::save()
@@ -694,6 +701,7 @@ void MainWindow::loadFile(const QString& fileName)
             if (closeProject()) {
                 Project::open(file);
                 setCurrentFile(fileName);
+                QTimer::singleShot(100, Qt::CoarseTimer, graphicsView, &GraphicsView::zoomFit);
             }
         } else if (excellonParser->isDrillFile(fileName)) {
             emit parseExcellonFile(fileName);

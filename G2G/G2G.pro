@@ -4,7 +4,7 @@ TARGET = Getber2Gcode
 TEMPLATE = app
 
 #QMAKE_CXXFLAGS += /std:c++17
-QMAKE_CXXFLAGS += /std:c++14
+#QMAKE_CXXFLAGS += /std:c++14
 
 RESOURCES += \
     res/resources.qrc \
