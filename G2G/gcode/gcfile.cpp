@@ -309,7 +309,7 @@ void File::createGi()
     case Thermal:
         for (const Path& path : m_toolPaths) {
             //qDebug() << path;
-            item = new PathItem(path);
+            item = new PathItem(path, this);
             item->setPen(QPen(Qt::black, m_tool.getDiameter(m_depth), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColor(Settings::color(Colors::CutArea));
             itemGroup()->append(item);
@@ -317,7 +317,7 @@ void File::createGi()
 
         m_g0path.reserve(m_toolPaths.size() * 2);
         for (int i = 0; i < m_toolPaths.size(); ++i) {
-            item = new PathItem(m_toolPaths[i]);
+            item = new PathItem(m_toolPaths[i], this);
             item->setPenColor(Settings::color(Colors::ToolPath));
             itemGroup()->append(item);
             if (i < m_toolPaths.size() - 1) {
@@ -326,7 +326,7 @@ void File::createGi()
         }
 
         //        for (const Path& path : tmpPaths2) {
-        //            item = new PathItem({ path });
+        //            item = new PathItem({ path } , this);
         //
         //            item->setPenColor(Settings::color(Colors::ToolPath));
         //            itemGroup()->append(item);
@@ -375,7 +375,7 @@ void File::createGi()
             //                    clipper.AddPaths(pathss[i], ptSubject, false);
             //                    clipper.AddPath(outer, ptClip, true);
             //                    clipper.Execute(ctIntersection, tmpPaths, /*pftNonZero*/ pftPositive);
-            //                    item = new PathItem(tmpPaths);
+            //                    item = new PathItem(tmpPaths , this);
 
             //                    item->setPenColor(Settings::color(Colors::ToolPath));
             //                    item->setAcceptDrops(false);
@@ -389,7 +389,7 @@ void File::createGi()
 
             //            for (const Path& path : toolPaths)
             //                g0path.append(path.first());
-            //            item = new PathItem({ g0path });
+            //            item = new PathItem({ g0path } , this);
             //            item->setPenColor(Settings::color(Colors::G0));
             //            itemGroup()->append(item);
         } else {
@@ -403,7 +403,7 @@ void File::createGi()
             m_g0path.reserve(m_toolPaths.size());
             int i = 0;
             for (const Path& path : m_toolPaths) {
-                item = new PathItem(path);
+                item = new PathItem(path, this);
                 item->setPenColor(Settings::color(Colors::ToolPath));
                 itemGroup()->append(item);
                 if (i < m_toolPaths.size() - 1) {

@@ -69,7 +69,7 @@ void GerberItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
         cb = cb.dark(110);
         b.setColor(cb);
         //        b.setStyle(Qt::Dense4Pattern);
-        //        b.setMatrix(matrix().scale(2 / MyGraphicsView::self->matrix().m11(), 2 / MyGraphicsView::self->matrix().m11()));
+        //        b.setMatrix(matrix().scale(2 * MyGraphicsView:: scaleFactor(), 2 * MyGraphicsView:: scaleFactor()));
         cp.setAlpha(255);
         pen = QPen(cp, 0.0);
     }

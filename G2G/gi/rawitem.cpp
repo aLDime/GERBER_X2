@@ -42,10 +42,10 @@ void RawItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, Q
     if (option->state & QStyle::State_Selected) {
         color.setAlpha(255);
         pen.setColor(color);
-        pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
+        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
     }
     if (option->state & QStyle::State_MouseOver) {
-        pen.setWidthF(2.0 / GraphicsView::self->matrix().m11());
+        pen.setWidthF(2.0 * GraphicsView::scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
         pen.setDashPattern({ 3.0, 3.0 });
@@ -62,13 +62,13 @@ Paths RawItem::paths() const { return { m_path }; }
 
 QPainterPath RawItem::shape() const
 {
-    if (m_scale != GraphicsView::self->matrix().m11()) {
-        m_scale = GraphicsView::self->matrix().m11();
+    if (m_scale != GraphicsView::scaleFactor()) {
+        m_scale = GraphicsView::scaleFactor();
         m_shape = QPainterPath();
         ClipperOffset offset;
         Paths tmpPpath;
         offset.AddPath(m_path, jtSquare, etOpenButt);
-        offset.Execute(tmpPpath, 6 * uScale / m_scale);
+        offset.Execute(tmpPpath, 6 * uScale * m_scale);
         for (const Path& path : tmpPpath)
             m_shape.addPolygon(toQPolygon(path));
         m_boundingRect = m_shape.boundingRect();

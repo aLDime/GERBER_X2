@@ -82,15 +82,17 @@ MainWindow::MainWindow(QWidget* parent)
     QLatin1String styleSheet("QGroupBox, .QFrame {"
                              "background-color: rgb(255,255,255);"
                              "border: 1px solid gray;"
-                             //                             "border-radius: 5px;"
+                             "border-radius: 1ex;"
+                             //                             "padding: 0ex;"
+                             "}"
+                             "QGroupBox {"
                              "margin-top: 3ex; /* leave space at the top for the title */"
-                             "padding: 0ex;"
                              "}"
                              "QGroupBox::title {"
                              "subcontrol-origin: margin;"
-                             "margin-top: -1ex;"
+                             //                             "margin-top: -1ex;"
                              "subcontrol-position: top center; /* position at the top center */"
-                             "padding: 0 1ex;"
+                             //                             "padding: 0 1ex;"
                              "}");
 
     setStyleSheet(styleSheet);
@@ -206,12 +208,12 @@ void MainWindow::createActionsFile()
     action->setStatusTip(tr("Open an existing file"));
     fileToolBar->addAction(action);
     // Save
-    action = fileMenu->addAction(Icon(SaveIcon), tr("&Save"), this, &MainWindow::save);
+    action = fileMenu->addAction(Icon(SaveIcon), tr("&Save project"), this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save the document to disk"));
     fileToolBar->addAction(action);
     // Save As
-    action = fileMenu->addAction(Icon(SaveAsIcon), tr("Save &As..."), this, &MainWindow::saveAs);
+    action = fileMenu->addAction(Icon(SaveAsIcon), tr("Save project &As..."), this, &MainWindow::saveAs);
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
     fileToolBar->addAction(action);

@@ -19,6 +19,8 @@ enum GCodeType {
 };
 namespace GCode {
 class File : public AbstractFile {
+    friend class PathItem;
+
 public:
     File() {}
     File(const Paths& toolPaths, const Tool& tool, double depth, GCodeType type, const Paths& pocketPaths = {});
@@ -57,20 +59,14 @@ private:
 
     inline QString g0()
     {
-        //        if (m_gCode != G00) {
         m_gCode = G00;
         return "G0";
-        //        }
-        //        return "";
     }
 
     inline QString g1()
     {
-        //        if (m_gCode != G01) {
         m_gCode = G01;
         return "G1";
-        //        }
-        //        return "";
     }
 
     inline QString x(double val) { return "X" + format(val); }
