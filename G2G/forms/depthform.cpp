@@ -17,13 +17,22 @@ DepthForm::DepthForm(QWidget* parent)
         if (rbBoard->isChecked())
             GCodePropertiesForm::thickness = value;
     });
-    connect(rbCopper, &QRadioButton::toggled, [=](bool checked) {
+
+    connect(rbCustom, &QRadioButton::toggled, [=](bool checked) {
         if (checked)
+            dsbx->setEnabled(true);
+    });
+    connect(rbCopper, &QRadioButton::toggled, [=](bool checked) {
+        if (checked) {
             dsbx->setValue(GCodePropertiesForm::copperThickness);
+            dsbx->setEnabled(false);
+        }
     });
     connect(rbBoard, &QRadioButton::toggled, [=](bool checked) {
-        if (checked)
+        if (checked) {
             dsbx->setValue(GCodePropertiesForm::thickness);
+            dsbx->setEnabled(false);
+        }
     });
     rbCustom->setChecked(true);
 }

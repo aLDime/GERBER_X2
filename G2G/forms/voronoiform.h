@@ -15,7 +15,7 @@ public:
     ~VoronoiForm();
 
 signals:
-    GCode::File* createVoronoi(const Tool& tool, double depth, const double k);
+    GCode::File* createVoronoi(const Tool& tool, double depth, const double t, const double w);
 
 private slots:
     void on_pbSelect_clicked();
@@ -24,11 +24,14 @@ private slots:
     void on_pbClose_clicked();
     void on_leName_textChanged(const QString& arg1);
 
+
+
 private:
     Ui::VoronoiForm* ui;
 
     double m_size = 0.0;
     double m_lenght = 0.0;
+    void setWidth(double w);
 
     // FormsUtil interface
 protected:

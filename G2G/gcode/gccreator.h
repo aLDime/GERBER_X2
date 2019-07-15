@@ -33,6 +33,7 @@ namespace GCode {
 class Creator : public QObject {
     Q_OBJECT
     friend class ClipperLib::Clipper;
+    friend class ClipperLib::ClipperOffset;
 
 public:
     static Creator* self;
@@ -42,7 +43,7 @@ public:
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);
     void createThermal(Gerber::File* file, const Tool& tool, double depth);
-    void createVoronoi(const Tool& tool, double depth, const double k);
+    void createVoronoi(const Tool& tool, double depth, const double tolerance, const double width);
     Pathss& groupedPaths(Grouping group, cInt k = 10, bool fl = true);
     void addRawPaths(Paths rawPaths);
     void addSupportPaths(Pathss supportPaths);

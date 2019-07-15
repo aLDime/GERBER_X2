@@ -33,9 +33,13 @@ VoronoiForm::VoronoiForm(QWidget* parent)
     for (QPushButton* button : findChildren<QPushButton*>()) {
         button->setIconSize({ 16, 16 });
     }
+    connect(ui->dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+
     QSettings settings;
     settings.beginGroup("VoronoiForm");
     ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
+    ui->dsbxWidth->setValue(settings.value("dsbxWidth").toDouble());
     if (settings.value("rbBoard").toBool())
         ui->dsbxDepth->rbBoard->setChecked(true);
     if (settings.value("rbCopper").toBool())
@@ -48,6 +52,7 @@ VoronoiForm::~VoronoiForm()
     QSettings settings;
     settings.beginGroup("VoronoiForm");
     settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxWidth", ui->dsbxWidth->value());
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();
@@ -142,10 +147,10 @@ void VoronoiForm::create()
         return;
     }
 
-    GCode::Creator* tps = toolPathCreator(wPaths, true, side);
+    GCode::Creator* tps = toolPathCreator(wPaths, true, Outer);
     tps->addRawPaths(wRawPaths);
     connect(this, &VoronoiForm::createVoronoi, tps, &GCode::Creator::createVoronoi);
-    emit createVoronoi(tool, ui->dsbxDepth->value(), ui->doubleSpinBox->value());
+    emit createVoronoi(tool, ui->dsbxDepth->value(), ui->dsbxPrecision->value(), ui->dsbxWidth->value() + 0.001);
     showProgress();
     //    progrfess(1, 0);
 }
@@ -153,11 +158,22 @@ void VoronoiForm::create()
 void VoronoiForm::updateName()
 {
     ui->leName->setText(tr("Voronoi"));
+    setWidth(0.0);
 }
 
 void VoronoiForm::on_leName_textChanged(const QString& arg1)
 {
     m_fileName = arg1;
+}
+
+void VoronoiForm::setWidth(double /*w*/)
+{
+    qDebug("on_dsbxWidth_valueChanged");
+    const double d = tool.getDiameter(ui->dsbxDepth->value());
+    if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
+        QMessageBox::warning(this, "Warning", "The width must be larger than the tool diameter!");
+        ui->dsbxWidth->setValue(d + 0.05);
+    }
 }
 
 void VoronoiForm::editFile(GCode::File* /*file*/)

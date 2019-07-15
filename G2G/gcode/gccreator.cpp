@@ -718,133 +718,12 @@ void Creator::createThermal(Gerber::File* file, const Tool& tool, double depth)
     }
 }
 
-void Creator::createVoronoi(const Tool& tool, double depth, const double k)
+void Creator::createVoronoi(const Tool& tool, double depth, const double tolerance, const double width)
 {
     try {
-        //qDebug() << "";
-        // emit progress(3, 0); // progress
-        //        QElapsedTimer t;
-        //        QElapsedTimer t2;
-        //t.start();
-        //        t2.start();
-
-        //            QVector<Vrn::Vertex*> points;
-        //            points.reserve(1000000);
-        //            int id = 0;
-        //            CleanPolygons(m_workingPaths, k * 0.1 * uScale);
-        //            groupedPaths(CopperPaths);
-        //            for (const Paths& paths : m_groupedPaths) {
-        //                for (const Path& path : paths) {
-        //                    IntPoint tmp(path.first());
-        //                    for (const IntPoint& point : path) {
-        //                        QLineF line(toQPointF(tmp), toQPointF(point));
-        //                        if (line.length() > k) {
-        //                            for (int i = 1, total = line.length() / k; i < total; ++i) {
-        //                                line.setLength(i * k);
-        //                                IntPoint point(toIntPoint(line.p2()));
-        //                                points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-        //                            }
-        //                        }
-        //                        points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-        //                        tmp = point;
-        //                    }
-        //                    QLineF line(toQPointF(tmp), toQPointF(path.first()));
-        //                    if (line.length() > k) {
-        //                        for (int i = 1, total = line.length() / k; i < total; ++i) {
-        //                            line.setLength(i * k);
-        //                            IntPoint point(toIntPoint(line.p2()));
-        //                            points.append(new Vrn::Vertex(point.X * dScale, point.Y * dScale, id));
-        //                        }
-        //                    }
-        //                }
-        //                ++id;
-        //            }
-        //            // emit progress(3, 1); // progress
-        //            {
-        //                Clipper clipper;
-        //                for (const Paths& paths : m_groupedPaths) {
-        //                    clipper.AddPaths(paths, ptClip, true);
-        //                }
-        //                clipper.AddPaths(m_workingRawPaths, ptClip, true);
-        //                IntRect r(clipper.GetBounds());
-
-        //                QRectF bounding_box;
-        //                bounding_box.setBottom(r.bottom * dScale + 1);
-        //                bounding_box.setLeft(r.left * dScale - 1);
-        //                bounding_box.setRight(r.right * dScale + 1);
-        //                bounding_box.setTop(r.top * dScale - 1);
-        //                //qDebug() << "size" << points.size();
-        //                Vrn::Voronoi voronoi;
-        //                Vrn::Diagram* diagram = voronoi.compute(points, bounding_box);
-        //                //qDebug() << "Voronoi.compute" << diagram->execTime;
-
-        //                m_returnPaths.reserve(diagram->edges.size());
-        //                for (Vrn::Edge* edge : diagram->edges) {
-        //                    if (edge->lSite && edge->rSite && edge->lSite->id != edge->rSite->id)
-        //                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
-        //                    //                    else if (!edge->lSite)
-        //                    //                        m_returnPaths.append(Path{ IntPoint(edge->va->x, edge->va->y), IntPoint(edge->vb->x, edge->vb->y) });
-        //                    else if (!edge->rSite)
-        //                        m_returnPaths.append(Path{ IntPoint(edge->va->x * uScale, edge->va->y * uScale), IntPoint(edge->vb->x * uScale, edge->vb->y * uScale) });
-        //                }
-        //                //qDebug() << "m_returnPaths" << m_returnPaths.size();
-        //                delete diagram;
-        //                // emit progress(3, 2); // progress
-        //            }
-
-        //            std::sort(m_returnPaths.begin(), m_returnPaths.end(), [](const Path& a, const Path& b) {
-        //                cInt r = b.first().Y - a.last().Y;
-        //                if (r)
-        //                    return r > 0;
-        //                return (b.first().X - a.last().X) >= 0;
-        //            });
-
-        //            // merge result toolPaths
-        //            const int max = m_returnPaths.size();
-        //            for (int k = 0; k < 10; ++k) {
-        //                for (int i = 0; i < m_returnPaths.size(); ++i) {
-        //                    // progress
-        //                    if (progressOrCancel(max, max - m_returnPaths.size(), 100))
-        //                        return;
-        //                    // progress
-        //                    for (int j = 0; j < m_returnPaths.size(); ++j) {
-        //                        if (i == j)
-        //                            continue;
-        //                        if (m_returnPaths[i].last() == m_returnPaths[j].first()) {
-        //                            //if (abs(m_returnPaths[i].last().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].last().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
-        //                            m_returnPaths[i].append(m_returnPaths[j].mid(1));
-        //                            m_returnPaths.remove(j--);
-        //                            continue;
-        //                        }
-        //                        if (m_returnPaths[i].first() == m_returnPaths[j].last()) {
-        //                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].last().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].last().Y) < 0.01 * uScale) {
-        //                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
-        //                            m_returnPaths.remove(i--);
-        //                            break;
-        //                        }
-        //                        if (m_returnPaths[i].first() == m_returnPaths[j].first()) {
-        //                            //if (abs(m_returnPaths[i].first().X - m_returnPaths[j].first().X) < 0.01 * uScale && abs(m_returnPaths[i].first().Y - m_returnPaths[j].first().Y) < 0.01 * uScale) {
-        //                            ReversePath(m_returnPaths[j]);
-        //                            m_returnPaths[j].append(m_returnPaths[i].mid(1));
-        //                            m_returnPaths.remove(i--);
-        //                            break;
-        //                        }
-        //                    }
-        //                }
-        //            }
-        //            int size = m_returnPaths.size();
-        //            for (int i = 0; i < m_returnPaths.size(); ++i) {
-        //                if (m_returnPaths[i].size() == 2) {
-        //                    m_returnPaths.remove(i--);
-        //                    continue;
-        //                }
-        //            }
-        //            //qDebug() << "remove" << (size - m_returnPaths.size());
-        //            //qDebug() << "createVoronoi test" << t.elapsed() << m_returnPaths.size();
-
         QVector<jcv_point> points;
         points.reserve(100000);
-        CleanPolygons(m_workingPaths, k * 0.1 * uScale);
+        CleanPolygons(m_workingPaths, tolerance * 0.1 * uScale);
         groupedPaths(CopperPaths);
         int id = 0;
 
@@ -852,9 +731,9 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
 
         auto condei = [&](IntPoint tmp, IntPoint point) {
             QLineF line(toQPointF(tmp), toQPointF(point));
-            if (line.length() > k) {
-                for (int i = 1, total = line.length() / k; i < total; ++i) {
-                    line.setLength(i * k);
+            if (line.length() > tolerance) {
+                for (int i = 1, total = line.length() / tolerance; i < total; ++i) {
+                    line.setLength(i * tolerance);
                     IntPoint point(toIntPoint(line.p2()));
                     points.append({ static_cast<jcv_real>(point.X), static_cast<jcv_real>(point.Y), id });
                 }
@@ -891,17 +770,18 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
         QList<QSharedPointer<OrdPath>> holder;
         QList<OrdPath*> merge;
 
+        Clipper clipper;
+        for (const Paths& paths : m_groupedPathss) {
+            clipper.AddPaths(paths, ptClip, true);
+        }
+        clipper.AddPaths(m_workingRawPaths, ptClip, true);
+        const IntRect r(clipper.GetBounds());
+
         progressOrCancel(3, 1); // progress
         {
-            Clipper clipper;
-            for (const Paths& paths : m_groupedPathss) {
-                clipper.AddPaths(paths, ptClip, true);
-            }
-            clipper.AddPaths(m_workingRawPaths, ptClip, true);
-            IntRect r(clipper.GetBounds());
             jcv_rect bounding_box = {
-                { static_cast<jcv_real>(r.left - uScale), static_cast<jcv_real>(r.top - uScale) },
-                { static_cast<jcv_real>(r.right + uScale), static_cast<jcv_real>(r.bottom + uScale) }
+                { static_cast<jcv_real>(r.left - uScale * 1.1), static_cast<jcv_real>(r.top - uScale * 1.1) },
+                { static_cast<jcv_real>(r.right + uScale * 1.1), static_cast<jcv_real>(r.bottom + uScale * 1.1) }
             };
 
             Pairss edges;
@@ -1056,7 +936,7 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
         //t.start();
 
         for (int i = 0; i < m_returnPaths.size(); ++i) {
-            if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < k * 0.5 * uScale)
+            if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < tolerance * 0.5 * uScale)
                 m_returnPaths.remove(i--);
         }
 
@@ -1073,17 +953,17 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
             for (int pi = 0; pi < path.size(); ++pi) {
                 for (int j = 0; j < m_returnPaths.size(); ++j) {
                     Path& iPath = m_returnPaths[j];
-                    if (abs(path[pi].X - iPath.first().X) < (k * 0.001 * uScale)
-                        && abs(path[pi].Y - iPath.first().Y) < (k * 0.001 * uScale))
+                    if (abs(path[pi].X - iPath.first().X) < (tolerance * 0.001 * uScale)
+                        && abs(path[pi].Y - iPath.first().Y) < (tolerance * 0.001 * uScale))
                         intersect[i].insert(pi);
-                    if (abs(path[pi].X - iPath.last().X) < (k * 0.001 * uScale)
-                        && abs(path[pi].Y - iPath.last().Y) < (k * 0.001 * uScale))
+                    if (abs(path[pi].X - iPath.last().X) < (tolerance * 0.001 * uScale)
+                        && abs(path[pi].Y - iPath.last().Y) < (tolerance * 0.001 * uScale))
                         intersect[i].insert(pi);
                 }
             }
         }
 
-        auto Clean = [k](Path& path, QList<int> skip) {
+        auto Clean = [tolerance](Path& path, QList<int> skip) {
             std::sort(skip.begin(), skip.end());
             for (int i = 0, o = 0; i < path.size() - 1; ++i) {
                 if (i > (skip.first() + o))
@@ -1091,7 +971,7 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
                 if ((i == (skip.first() + o)) || ((i + 1) == (skip.first() + o)))
                     continue;
                 QLineF line(toQPointF(path[i]), toQPointF(path[i + 1]));
-                if (line.length() < k) {
+                if (line.length() < tolerance) {
                     path[i] = toIntPoint(line.center());
                     path.remove(i + 1);
                     --o;
@@ -1114,11 +994,102 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double k)
             size2 += m_returnPaths[i].size();
         }
 
-        //qDebug() << "OPTIMIZE" << t.elapsed() << "before" << size1 << "after" << size2 << "redused size" << (size1 / size2);
-        //qDebug() << "elapsed" << t2.elapsed();
-        m_file = new GCode::File(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
-        m_file->setFileName(tool.name());
-        emit fileReady(m_file);
+        if (width) {
+            m_toolDiameter = tool.getDiameter(depth) * uScale;
+            m_dOffset = m_toolDiameter / 2;
+            m_stepOver = tool.stepover() * uScale;
+
+            // cut toolPath
+            {
+                cInt k = 0; //                -width* uScale * 0.5;
+                Path outer = {
+                    IntPoint(r.left - k, r.bottom + k),
+                    IntPoint(r.right + k, r.bottom + k),
+                    IntPoint(r.right + k, r.top - k),
+                    IntPoint(r.left - k, r.top - k)
+                };
+                ReversePath(outer);
+                Clipper clipper;
+                clipper.AddPaths(m_returnPaths, ptSubject, false);
+                clipper.AddPath(outer, ptClip, true);
+                PolyTree polytree;
+                clipper.Execute(ctIntersection, polytree, pftPositive);
+                PolyTreeToPaths(polytree, m_returnPaths);
+            }
+
+            {
+                ClipperOffset offset(uScale);
+                offset.AddPaths(m_returnPaths, jtMiter, etOpenRound);
+                offset.Execute(m_returnPaths, width * uScale * 0.5);
+                Clipper clipper;
+                clipper.AddPaths(m_returnPaths, ptSubject, true);
+                for (const Paths& paths : m_groupedPathss) {
+                    clipper.AddPaths(paths, ptClip, true);
+                }
+                clipper.Execute(ctDifference, m_returnPaths, pftPositive, pftNegative);
+            }
+            {
+                //                m_returnPaths.clear();
+                //                switch (Inner) {
+                //                case Outer:
+                //                    groupedPaths(CutoffPaths, m_toolDiameter + 5);
+                //                    if (m_groupedPathss.size() > 1 && m_groupedPathss.first().size() == 2)
+                //                        m_groupedPathss.removeFirst();
+                //                    break;
+                //                case Inner:
+                //                    groupedPaths(CopperPaths);
+                //                    break;
+                //                }
+                //                for (Paths m_returnPaths : m_returnPaths) {
+                ClipperOffset offset(uScale);
+                offset.AddPaths(m_returnPaths, jtRound, etClosedPolygon);
+                Paths tmpPaths1;
+                offset.Execute(tmpPaths1, -m_dOffset);
+                Paths tmpPaths;
+                do {
+                    tmpPaths.append(tmpPaths1);
+                    offset.Clear();
+                    offset.AddPaths(tmpPaths1, jtMiter, etClosedPolygon);
+                    offset.Execute(tmpPaths1, -m_stepOver);
+                } while (tmpPaths1.size());
+                m_returnPaths = tmpPaths; //.append(tmpPaths);
+                //                }
+            }
+
+            if (m_returnPaths.isEmpty()) {
+                emit fileReady(nullptr);
+                return;
+            }
+
+            Clipper clipper;
+            clipper.AddPaths(m_returnPaths, ptSubject, true);
+            IntRect r(clipper.GetBounds());
+
+            int k = tool.diameter() * uScale;
+            Path outer = {
+                IntPoint(r.left - k, r.bottom + k),
+                IntPoint(r.right + k, r.bottom + k),
+                IntPoint(r.right + k, r.top - k),
+                IntPoint(r.left - k, r.top - k)
+            };
+            PolyTree polyTree;
+            clipper.AddPath(outer, ptSubject, true);
+            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+
+            m_returnPaths.clear();
+            grouping2(polyTree.GetFirst(), &m_returnPaths);
+
+            ReversePaths(m_returnPaths);
+            sortByStratDistance(m_returnPaths);
+
+            m_file = new GCode::File(m_returnPaths, tool, depth, Voronoi);
+            m_file->setFileName(tool.name());
+            emit fileReady(m_file);
+        } else {
+            m_file = new GCode::File(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
+            m_file->setFileName(tool.name());
+            emit fileReady(m_file);
+        }
     } catch (...) {
         //qDebug() << "catch";
     }

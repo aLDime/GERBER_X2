@@ -159,13 +159,22 @@
       </item>
       <item row="4" column="0">
        <widget class="QLabel" name="label_4">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
         <property name="text">
-         <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;Precision:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+         <string>Precision:</string>
         </property>
        </widget>
       </item>
       <item row="4" column="1">
-       <widget class="DoubleSpinBox" name="doubleSpinBox">
+       <widget class="DoubleSpinBox" name="dsbxPrecision">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
         <property name="decimals">
          <number>2</number>
         </property>
@@ -183,7 +192,7 @@
         </property>
        </widget>
       </item>
-      <item row="5" column="0" colspan="2">
+      <item row="6" column="0" colspan="2">
        <widget class="Line" name="line_2">
         <property name="frameShadow">
          <enum>QFrame::Plain</enum>
@@ -193,7 +202,7 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="0">
+      <item row="7" column="0">
        <widget class="QLabel" name="label_6">
         <property name="font">
          <font>
@@ -206,11 +215,37 @@
         </property>
        </widget>
       </item>
-      <item row="6" column="1">
+      <item row="7" column="1">
        <widget class="QLineEdit" name="leName"/>
       </item>
       <item row="0" column="1">
        <widget class="DepthForm" name="dsbxDepth" native="true"/>
+      </item>
+      <item row="5" column="0">
+       <widget class="QLabel" name="label_5">
+        <property name="font">
+         <font>
+          <weight>75</weight>
+          <bold>true</bold>
+         </font>
+        </property>
+        <property name="text">
+         <string>Width:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="1">
+       <widget class="DoubleSpinBox" name="dsbxWidth">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+       </widget>
       </item>
      </layout>
     </widget>
