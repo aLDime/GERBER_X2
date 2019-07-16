@@ -11,25 +11,34 @@ DepthForm::DepthForm(QWidget* parent)
     setupUi(this);
     retranslateUi(this);
     connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &DepthForm::valueChanged);
-    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
-        if (rbCopper->isChecked())
-            GCodePropertiesForm::copperThickness = value;
-        if (rbBoard->isChecked())
-            GCodePropertiesForm::thickness = value;
-    });
+    //    connect(dsbx, QOverload<double>::of(&QDoubleSpinBox::valueChanged), [=](double value) {
+    //        if (rbCopper->isChecked())
+    //            GCodePropertiesForm::copperThickness = value;
+    //        if (rbBoard->isChecked())
+    //            GCodePropertiesForm::thickness = value;
+    //    });
 
     connect(rbCustom, &QRadioButton::toggled, [=](bool checked) {
-        if (checked)
+        if (checked) {
             dsbx->setEnabled(true);
+            dsbx->setValue(m_value);
+            m_fl = true;
+        }
     });
     connect(rbCopper, &QRadioButton::toggled, [=](bool checked) {
         if (checked) {
+            if (m_fl)
+                m_value = dsbx->value();
+            m_fl = false;
             dsbx->setValue(GCodePropertiesForm::copperThickness);
             dsbx->setEnabled(false);
         }
     });
     connect(rbBoard, &QRadioButton::toggled, [=](bool checked) {
         if (checked) {
+            if (m_fl)
+                m_value = dsbx->value();
+            m_fl = false;
             dsbx->setValue(GCodePropertiesForm::thickness);
             dsbx->setEnabled(false);
         }
@@ -37,7 +46,7 @@ DepthForm::DepthForm(QWidget* parent)
     rbCustom->setChecked(true);
 }
 
-double DepthForm::value() const { return dsbx->value(); }
+double DepthForm::value(bool fl) const { return fl ? m_value : dsbx->value(); }
 
 void DepthForm::setValue(double value) { dsbx->setValue(value); }
 

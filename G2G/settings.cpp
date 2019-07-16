@@ -8,7 +8,7 @@ const int gridColor = 100;
 
 QColor Settings::m_color[Colors::Count]{
     QColor(), //Background
-    QColor(255, 255, 0, 120), //Shtift
+    QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
     QColor(gridColor, gridColor, gridColor, 50), //Grid1
     QColor(gridColor, gridColor, gridColor, 100), //Grid5
@@ -34,6 +34,12 @@ QString Settings::m_endGCode = "M30";
 
 QString Settings::m_GCode = "G?X?Y?Z?F?S?";
 
+QPointF Settings::m_pinOffset;
+
+QPointF Settings::m_homeOffset;
+
+int Settings::m_homePos = 0;
+
 Settings::Settings() {}
 
 int Settings::circleSegments(double radius)
@@ -57,3 +63,12 @@ QString Settings::startGCode() { return m_startGCode; }
 QString Settings::endGCode() { return m_endGCode; }
 
 QString Settings::gCodeFormat() { return m_GCode; }
+
+QPointF Settings::homeOffset() { return m_homeOffset; }
+
+int Settings::homePos() { return m_homePos; }
+
+QPointF Settings::pinOffset()
+{
+    return m_pinOffset;
+}

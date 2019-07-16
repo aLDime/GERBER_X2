@@ -112,7 +112,7 @@ PocketForm::~PocketForm()
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
 
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();

@@ -17,7 +17,7 @@ enum GiType{
     PointZeroType,
     RawItemType,
     RulerType,
-    ShtiftType,
+    PinType,
 };
 
 class AbstractFile;

@@ -116,18 +116,17 @@ public:
     QString name() const { return m_name; }
     void setName(const QString& name) { m_name = name; }
     static int ver();
-
+    static void setChanged()
+    {
+        m_isModified = true;
+        self->changed();
+    }
 signals:
     void changed();
 
 private:
     QString m_name;
     static int m_ver;
-    static void setChanged()
-    {
-        m_isModified = true;
-        self->changed();
-    }
 
     static bool m_isModified;
     static QMutex m_mutex;

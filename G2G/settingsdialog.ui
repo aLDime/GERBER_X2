@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>405</width>
-    <height>536</height>
+    <width>384</width>
+    <height>584</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -353,6 +353,134 @@
              <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - only if the value has changed.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - always.&lt;/p&gt;&lt;p&gt;If one of the commands &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; and&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; is missing, it will not be inserted into the G-code.&lt;/p&gt;&lt;p&gt;If there is a space between the teams, then it will also be inserted into the G-code.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
             </property>
            </widget>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_4">
+            <property name="text">
+             <string>Home Reset Location:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout">
+            <item>
+             <widget class="QComboBox" name="cbxHomePos">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="MinimumExpanding" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <item>
+               <property name="text">
+                <string>Bottom Left</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Bottom Right</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Top Left</string>
+               </property>
+              </item>
+              <item>
+               <property name="text">
+                <string>Top Right</string>
+               </property>
+              </item>
+             </widget>
+            </item>
+            <item>
+             <widget class="DoubleSpinBox" name="dsbxHomeX">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="prefix">
+               <string>X </string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="DoubleSpinBox" name="dsbxHomeY">
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="prefix">
+               <string>Y </string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item>
+           <widget class="QLabel" name="label_5">
+            <property name="text">
+             <string>Pin Reset Location:</string>
+            </property>
+           </widget>
+          </item>
+          <item>
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
+            <item>
+             <widget class="DoubleSpinBox" name="dsbxPinX">
+              <property name="prefix">
+               <string>X </string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="DoubleSpinBox" name="dsbxPinY">
+              <property name="prefix">
+               <string>Y </string>
+              </property>
+              <property name="decimals">
+               <number>3</number>
+              </property>
+              <property name="minimum">
+               <double>-1000.000000000000000</double>
+              </property>
+              <property name="maximum">
+               <double>1000.000000000000000</double>
+              </property>
+             </widget>
+            </item>
+           </layout>
           </item>
          </layout>
         </widget>

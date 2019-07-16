@@ -36,10 +36,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     init();
 
-    GCodePropertiesForm::homePoint = new Point(Point::Home);
     GCodePropertiesForm::zeroPoint = new Point(Point::Zero);
+    GCodePropertiesForm::homePoint = new Point(Point::Home);
 
-    new Shtift[4];
+    new Pin[4];
 
     gerberParser->moveToThread(&parserThread);
     connect(this, &MainWindow::parseGerberFile, gerberParser, &FileParser::parseFile, Qt::QueuedConnection);
@@ -325,7 +325,7 @@ void MainWindow::createActionsSDS()
     // MyScene::self->update();
     // MainWindow::self->zero()->resetPos();
     // MainWindow::self->home()->resetPos();
-    // Shtift::shtifts()[0]->resetPos();
+    // Pin::shtifts()[0]->resetPos();
     // }
     // });
     // action->setShortcut(QKeySequence::Delete);
@@ -385,7 +385,7 @@ void MainWindow::createActionsToolPath()
 
         GCodePropertiesForm::homePoint->resetPos();
         GCodePropertiesForm::zeroPoint->resetPos();
-        Shtift::shtifts().first()->resetPos();
+        Pin::pins().first()->resetPos();
         for (QGraphicsItem* item : Scene::items())
             item->setSelected(selected.takeFirst());
         graphicsView->zoomFit();
@@ -410,7 +410,7 @@ void MainWindow::createActionsGraphics()
     tb->addAction(QIcon::fromTheme("path-intersection"), tr("intersection"));
 }
 
-void MainWindow::createShtiftsPath()
+void MainWindow::createPinsPath()
 {
     ToolDatabase tdb(this, { Tool::Drill });
     if (tdb.exec()) {
@@ -418,7 +418,7 @@ void MainWindow::createShtiftsPath()
 
         QPolygonF dst;
 
-        for (Shtift* item : Shtift::shtifts()) {
+        for (Pin* item : Pin::pins()) {
             item->setFlag(QGraphicsItem::ItemIsMovable, false);
             QPointF point(item->pos());
             if (dst.contains(point))
@@ -429,13 +429,13 @@ void MainWindow::createShtiftsPath()
         qDebug() << dst.size();
 
         QSettings settings;
-        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Shtift/depth").toDouble(), 0, 100, 2);
+        double depth = QInputDialog::getDouble(this, "", tr("Set Depth"), settings.value("Pin/depth").toDouble(), 0, 100, 2);
         if (depth == 0.0)
             return;
-        settings.setValue("Shtift/depth", depth);
+        settings.setValue("Pin/depth", depth);
 
         GCode::File* gcode = new GCode::File({ toPath(dst) }, tool, depth, Drill);
-        gcode->setFileName("Shtift (Tool Id " + QString::number(tool.id()) + ")");
+        gcode->setFileName("Pin (Tool Id " + QString::number(tool.id()) + ")");
         Project::addFile(gcode);
     }
 }
@@ -527,14 +527,14 @@ void MainWindow::onCustomContextMenuRequested(const QPoint& pos)
     if (!item)
         return;
 
-    if (item->type() == ShtiftType) {
-        a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Shtifts"), this, &MainWindow::createShtiftsPath);
+    if (item->type() == PinType) {
+        a = menu.addAction(Icon(PathDrillIcon), tr("&Create path for Pins"), this, &MainWindow::createPinsPath);
         a = menu.addAction(tr("Fixed"), [](bool fl) {
-            for (Shtift* item : Shtift::shtifts())
+            for (Pin* item : Pin::pins())
                 item->setFlag(QGraphicsItem::ItemIsMovable, !fl);
         });
         a->setCheckable(true);
-        a->setChecked(!(Shtift::shtifts()[0]->flags() & QGraphicsItem::ItemIsMovable));
+        a->setChecked(!(Pin::pins()[0]->flags() & QGraphicsItem::ItemIsMovable));
     } else if (dynamic_cast<Point*>(item)) {
         a = menu.addAction(tr("Fixed"), [=](bool fl) { item->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
         a->setCheckable(true);

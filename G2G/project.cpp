@@ -32,11 +32,11 @@ bool Project::save(QFile& file)
 
         out << GCodePropertiesForm::homePoint->pos();
         out << GCodePropertiesForm::zeroPoint->pos();
-        out << Shtift::shtifts()[0]->pos();
-        out << Shtift::shtifts()[1]->pos();
-        out << Shtift::shtifts()[2]->pos();
-        out << Shtift::shtifts()[3]->pos();
-        out << Shtift::worckRect;
+        out << Pin::pins()[0]->pos();
+        out << Pin::pins()[1]->pos();
+        out << Pin::pins()[2]->pos();
+        out << Pin::pins()[3]->pos();
+        out << Pin::worckRect;
         out << GCodePropertiesForm::safeZ;
         out << GCodePropertiesForm::thickness;
         out << GCodePropertiesForm::copperThickness;
@@ -68,14 +68,14 @@ bool Project::open(QFile& file)
         in >> pt;
         GCodePropertiesForm::zeroPoint->setPos(pt);
         in >> pt;
-        Shtift::shtifts()[0]->setPos(pt);
+        Pin::pins()[0]->setPos(pt);
         in >> pt;
-        Shtift::shtifts()[1]->setPos(pt);
+        Pin::pins()[1]->setPos(pt);
         in >> pt;
-        Shtift::shtifts()[2]->setPos(pt);
+        Pin::pins()[2]->setPos(pt);
         in >> pt;
-        Shtift::shtifts()[3]->setPos(pt);
-        in >> Shtift::worckRect;
+        Pin::pins()[3]->setPos(pt);
+        in >> Pin::worckRect;
         in >> GCodePropertiesForm::safeZ;
         in >> GCodePropertiesForm::thickness;
         in >> GCodePropertiesForm::copperThickness;

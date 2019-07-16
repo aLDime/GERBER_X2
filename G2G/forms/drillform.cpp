@@ -190,7 +190,7 @@ DrillForm::~DrillForm()
     settings.setValue("rb_pocket", ui->rb_pocket->isChecked());
     settings.setValue("rb_profile", ui->rb_profile->isChecked());
 
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();

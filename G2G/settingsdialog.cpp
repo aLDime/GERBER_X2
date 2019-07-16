@@ -10,7 +10,7 @@ const int gridColor = 100;
 
 const QColor defaultColor[(size_t)Colors::Count]{
     QColor(), //Background
-    QColor(255, 255, 0, 120), //Shtift
+    QColor(255, 255, 0, 120), //Pin
     QColor(Qt::gray), //CutArea
     QColor(gridColor, gridColor, gridColor, 50), //Grid1
     QColor(gridColor, gridColor, gridColor, 100), //Grid5
@@ -24,7 +24,7 @@ const QColor defaultColor[(size_t)Colors::Count]{
 
 const QString colorName[(size_t)Colors::Count]{
     "Background",
-    "Shtift",
+    "Pin",
     "CutArea",
     "Grid1",
     "Grid5",
@@ -99,6 +99,17 @@ void SettingsDialog::readSettings()
     cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
+    settings.beginGroup("Home");
+    m_pinOffset = settings.value("pinOffset", QPointF(6, 6)).toPointF();
+    m_homeOffset = settings.value("homeOffset").toPointF();
+    m_homePos = settings.value("homePos").toInt();
+    dsbxPinX->setValue(m_pinOffset.x());
+    dsbxPinY->setValue(m_pinOffset.y());
+    dsbxHomeX->setValue(m_homeOffset.x());
+    dsbxHomeY->setValue(m_homeOffset.y());
+    cbxHomePos->setCurrentIndex(m_homePos);
+    settings.endGroup();
+
     settings.beginGroup("SettingsDialog");
     if (isVisible())
         settings.setValue("geometry", saveGeometry());
@@ -150,6 +161,15 @@ void SettingsDialog::writeSettings()
 
     settings.beginGroup("Application");
     settings.setValue("FontSize", cbxFontSize->currentText());
+    settings.endGroup();
+
+    settings.beginGroup("Home");
+    m_pinOffset = QPointF(dsbxPinX->value(), dsbxPinY->value());
+    m_homeOffset = QPointF(dsbxHomeX->value(), dsbxHomeY->value());
+    m_homePos = cbxHomePos->currentIndex();
+    settings.setValue("pinOffset", m_pinOffset);
+    settings.setValue("homeOffset", m_homeOffset);
+    settings.setValue("homePos", m_homePos);
     settings.endGroup();
 
     settings.beginGroup("SettingsDialog");

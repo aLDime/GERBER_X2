@@ -21,6 +21,10 @@ public:
 private:
     bool m_drawPdf;
     QPointF m_cross;
+    double m_scale = std::numeric_limits<double>::max();
+    QRectF m_rect;
+    QMap<long, long> hGrid;
+    QMap<long, long> vGrid;
 
     // QGraphicsScene interface
 protected:

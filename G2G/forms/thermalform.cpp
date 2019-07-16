@@ -108,7 +108,7 @@ ThermalForm::~ThermalForm()
     m_sourcePreview.clear();
     QSettings settings;
     settings.beginGroup("ThermalForm");
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();

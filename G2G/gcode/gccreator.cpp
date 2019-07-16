@@ -697,8 +697,6 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
         groupedPaths(CopperPaths);
         int id = 0;
 
-        //t.start();
-
         auto condei = [&](IntPoint tmp, IntPoint point) {
             QLineF line(toQPointF(tmp), toQPointF(point));
             if (line.length() > tolerance) {
@@ -722,9 +720,6 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
             }
             ++id;
         }
-
-        //qDebug() << "DATA PREPARE" << t.elapsed();
-        //t.start();
 
         for (const Path& path : m_workingRawPaths) {
             IntPoint tmp(path.first());
@@ -814,8 +809,6 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
             }
 
             progressOrCancel(3, 3); // progress
-            //qDebug() << "GENERATE" << t.elapsed();
-            //t.start();
         }
         {
             const int max = merge.size();
@@ -848,8 +841,6 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
                     Next = Next->Next;
                 }
             }
-            //qDebug() << "MERGE_1" << t.elapsed() << "size" << m_returnPaths.size();
-            //t.start();
         }
         const int max = m_returnPaths.size();
         for (int k = 0; k < 3; ++k) {
@@ -902,19 +893,10 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
             }
         }
 
-        //qDebug() << "MERGE_2" << t.elapsed() << "size" << m_returnPaths.size();
-        //t.start();
-
         for (int i = 0; i < m_returnPaths.size(); ++i) {
             if (m_returnPaths[i].size() < 4 && Length(m_returnPaths[i].first(), m_returnPaths[i].last()) < tolerance * 0.5 * uScale)
                 m_returnPaths.remove(i--);
         }
-
-        //qDebug() << "CLEAR" << t.elapsed() << "size" << m_returnPaths.size();
-        //t.start();
-
-        //        m_file = new GCodeFile(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
-        //        emit fileReady(m_file);
 
         QVector<QSet<int>> intersect(m_returnPaths.size());
         for (int i = 0; i < m_returnPaths.size(); ++i) {
@@ -964,7 +946,11 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
             size2 += m_returnPaths[i].size();
         }
 
-        if (width) {
+        if (width < tool.getDiameter(depth)) {
+            m_file = new GCode::File(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
+            m_file->setFileName(tool.name());
+            emit fileReady(m_file);
+        } else {
             m_toolDiameter = tool.getDiameter(depth) * uScale;
             m_dOffset = m_toolDiameter / 2;
             m_stepOver = tool.stepover() * uScale;
@@ -1053,10 +1039,6 @@ void Creator::createVoronoi(const Tool& tool, double depth, const double toleran
             sortByStratDistance(m_returnPaths);
 
             m_file = new GCode::File(m_returnPaths, tool, depth, Voronoi);
-            m_file->setFileName(tool.name());
-            emit fileReady(m_file);
-        } else {
-            m_file = new GCode::File(sortByStratDistance2(m_returnPaths), tool, depth, Voronoi);
             m_file->setFileName(tool.name());
             emit fileReady(m_file);
         }

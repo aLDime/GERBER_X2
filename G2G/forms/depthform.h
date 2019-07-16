@@ -17,7 +17,7 @@ class DepthForm : public QWidget {
 public:
     explicit DepthForm(QWidget* parent = nullptr);
 
-    double value() const;
+    double value(bool fl = false) const;
     void setValue(double value);
     QRadioButton* rbCopper;
     QRadioButton* rbBoard;
@@ -26,6 +26,8 @@ signals:
     void valueChanged(double);
 
 private:
+    double m_value = 0.0;
+    bool m_fl = false;
     QHBoxLayout* horizontalLayout;
     QDoubleSpinBox* dsbx;
     void setupUi(QWidget* Form); // setupUi

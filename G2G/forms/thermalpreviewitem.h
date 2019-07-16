@@ -7,7 +7,7 @@
 #include <myclipper.h>
 
 enum {
-    ThermalType = ShtiftType + 1,
+    ThermalType = PinType + 1,
 };
 
 class ThermalNode;

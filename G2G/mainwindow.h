@@ -72,7 +72,7 @@ private:
     void about();
     bool closeProject();
     void createDockWidget(QWidget* dwContent, int type);
-    void createShtiftsPath();
+    void createPinsPath();
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void init();

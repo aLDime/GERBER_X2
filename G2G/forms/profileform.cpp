@@ -96,7 +96,7 @@ ProfileForm::~ProfileForm()
     settings.setValue("rbOutside", ui->rbOutside->isChecked());
     settings.setValue("dsbxBridgeLenght", ui->dsbxBridgeLenght->value());
 
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
     settings.endGroup();

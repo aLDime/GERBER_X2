@@ -7,7 +7,7 @@
 #include <myclipper.h>
 
 enum PreviewItemType {
-    SlotType = ShtiftType + 1,
+    SlotType = PinType + 1,
     DrillType,
     ApetrureType
 };

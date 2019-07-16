@@ -51,7 +51,7 @@ VoronoiForm::~VoronoiForm()
 {
     QSettings settings;
     settings.beginGroup("VoronoiForm");
-    settings.setValue("dsbxDepth", ui->dsbxDepth->value());
+    settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("dsbxWidth", ui->dsbxWidth->value());
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());

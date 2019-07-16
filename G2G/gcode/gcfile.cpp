@@ -103,7 +103,7 @@ void File::saveDrill()
 
     QPolygonF path(toQPolygon(m_toolPaths.first()));
 
-    const double k = Shtift::min() + Shtift::max();
+    const double k = Pin::min() + Pin::max();
 
     if (m_side) {
         for (QPointF& point : path) {
@@ -134,7 +134,7 @@ void File::saveProfilePocket()
 
     QVector<QPolygonF> paths(toQPolygons(m_toolPaths));
 
-    const double k = Shtift::min() + Shtift::max();
+    const double k = Pin::min() + Pin::max();
 
     if (m_side) {
         for (QPolygonF& path : paths) {
