@@ -33,6 +33,7 @@ IntPoint toIntPoint(const QPointF& p);
 
 double Angle(const IntPoint& pt1, const IntPoint& pt2);
 double Length(const IntPoint& pt1, const IntPoint& pt2);
+double Perimeter(const Path& path);
 
 //IntPoint Center(const IntPoint& pt1, const IntPoint& pt2)
 //{

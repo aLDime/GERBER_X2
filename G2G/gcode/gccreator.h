@@ -66,7 +66,8 @@ private:
     void grouping(PolyNode* node, Pathss* pathss, Grouping group);
 
     Path& fixPath(PolyNode* node);
-    void grouping2(PolyNode* node, Paths* addRawPaths, bool fl = false);
+    void grouping2(PolyNode* node, Paths* paths, bool fl = false);
+    void grouping3(Paths& paths);
 
     inline void progressOrCancel(int progressMax, int progressValue);
     static void progressOrCancel();

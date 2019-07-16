@@ -203,11 +203,19 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
     painter->drawLine(QLineF(k2, rect.top(), k2, rect.bottom()));
     painter->drawLine(QLineF(rect.left(), -k2, rect.right(), -k2));
 
-    QGraphicsItem* item = itemAt(m_cross, views().first()->transform());
-    if (item && item->type() != RulerType)
+    QList<QGraphicsItem*> items = QGraphicsScene::items(m_cross, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
+    bool fl = false;
+    for (QGraphicsItem* item : items) {
+        if (item && item->type() != RulerType && item->type() != BridgeType && item->flags() & QGraphicsItem::ItemIsSelectable) {
+            fl = true;
+            break;
+        }
+    }
+    if (fl)
         painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
     else
         painter->setPen(QPen(QColor(255, 255, 255, 100), 0.0 /*1.0 / scale*/));
+
     painter->drawLine(QLineF(m_cross.x(), rect.top(), m_cross.x(), rect.bottom()));
     painter->drawLine(QLineF(rect.left(), m_cross.y(), rect.right(), m_cross.y()));
 

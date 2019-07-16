@@ -130,3 +130,13 @@ void TranslatePath(Path& path, const IntPoint& pos)
         path[i].Y += pos.Y;
     }
 }
+
+double Perimeter(const Path& path)
+{
+    double p = 0.0;
+    for (int i = 0; i < path.size() - 1; ++i) {
+        p += Length(path[i], path[i + 1]);
+    }
+    p += Length(path.first(), path.last());
+    return p;
+}

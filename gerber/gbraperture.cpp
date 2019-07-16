@@ -134,6 +134,7 @@ void ApCircle::read(QDataStream& stream)
     stream >> m_drillDiam;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApCircle::write(QDataStream& stream) const
@@ -183,6 +184,7 @@ void ApRectangle::read(QDataStream& stream)
     stream >> m_drillDiam;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApRectangle::write(QDataStream& stream) const
@@ -228,6 +230,7 @@ void ApObround::read(QDataStream& stream)
     stream >> m_drillDiam;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApObround::write(QDataStream& stream) const
@@ -295,6 +298,7 @@ void ApPolygon::read(QDataStream& stream)
     stream >> m_drillDiam;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApPolygon::write(QDataStream& stream) const
@@ -352,6 +356,7 @@ void ApMacro::read(QDataStream& stream)
     stream >> m_macro;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApMacro::write(QDataStream& stream) const
@@ -696,6 +701,7 @@ void ApBlock::read(QDataStream& stream)
     stream >> *this;
     stream >> m_isFlashed;
     stream >> m_size;
+    draw();
 }
 
 void ApBlock::write(QDataStream& stream) const

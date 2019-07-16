@@ -286,6 +286,7 @@ void ThermalForm::setApertures(const QMap<int, QSharedPointer<Gerber::AbstractAp
             QString name(apertureIt.value()->name());
             ThermalNode* thermalNode = model->appendRow(drawApertureIcon(apertureIt.value().data()), name);
             for (const Gerber::GraphicObject& go : *file) {
+                qDebug() << go.state().dCode();
                 if (go.state().dCode() == Gerber::D03 && go.state().aperture() == apertureIt.key()) {
                     ThermalPreviewItem* item = new ThermalPreviewItem(go, tool, m_depth);
                     item->setToolTip(name);

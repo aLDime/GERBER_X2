@@ -290,12 +290,16 @@ class GraphicObject {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const Gerber::GraphicObject& go)
     {
-        stream << go.m_path << go.m_paths << go.m_state;
+        stream << go.m_path;
+        stream << go.m_paths;
+        stream << go.m_state;
         return stream;
     }
     friend QDataStream& operator>>(QDataStream& stream, Gerber::GraphicObject& go)
     {
-        stream >> go.m_path >> go.m_paths >> go.m_state;
+        stream >> go.m_path;
+        stream >> go.m_paths;
+        stream >> go.m_state;
         return stream;
     }
 

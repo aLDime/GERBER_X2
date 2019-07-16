@@ -257,23 +257,7 @@ void Creator::createPocket(const Tool& tool, const double depth, const int steps
             return;
         }
 
-        Clipper clipper;
-        clipper.AddPaths(m_returnPaths, ptSubject, true);
-        IntRect r(clipper.GetBounds());
-
-        int k = tool.diameter() * uScale;
-        Path outer = {
-            IntPoint(r.left - k, r.bottom + k),
-            IntPoint(r.right + k, r.bottom + k),
-            IntPoint(r.right + k, r.top - k),
-            IntPoint(r.left - k, r.top - k)
-        };
-        PolyTree polyTree;
-        clipper.AddPath(outer, ptSubject, true);
-        clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-
-        m_returnPaths.clear();
-        grouping2(polyTree.GetFirst(), &m_returnPaths);
+        grouping3(m_returnPaths);
 
         ReversePaths(m_returnPaths);
         sortByStratDistance(m_returnPaths);
@@ -337,23 +321,16 @@ void Creator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
                 break;
             }
 
-            Clipper clipper;
-            clipper.AddPaths(m_returnPaths, ptSubject, true);
-            IntRect r(clipper.GetBounds());
+            for (int i = 0; i < m_returnPaths.size(); ++i) {
+                if (Perimeter(m_returnPaths[i]) < m_dOffset)
+                    m_returnPaths.remove(i--);
+            }
+            for (int i = 0; i < fillPaths.size(); ++i) {
+                if (Perimeter(fillPaths[i]) < m_dOffset)
+                    fillPaths.remove(i--);
+            }
 
-            int k = tool.second.diameter() * uScale;
-            Path outer = {
-                IntPoint(r.left - k, r.bottom + k),
-                IntPoint(r.right + k, r.bottom + k),
-                IntPoint(r.right + k, r.top - k),
-                IntPoint(r.left - k, r.top - k)
-            };
-            PolyTree polyTree;
-            clipper.AddPath(outer, ptSubject, true);
-            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-
-            m_returnPaths.clear();
-            grouping2(polyTree.GetFirst(), &m_returnPaths);
+            grouping3(m_returnPaths);
 
             ReversePaths(m_returnPaths);
             sortByStratDistance(m_returnPaths);
@@ -414,23 +391,16 @@ void Creator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
                 return;
             }
 
-            Clipper clipper;
-            clipper.AddPaths(m_returnPaths, ptSubject, true);
-            IntRect r(clipper.GetBounds());
+            for (int i = 0; i < m_returnPaths.size(); ++i) {
+                if (Perimeter(m_returnPaths[i]) < m_dOffset)
+                    m_returnPaths.remove(i--);
+            }
+            for (int i = 0; i < fillPaths.size(); ++i) {
+                if (Perimeter(fillPaths[i]) < m_dOffset)
+                    fillPaths.remove(i--);
+            }
 
-            int k = tool.first.diameter() * uScale;
-            Path outer = {
-                IntPoint(r.left - k, r.bottom + k),
-                IntPoint(r.right + k, r.bottom + k),
-                IntPoint(r.right + k, r.top - k),
-                IntPoint(r.left - k, r.top - k)
-            };
-            PolyTree polyTree;
-            clipper.AddPath(outer, ptSubject, true);
-            clipper.Execute(ctUnion, polyTree, pftEvenOdd);
-
-            m_returnPaths.clear();
-            grouping2(polyTree.GetFirst(), &m_returnPaths);
+            grouping3(m_returnPaths);
 
             ReversePaths(m_returnPaths);
             sortByStratDistance(m_returnPaths);
@@ -1270,6 +1240,27 @@ void Creator::grouping2(PolyNode* node, Paths* paths, bool fl)
             grouping2(node->Childs[i], paths, true);
         }
     }
+}
+
+void Creator::grouping3(Paths& paths)
+{
+    Clipper clipper;
+    clipper.AddPaths(paths, ptSubject, true);
+    IntRect r(clipper.GetBounds());
+
+    int k = /*tool.diameter() **/ uScale;
+    Path outer = {
+        IntPoint(r.left - k, r.bottom + k),
+        IntPoint(r.right + k, r.bottom + k),
+        IntPoint(r.right + k, r.top - k),
+        IntPoint(r.left - k, r.top - k)
+    };
+    PolyTree polyTree;
+    clipper.AddPath(outer, ptSubject, true);
+    clipper.Execute(ctUnion, polyTree, pftEvenOdd);
+
+    paths.clear();
+    grouping2(polyTree.GetFirst(), &paths);
 }
 
 void Creator::progressOrCancel(int progressMax, int progressValue)
