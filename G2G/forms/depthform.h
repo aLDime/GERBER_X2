@@ -2,6 +2,7 @@
 #define DEPTHFORM_H
 
 #include <QWidget>
+#include <doublespinbox.h>
 
 #include <QtCore/QVariant>
 #include <QtWidgets/QApplication>
@@ -29,7 +30,7 @@ private:
     double m_value = 0.0;
     bool m_fl = false;
     QHBoxLayout* horizontalLayout;
-    QDoubleSpinBox* dsbx;
+    DoubleSpinBox* dsbx;
     void setupUi(QWidget* Form); // setupUi
     void retranslateUi(QWidget* Form); // retranslateUi
 };

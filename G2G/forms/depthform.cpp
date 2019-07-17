@@ -82,7 +82,7 @@ void DepthForm::setupUi(QWidget* Form)
     rbCustom->setSizePolicy(sizePolicy);
     horizontalLayout->addWidget(rbCustom);
 
-    dsbx = new QDoubleSpinBox(Form);
+    dsbx = new DoubleSpinBox(Form);
     dsbx->setObjectName(QString::fromUtf8("dsbx"));
     dsbx->setDecimals(3);
     dsbx->setMaximum(10.0);

@@ -37,11 +37,11 @@ double Tool::getDepth() const
 {
     switch (m_type) {
     case Tool::Drill:
-        return m_diameter * 0.5 * tan(qDegreesToRadians(180.0 - m_angle * 0.5)) + 0.1;
+        return m_diameter * 0.5 * tan(qDegreesToRadians((180.0 - m_angle) * 0.5));
     case Tool::EndMill:
     case Tool::Engraving:
     default:
-        return 0.01;
+        return 0.0;
     }
 }
 

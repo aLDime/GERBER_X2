@@ -9,7 +9,7 @@ TEMPLATE = app
 RESOURCES += \
     res/resources.qrc \
 
-DEFINES += QT_DEBUG
+#DEFINES += QT_DEBUG
 DEFINES += QT_DEPRECATED_WARNINGS G2G
 DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 

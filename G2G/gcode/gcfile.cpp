@@ -115,7 +115,7 @@ void File::saveDrill()
         point -= GCodePropertiesForm::zeroPoint->pos();
 
     for (QPointF& point : path) {
-        qDebug() << "saveDrill" << point << path.size();
+        qDebug() << "saveDrill" << point << path.size() << m_tool.getDepth();
         startPath(point);
         const double depth = m_depth + m_tool.getDepth();
         for (int i = 1; depth > m_tool.passDepth() * i; ++i) {
