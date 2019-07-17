@@ -17,6 +17,7 @@ public:
 signals:
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
+    void createRaster(const Tool& tool, const double depth, const double angle);
 
 private slots:
     void on_pbSelect_clicked();
@@ -45,7 +46,9 @@ protected:
 protected:
     void create() override;
     void updateName() override;
-  public:  virtual void editFile(GCode::File* file) override;
+
+public:
+    virtual void editFile(GCode::File* file) override;
 };
 
 #endif // POCKETFORM_H

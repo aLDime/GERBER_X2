@@ -39,6 +39,7 @@ public:
     static Creator* self;
     Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~Creator();
+    void createRaster(const Tool& tool, const double depth, const double angle);
     void createPocket(const Tool& tool, const double depth, const int steps);
     void createPocket2(const QPair<Tool, Tool>& tool, double depth);
     void createProfile(const Tool& tool, double depth);

@@ -297,7 +297,7 @@
            <item>
             <widget class="QRadioButton" name="rbRaster">
              <property name="enabled">
-              <bool>false</bool>
+              <bool>true</bool>
              </property>
              <property name="text">
               <string>Raster</string>

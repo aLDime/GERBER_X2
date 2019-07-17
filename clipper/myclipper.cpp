@@ -116,6 +116,8 @@ void RotatePath(Path& poligon, double angle, const IntPoint& center)
         const double tmpAangle = qDegreesToRadians(angle - Angle(center, pt));
         const double length = Length(center, pt);
         pt = IntPoint(cos(tmpAangle) * length, sin(tmpAangle) * length);
+        pt.X += center.X;
+        pt.Y += center.Y;
     }
     if (fl != (Area(poligon) < 0))
         ReversePath(poligon);

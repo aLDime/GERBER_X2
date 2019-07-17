@@ -136,7 +136,7 @@ bool PointOnPolygon(const QLineF& l2, const Path& path, IntPoint* ret = nullptr)
     return false;
 }
 ////////////////////////////////////////////////////////////////
-/// \brief ToolPathCreator::ToolPathCreator
+/// \brief Creator::Creator
 /// \param value
 /// \param convent
 ///
@@ -152,7 +152,169 @@ Creator::~Creator()
     self = nullptr;
 }
 ////////////////////////////////////////////////////////////////
-/// \brief ToolPathCreator::createPocket
+/// \brief Creator::createRaster
+/// \param tool
+/// \param depth
+/// \param angle
+///
+void Creator::createRaster(const Tool& tool, const double depth, const double angle)
+{
+    try {
+        self = this;
+
+        if (m_side == On)
+            return;
+
+        m_toolDiameter = tool.getDiameter(depth) * uScale;
+        m_dOffset = m_toolDiameter / 2;
+        m_stepOver = tool.stepover() * uScale;
+
+        Paths fillPaths;
+
+        switch (m_side) {
+        case Outer:
+            groupedPaths(CutoffPaths, m_toolDiameter + 5);
+            if (m_groupedPathss.size() > 1 && m_groupedPathss.first().size() == 2)
+                m_groupedPathss.removeFirst();
+            break;
+        case Inner:
+            groupedPaths(CopperPaths);
+            break;
+        }
+        for (Paths paths : m_groupedPathss) {
+            ClipperOffset offset(uScale);
+            offset.AddPaths(paths, jtRound, etClosedPolygon);
+            offset.Execute(paths, -m_dOffset);
+            fillPaths.append(paths);
+
+            if (paths.size()) {
+                for (Path& path : paths)
+                    path.append(path.first());
+                m_returnPaths.append(paths);
+
+                offset.Clear();
+                offset.AddPaths(paths, jtMiter, etClosedPolygon);
+                offset.Execute(paths, -m_stepOver);
+            } else
+                continue;
+            if (paths.size()) {
+                for (Path& path : paths)
+                    path.append(path.first());
+                //                m_returnPaths.append(paths);
+
+                Pathss p1;
+                Paths p2;
+                Paths p3;
+                Clipper clipper;
+                clipper.AddPaths(paths, ptClip, true);
+                Path hairBrush;
+                const IntRect r(clipper.GetBounds());
+                const cInt k = m_stepOver;
+                const cInt size = Length({ r.left /*- k*/, r.top /*- k*/ }, { r.right /*+ k*/, r.bottom /*+ k*/ });
+
+                const cInt end = r.bottom + (size - (r.bottom - r.top)) * 0.5;
+                const cInt start = r.top - (size - (r.bottom - r.top)) * 0.5;
+
+                const cInt left = r.left - (size - (r.right - r.left)) * 0.5;
+                const cInt right = r.right + (size - (r.right - r.left)) * 0.5;
+
+                const IntPoint center(0.5 * (r.left + r.right), 0.5 * (r.top + r.bottom));
+
+                for (int var = start, flag = 0; var < end; var += m_stepOver) {
+                    Path path;
+                    if (flag) {
+                        path = Path{ { left, var }, { right, var } };
+                        flag = 0;
+                    } else {
+                        path = Path{ { right, var }, { left, var } };
+                        flag = 1;
+                    }
+                    hairBrush.append(path);
+                    {
+                        Clipper clipper;
+                        clipper.AddPaths(paths, ptClip, true);
+                        RotatePath(path, angle, center);
+                        clipper.AddPath(path, ptSubject, false);
+                        PolyTree polytree;
+                        clipper.Execute(ctIntersection, polytree, pftPositive);
+                        p1.resize(p1.size() + 1);
+                        PolyTreeToPaths(polytree, p1.last());
+                    }
+                    if (flag) {
+                        for (Path& path : p1.last())
+                            if (path.first().X > path.last().X)
+                                ReversePath(path);
+                    } else {
+                        for (Path& path : p1.last())
+                            if (path.first().X < path.last().X)
+                                ReversePath(path);
+                    }
+                }
+                qDebug() << "hairBrush" << hairBrush.size();
+                //m_returnPaths.append(hairBrush);
+                //                {
+                //                    Path tmp(hairBrush);
+                //                    RotatePath(tmp, angle, center);
+                //                    clipper.AddPath(tmp, ptSubject, false);
+
+                //                    //                    m_returnPaths.append(p1);
+                //                }
+                {
+                    Path tmp(hairBrush);
+                    tmp.prepend({ tmp.first().X, start - k });
+                    tmp.prepend({ left - k, tmp.first().Y });
+                    tmp.append({ tmp.last().X, end + k });
+                    tmp.append({ left - k, tmp.last().Y });
+                    RotatePath(tmp, angle, center);
+                    Clipper clipper;
+                    clipper.AddPaths(paths, ptSubject, false);
+                    clipper.AddPath(tmp, ptClip, true);
+                    clipper.Execute(ctIntersection, p2, pftPositive);
+                }
+                {
+                    Path tmp(hairBrush);
+                    tmp.prepend({ tmp.first().X, start - k });
+                    tmp.prepend({ right + k, tmp.first().Y });
+                    tmp.append({ tmp.last().X, end + k });
+                    tmp.append({ right + k, tmp.last().Y });
+                    RotatePath(tmp, angle, center);
+                    Clipper clipper;
+                    clipper.AddPaths(paths, ptSubject, false);
+                    clipper.AddPath(tmp, ptClip, true);
+                    clipper.Execute(ctIntersection, p3, pftPositive);
+                    p2.append(p3);
+                }
+
+                for (Paths paths : p1)
+                    m_returnPaths.append(paths);
+
+                m_returnPaths.append(p2);
+            }
+        }
+
+        if (m_returnPaths.isEmpty()) {
+            emit fileReady(nullptr);
+            return;
+        }
+
+        //        grouping3(m_returnPaths);
+
+        //        ReversePaths(m_returnPaths);
+        //        sortByStratDistance(m_returnPaths);
+
+        if (m_returnPaths.isEmpty()) {
+            emit fileReady(nullptr);
+        } else {
+            m_file = new GCode::File(m_returnPaths, tool, depth, Profile); //, fillPaths);
+            m_file->setFileName(tool.name());
+            emit fileReady(m_file);
+        }
+    } catch (...) {
+        //qDebug() << "catch";
+    }
+}
+////////////////////////////////////////////////////////////////
+/// \brief Creator::createPocket
 /// \param tool
 /// \param depth
 /// \param side
@@ -419,7 +581,7 @@ void Creator::createPocket2(const QPair<Tool, Tool>& tool, double depth)
 }
 
 ////////////////////////////////////////////////////////////////
-/// \brief ToolPathCreator::createProfile
+/// \brief Creator::createProfile
 /// \param tool
 /// \param depth
 /// \param side
@@ -1068,7 +1230,7 @@ Pathss& Creator::groupedPaths(Grouping group, cInt k, bool fl)
     return m_groupedPathss;
 }
 ////////////////////////////////////////////////////////////////
-/// \brief ToolPathCreator::addRawPaths
+/// \brief Creator::addRawPaths
 /// \param paths
 ///
 void Creator::addRawPaths(Paths rawPaths)

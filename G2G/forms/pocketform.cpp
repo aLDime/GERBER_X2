@@ -36,12 +36,16 @@ PocketForm::PocketForm(QWidget* parent)
         else if (ui->rbInside->isChecked())
             side = Inner;
 
-        if (ui->rbOffset->isChecked())
+        if (ui->rbOffset->isChecked()) {
             type = Offset;
-        else if (ui->rbRaster->isChecked())
+        } else if (ui->rbRaster->isChecked()) {
             type = Raster;
-
-        ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
+            ui->chbxUseTwoTools->setChecked(false);
+            ui->chbxUseTwoTools->clicked(false);
+        }
+        ui->chbxUseTwoTools->setEnabled(!ui->rbRaster->isChecked());
+        ui->sbxSteps->setEnabled(!ui->rbRaster->isChecked());
+        //ui->cbxPass->setEnabled(ui->rbRaster->isChecked());
         ui->dsbxAngle->setEnabled(ui->rbRaster->isChecked());
 
         if (ui->rbClimb->isChecked())
@@ -67,7 +71,7 @@ PocketForm::PocketForm(QWidget* parent)
         ui->rbOutside->setChecked(true);
     if (settings.value("rbRaster").toBool())
         ui->rbRaster->setChecked(true);
-
+    ui->dsbxAngle->setValue(settings.value("dsbxAngle").toDouble());
     ui->dsbxDepth->setValue(settings.value("dsbxDepth").toDouble());
     if (settings.value("rbBoard").toBool())
         ui->dsbxDepth->rbBoard->setChecked(true);
@@ -112,6 +116,7 @@ PocketForm::~PocketForm()
     settings.setValue("rbRaster", ui->rbRaster->isChecked());
     settings.setValue("chbxUseTwoTools", ui->chbxUseTwoTools->isChecked());
 
+    settings.setValue("dsbxAngle", ui->dsbxAngle->value());
     settings.setValue("dsbxDepth", ui->dsbxDepth->value(true));
     settings.setValue("rbBoard", ui->dsbxDepth->rbBoard->isChecked());
     settings.setValue("rbCopper", ui->dsbxDepth->rbCopper->isChecked());
@@ -244,10 +249,14 @@ void PocketForm::create()
         fileCount = 2;
         connect(this, &PocketForm::createPocket2, tps, &GCode::Creator::createPocket2);
         emit createPocket2({ tool, tool2 }, ui->dsbxDepth->value());
+    } else if (ui->rbRaster->isChecked()) {
+        connect(this, &PocketForm::createRaster, tps, &GCode::Creator::createRaster);
+        emit createRaster(tool, ui->dsbxDepth->value(), ui->dsbxAngle->value());
     } else {
         connect(this, &PocketForm::createPocket, tps, &GCode::Creator::createPocket);
         emit createPocket(tool, ui->dsbxDepth->value(), ui->sbxSteps->value());
     }
+
     showProgress();
 }
 
@@ -258,8 +267,8 @@ void PocketForm::on_sbxSteps_valueChanged(int arg1)
 
 void PocketForm::updateName()
 {
-    static const QStringList name = { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside") };
-    ui->leName->setText(name[side]);
+    static const QStringList name = { tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside"), tr("Raster On"), tr("Raster Outside"), tr("Raster Inside") };
+    ui->leName->setText(name[side + type * 3]);
 }
 
 void PocketForm::on_chbxUseTwoTools_clicked(bool checked)

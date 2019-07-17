@@ -113,6 +113,10 @@ MainWindow::~MainWindow()
 
 void MainWindow::closeEvent(QCloseEvent* event)
 {
+#ifdef QT_DEBUG
+    event->accept();
+    return;
+#endif
     if (maybeSave()) {
         writeSettings();
         dockWidget->close();
@@ -365,7 +369,7 @@ void MainWindow::createActionsToolPath()
         action->setCheckable(true);
 
 #ifdef QT_DEBUG
-    QTimer::singleShot(10, [=] { toolpathActionList[Profile]->trigger(); });
+    QTimer::singleShot(10, [=] { toolpathActionList[Pocket]->trigger(); });
 #else
     QTimer::singleShot(10, [=] { toolpathActionList[GCodeProperties]->trigger(); });
 #endif

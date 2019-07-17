@@ -75,7 +75,7 @@ void PathItem::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
     if (m_pen.widthF() == 0) {
-        for (const QPolygonF& path : m_shape.toFillPolygons()) {
+        for (const QPolygonF& path : m_shape./*toFillPolygons*/toSubpathPolygons()) {
             for (int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
                 double length = 20 * GraphicsView::scaleFactor();
