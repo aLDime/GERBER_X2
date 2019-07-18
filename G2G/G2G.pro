@@ -69,7 +69,7 @@ HEADERS += \
     gi/itemgroup.h \
     gi/pathitem.h \
     gi/rawitem.h \
-    gi/ruler.h \
+#    gi/ruler.h \
     mainwindow.h \
     openingdialog.h \
     point.h \
@@ -122,7 +122,7 @@ SOURCES += \
     gi/itemgroup.cpp \
     gi/pathitem.cpp \
     gi/rawitem.cpp \
-    gi/ruler.cpp \
+#    gi/ruler.cpp \
     main.cpp \
     mainwindow.cpp \
     point.cpp \

@@ -8,7 +8,8 @@
 //#define ANIM
 
 class QDRuler;
-class Ruler;
+//class Ruler;
+class Scene;
 
 class GraphicsView : public QGraphicsView {
     Q_OBJECT
@@ -31,7 +32,8 @@ signals:
 private:
     QDRuler* hRuler;
     QDRuler* vRuler;
-    Ruler* ruller;
+    //    Ruler* ruller;
+    Scene* m_scene;
     const double zoomFactor = 1.5;
 
 #ifdef ANIM

@@ -12,12 +12,11 @@
 #include <gi/graphicsitem.h>
 #include <settings.h>
 
-Scene* m_self = nullptr;
+Scene* Scene::m_self = nullptr;
 
 Scene::Scene(QObject* parent)
     : QGraphicsScene(parent)
     , m_drawPdf(false)
-
 {
     m_self = this;
 }
@@ -102,6 +101,92 @@ void Scene::setCross(const QPointF& cross)
     update();
 }
 
+void Scene::setCross2(const QPointF& cross2)
+{
+    m_cross2 = cross2;
+}
+
+void Scene::drawRuller(QPainter* painter)
+{
+    const QPointF pt1(m_cross2);
+    const QPointF pt2(m_cross);
+    QLineF line(pt2, pt1);
+    const QRectF rect(
+        QPointF(qMin(pt1.x(), pt2.x()), qMin(pt1.y(), pt2.y())),
+        QPointF(qMax(pt1.x(), pt2.x()), qMax(pt1.y(), pt2.y())));
+    const double length = line.length();
+    const double angle = line.angle();
+
+    QFont font;
+    font.setPixelSize(16);
+    const QString text = QString("    ∆X = %1 mm\n"
+                                 "    ∆Y = %2 mm\n"
+                                 "    ∆ / = %3 mm\n"
+                                 "    %4°")
+                             .arg(rect.width(), 4, 'f', 3, '0')
+                             .arg(rect.height(), 4, 'f', 3, '0')
+                             .arg(length, 4, 'f', 3, '0')
+                             .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0');
+    const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
+
+    //    QLineF line(m_pt2, m_pt1);
+
+    if (qFuzzyIsNull(line.length()))
+        return;
+
+    const double k = GraphicsView::scaleFactor();
+
+    painter->setBrush(QColor(127, 127, 127, 100));
+    painter->setPen(QPen(Qt::green, 0.0)); //1.5 * k));
+    // draw rect
+    painter->drawRect(rect);
+    // draw cross
+    const double crossLength = 20.0 * k;
+    painter->drawLine(QLineF::fromPolar(crossLength, 0.000).translated(pt1));
+    painter->drawLine(QLineF::fromPolar(crossLength, 90.00).translated(pt1));
+    painter->drawLine(QLineF::fromPolar(crossLength, 180.0).translated(pt1));
+    painter->drawLine(QLineF::fromPolar(crossLength, 270.0).translated(pt1));
+
+    painter->drawLine(QLineF::fromPolar(crossLength, 0.000).translated(pt2));
+    painter->drawLine(QLineF::fromPolar(crossLength, 90.00).translated(pt2));
+    painter->drawLine(QLineF::fromPolar(crossLength, 180.0).translated(pt2));
+    painter->drawLine(QLineF::fromPolar(crossLength, 270.0).translated(pt2));
+
+    // draw arrow
+    painter->setRenderHint(QPainter::Antialiasing, true);
+
+    painter->setPen(QPen(Qt::white, 0.0));
+    painter->drawLine(line);
+    line.setLength(20.0 * k);
+    line.setAngle(angle + 10);
+    painter->drawLine(line);
+    line.setAngle(angle - 10);
+    painter->drawLine(line);
+
+    // draw text
+    painter->setFont(font);
+    painter->translate(pt2);
+    painter->scale(k, -k);
+    //painter->drawText(textRect, Qt::AlignLeft, text);
+
+    //font.setBold(true);
+    int i = 0;
+    for (QString txt : text.split('\n')) {
+        QPainterPath path;
+        path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * i++), font, txt);
+        painter->setPen(QPen(Qt::black, 4));
+        painter->setBrush(Qt::NoBrush);
+        for (QPolygonF& poly : path.toSubpathPolygons()) {
+            painter->drawPolygon(poly);
+        }
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(Qt::white);
+        for (QPolygonF& poly : path.toFillPolygons()) {
+            painter->drawPolygon(poly);
+        }
+    }
+}
+
 void Scene::drawBackground(QPainter* painter, const QRectF& rect)
 {
     if (m_drawPdf)
@@ -145,37 +230,31 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
 
         double gridStep = qPow(10.0, qCeil(log10((8.0 / m_scale)))); // 0.1;
         for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
-             hPos < right;
-             hPos += step) {
+             hPos < right; hPos += step) {
             hGrid[hPos] = 0;
         }
         for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
-             vPos < bottom;
-             vPos += step) {
+             vPos < bottom; vPos += step) {
             vGrid[vPos] = 0;
         }
 
         gridStep *= 5; // 0.5;
         for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
-             hPos < right;
-             hPos += step) {
+             hPos < right; hPos += step) {
             hGrid[hPos] = 1;
         }
         for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
-             vPos < bottom;
-             vPos += step) {
+             vPos < bottom; vPos += step) {
             vGrid[vPos] = 1;
         }
 
         gridStep *= 2; // 1.0;
         for (long hPos = qFloor(rect.left() / gridStep) * gridStep * k, right = rect.right() * k, step = gridStep * k;
-             hPos < right;
-             hPos += step) {
+             hPos < right; hPos += step) {
             hGrid[hPos] = 2;
         }
         for (long vPos = qFloor(rect.top() / gridStep) * gridStep * k, bottom = rect.bottom() * k, step = gridStep * k;
-             vPos < bottom;
-             vPos += step) {
+             vPos < bottom; vPos += step) {
             vGrid[vPos] = 2;
         }
     }
@@ -216,12 +295,15 @@ void Scene::drawForeground(QPainter* painter, const QRectF& rect)
         }
     }
     if (fl)
-        painter->setPen(QPen(QColor(255, 0, 0, 100), 0.0 /*1.0 / scale*/));
+        painter->setPen(QPen(QColor(255, 000, 000, 100), 0.0 /*1.0 / scale*/));
     else
         painter->setPen(QPen(QColor(255, 255, 255, 100), 0.0 /*1.0 / scale*/));
 
     painter->drawLine(QLineF(m_cross.x(), rect.top(), m_cross.x(), rect.bottom()));
     painter->drawLine(QLineF(rect.left(), m_cross.y(), rect.right(), m_cross.y()));
+
+    if (!m_cross2.isNull())
+        drawRuller(painter);
 
     painter->restore();
 }

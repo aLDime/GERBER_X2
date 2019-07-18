@@ -8,7 +8,7 @@
 #include <QTransform>
 #include <QtWidgets>
 #include <gi/bridgeitem.h>
-#include <gi/ruler.h>
+//#include <gi/ruler.h>
 #include <mainwindow.h>
 
 #ifdef ANIM
@@ -70,9 +70,9 @@ GraphicsView::GraphicsView(QWidget* parent)
     viewport()->setObjectName("viewport");
     settings.endGroup();
 
-    Scene* scene = new Scene;
-    setScene(scene);
-    connect(this, &GraphicsView::mouseMove, scene, &Scene::setCross);
+    m_scene = new Scene;
+    setScene(m_scene);
+    connect(this, &GraphicsView::mouseMove, m_scene, &Scene::setCross);
 
     setStyleSheet("QGraphicsView { background: black }");
 
@@ -322,10 +322,10 @@ void GraphicsView::mousePressEvent(QMouseEvent* event)
         setDragMode(NoDrag);
         setInteractive(false);
         //Ruler
-        ruller = new Ruler(mapToScene(event->pos()));
-        connect(this, &GraphicsView::mouseMove, ruller, &Ruler::setPoint2);
-        scene()->addItem(ruller);
-
+        m_scene->setCross2(mapToScene(event->pos()));
+        //ruller = new Ruler(mapToScene(event->pos()));
+        //connect(this, &GraphicsView::mouseMove, ruller, &Ruler::setPoint2);
+        //scene()->addItem(ruller);
         QGraphicsView::mousePressEvent(event);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
@@ -347,8 +347,10 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event)
         setDragMode(RubberBandDrag);
         setInteractive(true);
         //Ruler
-        delete ruller;
-        ruller = nullptr;
+        //delete ruller;
+        //ruller = nullptr;
+        m_scene->setCross2(QPointF());
+        m_scene->update();
     } else {
         QGraphicsView::mouseReleaseEvent(event);
     }

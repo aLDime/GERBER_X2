@@ -19,7 +19,7 @@ Ruler::~Ruler()
 
 QRectF Ruler::boundingRect() const
 {
-    //     return QRectF();
+    //return QRectF(-500, -500, 500, 500);
     const double k = GraphicsView::scaleFactor();
     const double width = (m_textRect.width() + 10) * k;
     const double height = (m_textRect.height() + 10) * k;
@@ -32,6 +32,7 @@ QRectF Ruler::boundingRect() const
 
 void Ruler::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/)
 {
+    return;
     QLineF line(m_pt2, m_pt1);
 
     if (qFuzzyIsNull(line.length()))
