@@ -117,12 +117,12 @@ void File::saveDrill()
     for (QPointF& point : path) {
         qDebug() << "saveDrill" << point << path.size() << m_tool.getDepth();
         startPath(point);
-        const double depth = m_depth + m_tool.getDepth();
+        const double depth = m_depth;
         for (int i = 1; depth > m_tool.passDepth() * i; ++i) {
             sl.append(formated({ g1(), z(-m_tool.passDepth() * i), feed(m_tool.plungeRate()) }));
             sl.append(formated({ g0(), z(0.0) }));
         }
-        sl.append(formated({ g1(), z(-depth), feed(m_tool.plungeRate()) }));
+        sl.append(formated({ g1(), z(-(depth + m_tool.getDepth())), feed(m_tool.plungeRate()) }));
         endPath();
     }
     endFile();
