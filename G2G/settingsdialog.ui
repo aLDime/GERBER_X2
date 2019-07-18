@@ -404,6 +404,9 @@
               <property name="prefix">
                <string>X </string>
               </property>
+              <property name="suffix">
+               <string> mm</string>
+              </property>
               <property name="decimals">
                <number>3</number>
               </property>
@@ -425,6 +428,9 @@
               </property>
               <property name="prefix">
                <string>Y </string>
+              </property>
+              <property name="suffix">
+               <string> mm</string>
               </property>
               <property name="decimals">
                <number>3</number>
@@ -453,6 +459,9 @@
               <property name="prefix">
                <string>X </string>
               </property>
+              <property name="suffix">
+               <string> mm</string>
+              </property>
               <property name="decimals">
                <number>3</number>
               </property>
@@ -468,6 +477,9 @@
              <widget class="DoubleSpinBox" name="dsbxPinY">
               <property name="prefix">
                <string>Y </string>
+              </property>
+              <property name="suffix">
+               <string> mm</string>
               </property>
               <property name="decimals">
                <number>3</number>

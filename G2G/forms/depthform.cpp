@@ -101,7 +101,7 @@ void DepthForm::retranslateUi(QWidget* Form)
     rbCopper->setToolTip(QApplication::translate("DepthForm", "Copper", nullptr));
     rbBoard->setText(QApplication::translate("DepthForm", "B", nullptr));
     rbBoard->setToolTip(QApplication::translate("DepthForm", "Board", nullptr));
-    rbCustom->setText(QApplication::translate("DepthForm", "N", nullptr));
+    rbCustom->setText(QApplication::translate("DepthForm", "U", nullptr));
     rbCustom->setToolTip(QApplication::translate("DepthForm", "Custom Depth", nullptr));
     dsbx->setSuffix(QApplication::translate("DepthForm", " mm", nullptr));
     dsbx->setToolTip(QApplication::translate("DepthForm", "Cutting depth", nullptr));

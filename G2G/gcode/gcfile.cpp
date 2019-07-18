@@ -12,6 +12,21 @@
 namespace GCode {
 
 QString File::lastDir;
+/*
+  G0X0Y0S1500M03
+  M05
+  M05 - выкл лазера GRBL
+  M03 - вкл лазера GRBL
+
+
+
+
+
+
+
+
+
+ */
 
 ///////////////////////////////////////////////
 void performance(QVector<QPair<cInt, cInt>>& range, Pathss& pathss, const Paths& paths, bool fl = true)
